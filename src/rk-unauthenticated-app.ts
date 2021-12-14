@@ -1,13 +1,13 @@
 import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
+import { msg, str } from '@lit/localize';
 import { appRouterAnimations } from './router-animations.js';
-// import { msg, str } from '@lit/localize';
 import './elements/app-router/app-router.js';
 import './pages/access/rk-access-page.js';
 import './pages/welcome/rk-welcome-page.js';
 
 export class RkUnauthenticaApp extends LitElement {
-  // @property({ type: String }) title = 'My app';
+  // @property({ type: String }) ff = 'My app';
 
   private onPageChange(evt: CustomEvent) {
     console.log(evt);

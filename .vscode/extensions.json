@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig",
+    "runem.lit-plugin",
+    "dbaeumer.vscode-eslint"
+  ],
+  "unwantedRecommendations": []
+}
