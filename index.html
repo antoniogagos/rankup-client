@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="Description" content="Put your description here." />
+    <base href="/" />
+    <title>rk-app</title>
+    <link rel="stylesheet" href="./samba/styles/root.css" />
+    <link rel="stylesheet" href="./samba/styles/theme.css" />
+  </head>
+
+  <body>
+    <rk-auth-wall logged-path="/app/tourneys">
+      <rk-unauthenticated-app slot="unknown"></rk-unauthenticated-app>
+    </rk-auth-wall>
+
+    <script type="module" src="./out-tsc/src/rk-elements/rk-auth-wall/rk-auth-wall.js"></script>
+    <script type="module" src="./out-tsc/src/rk-unauthenticated-app.js"></script>
+  </body>
+</html>

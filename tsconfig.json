@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "lib": ["DOM", "ESNext", "DOM.Iterable"],
+    "strict": true,
+    "strictNullChecks": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "outDir": "out-tsc",
+    "sourceMap": true,
+    "allowJs": true,
+    "checkJs": true,
+    "inlineSources": true,
+    "rootDir": "./",
+    "incremental": true
+  },
+  "include": ["**/*.ts"]
+}
