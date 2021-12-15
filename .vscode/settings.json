@@ -1,0 +1,38 @@
+{
+  "editor.rulers": [100],
+  "editor.formatOnSave": true,
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.exclude": {
+    ".git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "/build": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[plaintext]": {
+    "files.insertFinalNewline": false
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "build/**": true
+  },
+  "javascript.preferences.quoteStyle": "single",
+  "npm.packageManager": "yarn",
+  "explorer.compactFolders": false,
+  "typescript.validate.enable": true,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.preferences.importModuleSpecifierEnding": "auto",
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "html.customData": ["./custom-elements.json"],
+  "cssVariables.lookupFiles": ["hadron-design-system/styles/theme.css"],
+  "lit-plugin.rules.no-expressionless-property-binding": "off",
+  "lit-plugin.rules.no-invalid-css": "off"
+}

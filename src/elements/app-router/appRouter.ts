@@ -32,6 +32,26 @@ export class AppRouter extends HTMLElement {
 
   route: Route | null = null;
 
+  animations: AnimationItem[] = [];
+
+  overlayContainer: HTMLElement | null = null;
+
+  private _page: PageItem | null = null;
+
+  private _pages: PageItem[] = [];
+
+  private _visible = false;
+
+  private entryAnimation: Promise<Animation> | null = null;
+
+  private userPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  private visibilityObserver: IntersectionObserver | null = null;
+
+  private get _overlayContainer() {
+    return this.overlayContainer ?? document.querySelector('#overlayContainer') ?? document.body;
+  }
+
   get pages() {
     return this._pages;
   }
@@ -41,9 +61,9 @@ export class AppRouter extends HTMLElement {
   }
 
   set page(value) {
-    if (this.page !== value) {
+    if (this._page !== value) {
       const old = this.page;
-      this.page = value;
+      this._page = value;
       this.render();
       this.dispatch('page-changed', {
         page: value,
@@ -64,14 +84,14 @@ export class AppRouter extends HTMLElement {
   }
 
   set visible(value) {
-    if (typeof value === 'boolean' && value !== this.visible) {
+    if (typeof value === 'boolean' && value !== this._visible) {
       if (value) {
         this.installRoutes();
         Page();
       } else {
         this.uninstallRoutes();
       }
-      this.visible = value;
+      this._visible = value;
     }
   }
 
@@ -92,31 +112,11 @@ export class AppRouter extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
-    this.shadowRoot!.innerHTML = '<slot></slot>';
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML = '<slot></slot>';
     this.updateRoutes();
     // this.hideAllPages();
     this.prefetchPagesWhenIdle();
-  }
-
-  animations: AnimationItem[] = [];
-
-  overlayContainer: HTMLElement | null = null;
-
-  private _page: PageItem | null = null;
-
-  private _pages: PageItem[] = [];
-
-  private _visible = false;
-
-  private entryAnimation: Promise<Animation> | null = null;
-
-  private userPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  private visibilityObserver: IntersectionObserver | null = null;
-
-  private get _overlayContainer() {
-    return this.overlayContainer ?? document.querySelector('#overlayContainer') ?? document.body;
   }
 
   connectedCallback() {
@@ -163,7 +163,7 @@ export class AppRouter extends HTMLElement {
     if ('IntersectionObserver' in window) {
       this.visibilityObserver = new IntersectionObserver(
         ([entry]) => {
-          this._visible = entry.isIntersecting;
+          this.visible = entry.isIntersecting;
         },
         { rootMargin: '0px' },
       );
@@ -185,14 +185,6 @@ export class AppRouter extends HTMLElement {
   private unobserveVisibility() {
     this.visibilityObserver?.disconnect();
     this.visibilityObserver = null;
-  }
-
-  static onPageChange(evt: EventsMap['page-change']) {
-    evt.stopPropagation();
-    if (evt.detail.path !== window.history.state.path) {
-      // TODO optional params + serialize?
-      Page(evt.detail.path);
-    }
   }
 
   private async animatePageIn(
@@ -377,71 +369,6 @@ export class AppRouter extends HTMLElement {
     }
   }
 
-  static addRedirect(path: string, redirect: string): void {
-    Page(path, (ctx: PageJS.Context): void => {
-      // Custom redirect middleware for adding support to redirects with params
-      let to = redirect;
-      Object.keys(ctx.params).forEach(key => {
-        to = to.replace(new RegExp(`(\\/|^)(:${key})(\\/|$)`), `$1${ctx.params[key]}$3`);
-      });
-      if (Page.current !== to) {
-        Page.replace(to);
-      }
-    });
-  }
-
-  static addRoute({
-    path,
-    callback,
-    redirect,
-  }: {
-    path: string;
-    redirect?: string;
-    callback?: any;
-  }) {
-    const routerIdx = _totalRoutersInstalled;
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
-    if (AppRouter.getRouterCallback(path)) {
-      console.warn(`Route ${path} duplicated`);
-    } else {
-      if (redirect) {
-        AppRouter.addRedirect(path, redirect);
-      } else {
-        // TODO don't leverage Page for matching paths, create a middleware
-        // so that we can add more stuff. Mainly params/multiple-path
-        Page(path, callback);
-      }
-      const pageCb = pageCallbacks[pageCallbacks.length - 1];
-      /**
-       * Pagejs doesn't have anything for nested routes.
-       * We can support them by moving nested routes to the top of the
-       * callbacks chain.
-       * That is because routes are considered in order, and nested routes are
-       * more specific than upper routes.
-       */
-      const prepend = routerIdx > 0;
-      if (prepend) {
-        let idx = pageCallbacks.findIndex(
-          // insert before any previous router but after any middleware
-          // (middlewares won't have a "__routerIdx" prop)
-          cb => cb !== pageCb && cb.__routerIdx != null && cb.__routerIdx <= routerIdx,
-        );
-        if (idx === -1) idx = 0;
-        const lastCb = pageCallbacks.pop();
-        if (lastCb) {
-          pageCallbacks.splice(idx, 0, lastCb);
-        }
-      }
-      pageCb.__path = path;
-      pageCb.__routerIdx = routerIdx;
-    }
-  }
-
-  static getRouterCallback(path: string): PageCallbacksFn | undefined {
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
-    return pageCallbacks.find(cb => cb.__path === path);
-  }
-
   private uninstallRoutes() {
     const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
     let uninstalled = false;
@@ -460,19 +387,6 @@ export class AppRouter extends HTMLElement {
   private pageHasAnimation(page: PageItem): boolean {
     const anim = this.getPageAnimation(page);
     return !!(anim[0] || anim[1]);
-  }
-
-  static pathRelativeToThisModule(path: string) {
-    if (path.charAt(0) === '/') {
-      const docBase = window.location.origin;
-      const modulePath = ModuleUrl.replace(docBase, '');
-      const commonStart = AppRouter.commonStart([modulePath, path]);
-      const back = path.slice(0, commonStart.length).split('/').length - 1;
-      const nav = new Array(back).fill('../').join('') || './';
-      // console.log({path, docBase, modulePath, moduleUrl, commonStart});
-      return nav + path.slice(1);
-    }
-    return path;
   }
 
   private prefetchPagesWhenIdle() {
@@ -531,11 +445,6 @@ export class AppRouter extends HTMLElement {
       const litParentElement: LitElement = shadowRootNode.host as LitElement;
       litParentElement?.requestUpdate?.();
     }
-  }
-
-  static togglePageVisibility(pageElem: AppRouterPage, visible: boolean) {
-    // pageElem.style.display = visible ? '' : 'none';
-    pageElem.toggleAttribute('hidden', !visible);
   }
 
   private renderEntry(page: PageItem, pageElem: AppRouterPage) {
@@ -605,6 +514,97 @@ export class AppRouter extends HTMLElement {
         this.renderPage(exitPage, params);
       }
     }
+  }
+
+  static addRedirect(path: string, redirect: string): void {
+    Page(path, (ctx: PageJS.Context): void => {
+      // Custom redirect middleware for adding support to redirects with params
+      let to = redirect;
+      Object.keys(ctx.params).forEach(key => {
+        to = to.replace(new RegExp(`(\\/|^)(:${key})(\\/|$)`), `$1${ctx.params[key]}$3`);
+      });
+      if (Page.current !== to) {
+        Page.replace(to);
+      }
+    });
+  }
+
+  static addRoute({
+    path,
+    callback,
+    redirect,
+  }: {
+    path: string;
+    redirect?: string;
+    callback?: any;
+  }) {
+    const routerIdx = _totalRoutersInstalled;
+    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
+    if (AppRouter.getRouterCallback(path)) {
+      console.warn(`Route ${path} duplicated`);
+    } else {
+      if (redirect) {
+        AppRouter.addRedirect(path, redirect);
+      } else {
+        // TODO don't leverage Page for matching paths, create a middleware
+        // so that we can add more stuff. Mainly params/multiple-path
+        Page(path, callback);
+      }
+      const pageCb = pageCallbacks[pageCallbacks.length - 1];
+      /**
+       * Pagejs doesn't have anything for nested routes.
+       * We can support them by moving nested routes to the top of the
+       * callbacks chain.
+       * That is because routes are considered in order, and nested routes are
+       * more specific than upper routes.
+       */
+      const prepend = routerIdx > 0;
+      if (prepend) {
+        let idx = pageCallbacks.findIndex(
+          // insert before any previous router but after any middleware
+          // (middlewares won't have a "__routerIdx" prop)
+          cb => cb !== pageCb && cb.__routerIdx != null && cb.__routerIdx <= routerIdx,
+        );
+        if (idx === -1) idx = 0;
+        const lastCb = pageCallbacks.pop();
+        if (lastCb) {
+          pageCallbacks.splice(idx, 0, lastCb);
+        }
+      }
+      pageCb.__path = path;
+      pageCb.__routerIdx = routerIdx;
+    }
+  }
+
+  static onPageChange(evt: EventsMap['page-change']) {
+    evt.stopPropagation();
+    if (evt.detail.path !== window.history.state.path) {
+      // TODO optional params + serialize?
+      Page(evt.detail.path);
+    }
+  }
+
+  static getRouterCallback(path: string): PageCallbacksFn | undefined {
+    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
+    return pageCallbacks.find(cb => cb.__path === path);
+  }
+
+  static pathRelativeToThisModule(path: string) {
+    if (path.charAt(0) === '/') {
+      const docBase = window.location.origin;
+      const modulePath = ModuleUrl.replace(docBase, '');
+      const commonStart = AppRouter.commonStart([modulePath, path]);
+      const back = path.slice(0, commonStart.length).split('/').length - 1;
+      const nav = new Array(back).fill('../').join('') || './';
+      // console.log({path, docBase, modulePath, moduleUrl, commonStart});
+      return nav + path.slice(1);
+    }
+    return path;
+  }
+
+  static togglePageVisibility(pageElem: AppRouterPage, visible: boolean) {
+    // pageElem.style.display = visible ? '' : 'none';
+    pageElem.toggleAttribute('hidden', !visible);
   }
 
   // ---- Typed listeners
