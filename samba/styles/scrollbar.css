@@ -20,19 +20,19 @@
     border-top: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  :host::-webkit-scrollbar,
+  :host(.scroll-lg)::-webkit-scrollbar,
   .scroll-target.scroll-lg::-webkit-scrollbar {
     width: 12px;
     height: 12px;
   }
 
-  :host::-webkit-scrollbar,
+  :host(.scroll-md)::-webkit-scrollbar,
   .scroll-target.scroll-md::-webkit-scrollbar {
     width: 9px;
     height: 9px;
   }
 
-  :host::-webkit-scrollbar,
+  :host(.scroll-sm)::-webkit-scrollbar,
   .scroll-target.scroll-sm::-webkit-scrollbar {
     width: 7px;
     height: 7px;

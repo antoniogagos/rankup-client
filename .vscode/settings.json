@@ -32,7 +32,7 @@
   "typescript.preferences.importModuleSpecifierEnding": "auto",
   "typescript.updateImportsOnFileMove.enabled": "never",
   "html.customData": ["./custom-elements.json"],
-  "cssVariables.lookupFiles": ["hadron-design-system/styles/theme.css"],
+  "cssVariables.lookupFiles": ["**/*.{css,html}"],
   "lit-plugin.rules.no-expressionless-property-binding": "off",
   "lit-plugin.rules.no-invalid-css": "off"
 }
