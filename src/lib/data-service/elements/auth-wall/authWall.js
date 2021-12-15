@@ -25,6 +25,7 @@ export class AuthWall extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    [...this.children].forEach(el => el.toggleAttribute('hidden', true));
     if (!this.sessionProviders?.size) {
       throw new Error('AuthWall no session providers found');
     }
@@ -38,9 +39,8 @@ export class AuthWall extends LitElement {
 
   /** @param {Session} session */
   #onSessionUpdated(session) {
-    this.toggleAttribute('resolved', Boolean(session));
     [...this.children].forEach(el => {
-      el.toggleAttribute('hidden', !session);
+      el.toggleAttribute('hidden', false);
       if (el.localName === 'hadron-app') {
         const _el = /** @type {HTMLElement & {username?: string}} */ (el);
         _el.username = session?.user.usernameLowerCase ?? null;
@@ -64,10 +64,10 @@ export class AuthWall extends LitElement {
   render() {
     return this.#sessionController.user
       ? html`
-          <slot name="logged"></slot>
+          <slot name="authenticated"></slot>
         `
       : html`
-          <slot name="unknown">
+          <slot name="unauthenticated">
             <div>Login Form</div>
             <button @click=${this.#loginWithGoogle}>Login With Google</button>
           </slot>
@@ -77,9 +77,6 @@ export class AuthWall extends LitElement {
   static styles = [
     css`
       :host {
-        display: block;
-      }
-      :host([resolved]) {
         display: contents;
       }
     `,
