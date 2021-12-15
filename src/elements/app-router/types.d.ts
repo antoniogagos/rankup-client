@@ -1,3 +1,5 @@
+import type { AppRouter } from './appRouter.js';
+
 export interface AppRouterPage extends HTMLElement {
   onPageEntryTransitionStart?(): void;
   onPageExitTransitionStart?(): void;
@@ -20,6 +22,7 @@ export interface PageItem {
     name: string;
     value: string;
   }[];
+  router: AppRouter;
 }
 
 export interface AnimationItem {

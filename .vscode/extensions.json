@@ -3,7 +3,9 @@
     "esbenp.prettier-vscode",
     "EditorConfig.EditorConfig",
     "runem.lit-plugin",
-    "dbaeumer.vscode-eslint"
+    "dbaeumer.vscode-eslint",
+    "zignd.html-css-class-completion",
+    "vunguyentuan.vscode-css-variables"
   ],
   "unwantedRecommendations": []
 }

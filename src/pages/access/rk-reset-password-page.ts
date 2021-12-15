@@ -2,11 +2,11 @@ import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { msg } from '@lit/localize';
 
-export class WelcomePage extends LitElement {
+export class RkResetPasswordPage extends LitElement {
   render() {
     return html`
-      <h1>Welcome Page</h1>
-      <a href="/access">${msg('Start playing')}</a>
+      <h1>ResetPassword Page</h1>
+      <a href="/access">${msg('Back')}</a>
     `;
   }
 
@@ -14,16 +14,16 @@ export class WelcomePage extends LitElement {
     css`
       :host {
         display: block;
-        background: teal;
+        background: beige;
       }
     `,
   ];
 }
 
-customElements.define('rk-welcome-page', WelcomePage);
+customElements.define('rk-reset-password-page', RkResetPasswordPage);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'rk-welcome-page': WelcomePage;
+    'rk-reset-password-page': RkResetPasswordPage;
   }
 }

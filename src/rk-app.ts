@@ -3,6 +3,10 @@ import { property } from 'lit/decorators.js';
 import { appRouterAnimations } from './router-animations.js';
 // import { msg, str } from '@lit/localize';
 import './elements/app-router/app-router.js';
+// @ts-ignore
+import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { type: 'css' };
+// @ts-ignore
+import ScrollbarStyles from '../../samba/styles/scrollbar.css' assert { type: 'css' };
 
 export class RkApp extends LitElement {
   private onPageChange() {}
@@ -23,7 +27,7 @@ export class RkApp extends LitElement {
     `;
   }
 
-  static styles = [css``];
+  static styles = [AppRouterStyles, ScrollbarStyles, css``];
 }
 
 customElements.define('rk-app', RkApp);

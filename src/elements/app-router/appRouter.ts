@@ -11,6 +11,8 @@ import type {
   PageCallbacksList,
 } from './types';
 
+export type { EventsMap } from './events.types';
+
 let _totalRoutersInstalled = 0;
 const ModuleUrl = import.meta.url;
 
@@ -27,6 +29,8 @@ export class AppRouter extends HTMLElement {
   static currentPage: PageItem | null = null;
 
   static currentRoute: Route | null = null;
+
+  private static allPages: PageItem[] = [];
 
   exitPage: PageItem | null = null;
 
@@ -120,9 +124,13 @@ export class AppRouter extends HTMLElement {
   }
 
   connectedCallback() {
-    this.style.setProperty('display', 'block');
+    // Note: with display contents we can't compute isVisible with IObs unless there is content
+    // (at start). Can we assume visibility when connected? TESTING
+    //
+    // this.style.setProperty('display', 'block');
     this.removeNonRecyclablePages();
-    this.observeVisibility();
+    // this.observeVisibility();
+    this.visible = true;
     // TODO some other way to get anims?
     // this.animations = this.getRootNode().host?.constructor.animations;
     this.addEventListener('page-change', AppRouter.onPageChange);
@@ -136,8 +144,9 @@ export class AppRouter extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.uninstallRoutes();
-    this.unobserveVisibility();
+    this.visible = false;
+    // this.uninstallRoutes();
+    // this.unobserveVisibility();
     this.removeEventListener('page-change', AppRouter.onPageChange);
   }
 
@@ -276,7 +285,7 @@ export class AppRouter extends HTMLElement {
         console.error('Router.NoPathFound', child);
         return;
       }
-      const isRedirect = child.localName === 'app-router-redirect';
+      const isRedirect = child.localName === 'app-router__redirect';
       const redirect = (isRedirect && child.getAttribute('redirect')) || null;
       const src = child.getAttribute('src'); // optional lazy load
       const animation = child.getAttribute('animation') ?? null; // optional
@@ -295,15 +304,17 @@ export class AppRouter extends HTMLElement {
         attributes,
         name,
         path,
-        fullPath: (this.base + path).replace(/\/\/+/, '/'),
+        fullPath: (this.base ?? '' + path).replace(/\/\/+/, '/'),
         src,
         animation,
         animationIn,
         animationOut,
         overlay,
         recycle,
+        router: this,
       } as PageItem);
     });
+    AppRouter.allPages = [...AppRouter.allPages, ...pages];
     this._pages = pages;
   }
 
@@ -332,7 +343,7 @@ export class AppRouter extends HTMLElement {
     return (page.overlay ? this._overlayContainer : this).querySelector(page.elementName);
   }
 
-  // #hideAllPages() {
+  // private hideAllPages() {
   //   [...this.children].map(
   //     child => AppRouter.togglePageVisibility(child, false)
   //   );
@@ -358,7 +369,9 @@ export class AppRouter extends HTMLElement {
         path: page.path,
         // if defined, "callback" next prop won't be used
         redirect: page.redirect,
-        callback: (ctx: PageJS.Context, next: () => void) => this.switchPage(page, ctx),
+        callback: (ctx: PageJS.Context, next: () => void) => {
+          this.switchPage(page, ctx);
+        },
       });
     });
     if (this.fallback) {
@@ -377,6 +390,10 @@ export class AppRouter extends HTMLElement {
       if (cb) {
         uninstalled = true;
         pageCallbacks.splice(pageCallbacks.indexOf(cb), 1);
+        const idx = AppRouter.allPages.findIndex(p => p === page);
+        if (idx > -1) {
+          AppRouter.allPages.splice(idx, 1);
+        }
       }
     });
     if (uninstalled) {
@@ -422,6 +439,9 @@ export class AppRouter extends HTMLElement {
   }
 
   private switchPage(page: PageItem, ctx: any) {
+    if (this.page === page) {
+      return;
+    }
     const query: { [x: string]: string } = {};
     new URLSearchParams(ctx.querystring).forEach((value, key) => {
       try {
