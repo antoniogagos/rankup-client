@@ -1,5 +1,3 @@
-import type { AppRouter } from './appRouter.js';
-
 export interface AppRouterPage extends HTMLElement {
   onPageEntryTransitionStart?(): void;
   onPageExitTransitionStart?(): void;
@@ -8,6 +6,7 @@ export interface AppRouterPage extends HTMLElement {
 export interface PageItem {
   elementName: string;
   path: string;
+  fullPath: string;
   redirect?: string;
   name?: string;
   src?: string;
@@ -22,7 +21,6 @@ export interface PageItem {
     name: string;
     value: string;
   }[];
-  router: AppRouter;
 }
 
 export interface AnimationItem {
@@ -54,7 +52,6 @@ export interface Route {
 
 export type PageCallbacksFn = Function & {
   __path: string;
-  __routerIdx: number;
 };
 
 export type PageCallbacksList = PageCallbacksFn[];

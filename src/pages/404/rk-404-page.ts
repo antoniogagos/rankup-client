@@ -6,7 +6,7 @@ export class Rk404Page extends LitElement {
   render() {
     return html`
       <h1>404 Missing</h1>
-      <a href="/">${msg('Back')}</a>
+      <a href="/">${msg('Home')}</a>
     `;
   }
 

@@ -1,10 +1,10 @@
-import { PageItem, Route } from './types.d';
+import { PageItem } from './types.d';
 
 export interface EventsMap {
   'page-changed': CustomEvent<{
     page: PageItem | null;
     oldPage: PageItem | null;
-    route: Route | null;
+    route: PageJS.Context | null;
     entryAnimation?: Promise<Animation> | null;
   }>;
   /** App router can be updated by dispatching this event */

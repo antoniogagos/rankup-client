@@ -69,6 +69,7 @@
       "no-undef": "off",
       "no-dupe-class-members": "off",
       "no-await-in-loop": "off",
+      "no-useless-escape": "off",
       "no-use-before-define": [
         "error",
         {

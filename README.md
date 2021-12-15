@@ -13,7 +13,7 @@
 ## TODO
 
 X- poner theme del otro rankup
-A- investigar themes / copiar github 
+A- investigar themes / copiar github
 A- crear estructura components
 A- samba styles (buttons, inputs, drawer) y components (card)
 N- routing funcionando

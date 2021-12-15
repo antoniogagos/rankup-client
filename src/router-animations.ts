@@ -54,7 +54,7 @@ export const appRouterAnimations: AnimationItem[] = [
     },
   },
   {
-    id: 'opacity-animation-fast',
+    id: 'opacity-fast',
     keyframeSet: [{ opacity: '0' }, { opacity: '1' }],
     keyframeOptions: {
       duration: 144,
@@ -63,7 +63,7 @@ export const appRouterAnimations: AnimationItem[] = [
     },
   },
   {
-    id: 'opacity-animation',
+    id: 'opacity',
     keyframeSet: [{ opacity: '0' }, { opacity: '1' }],
     keyframeOptions: {
       duration: 260,
@@ -72,7 +72,7 @@ export const appRouterAnimations: AnimationItem[] = [
     },
   },
   {
-    id: 'scale-out-animation',
+    id: 'scale-out',
     keyframeSet: [
       { transform: 'scale(1)', opacity: 1 },
       { transform: 'scale(.7)', opacity: 0 },
