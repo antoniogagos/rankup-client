@@ -79,6 +79,7 @@
       ],
       "prefer-template": "off",
       "class-methods-use-this": "off",
+      "import/no-absolute-path": "off",
       "import/no-unresolved": "off",
       "import/extensions": [
         "error",

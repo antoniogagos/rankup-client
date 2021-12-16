@@ -1,14 +1,14 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { msg, str } from '@lit/localize';
-import { Locale, updateLocale } from './lib/localization/localization.js';
 import { appRouterAnimations } from './router-animations.js';
+import { path } from './lib/localization/rk-url-paths.js';
 import './elements/app-router/app-router.js';
 import './pages/welcome/rk-welcome-page.js';
 import './pages/access/rk-forgot-password-page.js';
 import './pages/access/rk-reset-password-page.js';
-import './pages/access/rk-sigin-page.js';
-import './pages/access/rk-sigup-page.js';
+import './pages/access/rk-signin-page.js';
+import './pages/access/rk-signup-page.js';
 import './pages/404/rk-404-page.js';
 import type { EventsMap as AppRouterEventsMap } from './elements/app-router/app-router.js';
 // @ts-ignore
@@ -30,18 +30,17 @@ export class RkUnauthenticaApp extends LitElement {
   render() {
     return html`
       <app-router
-        base="/${Locale}"
         .animations=${appRouterAnimations}
         @page-changed=${this.onPageChange}
         @request-navigation=${this.onNavigationRequested}>
         <rk-welcome-page path="/" animation="opacity"></rk-welcome-page>
-        <rk-signin-page path="/${msg('iniciar-session')}" animation="opacity"></rk-signin-page>
-        <rk-signup-page path="/${msg('registro')}" animation="opacity"></rk-signup-page>
+        <rk-signin-page path=${path('SIGNIN')} animation="opacity"></rk-signin-page>
+        <rk-signup-page path=${path('SIGNUP')} animation="opacity"></rk-signup-page>
         <rk-forgot-password-page
-          path="/${msg('recordar-password')}"
+          path=${path('FORGOT_PASSWORD')}
           animation="opacity"></rk-forgot-password-page>
         <rk-reset-password-page
-          path="/${msg('resetear-password')}"
+          path=${path('RESET_PASSWORD')}
           animation="opacity"></rk-reset-password-page>
         <rk-404-page path="/404" animation="opacity"></rk-404-page>
 

@@ -1,15 +1,16 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
+import { path } from '../../lib/localization/rk-url-paths.js';
 
 export class RkSignInPage extends LitElement {
   render() {
     return html`
       <h1>SignIn Page</h1>
       <div>
-        <a href="/">${msg('Back')}</a>
+        <a href="/">${msg('volver')}</a>
       </div>
       <div>
-        <a href="/access/forgot-password">${msg('Forgot Password')}</a>
+        <a href=${path('FORGOT_PASSWORD')}>${msg('Forgot Password')}</a>
       </div>
     `;
   }
@@ -18,7 +19,8 @@ export class RkSignInPage extends LitElement {
     css`
       :host {
         display: block;
-        background: beige;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
       }
     `,
   ];
