@@ -1,23 +1,41 @@
 import { LitElement, html, css } from 'lit';
-import { msg, str } from '@lit/localize';
+import { customElement } from 'lit/decorators.js';
 import { appRouterAnimations } from './router-animations.js';
-import './elements/app-router/app-router.js';
+import { RkDataServiceController } from './lib/rk-data-service/data-service-controller.js';
 import { path } from './lib/localization/rk-url-paths.js';
+import { SessionManager } from './managers/session/session-manager.js';
+import './elements/app-router/app-router.js';
 // @ts-ignore
 import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { type: 'css' };
 // @ts-ignore
 import ScrollbarStyles from '../../samba/styles/scrollbar.css' assert { type: 'css' };
 
+@customElement('rk-app')
 export class RkApp extends LitElement {
+  ds = new RkDataServiceController(this);
+
+  sessionManager = new SessionManager(this);
+
+  constructor() {
+    super();
+    window.rkPublicApp = this;
+  }
+
+  onSignOutClick() {
+    this.sessionManager.signOut();
+  }
+
   render() {
     return html`
       <app-router .animations=${appRouterAnimations}>
-        <div path=${path('TOURNEYS')} animation="opacity">List of tourneys</div>
+        <div path=${path('TOURNEYS')} animation="opacity">
+          List of tourneys
+          <button @click=${this.onSignOutClick}>Sign Out</button>
+        </div>
         <div path=${path('TOURNEY') + '/:id'} animation="opacity">Tourney Foo</div>
         <hw-404-page path="/404"></hw-404-page>
 
-        <app-router__redirect path="/" redirect=${path('TOURNEYS')}></app-router__redirect>
-        <app-router__redirect path="*" redirect="/404"></app-router__redirect>
+        <app-router__redirect path="*" redirect=${path('TOURNEYS')}></app-router__redirect>
       </app-router>
     `;
   }
@@ -40,4 +58,14 @@ export class RkApp extends LitElement {
   ];
 }
 
-customElements.define('rk-app', RkApp);
+declare global {
+  let rkApp: RkApp;
+
+  interface Window {
+    rkApp: RkApp;
+  }
+
+  interface HTMLElementTagNameMap {
+    'rk-app': RkApp;
+  }
+}
