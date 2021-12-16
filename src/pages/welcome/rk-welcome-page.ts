@@ -9,16 +9,14 @@ export class WelcomePage extends LitElement {
   render() {
     return html`
       <div class="main">
-        <img alt="Rankup logo" src="/assets/icons/rk-logo-bubbles.svg" />
+        <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
         <span class="title">Rankup</span>
-        <p>Challenge your friends in a season-long tournament 🎯</p>
-        <a class="btn btn--primary" href=${path('SIGNIN')}>
-          ${msg('Jugar ya')} ${Icons('back-arrow', 16)}
-        </a>
+        <p>${msg('Juega contra tus amigos prediciendo los resultados')}</p>
+        <a class="btn" href=${path('SIGNIN')}>${msg('Jugar ya')} ${Icons('back-arrow', 16)}</a>
       </div>
       <picture>
         <source type="image/avif" srcset="/assets/images/ball-bg.avif" />
-        <img alt="ball" src="/assets/images/ball-bg.webp" />
+        <img src="/assets/images/ball-bg.webp" alt="Goal" />
       </picture>
     `;
   }
@@ -42,19 +40,23 @@ export class WelcomePage extends LitElement {
       .title {
         font-size: 3.5rem;
         font-weight: bold;
-        margin-top: -2.5rem;
+        margin: 1.4rem;
       }
 
       .main p {
         font-size: 1.8rem;
-        margin: 1.4rem auto;
         max-width: 260px;
+        margin: 0;
         text-align: center;
       }
 
       .btn {
         position: absolute;
         bottom: 10vh;
+      }
+
+      .logo {
+        filter: invert(100%);
       }
 
       picture img {

@@ -29,6 +29,24 @@
   --color-text-warning: #e3b341;
   --color-text-white: #f0f6fc;
 
+  --color-input-bg: #0d1117;
+  --color-input-contrast-bg: rgba(1, 4, 9, 0.3);
+  --color-input-border: #21262d;
+  --color-input-shadow: 0 0 transparent;
+  --color-input-disabled-bg: #161b22;
+  --color-input-disabled-border: #30363d;
+  --color-input-warning-border: #d29922;
+  --color-input-error-border: #f85149;
+  --color-input-tooltip-success-text: #56d364;
+  --color-input-tooltip-success-bg: #101f1b;
+  --color-input-tooltip-success-border: #1c532b;
+  --color-input-tooltip-warning-text: #e3b341;
+  --color-input-tooltip-warning-bg: #1e1c16;
+  --color-input-tooltip-warning-border: #5d4411;
+  --color-input-tooltip-error-text: #ff7b72;
+  --color-input-tooltip-error-bg: #25171c;
+  --color-input-tooltip-error-border: #792e2e;
+
   --color-btn-text: #c9d1d9;
   --color-btn-bg: #21262d;
   --color-btn-border: #30363d;
