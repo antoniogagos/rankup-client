@@ -4,7 +4,6 @@ import { lazyLoad } from '../../lib/lit-directives/lazy-load-directive.js';
 import type { AllEventsMap, EventsMap } from './events.types';
 import type {
   AnimationItem,
-  Route,
   AppRouterPage,
   PageItem,
   PageCallbacksFn,
@@ -13,14 +12,9 @@ import type {
 
 export type { EventsMap } from './events.types';
 
-let _totalRoutersInstalled = 0;
 const ModuleUrl = import.meta.url;
 
 export class AppRouter extends HTMLElement {
-  static navigate(path: string) {
-    Page(path);
-  }
-
   /**
    * Note that with multiple instances of the router, the current page value
    * will automatically be the most specific, since routes will be create in
@@ -28,13 +22,11 @@ export class AppRouter extends HTMLElement {
    */
   static currentPage: PageItem | null = null;
 
-  static currentRoute: Route | null = null;
-
-  private static allPages: PageItem[] = [];
+  static currentRoute: PageJS.Context | null = null;
 
   exitPage: PageItem | null = null;
 
-  route: Route | null = null;
+  route: PageJS.Context | null = null;
 
   animations: AnimationItem[] = [];
 
@@ -46,9 +38,11 @@ export class AppRouter extends HTMLElement {
 
   private _visible = false;
 
+  private pagejsInstance: PageJS.Static | null = null;
+
   private entryAnimation: Promise<Animation> | null = null;
 
-  private userPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private userPrefersReducedMotion = false;
 
   private visibilityObserver: IntersectionObserver | null = null;
 
@@ -90,10 +84,15 @@ export class AppRouter extends HTMLElement {
   set visible(value) {
     if (typeof value === 'boolean' && value !== this._visible) {
       if (value) {
+        this.addEventListener('page-change', this.boundOnPageChanged);
+        this.pagejsInstance = Page.create();
         this.installRoutes();
-        Page();
+        this.pagejsInstance.start({ popstate: false, click: false });
       } else {
+        this.removeEventListener('page-change', this.boundOnPageChanged);
         this.uninstallRoutes();
+        this.pagejsInstance.stop();
+        this.pagejsInstance = null;
       }
       this._visible = value;
     }
@@ -101,7 +100,7 @@ export class AppRouter extends HTMLElement {
 
   /** prefix to all req */
   get base() {
-    return this.getAttribute('base');
+    return this.getAttribute('base') ?? '';
   }
 
   /** redirect when no route matches */
@@ -114,6 +113,11 @@ export class AppRouter extends HTMLElement {
     return this.getAttribute('fallback');
   }
 
+  get attrPrefix() {
+    const prefix = this.getAttribute('attributes-prefix');
+    return prefix ? `${prefix}-` : '';
+  }
+
   constructor() {
     super();
     const shadowRoot = this.attachShadow({ mode: 'open' });
@@ -124,6 +128,8 @@ export class AppRouter extends HTMLElement {
   }
 
   connectedCallback() {
+    registerRouter(this);
+    this.userPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Note: with display contents we can't compute isVisible with IObs unless there is content
     // (at start). Can we assume visibility when connected? TESTING
     //
@@ -131,9 +137,6 @@ export class AppRouter extends HTMLElement {
     this.removeNonRecyclablePages();
     // this.observeVisibility();
     this.visible = true;
-    // TODO some other way to get anims?
-    // this.animations = this.getRootNode().host?.constructor.animations;
-    this.addEventListener('page-change', AppRouter.onPageChange);
     if (this.page) {
       this.dispatch('page-changed', {
         page: this.page,
@@ -144,10 +147,23 @@ export class AppRouter extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.visible = false;
     // this.uninstallRoutes();
     // this.unobserveVisibility();
-    this.removeEventListener('page-change', AppRouter.onPageChange);
+    this.removeEventListener('page-change', this.boundOnPageChanged);
+    unregisterRouter(this);
+    this.visible = false;
+  }
+
+  replacePath(path: string, state: any) {
+    this.pagejsInstance.replace(path, state);
+  }
+
+  navigate(uri: string) {
+    this.pagejsInstance.show(uri);
+  }
+
+  handleWindowClick(evt: MouseEvent) {
+    this.pagejsInstance.clickHandler(evt);
   }
 
   /**
@@ -156,15 +172,11 @@ export class AppRouter extends HTMLElement {
    */
   private removeNonRecyclablePages() {
     [...this.children].forEach(child => {
-      // if ((child.style.display === 'none') &&
-      //     (child.hasAttribute('overlay') || child.hasAttribute('no-recycle'))) {
-      // if (child.style.display === 'none') {
-      if (child.hasAttribute('recycle')) {
+      if (this.pageHasAttribute(child, 'recycle')) {
         child.remove();
       } else {
         child.toggleAttribute('hidden', true);
       }
-      // }
     });
   }
 
@@ -201,8 +213,7 @@ export class AppRouter extends HTMLElement {
     pageElem: AppRouterPage,
     animation: string | AnimationItem,
   ) {
-    /** @type {Animation} */
-    let anim;
+    let anim: Animation;
     this.style.setProperty('overflow', 'hidden');
     this.style.setProperty('pointer-events', 'none', 'important');
     try {
@@ -228,21 +239,10 @@ export class AppRouter extends HTMLElement {
     return pageElem.animate(exitAnim.keyframeSet, exitAnim.keyframeOptions);
   }
 
-  static commonStart(strings: string[]) {
-    const A = strings.concat().sort();
-    const a1 = A[0];
-    const a2 = A[A.length - 1];
-    const L = a1.length;
-    let i = 0;
-    while (i < L && a1.charAt(i) === a2.charAt(i)) i += 1;
-    return a1.substring(0, i);
-  }
-
   private createPageElem(page: PageItem): AppRouterPage {
     const pageElem = document.createElement(page.elementName);
     const container = page.overlay ? this._overlayContainer : this;
     AppRouter.togglePageVisibility(pageElem, false);
-    // console.log('cratePage', pageElem);
     // pageElem.className = page.className;
     // pageElem.route = this.route;
     page.attributes.forEach(({ name, value }) => pageElem.setAttribute(name, value));
@@ -277,44 +277,51 @@ export class AppRouter extends HTMLElement {
     return this.getAnimationInOutArray(animationIn, animationOut);
   }
 
+  private getPageAttribute(pageElem: Element, attrName: string): string {
+    return pageElem.getAttribute(this.attrPrefix + attrName);
+  }
+
+  private pageHasAttribute(pageElem: Element, attrName: string): boolean {
+    return pageElem.hasAttribute(this.attrPrefix + attrName);
+  }
+
   private updateRoutes() {
     const pages: PageItem[] = [];
     [...this.children].forEach(child => {
-      const path = child.getAttribute('path');
-      if (!path) {
-        console.error('Router.NoPathFound', child);
+      const path = this.getPageAttribute(child, 'path');
+      if (!path || !path.match(/^(\/|\*)/)) {
+        console.error('Router path not found, or is not an absolute path', child);
         return;
       }
       const isRedirect = child.localName === 'app-router__redirect';
-      const redirect = (isRedirect && child.getAttribute('redirect')) || null;
-      const src = child.getAttribute('src'); // optional lazy load
-      const animation = child.getAttribute('animation') ?? null; // optional
-      const animationIn = child.getAttribute('animation-in') ?? null; // optional
-      const animationOut = child.getAttribute('animation-out') ?? null; // optional
-      const overlay = child.hasAttribute('overlay') ?? false; // optional
-      const name = child.getAttribute('name'); // optional for id
-      const recycle = overlay ? false : !child.hasAttribute('no-recycle');
+      const redirect = (isRedirect && this.getPageAttribute(child, 'redirect')) || null;
+      const src = this.getPageAttribute(child, 'src'); // optional lazy load
+      const animation = this.getPageAttribute(child, 'animation') ?? null; // optional
+      const animationIn = this.getPageAttribute(child, 'animation-in') ?? null; // optional
+      const animationOut = this.getPageAttribute(child, 'animation-out') ?? null; // optional
+      const overlay = !!this.getPageAttribute(child, 'overlay');
+      const name = this.getPageAttribute(child, 'name'); // optional for id
+      const recycle = overlay ? false : !this.pageHasAttribute(child, 'no-recycle');
       const attributes = [...child.attributes].map(({ name: attrName, value }) => ({
         name: attrName,
         value,
       }));
-      pages.push({
+      const pageItem: PageItem = {
         redirect,
         elementName: child.localName,
         attributes,
         name,
         path,
-        fullPath: (this.base ?? '' + path).replace(/\/\/+/, '/'),
+        fullPath: (this.base + path).replace(/\/\/+/, '/'),
         src,
         animation,
         animationIn,
         animationOut,
         overlay,
         recycle,
-        router: this,
-      } as PageItem);
+      };
+      pages.push(pageItem);
     });
-    AppRouter.allPages = [...AppRouter.allPages, ...pages];
     this._pages = pages;
   }
 
@@ -350,22 +357,14 @@ export class AppRouter extends HTMLElement {
   // }
 
   private installRoutes() {
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
-    const totalRoutesBefore = pageCallbacks.length;
     if (this.base) {
-      if (_totalRoutersInstalled === 0) {
-        Page.base(this.base);
-      } else {
-        console.warn(
-          "app-router 'base' attribute only works in the main router and it's global for all routers",
-        );
-      }
+      this.pagejsInstance.base(this.base);
     }
     if (this.home) {
-      AppRouter.addRoute({ path: '/', redirect: this.home });
+      this.addRoute({ path: '/', redirect: this.home });
     }
     this.pages?.forEach(page => {
-      AppRouter.addRoute({
+      this.addRoute({
         path: page.path,
         // if defined, "callback" next prop won't be used
         redirect: page.redirect,
@@ -375,30 +374,20 @@ export class AppRouter extends HTMLElement {
       });
     });
     if (this.fallback) {
-      AppRouter.addRoute({ path: '*', redirect: this.fallback });
-    }
-    if (pageCallbacks.length > totalRoutesBefore) {
-      _totalRoutersInstalled += 1;
+      this.addRoute({ path: '*', redirect: this.fallback });
     }
   }
 
   private uninstallRoutes() {
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
+    const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
     let uninstalled = false;
     this.pages?.forEach(page => {
-      const cb = AppRouter.getRouterCallback(page.path);
+      const cb = this.getRouterCallback(page.path);
       if (cb) {
         uninstalled = true;
         pageCallbacks.splice(pageCallbacks.indexOf(cb), 1);
-        const idx = AppRouter.allPages.findIndex(p => p === page);
-        if (idx > -1) {
-          AppRouter.allPages.splice(idx, 1);
-        }
       }
     });
-    if (uninstalled) {
-      _totalRoutersInstalled -= 1;
-    }
   }
 
   private pageHasAnimation(page: PageItem): boolean {
@@ -438,7 +427,7 @@ export class AppRouter extends HTMLElement {
     return exitPageHasAnimation && !exitPageAnimationPreventedByEntryPage;
   }
 
-  private switchPage(page: PageItem, ctx: any) {
+  private switchPage(page: PageItem, ctx: PageJS.Context) {
     if (this.page === page) {
       return;
     }
@@ -461,9 +450,9 @@ export class AppRouter extends HTMLElement {
     // after it's rendered. If it didn't it could read AppRouter.currentPage and
     // be sure it isn't changed
     const shadowRootNode: ShadowRoot = this.getRootNode?.() as ShadowRoot;
-    if (shadowRootNode) {
-      const litParentElement: LitElement = shadowRootNode.host as LitElement;
-      litParentElement?.requestUpdate?.();
+    const litParentElement: LitElement = shadowRootNode?.host as LitElement;
+    if (litParentElement?.requestUpdate) {
+      requestAnimationFrame(() => litParentElement.requestUpdate());
     }
   }
 
@@ -536,20 +525,20 @@ export class AppRouter extends HTMLElement {
     }
   }
 
-  static addRedirect(path: string, redirect: string): void {
-    Page(path, (ctx: PageJS.Context): void => {
+  private addRedirect(path: string, redirect: string): void {
+    this.pagejsInstance(path, (ctx: PageJS.Context): void => {
       // Custom redirect middleware for adding support to redirects with params
       let to = redirect;
       Object.keys(ctx.params).forEach(key => {
         to = to.replace(new RegExp(`(\\/|^)(:${key})(\\/|$)`), `$1${ctx.params[key]}$3`);
       });
-      if (Page.current !== to) {
-        Page.replace(to);
+      if (this.pagejsInstance.current !== to) {
+        this.pagejsInstance.replace(to);
       }
     });
   }
 
-  static addRoute({
+  private addRoute({
     path,
     callback,
     redirect,
@@ -558,55 +547,45 @@ export class AppRouter extends HTMLElement {
     redirect?: string;
     callback?: any;
   }) {
-    const routerIdx = _totalRoutersInstalled;
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
-    if (AppRouter.getRouterCallback(path)) {
+    const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
+    if (this.getRouterCallback(path)) {
       console.warn(`Route ${path} duplicated`);
     } else {
       if (redirect) {
-        AppRouter.addRedirect(path, redirect);
+        this.addRedirect(path, redirect);
       } else {
         // TODO don't leverage Page for matching paths, create a middleware
         // so that we can add more stuff. Mainly params/multiple-path
-        Page(path, callback);
+        this.pagejsInstance(path, callback);
       }
       const pageCb = pageCallbacks[pageCallbacks.length - 1];
-      /**
-       * Pagejs doesn't have anything for nested routes.
-       * We can support them by moving nested routes to the top of the
-       * callbacks chain.
-       * That is because routes are considered in order, and nested routes are
-       * more specific than upper routes.
-       */
-      const prepend = routerIdx > 0;
-      if (prepend) {
-        let idx = pageCallbacks.findIndex(
-          // insert before any previous router but after any middleware
-          // (middlewares won't have a "__routerIdx" prop)
-          cb => cb !== pageCb && cb.__routerIdx != null && cb.__routerIdx <= routerIdx,
-        );
-        if (idx === -1) idx = 0;
-        const lastCb = pageCallbacks.pop();
-        if (lastCb) {
-          pageCallbacks.splice(idx, 0, lastCb);
-        }
-      }
       pageCb.__path = path;
-      pageCb.__routerIdx = routerIdx;
     }
   }
 
-  static onPageChange(evt: EventsMap['page-change']) {
+  private boundOnPageChanged = this.onPageChange.bind(this);
+
+  private onPageChange(evt: EventsMap['page-change']) {
     evt.stopPropagation();
     if (evt.detail.path !== window.history.state.path) {
       // TODO optional params + serialize?
-      Page(evt.detail.path);
+      this.pagejsInstance(evt.detail.path);
     }
   }
 
-  static getRouterCallback(path: string): PageCallbacksFn | undefined {
-    const pageCallbacks: PageCallbacksList = (Page as any).callbacks;
+  private getRouterCallback(path: string): PageCallbacksFn | undefined {
+    const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
     return pageCallbacks.find(cb => cb.__path === path);
+  }
+
+  static commonStart(strings: string[]): string {
+    const A = strings.concat().sort();
+    const a1 = A[0];
+    const a2 = A[A.length - 1];
+    const L = a1.length;
+    let i = 0;
+    while (i < L && a1.charAt(i) === a2.charAt(i)) i += 1;
+    return a1.substring(0, i);
   }
 
   static pathRelativeToThisModule(path: string) {
@@ -665,4 +644,46 @@ export class AppRouter extends HTMLElement {
   ): void {
     super.addEventListener(type, listener, options);
   }
+}
+
+const Routers: Set<AppRouter> = new Set();
+const clickEvent = document.ontouchstart ? 'touchstart' : 'click';
+
+document.addEventListener(clickEvent as 'click', evt => {
+  const routers = [...Routers];
+  for (let idx = routers.length - 1; idx >= 0; idx -= 1) {
+    const router = routers[idx];
+    router.handleWindowClick(evt);
+  }
+});
+
+/**
+ * For multiple routing support, we need to prevent multiple routers from acting on a popstate
+ */
+window.addEventListener(
+  'popstate',
+  evt => {
+    const routers = [...Routers];
+    for (let idx = routers.length - 1; idx >= 0; idx -= 1) {
+      const router = routers[idx];
+      const path: string = evt.state?.path || window.location.pathname;
+      if (path.startsWith(router.base)) {
+        if (evt.state) {
+          router.replacePath(path, evt.state);
+        } else {
+          const { pathname, search, hash } = window.location;
+          router.navigate(pathname + search + hash);
+        }
+      }
+    }
+  },
+  false,
+);
+
+function unregisterRouter(router: AppRouter) {
+  Routers.delete(router);
+}
+
+function registerRouter(router: AppRouter) {
+  Routers.add(router);
 }

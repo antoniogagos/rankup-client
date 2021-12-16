@@ -16,6 +16,7 @@
     "allowJs": true,
     "checkJs": true,
     "inlineSources": true,
+    "useDefineForClassFields": false,
     "rootDir": "./",
     "incremental": true
   },

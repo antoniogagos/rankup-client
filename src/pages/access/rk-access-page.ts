@@ -1,7 +1,9 @@
 import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { msg, str } from '@lit/localize';
 import { appRouterAnimations } from '../../router-animations.js';
 import '../../rk-elements/rk-auth-wall/rk-auth-wall.js';
+import '../404/rk-404-page.js';
 import './rk-forgot-password-page.js';
 import './rk-reset-password-page.js';
 import './rk-signin-page.js';
@@ -11,21 +13,29 @@ import AppRouterStyles from '../../../../src/elements/app-router/styles.css' ass
 // import { property } from 'lit/decorators.js';
 // import { CloudController } from '../../rk-lib/data-service/cloud-db-controller.js';
 
+@customElement('rk-access-page')
 export class RkAccessPage extends LitElement {
+  @property({ type: Boolean }) hidden = true;
+
   render() {
     return html`
-      <app-router access .animations=${appRouterAnimations}>
-        <rk-signin-page path="/access/signin" animation="slide-from-left"></rk-signin-page>
-        <rk-signup-page path="/access/signup" animation="slide-from-left"></rk-signup-page>
+      <app-router base="/access" .animations=${appRouterAnimations}>
+        <rk-signin-page path="/signin" animation="opacity"></rk-signin-page>
+        <rk-signup-page path="/signup" animation="opacity"></rk-signup-page>
         <rk-forgot-password-page
-          path="/access/forgot-password"
-          animation="slide-from-left"></rk-forgot-password-page>
-        <rk-reset-password-page
-          path="/access/reset-password"
-          animation="slide-from-left"></rk-reset-password-page>
-        <hw-404-page path="/404"></hw-404-page>
+          path="/forgot-password"
+          animation="opacity"></rk-forgot-password-page>
+        <rk-reset-password-page path="/reset-password" animation="opacity"></rk-reset-password-page>
+        <rk-404-page path="/404" animation="opacity"></rk-404-page>
+
+        <app-router__redirect path="/" redirect="/signin"></app-router__redirect>
+        <app-router__redirect path="*" redirect="/404"></app-router__redirect>
       </app-router>
     `;
+  }
+
+  shouldUpdate() {
+    return !this.hasAttribute('hidden');
   }
 
   static styles = [
@@ -37,8 +47,6 @@ export class RkAccessPage extends LitElement {
     `,
   ];
 }
-
-customElements.define('rk-access-page', RkAccessPage);
 
 declare global {
   interface HTMLElementTagNameMap {
