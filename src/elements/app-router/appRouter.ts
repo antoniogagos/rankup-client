@@ -289,7 +289,6 @@ export class AppRouter extends HTMLElement {
     const pages: PageItem[] = [];
     [...this.children].forEach(child => {
       const path = this.getPageAttribute(child, 'path');
-      console.log(path);
       if (!path || !path.match(/^(\/|\*)/)) {
         console.error('Router path not found, or is not an absolute path', child);
         return;

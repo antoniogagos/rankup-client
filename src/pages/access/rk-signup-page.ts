@@ -6,7 +6,7 @@ export class RkSignUpPage extends LitElement {
   render() {
     return html`
       <h1>SignUp Page</h1>
-      <a href=${path('HOME')}>${msg('atras')}</a>
+      <a href="/">${msg('atras')}</a>
     `;
   }
 

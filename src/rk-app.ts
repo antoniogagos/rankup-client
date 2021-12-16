@@ -11,7 +11,7 @@ import ScrollbarStyles from '../../samba/styles/scrollbar.css' assert { type: 'c
 export class RkApp extends LitElement {
   render() {
     return html`
-      <app-router base=${path('APP', false)} .animations=${appRouterAnimations}>
+      <app-router .animations=${appRouterAnimations}>
         <div path=${path('TOURNEYS')} animation="opacity">List of tourneys</div>
         <div path=${path('TOURNEY') + '/:id'} animation="opacity">Tourney Foo</div>
         <hw-404-page path="/404"></hw-404-page>
