@@ -11,11 +11,51 @@
   </head>
 
   <body>
-    <rk-auth-wall logged-path="/app/tourneys">
+    <rk-auth-wall>
+      <rk-app slot="authenticated"></rk-app>
       <rk-unauthenticated-app slot="unauthenticated"></rk-unauthenticated-app>
     </rk-auth-wall>
 
     <script type="module" src="./out-tsc/src/rk-elements/rk-auth-wall/rk-auth-wall.js"></script>
-    <script type="module" src="./out-tsc/src/rk-unauthenticated-app.js"></script>
+
+    <script>
+      let authAppImported = false;
+      let unauthAppImported = false;
+
+      document.body.querySelector('rk-auth-wall').addEventListener('session-updated', evt => {
+        const isLogged = evt.detail.session;
+        if (isLogged) {
+          setColorScheme();
+          if (!authAppImported) {
+            import('./out-tsc/src/rk-app.js');
+            authAppImported = true;
+          }
+        } else {
+          removeColorScheme();
+          if (!unauthAppImported) {
+            import('./out-tsc/src/rk-unauthenticated-app.js');
+            unauthAppImported = true;
+          }
+        }
+      });
+
+      function setColorScheme() {
+        let theme = 'light';
+        if (localStorage.getItem('theme')) {
+          theme = localStorage.getItem('theme');
+        } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+          theme = 'dark';
+        }
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-color-mode', 'dark');
+        } else {
+          removeColorScheme();
+        }
+      }
+
+      function removeColorScheme() {
+        document.documentElement.removeAttribute('data-color-mode');
+      }
+    </script>
   </body>
 </html>

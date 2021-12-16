@@ -122,12 +122,12 @@ export class AppRouter extends HTMLElement {
     super();
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.innerHTML = '<slot></slot>';
-    this.updateRoutes();
-    // this.hideAllPages();
-    this.prefetchPagesWhenIdle();
   }
 
   connectedCallback() {
+    this.updateRoutes();
+    // this.hideAllPages();
+    this.prefetchPagesWhenIdle();
     registerRouter(this);
     this.userPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Note: with display contents we can't compute isVisible with IObs unless there is content

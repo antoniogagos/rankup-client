@@ -13,10 +13,11 @@
 ## TODO
 
 X- poner theme del otro rankup
-A- investigar themes / copiar github
-A- crear estructura components
+X- investigar themes / copiar github
+X- crear estructura components
+X- routing funcionando
+
 A- samba styles (buttons, inputs, drawer) y components (card)
-N- routing funcionando
 N- poner auth-wall
 N- mock remote DB
 N- unificar con hadron

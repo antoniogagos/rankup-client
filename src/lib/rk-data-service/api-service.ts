@@ -3,7 +3,7 @@ import type {
   IApiService,
   LoggedUser,
   SignInResponse,
-} from '../../lib/data-service/types.js';
+} from '../data-service/types.js';
 
 export const RkApiService: IApiService = {
   config: {},
@@ -31,7 +31,7 @@ export const RkApiService: IApiService = {
         credentials: {
           AccessKeyId: 'access-key-id',
           Expiration: 'expiration',
-          SecretKey: 'eecret-key',
+          SecretKey: 'secret-key',
           SessionToken: 'session-token',
         },
         user: {

@@ -15,24 +15,24 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
   // esbuildTarget: 'auto'
 
   /** Set appIndex to enable SPA routing */
-  // appIndex: 'demo/index.html',
+  appIndex: 'index.html',
 
   plugins: [
     /** Use Hot Module Replacement by uncommenting. Requires @open-wc/dev-server-hmr plugin */
     // hmr && hmrPlugin({ exclude: ['**/*/node_modules/**/*'], presets: [presets.litElement] }),
   ],
 
-  middlewares: [
-    // Redirect all request from /app/* (without an extension) to app.html
-    function rewriteIndex(context, next) {
-      if (context.url === '/app' || context.url.match(/(?<=\/app\/).*(?<!\.\w+)$/)) {
-        context.url = '/app.html';
-      } else if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
-        context.url = '/index.html';
-      }
-      return next();
-    },
-  ],
+  // middlewares: [
+  //   // Redirect all request from /app/* (without an extension) to app.html
+  //   function rewriteIndex(context, next) {
+  //     if (context.url === '/app' || context.url.match(/(?<=\/app\/).*(?<!\.\w+)$/)) {
+  //       context.url = '/app.html';
+  //     } else if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
+  //       context.url = '/index.html';
+  //     }
+  //     return next();
+  //   },
+  // ],
 
   // See documentation for all available options
 });

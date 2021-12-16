@@ -203,7 +203,7 @@ export class SessionController {
         for (const [name, provider] of this.#sessionProviders) {
           if (provider.isOAuthProvider && (await provider.isLogged())) {
             this.logIn({ provider: name });
-            return;
+            // return;
           }
         }
         // const isLoggedUsingGoogle = await GoogleSession.isLogged();
