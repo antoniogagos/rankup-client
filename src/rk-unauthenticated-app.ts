@@ -1,8 +1,8 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { msg, str } from '@lit/localize';
+import { customElement } from 'lit/decorators.js';
 import { appRouterAnimations } from './router-animations.js';
 import { path } from './lib/localization/rk-url-paths.js';
+import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
 import './pages/welcome/rk-welcome-page.js';
 import './pages/access/rk-forgot-password-page.js';
@@ -18,21 +18,27 @@ import ScrollbarStyles from '../../samba/styles/scrollbar.css' assert { type: 'c
 
 @customElement('rk-unauthenticated-app')
 export class RkUnauthenticaApp extends LitElement {
-  private onPageChange(evt: AppRouterEventsMap['page-changed']) {
-    // const { elementName } = evt.detail.page;
-    // if (elementName === 'rk-access-page') {
-    //   import(`./pages/access/rk-access-page.js`);
-    // }
+  sessionManager: SessionManager = null;
+
+  constructor() {
+    super();
+    window.rkPublicApp = this;
   }
 
-  private onNavigationRequested() {}
+  connectedCallback(): void {
+    super.connectedCallback?.();
+    this.sessionManager = new SessionManager(this);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback?.();
+    this.removeController(this.sessionManager);
+    this.sessionManager = null;
+  }
 
   render() {
     return html`
-      <app-router
-        .animations=${appRouterAnimations}
-        @page-changed=${this.onPageChange}
-        @request-navigation=${this.onNavigationRequested}>
+      <app-router .animations=${appRouterAnimations}>
         <rk-welcome-page path="/" animation="opacity"></rk-welcome-page>
         <rk-signin-page path=${path('SIGNIN')} animation="opacity"></rk-signin-page>
         <rk-signup-page path=${path('SIGNUP')} animation="opacity"></rk-signup-page>
@@ -44,7 +50,8 @@ export class RkUnauthenticaApp extends LitElement {
           animation="opacity"></rk-reset-password-page>
         <rk-404-page path="/404" animation="opacity"></rk-404-page>
 
-        <app-router__redirect path="*" redirect="/404"></app-router__redirect>
+        <app-router__redirect path="/oauth" redirect=${path('SIGNIN')}></app-router__redirect>
+        <app-router__redirect path="*" redirect="/"></app-router__redirect>
       </app-router>
     `;
   }
@@ -68,6 +75,12 @@ export class RkUnauthenticaApp extends LitElement {
 }
 
 declare global {
+  let rkPublicApp: RkUnauthenticaApp;
+
+  interface Window {
+    rkPublicApp: RkUnauthenticaApp;
+  }
+
   interface HTMLElementTagNameMap {
     'rk-unauthenticated-app': RkUnauthenticaApp;
   }

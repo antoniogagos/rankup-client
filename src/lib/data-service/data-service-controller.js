@@ -4,31 +4,34 @@ import { SessionController } from './session/session-controller.js';
 /** @typedef {import('./types').IApiService} IApiService */
 /** @typedef {import('./types').Session} Session */
 /** @typedef {import('lit').ReactiveController} ReactiveController */
-/** @typedef {HTMLElement & import('lit').ReactiveControllerHost} ReactiveControllerHost */
+/** @typedef {import('lit').ReactiveElement} ReactiveElement */
 
 /**
  * @template {IApiService} T
+ * @template {Map<string, ISessionProvider>} SessionProviders
  * @implements {ReactiveController}
  */
 export class DataService {
-  /** @type {SessionController | null} */
+  /** @type {SessionController<SessionProviders> | null} */
   sessionController = null;
 
-  /** @type {ReactiveControllerHost | null} */
+  sessionProviders = /** @type {SessionProviders} */ (new Map());
+
+  /** @type {ReactiveElement | null} */
   host = null;
 
-  /** @type {Map<string, ISessionProvider>} */
-  sessionProviders = new Map();
-
   /** @type {T | null} */
-  request = null;
+  #apiService = null;
+
+  /** @type {(user: LoggedUser) => void | null} */
+  #onUserChanged = null;
 
   /**
-   * @param {ReactiveControllerHost} host
-   * @param {Map<string, ISessionProvider>} sessionProviders
+   * @param {ReactiveElement} host
+   * @param {SessionProviders} sessionProviders
    * @param {T} apiService
    * @param {Object} [param]
-   * @param {function(LoggedUser):void} [param.onUserChanged]
+   * @param {(user: LoggedUser) => void} [param.onUserChanged]
    */
   constructor(host, sessionProviders, apiService, { onUserChanged } = {}) {
     if (!sessionProviders?.size) {
@@ -36,8 +39,8 @@ export class DataService {
     }
     this.host = host;
     this.sessionProviders = sessionProviders;
-    this.apiService = apiService;
-    this.onUserChanged = onUserChanged;
+    this.#apiService = apiService;
+    this.#onUserChanged = onUserChanged;
     host.addController(this);
   }
 
@@ -49,14 +52,18 @@ export class DataService {
     return this.sessionController.isSignedIn;
   }
 
+  get request() {
+    return this.#apiService;
+  }
+
   hostConnected() {
     this.sessionController = new SessionController(
       this.host,
       this.sessionProviders,
-      this.apiService,
+      this.#apiService,
       {
         onUpdated: this.#onSessionUpdated.bind(this),
-        onUserChanged: this.#onUserChanged.bind(this),
+        onUserChanged: this.#onUserChanged?.bind(this),
       },
     );
   }
@@ -68,15 +75,10 @@ export class DataService {
 
   /** @param {Session} session */
   #onSessionUpdated(session) {
-    this.apiService.config = {
-      ...this.apiService.config,
+    this.#apiService.config = {
+      ...this.#apiService.config,
       credentials: session?.credentials ?? null,
       region: session?.region ?? null,
     };
-  }
-
-  /** @param {LoggedUser} user */
-  #onUserChanged(user) {
-    this.onUserChanged?.(user);
   }
 }

@@ -1,11 +1,10 @@
 /** @typedef {import('../../types').ISessionProvider} ISessionProvider */
 
-// @ts-ignore
-// import env from '../../../../env.json' assert { type: 'json' };
-// const { googleClientId: GOOGLE_CLIENT_ID } = env;
-
 /** @type {string | null} */
 let GOOGLE_CLIENT_ID = null;
+
+/** @type {string} */
+let REDIRECT_URL = `${window.location.origin}/login?googleAuth=1`;
 
 /** @type {Promise<void>} */
 let _apiLoadReq = null;
@@ -24,13 +23,19 @@ let _user = null;
 
 /** @implements {ISessionProvider}  */
 export class GoogleSessionProvider {
-  /** @param {string} googleClientId */
-  constructor(googleClientId) {
+  /**
+   * @param {string} googleClientId
+   * @param {string} [redirectURL]
+   */
+  constructor(googleClientId, redirectURL) {
     if (GOOGLE_CLIENT_ID && googleClientId !== GOOGLE_CLIENT_ID) {
       throw new Error('GoogleSessionProvider already initialized');
     }
     if (!googleClientId) {
       throw new Error('GoogleSessionProvider client id not provided');
+    }
+    if (redirectURL) {
+      REDIRECT_URL = redirectURL;
     }
     GOOGLE_CLIENT_ID = googleClientId;
   }
@@ -96,7 +101,6 @@ async function initAuthApi() {
           gapi.client.init({
             clientId: GOOGLE_CLIENT_ID,
             scope: 'profile',
-            // apiKey: '',
           }),
         )
         .then(() => {
@@ -164,8 +168,9 @@ async function logIn() {
   } else {
     _user = await _GoogleAuth.signIn({
       prompt: 'select_account',
-      ux_mode: 'redirect',
-      redirect_uri: `${window.location.origin}/login?googleAuth=1`,
+      // ux_mode: 'redirect', // not working?
+      ux_mode: 'popup',
+      // redirect_uri: REDIRECT_URL,
     });
   }
   return getOauthLoggedUserDataFromGoogleLoggedUser(_user);

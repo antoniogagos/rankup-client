@@ -75,7 +75,7 @@ export function Icons(icon, size = 24, tagfn = svg) {
  * @returns  {string}
  */
 function getIcon(icon, size) {
-  return /** @type {any}*/ (ICONS)[size]?.[icon] ?? '';
+  return /** @type {any} */ (ICONS)[size]?.[icon] ?? '';
 }
 
 /**
@@ -85,8 +85,8 @@ function getIcon(icon, size) {
  */
 Icons.smallest = function smallest(icon, tagfn = svg) {
   for (const size of SIZES) {
-    if (/** @type {any}*/ (ICONS)[size][icon]) {
-      return tagfn([/** @type {any}*/ (ICONS)[size][icon]]);
+    if (/** @type {any} */ (ICONS)[size][icon]) {
+      return tagfn([/** @type {any} */ (ICONS)[size][icon]]);
     }
   }
   return null;

@@ -15,7 +15,7 @@ export class AuthWall extends LitElement {
   /** @type {IApiService} */
   apiService = null;
 
-  /** @type {import('../../session/session-controller').SessionController} */
+  /** @type {import('../../session/session-controller').SessionController<Map<string, ISessionProvider>>} */
   #sessionController = null;
 
   constructor() {
@@ -25,15 +25,9 @@ export class AuthWall extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    this.#dispatchSessionUpdate();
+    this.#dispatchSessionUpdate(); // using localStorage cache before loading any other dep
     const SessionController = await this.lazyLoadSessionController();
     [...this.children].forEach(el => el.toggleAttribute('hidden', true));
-    if (!this.sessionProviders?.size) {
-      throw new Error('AuthWall no session providers found');
-    }
-    if (!this.apiService) {
-      throw new Error('AuthWall no api service found');
-    }
     this.#sessionController = new SessionController(this, this.sessionProviders, this.apiService, {
       onUpdated: this.#onSessionUpdated.bind(this),
     });
@@ -51,13 +45,7 @@ export class AuthWall extends LitElement {
 
   /** @param {Session} session */
   #onSessionUpdated(session) {
-    [...this.children].forEach(el => {
-      el.toggleAttribute('hidden', false);
-      // if (el.localName === 'hadron-app') {
-      //   const _el = /** @type {HTMLElement & {username?: string}} */ (el);
-      //   _el.username = session?.user.usernameLowerCase ?? null;
-      // }
-    });
+    [...this.children].forEach(el => el.toggleAttribute('hidden', false));
     // if (session && window.location.pathname.startsWith('/login')) {
     //   window.location.replace('/app/dashboard');
     // }

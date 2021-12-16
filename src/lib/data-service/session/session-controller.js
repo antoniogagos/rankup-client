@@ -1,15 +1,9 @@
-// import { HadronHttpApi } from '../hadron-http-api/hadron-http-api.js';
 /** @typedef {import('../types').Session} Session */
 /** @typedef {import('../types').LoggedUser} LoggedUser */
 /** @typedef {import('../types').ISessionProvider} ISessionProvider */
 /** @typedef {import('../types').IApiService} IApiService */
 /** @typedef {import('lit').ReactiveController} ReactiveController */
-/** @typedef {HTMLElement & import('lit').ReactiveControllerHost} ReactiveControllerHost */
-
-// const apiService = new HadronHttpApi();
-
-/** @type {IApiService | null} */
-let API_SERVICE = null;
+/** @typedef {import('lit').ReactiveElement} ReactiveElement */
 
 /** @type {Session} */
 let _session = null;
@@ -17,7 +11,7 @@ let _session = null;
 /** @type {LoggedUser} */
 let _user = null;
 
-/** @type {Set<SessionController>} */
+/** @type {Set<SessionController<Map<string, ISessionProvider>>>} */
 const _controllers = new Set();
 
 /** @type {Promise<void>} */
@@ -33,11 +27,12 @@ let _scheduledRefreshWhenOnline = null;
 function _updateSession(session) {
   const username = session?.user.username ?? _session?.user.username;
   if (session) {
-    API_SERVICE.config = {
-      ...API_SERVICE.config,
-      credentials: session.credentials,
-      region: session.region,
-    };
+    _controllers.forEach(controller => {
+      controller.apiService.updateConfig({
+        credentials: session.credentials,
+        region: session.region,
+      });
+    });
   }
   if (username) {
     if (session) {
@@ -52,11 +47,18 @@ function _updateSession(session) {
   _user = session?.user;
 }
 
-/** @implements {ReactiveController} */
+/**
+ * @template {Map<string, ISessionProvider>} SessionProviders
+ * @implements {ReactiveController}
+ */
 export class SessionController {
   /**
-   * @param {ReactiveControllerHost} host
-   * @param {Map<string, ISessionProvider>} sessionProviders
+   * @typedef {KeyOfMap<SessionProviders>} AvailableProviders
+   */
+
+  /**
+   * @param {ReactiveElement} host
+   * @param {SessionProviders} sessionProviders
    * @param {IApiService} apiService
    * @param {Object} [p2]
    * @param {function(Session):void} [p2.onUpdated]
@@ -67,10 +69,10 @@ export class SessionController {
     if (!sessionProviders?.size) {
       throw new Error('No session providers found');
     }
-    if (!apiService || (API_SERVICE && API_SERVICE !== apiService)) {
+    if (!apiService) {
       throw new Error('SessionController invalid api service');
     }
-    API_SERVICE = apiService;
+    this.apiService = apiService;
     this.host = host;
     this.onUpdated = onUpdated;
     this.onUserChanged = onUserChanged;
@@ -79,14 +81,13 @@ export class SessionController {
     this.#restoreSession();
   }
 
-  /** @type {ReactiveControllerHost} */
+  /** @type {ReactiveElement} */
   host = null;
 
   /** @type {function(Session): void} */
   onUpdated = null;
 
-  /** @type {Map<string, ISessionProvider>} */
-  #sessionProviders = new Map();
+  #sessionProviders = /** @type {SessionProviders} */ (new Map());
 
   get session() {
     return _session;
@@ -114,20 +115,20 @@ export class SessionController {
 
   /**
    * @param {{
-   *   provider: string
+   *   provider: AvailableProviders
    *   username?: string
    *   password?: string
    * }} param0
    * @returns {Promise<void>}
    */
-  async logIn({ provider }) {
+  async logIn({ provider, username, password }) {
     if (!navigator.onLine) throw new Error('DisconnectedError');
     _logInReq ??= new Promise((resolve, reject) => {
       const old = _session;
       const OAuthProvider = this.#getSessionProvider(provider);
       OAuthProvider.refresh()
         .then(oauthLoggedUser =>
-          API_SERVICE.Auth.SignIn({
+          this.apiService.Auth.SignIn({
             token: oauthLoggedUser.tokenId,
             provider,
           }),
@@ -154,11 +155,12 @@ export class SessionController {
 
   /**
    * @param {{
-   *   provider: string
-   *   username: string
+   *   provider: AvailableProviders
+   *   username?: string
+   *   password?: string
    * }} param0
    */
-  async signUp({ provider, username }) {
+  async signUp({ provider, username, password }) {
     if (!navigator.onLine) {
       throw new Error('DisconnectedError');
     }
@@ -172,7 +174,9 @@ export class SessionController {
     let refreshed = false;
     if (navigator.onLine) {
       try {
-        await this.logIn({ provider: _session.provider });
+        await this.logIn({
+          provider: /** @type {AvailableProviders} */ (_session.provider),
+        });
         refreshed = true;
       } catch (err) {
         this.#scheduleRefresh(new Date(Date.now() + 1000 * 60 * 18));
@@ -202,15 +206,13 @@ export class SessionController {
       } else {
         for (const [name, provider] of this.#sessionProviders) {
           if (provider.isOAuthProvider && (await provider.isLogged())) {
-            this.logIn({ provider: name });
+            this.logIn({
+              provider: /** @type {AvailableProviders} */ (name),
+            });
+            break;
             // return;
           }
         }
-        // const isLoggedUsingGoogle = await GoogleSession.isLogged();
-        // if (isLoggedUsingGoogle) {
-        //   this.logIn({ provider: 'google' });
-        //   return;
-        // }
       }
     }
     // Note: this session could be expired, but we want to notify the session. This way we can

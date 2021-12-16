@@ -528,7 +528,7 @@ export class AppRouter extends HTMLElement {
   private addRedirect(path: string, redirect: string): void {
     this.pagejsInstance(path, (ctx: PageJS.Context): void => {
       // Custom redirect middleware for adding support to redirects with params
-      let to = redirect;
+      let to = redirect + (ctx.querystring ? `?${ctx.querystring}` : '');
       Object.keys(ctx.params).forEach(key => {
         to = to.replace(new RegExp(`(\\/|^)(:${key})(\\/|$)`), `$1${ctx.params[key]}$3`);
       });
@@ -545,7 +545,7 @@ export class AppRouter extends HTMLElement {
   }: {
     path: string;
     redirect?: string;
-    callback?: any;
+    callback?: PageJS.Callback;
   }) {
     const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
     if (this.getRouterCallback(path)) {
