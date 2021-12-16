@@ -2,28 +2,26 @@ import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { msg } from '@lit/localize';
 
-export class RkSignUpPage extends LitElement {
+export class RkSignInPage extends LitElement {
   render() {
-    return html`
-      <h1>SignUp Page</h1>
-      <a href="/access">${msg('Back')}</a>
-    `;
+    return html``;
   }
 
   static styles = [
     css`
       :host {
         display: block;
-        background: beige;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
       }
     `,
   ];
 }
 
-customElements.define('rk-signup-page', RkSignUpPage);
+customElements.define('rk-signin-page', RkSignInPage);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'rk-signup-page': RkSignUpPage;
+    'rk-signin-page': RkSignInPage;
   }
 }

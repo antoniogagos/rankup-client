@@ -4,8 +4,8 @@ import { appRouterAnimations } from '../../router-animations.js';
 import '../../rk-elements/rk-auth-wall/rk-auth-wall.js';
 import './rk-forgot-password-page.js';
 import './rk-reset-password-page.js';
-import './rk-sigin-page.js';
-import './rk-sigup-page.js';
+import './rk-signin-page.js';
+import './rk-signup-page.js';
 // @ts-ignore
 import AppRouterStyles from '../../../../src/elements/app-router/styles.css' assert { type: 'css' };
 // import { property } from 'lit/decorators.js';

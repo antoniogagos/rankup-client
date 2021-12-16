@@ -6,7 +6,7 @@ export class RkForgotPasswordPage extends LitElement {
   render() {
     return html`
       <h1>ForgotPassword Page</h1>
-      <a href="/access">${msg('Back')}</a>
+      <a href="/access">${msg('Volver')}</a>
     `;
   }
 

@@ -2,11 +2,11 @@ import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { msg } from '@lit/localize';
 
-export class RkSignInPage extends LitElement {
+export class RkSignUpPage extends LitElement {
   render() {
     return html`
-      <h1>SignIn Page</h1>
-      <a href="/">${msg('Back')}</a>
+      <h1>SignUp Page</h1>
+      <a href="/access">${msg('afsd')}</a>
     `;
   }
 
@@ -20,10 +20,10 @@ export class RkSignInPage extends LitElement {
   ];
 }
 
-customElements.define('rk-signin-page', RkSignInPage);
+customElements.define('rk-signup-page', RkSignUpPage);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'rk-signin-page': RkSignInPage;
+    'rk-signup-page': RkSignUpPage;
   }
 }

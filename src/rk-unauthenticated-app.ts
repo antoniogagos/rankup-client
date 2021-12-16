@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
-import { msg, str } from '@lit/localize';
 import { appRouterAnimations } from './router-animations.js';
 import './elements/app-router/app-router.js';
 import './pages/welcome/rk-welcome-page.js';
