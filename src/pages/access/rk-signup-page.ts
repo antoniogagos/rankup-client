@@ -4,7 +4,7 @@ import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
 import { property } from 'lit/decorators.js';
 // @ts-ignore
-import inputStyles from '/samba/styles/input.css' assert { type: 'css' };
+import formControlStyles from '/samba/styles/form-control.css' assert { type: 'css' };
 // @ts-ignore
 import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 // @ts-ignore
@@ -40,6 +40,7 @@ export class RkSignUpPage extends LitElement {
           <div class="input-wrapper">
             ${Icons('username', 24)}
             <input
+              class="form-control"
               id="username"
               name="username"
               placeholder=${msg('Nombre de usuario')}
@@ -53,6 +54,7 @@ export class RkSignUpPage extends LitElement {
           <div class="input-wrapper">
             ${Icons('email-open', 24)}
             <input
+              class="form-control"
               id="email"
               name="email"
               placeholder="Email"
@@ -67,6 +69,7 @@ export class RkSignUpPage extends LitElement {
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
+              class="form-control"
               id="current-password"
               name="current-password"
               placeholder=${msg('Contraseña')}
@@ -90,6 +93,7 @@ export class RkSignUpPage extends LitElement {
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
+              class="form-control"
               id="current-password"
               name="current-password"
               placeholder=${msg('Confirmar contraseña')}
@@ -111,14 +115,14 @@ export class RkSignUpPage extends LitElement {
   }
 
   static styles = [
-    inputStyles,
     resetStyles,
+    formControlStyles,
     buttonStyles,
     css`
       :host {
         align-items: center;
-        background: var(--color-bg-doc);
-        color: var(--color-text-primary);
+        background: var(--color-canvas-default);
+        color: var(--color-fg-default);
         display: flex;
         flex-direction: column;
         height: 100%;

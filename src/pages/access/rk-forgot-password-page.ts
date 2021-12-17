@@ -3,11 +3,13 @@ import { msg } from '@lit/localize';
 import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
 // @ts-ignore
-import inputStyles from '/samba/styles/input.css' assert { type: 'css' };
+import formControlStyles from '/samba/styles/form-control.css' assert { type: 'css' };
 // @ts-ignore
 import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
+// @ts-ignore
+import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkForgotPasswordPage extends LitElement {
   handleFormSubmit(evt: FormDataEvent) {
@@ -23,7 +25,7 @@ export class RkForgotPasswordPage extends LitElement {
   render() {
     return html`
       <header>
-        <a class="go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
+        <a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
         <div>${msg('Recordar contraseña')}</div>
       </header>
       <p>
@@ -41,7 +43,7 @@ export class RkForgotPasswordPage extends LitElement {
               name="email"
               placeholder="Email"
               type="email"
-              class="btn"
+              class="form-control"
               autocomplete="email"
               required />
           </div>
@@ -50,20 +52,21 @@ export class RkForgotPasswordPage extends LitElement {
       </form>
       <footer>
         ${msg('¿No tienes una cuenta?')}
-        <a href=${path('SIGNUP')}>${msg('Crea una')}</a>
+        <a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
       </footer>
     `;
   }
 
   static styles = [
     resetStyles,
-    inputStyles,
+    linkStyles,
+    formControlStyles,
     buttonStyles,
     css`
       :host {
         align-items: center;
-        background: var(--color-bg-doc);
-        color: var(--color-text-primary);
+        background: var(--color-canvas-default);
+        color: var(--color-fg-default);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -88,7 +91,6 @@ export class RkForgotPasswordPage extends LitElement {
         font-size: 1.5rem;
       }
       footer a {
-        color: var(--color-text-link);
         text-decoration: underline;
       }
       p {

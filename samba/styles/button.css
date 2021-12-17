@@ -3,18 +3,21 @@
   background: var(--color-btn-bg);
   border-radius: 24px;
   border: 2px solid var(--color-btn-border);
+  box-shadow: var(--color-btn-shadow);
   box-sizing: border-box;
   color: var(--color-btn-text);
+  cursor: pointer;
   display: flex;
   font-family: inherit;
   font-size: 1.6rem;
   font-weight: 600;
-  justify-content: center;
-  min-width: 200px;
   gap: 10px;
-  padding: 6px 20px;
+  justify-content: center;
   min-height: 48px;
+  min-width: 200px;
+  padding: 6px 20px;
   pointer-events: all;
+  transition: all 125ms;
 }
 
 .btn--xs {
@@ -33,10 +36,16 @@
   font-size: 2rem;
 }
 
-a.btn {
-  text-decoration: none;
+.btn:hover {
+  background-color: var(--color-btn-hover-bg);
+  border-color: var(--color-btn-hover-border);
 }
 
-.btn:hover {
-  background: var(--color-btn-hover-bg);
+.btn:focus {
+  background-color: var(--color-btn-focus-bg);
+  box-shadow: var(--color-btn-focus-shadow);
+}
+
+a.btn {
+  text-decoration: none;
 }

@@ -3,4 +3,8 @@
 
 :root {
   color-scheme: dark light;
+  scroll-behavior: smooth;
+  font-size: 62.5%;
+  height: 100vh;
+  background-color: var(--color-canvas-subtle);
 }

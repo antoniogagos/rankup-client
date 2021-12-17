@@ -1,0 +1,7 @@
+.link--primary {
+  color: var(--color-fg-default);
+}
+
+.link--primary:hover {
+  color: var(--color-accent-fg);
+}

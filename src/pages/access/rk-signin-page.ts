@@ -4,11 +4,13 @@ import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
 import { property } from 'lit/decorators.js';
 // @ts-ignore
-import inputStyles from '/samba/styles/input.css' assert { type: 'css' };
+import formControlStyles from '/samba/styles/form-control.css' assert { type: 'css' };
 // @ts-ignore
 import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
+// @ts-ignore
+import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkSignInPage extends LitElement {
   @property({ type: Boolean })
@@ -46,7 +48,7 @@ export class RkSignInPage extends LitElement {
               name="email"
               placeholder="Email"
               type="email"
-              class="btn"
+              class="form-control"
               autocomplete="email"
               required />
           </div>
@@ -56,7 +58,7 @@ export class RkSignInPage extends LitElement {
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
-              class="btn"
+              class="form-control"
               id="current-password"
               name="current-password"
               placeholder=${msg('Contraseña')}
@@ -75,7 +77,7 @@ export class RkSignInPage extends LitElement {
             </button>
           </div>
         </section>
-        <a class="forgot-password-link" href=${path('FORGOT_PASSWORD')}>
+        <a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}>
           ${msg('Olvidaste la contraseña?')}
         </a>
         <button class="btn" id="signinButton">
@@ -86,23 +88,24 @@ export class RkSignInPage extends LitElement {
         <div class="cross"></div>
         <div class="divisor-text">${msg('o continua con')}</div>
       </div>
-      <button @click=${this.googleSignInClick}>${Icons('google', 48)}</button>
+      <button id="googleBtn" @click=${this.googleSignInClick}>${Icons('google', 48)}</button>
       <footer>
         ${msg('¿No tienes una cuenta?')}
-        <a href=${path('SIGNUP')}>${msg('Crea una')}</a>
+        <a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
       </footer>
     `;
   }
 
   static styles = [
     resetStyles,
-    inputStyles,
+    linkStyles,
+    formControlStyles,
     buttonStyles,
     css`
       :host {
         align-items: center;
-        background: var(--color-bg-doc);
-        color: var(--color-text-primary);
+        background: var(--color-canvas-default);
+        color: var(--color-fg-default);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -126,7 +129,6 @@ export class RkSignInPage extends LitElement {
         font-size: 1.5rem;
       }
       footer a {
-        color: var(--color-text-link);
         text-decoration: underline;
       }
       #toggle-password {
@@ -140,9 +142,6 @@ export class RkSignInPage extends LitElement {
         position: absolute;
         right: 20px;
         top: 0;
-      }
-      #google-button {
-        margin-top: 0.5rem;
       }
       #signinButton {
         margin: 4rem auto;
@@ -160,8 +159,8 @@ export class RkSignInPage extends LitElement {
         width: 100%;
       }
       .divisor-text {
-        background: var(--color-bg-doc);
-        color: var(--color-text-placeholder);
+        background: var(--color-canvas-default);
+        color: var(--color-fg-subtle);
         font-size: 15px;
         left: 0px;
         margin: -1rem auto;
@@ -173,7 +172,7 @@ export class RkSignInPage extends LitElement {
         z-index: 2;
       }
       .cross {
-        background: var(--color-bg-primary);
+        background: var(--color-canvas-subtle);
         height: 3px;
         position: absolute;
         top: 0;
@@ -190,7 +189,6 @@ export class RkSignInPage extends LitElement {
         top: 0;
       }
       .forgot-password-link {
-        color: var(--color-text-secondary);
         margin-left: auto;
         margin-top: 0.6rem;
         width: fit-content;

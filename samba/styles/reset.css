@@ -52,6 +52,12 @@ a {
   text-decoration: none;
   color: inherit;
   font-size: 1.4rem;
+  color: var(--color-accent-fg);
+}
+
+a:focus-visible,
+button {
+  outline-offset: 1px;
 }
 
 button {
@@ -59,4 +65,5 @@ button {
   margin: 0;
   background: inherit;
   border: none;
+  cursor: pointer;
 }

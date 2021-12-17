@@ -28,8 +28,8 @@ export class WelcomePage extends LitElement {
     css`
       .main {
         align-items: center;
-        background: var(--color-bg-backdrop);
-        color: var(--color-scale-gray-0);
+        background: var(--color-landing-bg);
+        color: var(--color-landing-text);
         display: flex;
         flex-direction: column;
         height: 100%;
