@@ -3,7 +3,7 @@
   --color-bg-doc-inverse: #24292e;
   --color-bg-doc-inset: #f6f8fa;
 
-  --color-bg-primary: #ebecee;
+  --color-bg-primary: #e6e6e9;
   --color-bg-secondary: #fafbfc;
   --color-bg-tertiary: #f6f8fa;
   --color-bg-overlay: #fff;
@@ -20,7 +20,7 @@
   --color-text-primary: rgba(0, 0, 0, 0.87);
   --color-text-secondary: #586069;
   --color-text-tertiary: #6a737d;
-  --color-text-placeholder: #6a737d;
+  --color-text-placeholder: #7a7a7a;
   --color-text-disabled: #6a737d;
   --color-text-inverse: #fff;
   --color-text-link: #0366d6;

@@ -14,28 +14,29 @@ export class RkSignInPage extends LitElement {
   @property({ type: Boolean })
   showPassword = false;
 
-  togglePassword(evt: Event) {
+  googleSignInClick() {
+    rkPublicApp.sessionManager.signIn({ provider: 'google' });
+  }
+
+  togglePassword() {
     this.showPassword = !this.showPassword;
   }
 
   handleFormSubmit(evt: FormDataEvent) {
+    evt.preventDefault();
     const form = evt.target as HTMLFormElement;
     console.log('submit');
     if (form.checkValidity() === false) {
       console.log('not valid');
-      evt.preventDefault();
     } else {
-      alert('Signing in!');
-      const signinButton = this.shadowRoot.querySelector('#signinButton') as HTMLButtonElement;
-      signinButton.disabled = true;
-      evt.preventDefault();
+      console.log('Signing in!');
     }
   }
 
   render() {
     return html`
       <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
-      <form action="#" method="POST" @submit=${this.handleFormSubmit}>
+      <form @submit=${this.handleFormSubmit}>
         <section>
           <!-- <label for="email">Email</label> -->
           <div class="input-wrapper">
@@ -46,11 +47,10 @@ export class RkSignInPage extends LitElement {
               placeholder="Email"
               type="email"
               class="btn"
-              autocomplete="username"
+              autocomplete="email"
               required />
           </div>
         </section>
-
         <section>
           <!-- <label for="current-password">Password</label> -->
           <div class="input-wrapper">
@@ -79,17 +79,17 @@ export class RkSignInPage extends LitElement {
           ${msg('Olvidaste la contraseña?')}
         </a>
         <button class="btn" id="signinButton">
-          ${msg('Iniciar sesión')} ${Icons('back-arrow', 16)}
+          ${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}
         </button>
       </form>
       <div class="divisor">
         <div class="cross"></div>
         <div class="divisor-text">${msg('o continua con')}</div>
       </div>
-      <button>${Icons('google', 18)}</button>
+      <button @click=${this.googleSignInClick}>${Icons('google', 48)}</button>
       <footer>
         ${msg('¿No tienes una cuenta?')}
-        <a href=${path('SIGNUP')}>${msg('Crea una', { desc: 'Crear cuenta' })}</a>
+        <a href=${path('SIGNUP')}>${msg('Crea una')}</a>
       </footer>
     `;
   }
@@ -108,37 +108,6 @@ export class RkSignInPage extends LitElement {
         height: 100%;
         justify-content: center;
       }
-
-      .logo {
-        margin-top: -2rem;
-      }
-
-      .divisor {
-        position: relative;
-        width: 100%;
-        max-width: 500px;
-        text-align: center;
-      }
-
-      .divisor-text {
-        background: var(--color-bg-doc);
-        z-index: 2;
-        color: var(--color-scale-gray-4);
-        font-size: 15px;
-        font-weight: bold;
-        margin-top: -1rem;
-        margin-bottom: 1rem;
-        padding: 0 20px;
-      }
-
-      .cross {
-        position: absolute;
-        top: 0;
-        height: 3px;
-        background: var(--color-bg-primary);
-        width: 100%;
-      }
-
       form {
         margin-top: 4rem;
         box-sizing: border-box;
@@ -148,27 +117,18 @@ export class RkSignInPage extends LitElement {
         padding: 0 20px;
         width: 100%;
       }
-
       form section {
-        margin: 1.4rem 0;
+        margin: 0.8rem 0;
       }
-
-      .input-wrapper {
-        position: relative;
-      }
-
-      .input-wrapper > svg {
-        bottom: 0;
-        left: 20px;
-        margin: auto;
+      footer {
         position: absolute;
-        top: 0;
+        bottom: 50px;
+        font-size: 1.5rem;
       }
-
-      .alternative-services-container {
-        text-align: center;
+      footer a {
+        color: var(--color-text-link);
+        text-decoration: underline;
       }
-
       #toggle-password {
         align-items: center;
         background: none;
@@ -181,31 +141,59 @@ export class RkSignInPage extends LitElement {
         right: 20px;
         top: 0;
       }
-
       #google-button {
         margin-top: 0.5rem;
       }
-
-      .forgot-password-link {
-        text-align: right;
-        color: var(--color-text-secondary);
-      }
-
       #signinButton {
         margin: 4rem auto;
         white-space: nowrap;
         width: fit-content;
       }
-
-      footer {
-        position: absolute;
-        bottom: 50px;
-        font-size: 1.5rem;
+      .logo {
+        margin-top: -2rem;
       }
-
-      footer a {
-        color: var(--color-text-link);
-        text-decoration: underline;
+      .divisor {
+        margin: 3.5rem;
+        max-width: 500px;
+        position: relative;
+        text-align: center;
+        width: 100%;
+      }
+      .divisor-text {
+        background: var(--color-bg-doc);
+        color: var(--color-text-placeholder);
+        font-size: 15px;
+        left: 0px;
+        margin: -1rem auto;
+        padding: 0 20px;
+        position: absolute;
+        right: 0px;
+        text-align: center;
+        width: fit-content;
+        z-index: 2;
+      }
+      .cross {
+        background: var(--color-bg-primary);
+        height: 3px;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+      .input-wrapper {
+        position: relative;
+      }
+      .input-wrapper > svg {
+        bottom: 0;
+        left: 20px;
+        margin: auto;
+        position: absolute;
+        top: 0;
+      }
+      .forgot-password-link {
+        color: var(--color-text-secondary);
+        margin-left: auto;
+        margin-top: 0.6rem;
+        width: fit-content;
       }
     `,
   ];

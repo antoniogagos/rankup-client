@@ -1,8 +1,10 @@
 input[name='email'],
+input[name='username'],
 input[name='current-password'] {
-  background: transparent;
+  background: var(--color-bg-primary);
   border-radius: 24px;
-  border: 2px solid var(--color-scale-gray-9);
+  /* border: 2px solid var(--color-scale-gray-9); */
+  border: none;
   box-sizing: border-box;
   color: var(--color-text-primary);
   font-family: inherit;
@@ -11,12 +13,20 @@ input[name='current-password'] {
   font-weight: 600;
   padding: 0 55px;
   width: 100%;
+  cursor: default;
 }
 
 input[name='email']::placeholder,
+input[name='username']::placeholder,
 input[name='current-password']::placeholder {
   color: var(--color-text-placeholder);
   font-weight: 300;
+}
+
+input[name='email']:focus,
+input[name='username']:focus,
+input[name='current-password']:focus {
+  box-shadow: 0 0 0 2px var(--color-scale-gray-9);
 }
 
 input:focus-visible {

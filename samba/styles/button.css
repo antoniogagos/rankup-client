@@ -17,24 +17,20 @@
   pointer-events: all;
 }
 
-#google-button {
-  height: 4.4rem;
-  padding: 0 1.2rem;
-  color: var(--color-btn-text);
-  display: flex;
-  align-items: center;
-  width: 225px;
-  font-family: inherit;
-  font-size: 1.6rem;
-  font-weight: 600;
-  border-radius: 0.3rem;
-  background: #fff;
-  border: none;
-  box-shadow: #8080801f 1px 1px 1px 1px;
+.btn--xs {
+  font-size: 1.1rem;
 }
 
-#google-button svg {
-  padding-right: 1.4rem;
+.btn--s {
+  font-size: 1.3rem;
+}
+
+.btn--md {
+  font-size: 1.6rem;
+}
+
+.btn--lg {
+  font-size: 2rem;
 }
 
 a.btn {

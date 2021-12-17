@@ -1,20 +1,164 @@
 import { LitElement, html, css } from 'lit';
-import { property } from 'lit/decorators.js';
 import { msg } from '@lit/localize';
+import { property } from 'lit/decorators.js';
+import { path } from '../../lib/localization/rk-url-paths.js';
+import { Icons } from '../../unauthenticated-icons.js';
+// @ts-ignore
+import inputStyles from '/samba/styles/input.css' assert { type: 'css' };
+// @ts-ignore
+import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
+// @ts-ignore
+import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 
 export class RkResetPasswordPage extends LitElement {
+  @property({ type: Boolean })
+  showPassword = false;
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  handleFormSubmit(evt: FormDataEvent) {
+    evt.preventDefault();
+    const form = evt.target as HTMLFormElement;
+    if (form.checkValidity() === false) {
+      console.log('Invalid');
+    } else {
+      evt.preventDefault();
+    }
+  }
+
   render() {
     return html`
-      <h1>ResetPassword Page</h1>
-      <a href="/access">${msg('Volver')}</a>
+      <header>
+        <a class="go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
+        <div>${msg('Restablecer contraseña')}</div>
+      </header>
+      <form @submit=${this.handleFormSubmit}>
+        <section>
+          <!-- <label for="current-password">Password</label> -->
+          <div class="input-wrapper">
+            ${Icons('privacy', 24)}
+            <input
+              id="current-password"
+              name="current-password"
+              placeholder=${msg('Contraseña')}
+              type=${this.showPassword ? 'text' : 'password'}
+              autocomplete="current-password"
+              aria-describedby="password-constraints"
+              required />
+            <button
+              id="toggle-password"
+              @click=${this.togglePassword}
+              type="button"
+              aria-label=${this.showPassword
+                ? 'Hide password'
+                : 'Show password as plain text. Warning: this will display your password on the screen.'}>
+              ${Icons(`${this.showPassword ? 'eye-hide' : 'eye'}`, 24)}
+            </button>
+          </div>
+        </section>
+        <section>
+          <!-- <label for="current-password">Password</label> -->
+          <div class="input-wrapper">
+            ${Icons('privacy', 24)}
+            <input
+              id="current-password"
+              name="current-password"
+              placeholder=${msg('Confirmar contraseña')}
+              type=${this.showPassword ? 'text' : 'password'}
+              autocomplete="current-password"
+              aria-describedby="password-constraints"
+              required />
+          </div>
+        </section>
+        <button class="btn">${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}</button>
+      </form>
+      <footer>
+        ${msg('¿No tienes una cuenta?')}
+        <a href=${path('SIGNUP')}>${msg('Crea una')}</a>
+      </footer>
     `;
   }
 
   static styles = [
+    resetStyles,
+    inputStyles,
+    buttonStyles,
     css`
       :host {
-        display: block;
-        background: beige;
+        align-items: center;
+        background: var(--color-bg-doc);
+        color: var(--color-text-primary);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      header {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        font-size: 1.6rem;
+        justify-content: center;
+        padding: 4rem;
+        position: relative;
+        width: 100%;
+      }
+      header a {
+        position: absolute;
+        left: 3rem;
+      }
+      footer {
+        position: absolute;
+        bottom: 50px;
+        font-size: 1.5rem;
+      }
+      footer a {
+        color: var(--color-text-link);
+        text-decoration: underline;
+      }
+      p {
+        text-align: center;
+        max-width: 275px;
+        margin: 0 auto;
+      }
+      form {
+        margin-top: 4rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        max-width: 500px;
+        padding: 0 20px;
+        width: 100%;
+      }
+      form section {
+        margin: 0.8rem 0;
+      }
+      button {
+        width: fit-content;
+        margin: 3rem auto;
+      }
+      #toggle-password {
+        align-items: center;
+        background: none;
+        border: none;
+        bottom: 0;
+        display: flex;
+        left: auto;
+        margin: auto;
+        position: absolute;
+        right: 20px;
+        top: 0;
+      }
+      .input-wrapper {
+        position: relative;
+      }
+      .input-wrapper > svg {
+        bottom: 0;
+        left: 20px;
+        margin: auto;
+        position: absolute;
+        top: 0;
       }
     `,
   ];
