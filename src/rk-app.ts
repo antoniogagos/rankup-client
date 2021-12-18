@@ -5,6 +5,7 @@ import { RkDataServiceController } from './lib/rk-data-service/data-service-cont
 import { path } from './lib/localization/rk-url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
+import './pages/home/rk-home-page.js';
 // @ts-ignore
 import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { type: 'css' };
 // @ts-ignore
@@ -18,23 +19,24 @@ export class RkApp extends LitElement {
 
   constructor() {
     super();
-    window.rkPublicApp = this;
+    window.rkApp = this;
   }
 
   onSignOutClick() {
     this.sessionManager.signOut();
   }
 
+  // <button path=${path('TOURNEYS')} @click=${this.onSignOutClick}>Sign Out</button>
+  // <div path=${path('TOURNEYS')} animation="opacity">
+  //   List of tourneys
+  //   <button @click=${this.onSignOutClick}>Sign Out</button>
+  // </div>
+  // <div path=${path('TOURNEY') + '/:id'} animation="opacity">Tourney Foo</div>
   render() {
     return html`
       <app-router .animations=${appRouterAnimations}>
-        <div path=${path('TOURNEYS')} animation="opacity">
-          List of tourneys
-          <button @click=${this.onSignOutClick}>Sign Out</button>
-        </div>
-        <div path=${path('TOURNEY') + '/:id'} animation="opacity">Tourney Foo</div>
+        <rk-home-page path=${path('TOURNEYS')} animation="opacity"></rk-home-page>
         <hw-404-page path="/404"></hw-404-page>
-
         <app-router__redirect path="*" redirect=${path('TOURNEYS')}></app-router__redirect>
       </app-router>
     `;

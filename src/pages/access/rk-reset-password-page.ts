@@ -77,7 +77,9 @@ export class RkResetPasswordPage extends LitElement {
               required />
           </div>
         </section>
-        <button class="btn">${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}</button>
+        <button class="btn--primary">
+          ${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}
+        </button>
       </form>
       <footer>
         ${msg('¿No tienes una cuenta?')}

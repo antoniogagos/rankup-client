@@ -980,6 +980,13 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@lit-labs/task@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@lit-labs/task/-/task-1.0.0.tgz#413d2951db82d0b20205e94ce1c9c030d3a2954f"
+  integrity sha512-wBXYARZK5+2SW6hO+ejGYdL/mFUB83QV4Xnmw2117D/ECCxs7bf0ZV/26o1NORN83VLwDfkhZCpILRuQR+/DMA==
+  dependencies:
+    "@lit/reactive-element" "^1.0.0"
+
 "@lit/localize@^0.11.0":
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/@lit/localize/-/localize-0.11.1.tgz#eda104ee88ee1f2e820729918b04c560cf3ebf90"

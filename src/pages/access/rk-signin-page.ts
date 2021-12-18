@@ -80,7 +80,7 @@ export class RkSignInPage extends LitElement {
         <a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}>
           ${msg('Olvidaste la contraseña?')}
         </a>
-        <button class="btn" id="signinButton">
+        <button class="btn--primary" id="signinButton">
           ${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}
         </button>
       </form>

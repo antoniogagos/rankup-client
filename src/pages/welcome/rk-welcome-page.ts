@@ -12,7 +12,7 @@ export class WelcomePage extends LitElement {
         <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
         <span class="title">Rankup</span>
         <p>${msg('Juega contra tus amigos prediciendo los resultados')}</p>
-        <a class="btn btn--lg" href=${path('SIGNIN')}>
+        <a class="btn btn--primary btn--lg" href=${path('SIGNIN')}>
           ${msg('Jugar ya')} ${Icons('arrow-right', 16)}
         </a>
       </div>

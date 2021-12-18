@@ -14,9 +14,10 @@
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\""
   },
   "dependencies": {
+    "@lit-labs/task": "^1.0.0",
+    "@lit/localize": "^0.11.0",
     "lit": "^2.0.2",
-    "page": "^1.11.6",
-    "@lit/localize": "^0.11.0"
+    "page": "^1.11.6"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
@@ -26,14 +27,14 @@
     "@open-wc/testing": "next",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
+    "@types/gapi.auth2": "^0.0.55",
+    "@types/page": "^1.11.4",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@web/dev-server": "^0.1.28",
     "@web/rollup-plugin-html": "^1.10.1",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "@web/test-runner": "next",
-    "@types/page": "^1.11.4",
-    "@types/gapi.auth2": "^0.0.55",
     "babel-plugin-template-html-minifier": "^4.1.0",
     "concurrently": "^5.3.0",
     "deepmerge": "^4.2.2",
