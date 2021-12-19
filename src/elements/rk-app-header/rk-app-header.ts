@@ -1,16 +1,35 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { Icons } from '../../unauthenticated-icons.js';
+import { openOverlay } from 'samba/overlay/open-overlay.js';
+import type { RkDrawer } from '../../elements/rk-drawer/rk-drawer.js';
+import '../../elements/rk-drawer/rk-drawer.js';
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore
 import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 
 export class RkAppHeader extends LitElement {
+  private _onMenuClick() {
+    openOverlay<RkDrawer>('rk-drawer', null, {
+      addOverlayStyles: false,
+      cancelOnOutsideClick: true,
+      withBackdrop: true,
+      animationIn: [
+        { transform: 'translateX(-20px)', opacity: 0 },
+        { transform: 'translateX(0)', opacity: 1 },
+      ],
+      animationOut: [
+        { transform: 'translateX(0)', opacity: 1 },
+        { transform: 'translateX(-20px)', opacity: 0 },
+      ],
+    });
+  }
+
   render() {
     return html`
       <header>
-        <button>${Icons('hamburger', 24)}</button>
+        <button @click=${this._onMenuClick}>${Icons('hamburger', 24)}</button>
         <section>
           <button>${Icons('bell', 24)}</button>
           <button>

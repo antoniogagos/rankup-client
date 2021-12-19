@@ -18,7 +18,12 @@
     "inlineSources": true,
     "useDefineForClassFields": false,
     "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "samba/*": ["./samba/*"],
+      "modules/*": ["./modules/*"]
+    },
     "incremental": true
   },
-  "include": ["**/*.ts", "**/*.css"]
+  "include": ["**/*.ts", "**/*.css", "samba"]
 }

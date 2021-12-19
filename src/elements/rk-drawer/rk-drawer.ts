@@ -1,19 +1,25 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { Task, TaskStatus } from '@lit-labs/task';
+import type { OverlayController } from 'samba/overlay/types.js';
+// @ts-ignore
+import buttonStyles from 'samba/styles/button.css' assert { type: 'css' };
+// @ts-ignore
+import resetStyles from 'samba/styles/reset.css' assert { type: 'css' };
 import { Icons } from '../../unauthenticated-icons.js';
-// @ts-ignore
-import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
-// @ts-ignore
-import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 
-export class RkDrawer extends LitElement {
+export interface RkDrawerParameters {}
+
+@customElement('rk-drawer')
+export class RkDrawer extends LitElement implements RkDrawerParameters {
   private _tourneys = new Task(
     this,
     () => rkApp.ds.request.Tourneys.GetUserTourneys(),
     () => [null],
   );
+
+  overlayController?: OverlayController<this> = null;
 
   render() {
     return html`
@@ -34,6 +40,10 @@ export class RkDrawer extends LitElement {
     resetStyles,
     buttonStyles,
     css`
+      :host {
+        display: inline-block;
+        height: 100%;
+      }
       main {
         align-items: flex-start;
         background: var(--color-canvas-overlay);
@@ -75,8 +85,6 @@ export class RkDrawer extends LitElement {
     `,
   ];
 }
-
-customElements.define('rk-drawer', RkDrawer);
 
 declare global {
   interface HTMLElementTagNameMap {

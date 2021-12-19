@@ -16,6 +16,10 @@ export class LoadSpinner extends LitElement {
 
   #coolingDown = false;
 
+  /**
+   * @param {boolean} active
+   * @param {boolean} old
+   */
   #activeChanged(active, old) {
     this.toggleAttribute('aria-hidden', !active);
     this.toggleAttribute('visible', active);

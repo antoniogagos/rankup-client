@@ -30,3 +30,7 @@ body {
       'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   }
 }
+
+overlay-container {
+  z-index: 1;
+}
