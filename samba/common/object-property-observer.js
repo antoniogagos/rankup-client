@@ -5,14 +5,27 @@ const OBSERVED_PROPS = new WeakMap();
  * @property {function | string} cb
  * @property {boolean} [configurable=true]
  * @property {boolean} [enumerable=true]
- * @property {function} [hasChanged]
+ * @property {(val: any, old: any) => boolean} [hasChanged]
  */
 
+/**
+ * @this any
+ * @param {string} name
+ * @returns
+ */
 function createPropGetter(name) {
   return () => OBSERVED_PROPS.get(this)?.get(name);
 }
 
+/**
+ * @this any
+ * @param {ObservablePropertyObject['cb']} cb
+ * @param {string} name
+ * @param {ObservablePropertyObject['hasChanged']} hasChangedCb
+ * @returns
+ */
 function createPropSetter(cb, name, hasChangedCb) {
+  /** @param {string} value */
   return value => {
     const old = OBSERVED_PROPS.get(this).get(name);
     const hasChanged = hasChangedCb ? hasChangedCb(value, old) : value !== old;
@@ -45,6 +58,15 @@ function createPropSetter(cb, name, hasChangedCb) {
   };
 }
 
+/**
+ * @param {{
+ *   cb: ObservablePropertyObject['cb']
+ *   name: string
+ *   hasChangedCb: ObservablePropertyObject['hasChanged']
+ *   configurable: boolean
+ *   enumerable: boolean
+ * }} param0
+ */
 function getPropertyDescriptor({ cb, name, hasChangedCb, configurable, enumerable }) {
   return {
     enumerable: enumerable ?? true,
@@ -54,6 +76,16 @@ function getPropertyDescriptor({ cb, name, hasChangedCb, configurable, enumerabl
   };
 }
 
+/**
+ * @param {{
+ *   obj: any
+ *   cb: ObservablePropertyObject['cb']
+ *   name: string
+ *   hasChangedCb: ObservablePropertyObject['hasChanged']
+ *   configurable: boolean
+ *   enumerable: boolean
+ * }} param0
+ */
 function observeProperty({ obj, cb, name, hasChangedCb, configurable, enumerable }) {
   const descriptor = getPropertyDescriptor({ cb, name, hasChangedCb, configurable, enumerable });
   if (OBSERVED_PROPS.has(obj) === false) {
@@ -69,7 +101,13 @@ function observeProperty({ obj, cb, name, hasChangedCb, configurable, enumerable
  */
 export function observeProperties(obj, properties) {
   for (const [name, params] of Object.entries(properties)) {
-    const cb = /** @type {ObservablePropertyObject} */ (params).cb ?? params;
+    /** @type {ObservablePropertyObject['cb']} */
+    let cb = null;
+    if (/** @type {ObservablePropertyObject} */ (params).cb) {
+      cb = /** @type {ObservablePropertyObject} */ (params).cb;
+    } else {
+      cb = /** @type {string} */ (params);
+    }
     const validObserverCb =
       cb &&
       // value is a fn

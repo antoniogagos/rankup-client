@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import 'samba/overlay/overlay-container.js';
 import { appRouterAnimations } from './router-animations.js';
 import { RkDataServiceController } from './lib/rk-data-service/data-service-controller.js';
 import { path } from './lib/localization/rk-url-paths.js';
