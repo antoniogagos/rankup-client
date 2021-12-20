@@ -12,17 +12,19 @@ export const PublicPaths = {
 export const AppPaths = {
   TOURNEYS: msg('torneos', { id: 'PathTourneys', desc: 'This is part of the URL.' }),
   TOURNEY: msg('torneo', { id: 'PathTourneys', desc: 'This is part of the URL.' }),
+  RANKING: msg('clasificacion', { id: 'PathTourneys', desc: 'This is part of the URL.' }),
+  SHARE_TOURNEY: msg('compartir-torneo', { id: 'PathTourneys', desc: 'This is part of the URL.' }),
 };
 
 type PublicPathsKeys = keyof typeof PublicPaths;
 type AppPathsKeys = keyof typeof AppPaths;
 type AllKeys = PublicPathsKeys | AppPathsKeys;
 
-export function path(key: AllKeys): string {
+export function path(key: AllKeys, rest?: string): string {
   if (key in AppPaths) {
-    return `/${Locale}/app/${AppPaths[key as AppPathsKeys]}`;
+    return `/${Locale}/app/${AppPaths[key as AppPathsKeys]}${rest ? `/${rest}` : ''}`;
   }
-  return `/${Locale}/${PublicPaths[key as PublicPathsKeys]}`;
+  return `/${Locale}/${PublicPaths[key as PublicPathsKeys]}${rest ? `/${rest}` : ''}`;
 }
 
 const isDev = window.location.host.slice(0, 9) === 'localhost';

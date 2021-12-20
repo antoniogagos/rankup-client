@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
-import { Icons } from '../../unauthenticated-icons.js';
+import { Icons } from '../../authenticated-icons.js';
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore
@@ -34,14 +34,14 @@ export class RkAppHeader extends LitElement {
         flex-direction: row;
         height: 70px;
         justify-content: space-between;
-        padding: 20px;
+        padding: 2rem;
         width: 100%;
         z-index: 2;
       }
 
       header section {
         display: flex;
-        gap: 20px;
+        gap: 2rem;
       }
     `,
   ];

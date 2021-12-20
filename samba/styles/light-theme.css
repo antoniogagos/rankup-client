@@ -17,10 +17,14 @@
 
   --color-header-text: #24292f;
   --color-header-bg: rgba(0, 0, 0, 0);
+  --color-header-bg-inverted: rgba(0, 0, 0, 0);
+  --color-header-text-inverted: rgba(255, 255, 255, 0.9);
   --color-header-divider: #57606a;
   --color-header-logo: #ffffff;
   --color-header-search-bg: #24292f;
   --color-header-search-border: #57606a;
+
+  --color-season-winner-text: rgba(255, 255, 255, 0.92);
 
   --color-accent-fg: #0969da;
   --color-accent-emphasis: rgb(136 136 136);
@@ -56,6 +60,14 @@
   --color-shadow-medium: 0 3px 6px rgba(140, 149, 159, 0.15);
   --color-shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
   --color-shadow-extra-large: 0 12px 28px rgba(140, 149, 159, 0.3);
+
+  --color-footer-text: #24292f;
+  --color-footer-bg: #fff;
+  --color-footer-shadow: 0px -1px 9px rgb(0 0 0 / 8%);
+  --color-footer-icon: #9299a1;
+  --color-footer-selected-text: #19671d;
+  --color-footer-selected-bg-icon: #388e3c;
+  --color-footer-selected-icon: #fff;
 
   --color-canvas-default-transparent: rgba(255, 255, 255, 0);
   --color-marketing-icon-primary: #218bff;

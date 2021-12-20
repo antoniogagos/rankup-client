@@ -2889,6 +2889,23 @@ eslint-plugin-lit-a11y@^1.0.1:
     parse5-htmlparser2-tree-adapter "^6.0.1"
     requireindex "~1.2.0"
 
+eslint-plugin-lit-a11y@^1.1.0-next.1:
+  version "1.1.0-next.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-lit-a11y/-/eslint-plugin-lit-a11y-1.1.0-next.1.tgz#befeb327714e5d7e04f85b9a8a871acc4cc740eb"
+  integrity sha512-OAv0W84maDyHs22/aXIFcc94SnoN0jnfUqNgxyJ1LMrdiMNQtkjTQa4Yq7g/IA/0Nf/TTGBRRjMP7YOIXBOGnA==
+  dependencies:
+    aria-query "^4.2.2"
+    axe-core "^4.3.3"
+    axobject-query "^2.2.0"
+    dom5 "^3.0.1"
+    emoji-regex "^9.2.0"
+    eslint "^7.6.0"
+    eslint-rule-extender "0.0.1"
+    intl-list-format "^1.0.3"
+    parse5 "^5.1.1"
+    parse5-htmlparser2-tree-adapter "^6.0.1"
+    requireindex "~1.2.0"
+
 eslint-plugin-lit@^1.2.0:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-lit/-/eslint-plugin-lit-1.6.1.tgz#e1f51fe9e580d4095b58cc4bc4dc6b44409af6b0"

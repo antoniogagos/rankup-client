@@ -6,6 +6,7 @@ import { path } from './lib/localization/rk-url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
 import './pages/home/rk-home-page.js';
+import './pages/tourney/rk-tourney-page.js';
 // @ts-ignore
 import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { type: 'css' };
 // @ts-ignore
@@ -36,6 +37,7 @@ export class RkApp extends LitElement {
     return html`
       <app-router .animations=${appRouterAnimations}>
         <rk-home-page path=${path('TOURNEYS')} animation="opacity"></rk-home-page>
+        <rk-tourney-page path=${path('TOURNEY', ':id')} animation="opacity"></rk-tourney-page>
         <hw-404-page path="/404"></hw-404-page>
         <app-router__redirect path="*" redirect=${path('TOURNEYS')}></app-router__redirect>
       </app-router>

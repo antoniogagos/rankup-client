@@ -14,17 +14,17 @@ import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkSignInPage extends LitElement {
   @property({ type: Boolean })
-  showPassword = false;
+  _showPassword = false;
 
-  googleSignInClick() {
+  private _googleSignInClick() {
     rkPublicApp.sessionManager.signIn({ provider: 'google' });
   }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  private _togglePassword() {
+    this._showPassword = !this._showPassword;
   }
 
-  handleFormSubmit(evt: FormDataEvent) {
+  private _handleFormSubmit(evt: FormDataEvent) {
     evt.preventDefault();
     const form = evt.target as HTMLFormElement;
     console.log('submit');
@@ -38,7 +38,7 @@ export class RkSignInPage extends LitElement {
   render() {
     return html`
       <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
-      <form @submit=${this.handleFormSubmit}>
+      <form @submit=${this._handleFormSubmit}>
         <section>
           <!-- <label for="email">Email</label> -->
           <div class="input-wrapper">
@@ -62,18 +62,18 @@ export class RkSignInPage extends LitElement {
               id="current-password"
               name="current-password"
               placeholder=${msg('Contraseña')}
-              type=${this.showPassword ? 'text' : 'password'}
+              type=${this._showPassword ? 'text' : 'password'}
               autocomplete="current-password"
               aria-describedby="password-constraints"
               required />
             <button
               id="toggle-password"
-              @click=${this.togglePassword}
+              @click=${this._togglePassword}
               type="button"
-              aria-label=${this.showPassword
+              aria-label=${this._showPassword
                 ? 'Hide password'
                 : 'Show password as plain text. Warning: this will display your password on the screen.'}>
-              ${Icons(`${this.showPassword ? 'eye-hide' : 'eye'}`, 24)}
+              ${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
             </button>
           </div>
         </section>
@@ -88,7 +88,7 @@ export class RkSignInPage extends LitElement {
         <div class="cross"></div>
         <div class="divisor-text">${msg('o continua con')}</div>
       </div>
-      <button id="googleBtn" @click=${this.googleSignInClick}>${Icons('google', 48)}</button>
+      <button id="googleBtn" @click=${this._googleSignInClick}>${Icons('google', 48)}</button>
       <footer>
         ${msg('¿No tienes una cuenta?')}
         <a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>

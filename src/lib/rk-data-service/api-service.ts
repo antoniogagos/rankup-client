@@ -29,6 +29,7 @@ export class RkApiService implements IApiService {
 
   Tourneys = {
     GetUserTourneys: this.GetUserTourneys,
+    GetRanking: this.GetRanking,
   };
 
   private async SignIn({
@@ -94,6 +95,7 @@ export class RkApiService implements IApiService {
         chatReadCount: 2,
         pushChatEnabled: true,
         rankingPosition: 3,
+        name: 'The Squad Team',
         // tourney info
         ownerId: 'user-phoga',
         isPublic: false,
@@ -101,10 +103,60 @@ export class RkApiService implements IApiService {
         open: false,
         chatEnabled: true,
         totalPlayers: 18,
-        competitionId: 'competitiond-1',
+        competitionId: 'laliga',
         season: 2021,
         format: 'FULL_SEASON',
         pointsVersion: 1,
+      },
+    ];
+  }
+
+  private async GetRanking() {
+    return [
+      {
+        position: 1,
+        points: 1264,
+        user: {
+          userId: 'antonio-id',
+          username: 'Antonio',
+          picture: 'rocket.svg',
+        },
+      },
+      {
+        position: 2,
+        points: 1180,
+        user: {
+          userId: 'cristiano-ronaldo-id',
+          username: 'Cristiano_Ronaldo',
+          picture: 'tree.svg',
+        },
+      },
+      {
+        position: 3,
+        points: 950,
+        user: {
+          userId: 'nacho-id',
+          username: 'nacho',
+          picture: 'ironman.svg',
+        },
+      },
+      {
+        position: 4,
+        points: 778,
+        user: {
+          userId: 'alvaro-id',
+          username: 'alvaro',
+          picture: 'fighter.svg',
+        },
+      },
+      {
+        position: 5,
+        points: 734,
+        user: {
+          userId: 'elbichito-id',
+          username: 'ElBichito',
+          picture: 'bulbasaur.svg',
+        },
       },
     ];
   }

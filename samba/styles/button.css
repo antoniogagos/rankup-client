@@ -9,8 +9,6 @@
   font-size: 1.6rem;
   font-weight: 600;
   gap: 10px;
-  min-height: 48px;
-  min-width: 200px;
   pointer-events: all;
   transition: all 125ms;
   white-space: nowrap;
@@ -26,18 +24,24 @@
 
 .btn--xs {
   font-size: 1.1rem;
+  min-height: 32px;
 }
 
 .btn--s {
   font-size: 1.3rem;
+  min-height: 36px;
 }
 
 .btn--md {
   font-size: 1.6rem;
+  min-height: 42px;
+  min-width: 155px;
 }
 
 .btn--lg {
   font-size: 2rem;
+  min-height: 48px;
+  min-width: 175px;
 }
 
 .btn:hover {

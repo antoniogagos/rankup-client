@@ -5,3 +5,7 @@
 .link--primary:hover {
   color: var(--color-accent-fg);
 }
+
+.link--primary-inverted {
+  color: var(--color-header-inverted);
+}

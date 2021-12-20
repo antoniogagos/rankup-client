@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { property, state } from 'lit/decorators.js';
 import { Task, TaskStatus } from '@lit-labs/task';
-import { Icons } from '../../unauthenticated-icons.js';
+import { Icons } from '../../authenticated-icons.js';
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore

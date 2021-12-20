@@ -12,13 +12,13 @@ import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkForgotPasswordPage extends LitElement {
-  handleFormSubmit(evt: FormDataEvent) {
+  private _handleFormSubmit(evt: FormDataEvent) {
     evt.preventDefault();
     const form = evt.target as HTMLFormElement;
     if (form.checkValidity() === false) {
       console.log('Invalid');
     } else {
-      evt.preventDefault();
+      console.log('valid');
     }
   }
 
@@ -33,7 +33,7 @@ export class RkForgotPasswordPage extends LitElement {
           'Introduce el email con el que te registraste en Rankup para recuperar la contraseña',
         )}
       </p>
-      <form @submit=${this.handleFormSubmit}>
+      <form @submit=${this._handleFormSubmit}>
         <section>
           <!-- <label for="email">Email</label> -->
           <div class="input-wrapper">

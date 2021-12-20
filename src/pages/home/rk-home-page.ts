@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
+import { Icons } from '../../authenticated-icons.js';
 import { property } from 'lit/decorators.js';
 import '../../elements/rk-app-header/rk-app-header.js';
 import '../../elements/rk-tourney-list/rk-tourney-list.js';
@@ -15,18 +15,13 @@ export class HomePage extends LitElement {
 
   render() {
     return html`
-      <rk-drawer></rk-drawer>
+      <!-- <rk-drawer></rk-drawer> -->
       <rk-app-header></rk-app-header>
       <rk-tourney-list></rk-tourney-list>
     `;
   }
 
-  static styles = [
-    css`
-       {
-      }
-    `,
-  ];
+  static styles = [css``];
 }
 
 customElements.define('rk-home-page', HomePage);
