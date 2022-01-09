@@ -16,27 +16,13 @@ const importMap = {
 };
 const monorepoPkgs = Object.keys(importMap.imports).map(name => name.slice(0, -1));
 
-/**
- * @param {Object} p0
- * @param {*} p0.source url of the import statement
- * @param {*} p0.context context where the import (source param) is found
- */
-function resolveImportPlugin({ source, context }) {
-  if (monorepoPkgs.includes(parseURL(source).page)) {
-    // when resolving dynamic imports we might found request outside our root folder
-    // (hadronw-web), therefore we must prepend the prefix to allow request 1 folder above
-    //
-    // Also, it looks like the importMapsPlugin adds the query param wds-import-map
-    // We have to add it too so that we don't fetch the same twice
-    return Path.join(REQ_ROOT_PREFIX, source); // + '?wds-import-map=0';
-  }
-}
 export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
-  open: '/',
+  // open: false,
   watch: !hmr,
   /** Resolve bare module imports */
   nodeResolve: {
     exportConditions: ['browser', 'development'],
+    dedupe: ['lit', '@lit'],
   },
 
   /** Compile JS for older browsers. Requires @web/dev-server-esbuild plugin */
@@ -52,15 +38,15 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
     },
   ],
 
-  middlewares: [
-    // Redirect all request from /app/* (without an extension) to app.html
-    function rewriteIndex(context, next) {
-      if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
-        context.url = '/index.html';
-      }
-      return next();
-    },
-  ],
+  // middlewares: [
+  //   // Redirect all request from /app/* (without an extension) to app.html
+  //   function rewriteIndex(context, next) {
+  //     if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
+  //       context.url = '/index.html';
+  //     }
+  //     return next();
+  //   },
+  // ],
 
   // See documentation for all available options
 });
@@ -77,4 +63,20 @@ function parseURL(url) {
     filename,
     hasExtension,
   };
+}
+
+/**
+ * @param {Object} p0
+ * @param {*} p0.source url of the import statement
+ * @param {*} p0.context context where the import (source param) is found
+ */
+function resolveImportPlugin({ source, context }) {
+  if (monorepoPkgs.includes(parseURL(source).page)) {
+    // when resolving dynamic imports we might found request outside our root folder
+    // (hadronw-web), therefore we must prepend the prefix to allow request 1 folder above
+    //
+    // Also, it looks like the importMapsPlugin adds the query param wds-import-map
+    // We have to add it too so that we don't fetch the same twice
+    return Path.join(REQ_ROOT_PREFIX, source); // + '?wds-import-map=0';
+  }
 }

@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
-import { property } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
 // @ts-ignore
@@ -14,19 +14,73 @@ import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkResetPasswordPage extends LitElement {
   @property({ type: Boolean })
-  showPassword = false;
+  showPassword: boolean = false;
 
-  togglePassword() {
+  @property({ type: String })
+  codeFromURL: string = null;
+
+  @property({ type: String })
+  emailFromURL: string = null;
+
+  @query('#verificationCode')
+  vertificationCodeInput: HTMLInputElement;
+
+  @query('#email')
+  emailInput: HTMLInputElement;
+
+  @query('#password')
+  passwordInput: HTMLInputElement;
+
+  @query('form')
+  form: HTMLInputElement;
+
+  private _hidden: boolean = false;
+
+  set hidden(val: boolean) {
+    this._hidden = val;
+    if (!val && this.codeFromURL === null) {
+      this._processEmailAndCodeFromURL();
+    }
+  }
+
+  @property({ type: Boolean })
+  get hidden() {
+    return this._hidden;
+  }
+
+  private _togglePassword() {
     this.showPassword = !this.showPassword;
   }
 
-  handleFormSubmit(evt: FormDataEvent) {
+  private _onFormSubmit(evt: FormDataEvent) {
     evt.preventDefault();
-    const form = evt.target as HTMLFormElement;
-    if (form.checkValidity() === false) {
-      console.log('Invalid');
+    if (this.form.checkValidity()) {
+      const email = this.emailInput.value;
+      const vertificationCode = this.vertificationCodeInput.value;
+      const password = this.passwordInput.value;
+      this._resetPassword(email, vertificationCode, password);
     } else {
-      evt.preventDefault();
+      this.form.reportValidity();
+    }
+  }
+
+  private _processEmailAndCodeFromURL() {
+    const url = new URL(window.location.toString());
+    this.emailFromURL ??= url.searchParams.get('email');
+    this.codeFromURL ??= url.searchParams.get('code') ?? '';
+  }
+
+  private async _resetPassword(email: string, verificationCode: string, newPassword: string) {
+    try {
+      const resp = await rkPublicApp.sessionManager.confirmForgottenPassword(
+        email,
+        verificationCode,
+        newPassword,
+      );
+      console.log('confirmed-change-pass', { resp });
+    } catch (err: any) {
+      this.passwordInput.setCustomValidity(err.message);
+      this.form.reportValidity();
     }
   }
 
@@ -36,24 +90,53 @@ export class RkResetPasswordPage extends LitElement {
         <a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
         <div>${msg('Restablecer contraseña')}</div>
       </header>
-      <form @submit=${this.handleFormSubmit}>
-        <section>
-          <!-- <label for="current-password">Password</label> -->
+      <form @submit=${this._onFormSubmit}>
+        <section ?hidden=${!!this.emailFromURL}>
+          <div class="input-wrapper">
+            ${Icons('email-open', 24)}
+            <input
+              class="form-control"
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder=${msg('Email')}
+              required
+              .value=${this.emailFromURL} />
+          </div>
+        </section>
+
+        <section ?hidden=${!!this.codeFromURL}>
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
               class="form-control"
-              id="current-password"
+              id="verificationCode"
+              name="verification-code"
+              type="text"
+              autocomplete="off"
+              placeholder=${msg('Código recibido por email')}
+              required
+              .value=${this.codeFromURL} />
+          </div>
+        </section>
+
+        <section>
+          <div class="input-wrapper">
+            ${Icons('privacy', 24)}
+            <input
+              class="form-control"
+              id="password"
               name="current-password"
-              placeholder=${msg('Contraseña')}
               type=${this.showPassword ? 'text' : 'password'}
               autocomplete="current-password"
+              placeholder=${msg('Contraseña')}
               aria-describedby="password-constraints"
               required />
             <button
               tab-index="-1"
-              id="toggle-password"
-              @click=${this.togglePassword}
+              id="togglePassword"
+              @click=${this._togglePassword}
               type="button"
               aria-label=${this.showPassword
                 ? 'Hide password'
@@ -62,13 +145,13 @@ export class RkResetPasswordPage extends LitElement {
             </button>
           </div>
         </section>
+
         <section>
-          <!-- <label for="current-password">Password</label> -->
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
               class="form-control"
-              id="current-password"
+              id="repeatPassword"
               name="current-password"
               placeholder=${msg('Confirmar contraseña')}
               type=${this.showPassword ? 'text' : 'password'}
@@ -145,7 +228,7 @@ export class RkResetPasswordPage extends LitElement {
         width: fit-content;
         margin: 3rem auto;
       }
-      #toggle-password {
+      #togglePassword {
         align-items: center;
         background: none;
         border: none;
@@ -166,6 +249,9 @@ export class RkResetPasswordPage extends LitElement {
         margin: auto;
         position: absolute;
         top: 0;
+      }
+      [hidden] {
+        display: none !important;
       }
     `,
   ];

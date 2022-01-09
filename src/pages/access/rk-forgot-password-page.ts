@@ -1,5 +1,7 @@
 import { LitElement, html, css } from 'lit';
-import { msg } from '@lit/localize';
+import { msg, str } from '@lit/localize';
+import { query, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
 // @ts-ignore
@@ -12,30 +14,46 @@ import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkForgotPasswordPage extends LitElement {
-  handleFormSubmit(evt: FormDataEvent) {
+  @state()
+  _sent: boolean = false;
+
+  @state()
+  _loading: boolean = false;
+
+  @query('form')
+  form: HTMLInputElement;
+
+  @query('#email')
+  emailInput: HTMLInputElement;
+
+  private _onFormSubmit(evt: FormDataEvent) {
     evt.preventDefault();
-    const form = evt.target as HTMLFormElement;
-    if (form.checkValidity() === false) {
-      console.log('Invalid');
-    } else {
-      evt.preventDefault();
+    if (this.form.checkValidity()) {
+      const email = this.emailInput.value;
+      this._forgotPassword(email);
     }
   }
 
-  render() {
+  private async _forgotPassword(email: string) {
+    try {
+      this._loading = true;
+      await rkPublicApp.sessionManager.forgotPassword(email);
+    } finally {
+      this._loading = false;
+      this._sent = true;
+    }
+  }
+
+  private _formRender() {
     return html`
-      <header>
-        <a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
-        <div>${msg('Recordar contraseña')}</div>
-      </header>
       <p>
         ${msg(
           'Introduce el email con el que te registraste en Rankup para recuperar la contraseña',
         )}
       </p>
-      <form @submit=${this.handleFormSubmit}>
+
+      <form @submit=${this._onFormSubmit}>
         <section>
-          <!-- <label for="email">Email</label> -->
           <div class="input-wrapper">
             ${Icons('email-open', 24)}
             <input
@@ -52,6 +70,31 @@ export class RkForgotPasswordPage extends LitElement {
           ${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}
         </button>
       </form>
+    `;
+  }
+
+  private _sentRender() {
+    return html`
+      <p>
+        ${msg(
+          str`Se ha enviado un email a ${this.emailInput.value}. Revisa tu correo para continuar con el proceso.`,
+        )}
+      </p>
+    `;
+  }
+
+  render() {
+    return html`
+      <header>
+        <a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
+        <div>${msg('Recordar contraseña')}</div>
+      </header>
+
+      ${choose(this._sent, [
+        [false, this._formRender.bind(this)],
+        [true, this._sentRender.bind(this)],
+      ])}
+
       <footer>
         ${msg('¿No tienes una cuenta?')}
         <a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
@@ -72,6 +115,9 @@ export class RkForgotPasswordPage extends LitElement {
         display: flex;
         flex-direction: column;
         height: 100%;
+      }
+      progress-bar {
+        width: 100%;
       }
       header {
         align-items: center;

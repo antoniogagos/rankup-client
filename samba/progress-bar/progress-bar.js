@@ -1,4 +1,4 @@
-import {LitElement, html, css} from 'lit';
+import { LitElement, html, css } from 'lit';
 
 const STEP = 0.01;
 const MIN_PROGRESS = 0;
@@ -11,9 +11,10 @@ class ProgressBar extends LitElement {
   static is = 'progress-bar';
 
   static properties = {
-    blockOn: {type: Number, attribute: 'block-on'},
-    noBlur: {type: Boolean, attribute: 'no-blur'},
-    progress: {type: Number},
+    blockOn: { type: Number, attribute: 'block-on' },
+    noBlur: { type: Boolean, attribute: 'no-blur' },
+    progress: { type: Number },
+    active: { type: Boolean },
   };
 
   constructor() {
@@ -23,6 +24,8 @@ class ProgressBar extends LitElement {
   }
 
   #progress = 0;
+
+  #active = false;
 
   get progress() {
     return this.#progress;
@@ -37,8 +40,22 @@ class ProgressBar extends LitElement {
     this.setAttribute('aria-valuenow', String(progress));
   }
 
+  /** @param {boolean} value  */
+  set active(value) {
+    this.#active = value;
+    if (value) {
+      this.start();
+    } else {
+      this.finish();
+    }
+  }
+
+  get active() {
+    return this.#active;
+  }
+
   connectedCallback() {
-    super.connectedCallback();
+    super.connectedCallback?.();
     this.setAttribute('hidden', '');
     this.setAttribute('aria-valuemin', String(MIN_PROGRESS));
     this.setAttribute('aria-valuemax', String(MAX_PROGRESS));
@@ -47,13 +64,13 @@ class ProgressBar extends LitElement {
   start() {
     this.progress = MIN_PROGRESS;
     this.removeAttribute('hidden');
-    requestAnimationFrame(_ => this.#nextProgress);
+    requestAnimationFrame(() => this.#nextProgress);
   }
 
   finish() {
     this.progress = MAX_PROGRESS;
-    setTimeout(_ => {
-      requestAnimationFrame(_ => {
+    setTimeout(() => {
+      requestAnimationFrame(() => {
         this.setAttribute('hidden', '');
         this.progress = 0;
       });
@@ -63,7 +80,7 @@ class ProgressBar extends LitElement {
   #nextProgress() {
     if (this.progress < this.blockOn) {
       this.progress += STEP;
-      requestAnimationFrame(_ => this.#nextProgress);
+      requestAnimationFrame(() => this.#nextProgress);
     }
   }
 

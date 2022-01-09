@@ -76,6 +76,7 @@ export function Icons(icon, size = 24, tagfn = svg) {
   const str = getIcon(icon, size);
   if (str) {
     const value = tagfn([str]);
+    value.strings.raw = [str];
     st.set(key, value);
     return value;
   }
@@ -100,7 +101,10 @@ function getIcon(icon, size) {
 Icons.smallest = function smallest(icon, tagfn = svg) {
   for (const size of SIZES) {
     if (/** @type {any} */ (ICONS)[size][icon]) {
-      return tagfn([/** @type {any} */ (ICONS)[size][icon]]);
+      const str = /** @type {any} */ (ICONS)[size][icon];
+      const value = tagfn([str]);
+      value.strings.raw = [str];
+      return value;
     }
   }
   return null;

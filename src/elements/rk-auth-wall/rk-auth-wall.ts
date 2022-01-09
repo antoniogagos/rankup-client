@@ -1,18 +1,88 @@
-import { AuthWall } from '../../lib/data-service/elements/auth-wall/authWall.js';
+import { LitElement, html, css } from 'lit';
 
-export class RkAuthWall extends AuthWall {
-  async lazyLoadSessionController() {
-    const [res] = await Promise.all([
-      super.lazyLoadSessionController(),
-      import('../../lib/rk-data-service/session-providers.js').then(({ RkSessionProviders }) => {
-        this.sessionProviders = RkSessionProviders;
+/**
+ * @fires session-updated
+ */
+export class AuthWall extends LitElement {
+  constructor() {
+    super();
+    const session = this._isLoggedFromLocalST();
+    this._isLogged = !!session;
+    this.dispatchEvent(
+      new CustomEvent('session-updated', {
+        detail: {
+          session,
+          old: null,
+        },
       }),
-      import('../../lib/rk-data-service/api-service.js').then(({ RkApiService }) => {
-        this.apiService = new RkApiService();
-      }),
-    ]);
-    return res;
+    );
   }
+
+  private _isLogged = false;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('session-updated', this._onSessionUpdated);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('session-updated', this._onSessionUpdated);
+  }
+
+  private _onSessionUpdated = (evt: Event) => {
+    const { session } = (evt as CustomEvent).detail;
+    this._isLogged = !!session;
+    this.requestUpdate();
+  };
+
+  /** @returns {boolean} */
+  private _isLoggedFromLocalST() {
+    try {
+      const ns = 'CognitoIdentityServiceProvider';
+      const reg = new RegExp(ns + '\\.\\w+\\.LastAuthUser');
+      const key = Object.keys(window.localStorage).find(k => k.match(reg));
+      if (key) {
+        // const { localStorage } = window;
+        // const userId = localStorage.getItem(key);
+        // const clientId = key.split('.')[1];
+        // const accessToken = localStorage.getItem(`${ns}.${clientId}.${userId}.accessToken`);
+        // const idToken = localStorage.getItem(`${ns}.${clientId}.${userId}.idToken`);
+        // const refreshToken = localStorage.getItem(`${ns}.${clientId}.${userId}.refreshToken`);
+        return true;
+      }
+    } catch {
+      // ignore
+    }
+    return false;
+  }
+
+  render() {
+    return this._isLogged
+      ? html`
+          <slot name="authenticated"></slot>
+        `
+      : html`
+          <slot name="unauthenticated"></slot>
+        `;
+  }
+
+  static styles = [
+    css`
+      :host {
+        display: block;
+        display: contents;
+        height: 100%;
+        width: 100%;
+      }
+    `,
+  ];
 }
 
-window.customElements.define('rk-auth-wall', RkAuthWall);
+window.customElements.define('rk-auth-wall', AuthWall);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'rk-auth-wall': AuthWall;
+  }
+}

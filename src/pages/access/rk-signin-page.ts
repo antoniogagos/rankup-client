@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { path } from '../../lib/localization/rk-url-paths.js';
 import { Icons } from '../../unauthenticated-icons.js';
-import { property } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 // @ts-ignore
 import formControlStyles from '/samba/styles/form-control.css' assert { type: 'css' };
 // @ts-ignore
@@ -16,31 +16,55 @@ export class RkSignInPage extends LitElement {
   @property({ type: Boolean })
   showPassword = false;
 
-  googleSignInClick() {
-    rkPublicApp.sessionManager.signIn({ provider: 'google' });
-  }
+  @query('#email')
+  emailInput: HTMLInputElement;
 
-  togglePassword() {
+  @query('#currentPassword')
+  passwordInput: HTMLInputElement;
+
+  @query('form')
+  form: HTMLInputElement;
+
+  private _togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
 
-  handleFormSubmit(evt: FormDataEvent) {
+  private _onGoogleSignInClick() {
+    rkPublicApp.sessionManager.signInWithOAuth('Google');
+  }
+
+  private _onFormSubmit(evt: FormDataEvent) {
     evt.preventDefault();
     const form = evt.target as HTMLFormElement;
-    console.log('submit');
-    if (form.checkValidity() === false) {
-      console.log('not valid');
+    if (form.checkValidity()) {
+      const email = this.emailInput.value;
+      const password = this.passwordInput.value;
+      this._signIn(email, password);
     } else {
-      console.log('Signing in!');
+      form.reportValidity();
+    }
+  }
+
+  private _onFormInput() {
+    this.passwordInput.setCustomValidity('');
+  }
+
+  async _signIn(email: string, password: string) {
+    try {
+      await rkPublicApp.sessionManager.signInWithPassword({ email, password });
+    } catch (err: any) {
+      if (err?.name === 'NotAuthorizedException' || err?.name === 'UserNotFoundException') {
+        this.passwordInput.setCustomValidity(msg('Email o contraseña inválidos'));
+        this.form.reportValidity();
+      }
     }
   }
 
   render() {
     return html`
       <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
-      <form @submit=${this.handleFormSubmit}>
+      <form @submit=${this._onFormSubmit} @input=${this._onFormInput}>
         <section>
-          <!-- <label for="email">Email</label> -->
           <div class="input-wrapper">
             ${Icons('email-open', 24)}
             <input
@@ -53,13 +77,13 @@ export class RkSignInPage extends LitElement {
               required />
           </div>
         </section>
+
         <section>
-          <!-- <label for="current-password">Password</label> -->
           <div class="input-wrapper">
             ${Icons('privacy', 24)}
             <input
               class="form-control"
-              id="current-password"
+              id="currentPassword"
               name="current-password"
               placeholder=${msg('Contraseña')}
               type=${this.showPassword ? 'text' : 'password'}
@@ -67,8 +91,8 @@ export class RkSignInPage extends LitElement {
               aria-describedby="password-constraints"
               required />
             <button
-              id="toggle-password"
-              @click=${this.togglePassword}
+              id="togglePassword"
+              @click=${this._togglePasswordVisibility}
               type="button"
               aria-label=${this.showPassword
                 ? 'Hide password'
@@ -77,18 +101,23 @@ export class RkSignInPage extends LitElement {
             </button>
           </div>
         </section>
+
         <a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}>
           ${msg('Olvidaste la contraseña?')}
         </a>
+
         <button class="btn--primary" id="signinButton">
           ${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}
         </button>
       </form>
+
       <div class="divisor">
         <div class="cross"></div>
         <div class="divisor-text">${msg('o continua con')}</div>
       </div>
-      <button id="googleBtn" @click=${this.googleSignInClick}>${Icons('google', 48)}</button>
+
+      <button id="googleBtn" @click=${this._onGoogleSignInClick}>${Icons('google', 48)}</button>
+
       <footer>
         ${msg('¿No tienes una cuenta?')}
         <a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
@@ -131,7 +160,7 @@ export class RkSignInPage extends LitElement {
       footer a {
         text-decoration: underline;
       }
-      #toggle-password {
+      #togglePassword {
         align-items: center;
         background: none;
         border: none;

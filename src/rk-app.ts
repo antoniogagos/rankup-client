@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import 'samba/overlay/overlay-container.js';
 import { appRouterAnimations } from './router-animations.js';
-import { RkDataServiceController } from './lib/rk-data-service/data-service-controller.js';
+import { DataService } from './lib/data-service/data-service.js';
 import { path } from './lib/localization/rk-url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
@@ -12,15 +12,35 @@ import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { 
 // @ts-ignore
 import ScrollbarStyles from '../../samba/styles/scrollbar.css' assert { type: 'css' };
 
+/**
+ * @fires session-updated
+ */
 @customElement('rk-app')
 export class RkApp extends LitElement {
-  ds = new RkDataServiceController(this);
+  ds = new DataService(this);
 
   sessionManager = new SessionManager(this);
 
   constructor() {
     super();
     window.rkApp = this;
+    this.addEventListener('session-updated', this._onSessionUpdated.bind(this));
+  }
+
+  private _onSessionUpdated(evt: Event) {
+    const { session } = (evt as CustomEvent).detail;
+    this.ds.userId = session?.userId ?? null;
+    this.ds.authorizationToken = session?.accessToken ?? null;
+    if (session) {
+      // test
+      this.ds
+        .GetUser()
+        .then(resp => resp.json())
+        .then(data => console.log('getUserResponse', data))
+        .catch(err => console.error('getUserResp', err));
+    } else {
+      this.shadowRoot.querySelector('app-router').navigate('/');
+    }
   }
 
   onSignOutClick() {

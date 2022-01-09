@@ -14,6 +14,9 @@ export type { EventsMap } from './events.types';
 
 const ModuleUrl = import.meta.url;
 
+/**
+ * @fires page-changed
+ */
 export class AppRouter extends HTMLElement {
   /**
    * Note that with multiple instances of the router, the current page value
@@ -36,7 +39,7 @@ export class AppRouter extends HTMLElement {
 
   private _pages: PageItem[] = [];
 
-  private _visible = false;
+  private _visible: boolean = false;
 
   private pagejsInstance: PageJS.Static | null = null;
 
@@ -72,7 +75,7 @@ export class AppRouter extends HTMLElement {
     }
   }
 
-  get pageElement() {
+  get pageElement(): AppRouterPage | null {
     const { page } = this;
     return page ? this.getPageElement(page) : null;
   }
@@ -154,7 +157,7 @@ export class AppRouter extends HTMLElement {
     this.visible = false;
   }
 
-  replacePath(path: string, state: any) {
+  replacePath(path: string, state?: any) {
     this.pagejsInstance.replace(path, state);
   }
 
@@ -380,11 +383,9 @@ export class AppRouter extends HTMLElement {
 
   private uninstallRoutes() {
     const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
-    let uninstalled = false;
     this.pages?.forEach(page => {
       const cb = this.getRouterCallback(page.path);
       if (cb) {
-        uninstalled = true;
         pageCallbacks.splice(pageCallbacks.indexOf(cb), 1);
       }
     });
@@ -546,7 +547,7 @@ export class AppRouter extends HTMLElement {
     path: string;
     redirect?: string;
     callback?: PageJS.Callback;
-  }) {
+  }): void {
     const pageCallbacks: PageCallbacksList = (this.pagejsInstance as any).callbacks;
     if (this.getRouterCallback(path)) {
       console.warn(`Route ${path} duplicated`);
@@ -588,7 +589,7 @@ export class AppRouter extends HTMLElement {
     return a1.substring(0, i);
   }
 
-  static pathRelativeToThisModule(path: string) {
+  static pathRelativeToThisModule(path: string): string {
     if (path.charAt(0) === '/') {
       const docBase = window.location.origin;
       const modulePath = ModuleUrl.replace(docBase, '');

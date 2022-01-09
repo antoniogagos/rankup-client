@@ -15,6 +15,7 @@
       <rk-app id="rkApp" slot="authenticated"></rk-app>
       <rk-unauthenticated-app id="rkPublicApp" slot="unauthenticated"></rk-unauthenticated-app>
     </rk-auth-wall>
+
     <overlay-container></overlay-container>
 
     <script type="module" src="./out-tsc/src/elements/rk-auth-wall/rk-auth-wall.js"></script>
@@ -23,6 +24,7 @@
       let unauthAppImported = false;
 
       document.body.querySelector('rk-auth-wall').addEventListener('session-updated', evt => {
+        document.body.querySelector('overlay-container').closeAll?.();
         const isLogged = evt.detail.session;
         if (isLogged) {
           setColorScheme();

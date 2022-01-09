@@ -7,6 +7,7 @@ export const PublicPaths = {
   SIGNUP: msg('registro', { desc: 'This is part of the URL.' }),
   FORGOT_PASSWORD: msg('recordar-contraseña', { desc: 'This is part of the URL.' }),
   RESET_PASSWORD: msg('restablecer-contraseña', { desc: 'This is part of the URL.' }),
+  CONFIRM_REGISTRATION: msg('confirmar-registro', { desc: 'This is part of the URL.' }),
 };
 
 export const AppPaths = {

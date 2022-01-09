@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { appRouterAnimations } from './router-animations.js';
-import { path } from './lib/localization/rk-url-paths.js';
+import { path, PublicPaths } from './lib/localization/rk-url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
 import './pages/welcome/rk-welcome-page.js';
@@ -9,6 +9,7 @@ import './pages/access/rk-forgot-password-page.js';
 import './pages/access/rk-reset-password-page.js';
 import './pages/access/rk-signin-page.js';
 import './pages/access/rk-signup-page.js';
+import './pages/access/rk-confirm-registration-page.js';
 import './pages/404/rk-404-page.js';
 import type { EventsMap as AppRouterEventsMap } from './elements/app-router/app-router.js';
 // @ts-ignore
@@ -36,12 +37,23 @@ export class RkUnauthenticaApp extends LitElement {
     this.sessionManager = null;
   }
 
+  redirectToPage(pagePath: keyof typeof PublicPaths, queryParams?: { [key: string]: string }) {
+    let url: string = path(pagePath);
+    if (queryParams) {
+      url += '?' + new URLSearchParams(queryParams).toString();
+    }
+    this.shadowRoot.querySelector('app-router').navigate(url);
+  }
+
   render() {
     return html`
       <app-router .animations=${appRouterAnimations}>
         <rk-welcome-page path="/" animation="opacity"></rk-welcome-page>
         <rk-signin-page path=${path('SIGNIN')} animation="opacity"></rk-signin-page>
         <rk-signup-page path=${path('SIGNUP')} animation="opacity"></rk-signup-page>
+        <rk-confirm-registration-page
+          path=${path('CONFIRM_REGISTRATION')}
+          animation="opacity"></rk-confirm-registration-page>
         <rk-forgot-password-page
           path=${path('FORGOT_PASSWORD')}
           animation="opacity"></rk-forgot-password-page>

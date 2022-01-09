@@ -15,11 +15,38 @@ export interface RkDrawerParameters {}
 export class RkDrawer extends LitElement implements RkDrawerParameters {
   private _tourneys = new Task(
     this,
-    () => rkApp.ds.request.Tourneys.GetUserTourneys(),
+    () => rkApp.ds.GetUserTourneys(),
     () => [null],
   );
 
   overlayController?: OverlayController<this> = null;
+
+  connectedCallback(): void {
+    super.connectedCallback?.();
+    const url = new URL(window.location.toString());
+    url.searchParams.set('drawer', '1');
+    window.history.pushState({ drawer: 1, ...window.history.state }, null, url.toString());
+    window.addEventListener('popstate', this._onPopstate);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback?.();
+    const { drawer, ..._state } = window.history.state ?? {};
+    if (drawer) {
+      const url = new URL(window.location.toString());
+      url.searchParams.delete('drawer');
+      window.history.replaceState(_state, null, url);
+    }
+    window.removeEventListener('popstate', this._onPopstate);
+  }
+
+  private _onPopstate = (evt: Event) => {
+    this.overlayController?.close();
+  };
+
+  private _onSignOutClicked() {
+    rkApp.sessionManager.signOut();
+  }
 
   render() {
     return html`
@@ -28,7 +55,9 @@ export class RkDrawer extends LitElement implements RkDrawerParameters {
         <div class="rankup">Rankup</div>
         <button class="btn">${Icons('create-tourney', 18)}${msg('Crear liga')}</button>
         <button class="btn">${Icons('join-tourney', 18)}${msg('Unirse a una liga')}</button>
-        <button id="signoutBtn" class="btn">${Icons('sign-out', 18)}${msg('Cerrar sesión')}</button>
+        <button id="signoutBtn" class="btn" @click=${this._onSignOutClicked}>
+          ${Icons('sign-out', 18)}${msg('Cerrar sesión')}
+        </button>
         <div class="divisor-line"></div>
         <button class="btn">${Icons('twitter', 18)}${msg('¡Síguenos en Twitter!')}</button>
         <button class="btn">${Icons('newsletter', 18)}${msg('Rankup newsletter')}</button>

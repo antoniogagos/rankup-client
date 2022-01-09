@@ -12,7 +12,7 @@ import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 export class RkTourneyList extends LitElement {
   private _tourneys = new Task(
     this,
-    () => rkApp.ds.request.Tourneys.GetUserTourneys(),
+    () => rkApp.ds.GetUserTourneys(),
     () => [null],
   );
 

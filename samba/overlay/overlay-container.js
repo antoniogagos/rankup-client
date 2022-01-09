@@ -102,7 +102,7 @@ export class OverlayContainer extends HTMLElement {
   #onDocumentMousedown = evt => {
     const overlays = this.#overlays;
     const lastOverlay = overlays[overlays.length - 1];
-    if (lastOverlay) {
+    if (lastOverlay && evt.button === 0) {
       const { overlayController } = lastOverlay;
       const overlayClicked = evt.composedPath().includes(lastOverlay);
       if (!overlayClicked) {
