@@ -1,9 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
-import { Icons } from '../../unauthenticated-icons.js';
+import { Icons } from '../../authenticated-icons.js';
 import { openOverlay } from 'samba/overlay/open-overlay.js';
-import type { RkDrawer } from '../../elements/rk-drawer/rk-drawer.js';
 import '../../elements/rk-drawer/rk-drawer.js';
+import type { RkDrawer } from '../../elements/rk-drawer/rk-drawer.js';
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore
@@ -31,7 +31,7 @@ export class RkAppHeader extends LitElement {
       <header>
         <button @click=${this._onMenuClick}>${Icons('hamburger', 24)}</button>
         <section>
-          <button>${Icons('bell', 24)}</button>
+          <button>${Icons('bell-with-number', 24)}</button>
           <button>
             <img alt="Player avatar" src="/assets/images/default-avatar.svg" />
           </button>

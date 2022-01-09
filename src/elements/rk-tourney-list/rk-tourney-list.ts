@@ -5,6 +5,7 @@ import { Task, TaskStatus } from '@lit-labs/task';
 import { Icons } from '../../authenticated-icons.js';
 import { path } from '../../lib/localization/rk-url-paths.js';
 import { appRouterAnimations } from '../../router-animations.js';
+import { AppPaths } from '../../lib/localization/rk-url-paths.js';
 // @ts-ignore
 import resetStyles from '/samba/styles/reset.css' assert { type: 'css' };
 // @ts-ignore
@@ -41,7 +42,7 @@ export class RkTourneyList extends LitElement {
 
         <a href="${path(
           'TOURNEY',
-          'fj_rew',
+          `fj_rew/${AppPaths.MATCHDAY}`,
         )}" animation="opacity" class="tourney-card" competitionId="laliga">
           <div><img src="/assets/images/laliga.svg" alt="LaLiga logo" /></div>
           <div class="tourney-description">

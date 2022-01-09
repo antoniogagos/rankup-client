@@ -482,8 +482,9 @@ export class AppRouter extends HTMLElement {
     await animFinish;
     if (page.recycle) {
       AppRouter.togglePageVisibility(pageElem, false);
+    } else {
+      pageElem.remove();
     }
-    pageElem.remove();
   }
 
   private renderPage(page: PageItem, params?: object) {

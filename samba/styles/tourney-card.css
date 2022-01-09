@@ -22,9 +22,11 @@
   grid-column-gap: 10px;
   grid-template-columns: max-content auto max-content;
   height: 12.4rem;
+  max-height: 14.4rem;
+  max-width: 44rem;
   padding: 2rem;
-  width: 34rem;
   position: relative;
+  width: 90%;
   z-index: 1;
 }
 

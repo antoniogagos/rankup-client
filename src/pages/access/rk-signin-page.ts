@@ -80,7 +80,7 @@ export class RkSignInPage extends LitElement {
         <a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}>
           ${msg('Olvidaste la contraseña?')}
         </a>
-        <button class="btn--primary" id="signinButton">
+        <button class="btn btn--primary" id="signinButton">
           ${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}
         </button>
       </form>
@@ -127,6 +127,9 @@ export class RkSignInPage extends LitElement {
         position: absolute;
         bottom: 50px;
         font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
       footer a {
         text-decoration: underline;

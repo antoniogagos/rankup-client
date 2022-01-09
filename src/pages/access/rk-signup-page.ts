@@ -99,7 +99,7 @@ export class RkSignUpPage extends LitElement {
               required />
           </div>
         </section>
-        <button class="btn btr--primary btn--md" id="signinButton">
+        <button class="btn btn--primary btn--md" id="signinButton">
           ${msg('Crear cuenta')} ${Icons('arrow-right', 16)}
         </button>
       </form>

@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { path } from '../../lib/localization/rk-url-paths.js';
+import { path, relativePath } from '../../lib/localization/rk-url-paths.js';
 import { Task, TaskStatus } from '@lit-labs/task';
 import { Icons } from '../../authenticated-icons.js';
 // @ts-ignore
@@ -16,7 +16,7 @@ import typographyStyles from '/samba/styles/typography.css' assert { type: 'css'
 
 export class RkTourneyHeader extends LitElement {
   @property({ type: Boolean, attribute: 'inverted-color' })
-  invertedColor = true;
+  invertedColor = false;
 
   private _tourneys = new Task(
     this,
@@ -25,6 +25,11 @@ export class RkTourneyHeader extends LitElement {
   );
 
   render() {
+    const linkClasses = {
+      'link--primary': !this.invertedColor,
+      'link--primary-inverted': this.invertedColor,
+    };
+    const staticPath = path('TOURNEY') + '/fj_rew';
     return html`
       <header
         class=${classMap({
@@ -34,18 +39,19 @@ export class RkTourneyHeader extends LitElement {
         <section class="left-section">
           <a
             id="arrow"
-            class=${classMap({
-              'link--primary': !this.invertedColor,
-              'link--primary-inverted': this.invertedColor,
-            })}
+            class=${classMap(linkClasses)}
             href=${path('TOURNEYS')}>
-            ${Icons('arrow-left', 16)}
+            ${Icons('arrow-left', 20)}
           </a>
-          <div class="f4 text-bold nowrap">The Squad Team</div>
         </section>
+        <div class="f3 text-bold nowrap">The Squad Team</div>
         <section class="right-section">
-          <button>${Icons('add-player', 20)}</button>
-          <button>${Icons('settings', 20)}</button>
+          <a href=${staticPath + relativePath('SHARE_TOURNEY')} class=${classMap(
+      linkClasses,
+    )}>${Icons('add-player', 20)}</a>
+          <a href=${staticPath + relativePath('SETTINGS_TOURNEY')} class=${classMap(
+      linkClasses,
+    )}>${Icons('settings', 20)}</button></a>
         </section>
       </header>
     `;
@@ -58,15 +64,20 @@ export class RkTourneyHeader extends LitElement {
     typographyStyles,
     css`
       :host {
-        width: 100%;
-        padding: 2rem;
-        box-sizing: border-box;
-        z-index: 2;
+        z-index: 3;
       }
       header {
-        width: 100%;
+        align-items: center;
+        box-sizing: border-box;
         display: flex;
-        justify-content: space-between;
+        height: 6.6rem;
+        justify-content: center;
+        padding: 2rem;
+        width: 100%;
+        z-index: 1;
+      }
+      #arrow {
+        display: flex;
       }
       .color-header-text {
         background: var(--color-header-bg);
@@ -80,8 +91,12 @@ export class RkTourneyHeader extends LitElement {
         display: flex;
         align-items: center;
         gap: 1rem;
+        position: absolute;
+        left: 2rem;
       }
       .right-section {
+        position: absolute;
+        right: 2rem;
         display: flex;
         align-items: center;
         gap: 1.5rem;

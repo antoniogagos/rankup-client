@@ -59,43 +59,42 @@ export class ToggleInput extends LitElement {
       position: relative;
       display: grid;
       grid-template-columns: 28px 1fr;
+      cursor: pointer;
     }
     input {
       display: none !important;
     }
     #toggle {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 14px;
+      background: #666;
+      border-radius: 1.6rem;
       display: inline-block;
-      width: 28px;
-      min-width: 28px;
-      height: 16px;
+      width: 4rem;
+      height: 2.2rem;
       position: relative;
       transition: background 0.15s;
       vertical-align: middle;
-      width: 100%;
     }
     #toggle::after {
       content: '';
       position: absolute;
-      top: 1px;
-      left: 1px;
-      border-radius: 14px;
-      width: 14px;
-      height: 14px;
+      top: 4px;
+      left: 6px;
+      border-radius: 1.6rem;
+      width: 1.3rem;
+      height: 1.3rem;
       background: #fff;
       display: block;
       transition: left 0.15s;
       box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 0 1px 0 rgba(0, 0, 0, 0.21);
     }
     input:checked + #toggle {
-      background: var(--primary-color, #129bf6);
+      background: #0066ff;
     }
     :host([disabled]) input:checked + #toggle {
       background: var(--background-color-500, #9e9e9e);
     }
     input:checked + #toggle::after {
-      left: calc(100% - 15px);
+      left: calc(100% - 20px);
     }
     .text:not(:empty) {
       margin-left: 5px;

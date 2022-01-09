@@ -2,27 +2,48 @@
   /* Color del texto default */
   --color-fg-default: #24292f;
   --color-fg-muted: #57606a;
-  --color-fg-subtle: #6e7781;
+  --color-fg-subtle: #9b9b9b;
   --color-fg-on-emphasis: #ffffff;
+  --color-fg-reverted: #fff;
 
   --color-landing-bg: rgba(27, 31, 36, 0.85);
-  --color-landing-text: #f6f6fa;
+  --color-landing-text: #fafafa;
+
+  --color-attention-fg: #9a6700;
+  --color-attention-emphasis: #bf8700;
+  --color-attention-muted: rgba(212, 167, 44, 0.4);
+  --color-attention-subtle: #fff8c5;
 
   /* Canvas se refiere a backgrounds de los sitios principales */
-  --color-canvas-default: #f6f6fa;
-  --color-canvas-overlay: #ffffff;
+  --color-canvas-default: #fff;
+  --color-canvas-secondary: #fafafa;
+  --color-canvas-overlay: #fafafa;
+  --color-canvas-inverted: #333;
   --color-canvas-inset: #f0f0f3;
   --color-canvas-subtle: #e9e9ed;
   --color-overlay-shadow: 0 1px 3px rgba(27, 31, 36, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
 
   --color-header-text: #24292f;
-  --color-header-bg: rgba(0, 0, 0, 0);
+  --color-header-bg: #fff;
   --color-header-bg-inverted: rgba(0, 0, 0, 0);
   --color-header-text-inverted: rgba(255, 255, 255, 0.9);
   --color-header-divider: #57606a;
   --color-header-logo: #ffffff;
   --color-header-search-bg: #24292f;
   --color-header-search-border: #57606a;
+
+  --color-footer-text: #2b2b2b;
+  --color-footer-bg: #fff;
+  --color-footer-shadow: 0px -1px 9px rgb(0 0 0 / 8%);
+  --color-footer-icon: #9299a1;
+  --color-footer-selected-text: #19671d;
+  --color-footer-selected-bg-icon: #388e3c;
+  --color-footer-selected-icon: #fff;
+
+  --color-severe-fg: #d4860d;
+  --color-severe-emphasis: #bc4c00;
+  --color-severe-muted: rgba(251, 143, 68, 0.4);
+  --color-severe-subtle: #fff1e5;
 
   --color-season-winner-text: rgba(255, 255, 255, 0.92);
 
@@ -31,16 +52,36 @@
   --color-accent-muted: rgba(84, 174, 255, 0.4);
   --color-accent-subtle: #ddf4ff;
 
-  --color-primer-shadow-focus: 0 0 0 3px rgb(158 158 158);
+  --color-primer-shadow-focus: 0 0 0 1px rgb(158 158 158);
   --color-primer-canvas-backdrop: rgba(27, 31, 36, 0.5);
 
   --color-btn-text: #000;
-  --color-btn-bg: #fff;
+  --color-btn-bg: #fafafa;
   --color-btn-border: #000;
   --color-btn-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
   --color-btn-hover-bg: #f3f4f6;
   --color-btn-hover-border: rgba(27, 31, 36, 0.85);
   --color-btn-focus-bg: #f6f8fa;
+
+  --color-btn-danger-text: #cf222e;
+  --color-btn-danger-hover-text: #ffffff;
+  --color-btn-danger-hover-bg: #a40e26;
+  --color-btn-danger-hover-border: rgba(27, 31, 36, 0.15);
+  --color-btn-danger-hover-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+  --color-btn-danger-hover-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --color-btn-danger-hover-counter-bg: rgba(255, 255, 255, 0.2);
+  --color-btn-danger-selected-text: #ffffff;
+  --color-btn-danger-selected-bg: hsla(356, 72%, 44%, 1);
+  --color-btn-danger-selected-border: rgba(27, 31, 36, 0.15);
+  --color-btn-danger-selected-shadow: inset 0 1px 0 rgba(76, 0, 20, 0.2);
+  --color-btn-danger-disabled-text: rgba(207, 34, 46, 0.5);
+  --color-btn-danger-disabled-bg: #f6f8fa;
+  --color-btn-danger-disabled-counter-bg: rgba(207, 34, 46, 0.05);
+  --color-btn-danger-focus-border: rgba(27, 31, 36, 0.15);
+  --color-btn-danger-focus-shadow: 0 0 0 3px rgba(164, 14, 38, 0.4);
+  --color-btn-danger-counter-bg: rgba(207, 34, 46, 0.1);
+  --color-btn-danger-icon: #cf222e;
+  --color-btn-danger-hover-icon: #ffffff;
 
   --color-btn-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
   --color-btn-active-bg: hsla(220, 14%, 93%, 1);
@@ -53,21 +94,13 @@
   --color-btn-counter-bg: rgba(27, 31, 36, 0.08);
 
   --color-border-default: #000;
-  --color-border-muted: hsla(210, 18%, 87%, 1);
+  --color-border-muted: #ececec;
   --color-border-subtle: rgba(27, 31, 36, 0.15);
 
   --color-shadow-small: 0 1px 0 rgba(27, 31, 36, 0.04);
   --color-shadow-medium: 0 3px 6px rgba(140, 149, 159, 0.15);
   --color-shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
   --color-shadow-extra-large: 0 12px 28px rgba(140, 149, 159, 0.3);
-
-  --color-footer-text: #24292f;
-  --color-footer-bg: #fff;
-  --color-footer-shadow: 0px -1px 9px rgb(0 0 0 / 8%);
-  --color-footer-icon: #9299a1;
-  --color-footer-selected-text: #19671d;
-  --color-footer-selected-bg-icon: #388e3c;
-  --color-footer-selected-icon: #fff;
 
   --color-canvas-default-transparent: rgba(255, 255, 255, 0);
   --color-marketing-icon-primary: #218bff;
@@ -323,14 +356,6 @@
   --color-success-emphasis: #2da44e;
   --color-success-muted: rgba(74, 194, 107, 0.4);
   --color-success-subtle: #dafbe1;
-  --color-attention-fg: #9a6700;
-  --color-attention-emphasis: #bf8700;
-  --color-attention-muted: rgba(212, 167, 44, 0.4);
-  --color-attention-subtle: #fff8c5;
-  --color-severe-fg: #bc4c00;
-  --color-severe-emphasis: #bc4c00;
-  --color-severe-muted: rgba(251, 143, 68, 0.4);
-  --color-severe-subtle: #fff1e5;
   --color-danger-fg: #cf222e;
   --color-danger-emphasis: #cf222e;
   --color-danger-muted: rgba(255, 129, 130, 0.4);

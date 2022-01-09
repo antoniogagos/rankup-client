@@ -3,6 +3,7 @@ import { msg } from '@lit/localize';
 import { property, state } from 'lit/decorators.js';
 import { Task, TaskStatus } from '@lit-labs/task';
 import { Icons } from '../../authenticated-icons.js';
+import { path, relativePath } from '../../lib/localization/rk-url-paths.js';
 // @ts-ignore
 import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore
@@ -16,7 +17,7 @@ enum Tabs {
 
 export class RkTourneyFooter extends LitElement {
   @state()
-  private _selectedTab = Tabs.RANKING;
+  private _selectedTab = Tabs.MATCHDAY;
 
   private _tourneys = new Task(
     this,
@@ -32,25 +33,38 @@ export class RkTourneyFooter extends LitElement {
   }
 
   render() {
+    const staticPath = path('TOURNEY') + '/fj_rew';
     return html`
       <footer @click=${this._onTabClick}>
         <a
-          class="header--item"
-          name=${Tabs.RANKING}
-          ?selected=${this._selectedTab === Tabs.RANKING}>
-          <div class="item-icon">${Icons('tourney', 20)}</div>
-          <span>${msg('Clasificación')}</span>
-        </a>
-        <a
+          href=${staticPath + relativePath('MATCHDAY')}
           class="header--item"
           name=${Tabs.MATCHDAY}
           ?selected=${this._selectedTab === Tabs.MATCHDAY}>
-          <div class="item-icon">${Icons('ball', 20)}</div>
-          <span>${msg('Jornada')}</span>
+          <div class="item-icon">
+            ${this._selectedTab === Tabs.MATCHDAY ? Icons('field-filled', 28) : Icons('field', 24)}
+          </div>
+          <!-- <span>${msg('Jornada')}</span> -->
         </a>
-        <a class="header--item" name=${Tabs.CHAT} ?selected=${this._selectedTab === Tabs.CHAT}>
-          <div class="item-icon">${Icons('chat', 20)}</div>
-          <span>${msg('Chat')}</span>
+        <a
+          href=${staticPath + relativePath('RANKING')}
+          class="header--item"
+          name=${Tabs.RANKING}
+          ?selected=${this._selectedTab === Tabs.RANKING}>
+          <div class="item-icon">
+            ${this._selectedTab === Tabs.RANKING ? Icons('trophy-filled', 24) : Icons('trophy', 24)}
+          </div>
+          <!-- <span>${msg('Clasificación')}</span> -->
+        </a>
+        <a
+          href=${staticPath + relativePath('CHAT')}
+          class="header--item"
+          name=${Tabs.CHAT}
+          ?selected=${this._selectedTab === Tabs.CHAT}>
+          <div class="item-icon">
+            ${this._selectedTab === Tabs.CHAT ? Icons('chat-filled', 24) : Icons('chat', 24)}
+          </div>
+          <!-- <span>${msg('Chat')}</span> -->
         </a>
       </footer>
     `;
@@ -62,16 +76,21 @@ export class RkTourneyFooter extends LitElement {
     css`
       :host {
         display: block;
+        z-index: 1;
+        width: 100%;
+        background: var(--color-footer-bg);
+        color: var(--color-footer-text);
+        font-weight: 600;
       }
       footer {
-        background: var(--color-footer-bg);
-        box-shadow: var(--color-footer-shadow);
+        border-top: 1px solid var(--color-border-subtle);
+        max-width: 450px;
+        margin: 0 auto;
         box-sizing: border-box;
-        color: var(--color-footer-text);
         display: flex;
         flex-direction: row;
-        height: 100%;
-        width: 100%;
+        height: 5.6rem;
+        font-size: 1.4rem;
       }
       .header--item {
         align-items: center;
@@ -83,19 +102,16 @@ export class RkTourneyFooter extends LitElement {
         flex: 1 1 0;
         height: 100%;
         justify-content: space-between;
-        padding-top: 0.8rem;
-        padding: 0.6rem 2rem;
+        padding: 0.5rem;
       }
       .header--item > * {
         pointer-events: none;
       }
-      .header--item[selected] span {
-        color: var(--color-footer-selected-text);
+      .header--item[selected] {
+        color: green;
       }
       .header--item[selected] .item-icon {
-        background-color: var(--color-footer-selected-bg-icon);
-        border-radius: 20px;
-        color: var(--color-footer-selected-icon);
+        color: green;
       }
       .item-icon {
         align-items: center;
@@ -103,6 +119,8 @@ export class RkTourneyFooter extends LitElement {
         display: flex;
         height: 100%;
         justify-content: center;
+        margin: 0 auto;
+        max-width: 60px;
         width: 70%;
       }
     `,

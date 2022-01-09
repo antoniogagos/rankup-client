@@ -4,7 +4,7 @@
 3: 1.6
 4: 2.4
 5: 3.2
-6: 5
+6: 4
 */
 
 .mt-1 {
@@ -71,6 +71,10 @@
   margin-bottom: 3.2rem;
 }
 
+.mb-6 {
+  margin-bottom: 4rem;
+}
+
 .ml-1 {
   margin-left: 0.4rem;
 }
@@ -88,5 +92,5 @@
 }
 
 .ml-5 {
-  margin-left: 3.2rem;
+  margin-left: 4rem;
 }

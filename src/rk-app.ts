@@ -8,6 +8,8 @@ import { SessionManager } from './managers/session/session-manager.js';
 import './elements/app-router/app-router.js';
 import './pages/home/rk-home-page.js';
 import './pages/tourney/rk-tourney-page.js';
+import './pages/create-tourney/rk-create-tourney-page.js';
+import './pages/join-tourney/rk-join-tourney-page.js';
 // @ts-ignore
 import AppRouterStyles from '../../src/elements/app-router/styles.css' assert { type: 'css' };
 // @ts-ignore
@@ -38,7 +40,13 @@ export class RkApp extends LitElement {
     return html`
       <app-router .animations=${appRouterAnimations}>
         <rk-home-page path=${path('TOURNEYS')} animation="opacity"></rk-home-page>
-        <rk-tourney-page path=${path('TOURNEY', ':id')} animation="opacity"></rk-tourney-page>
+        <rk-tourney-page path=${path('TOURNEY', '*')} animation="opacity"></rk-tourney-page>
+        <rk-join-tourney-page
+          path=${path('JOIN_TOURNEY')}
+          animation="opacity"></rk-join-tourney-page>
+        <rk-create-tourney-page
+          path=${path('CREATE_TOURNEY')}
+          animation="opacity"></rk-create-tourney-page>
         <hw-404-page path="/404"></hw-404-page>
         <app-router__redirect path="*" redirect=${path('TOURNEYS')}></app-router__redirect>
       </app-router>

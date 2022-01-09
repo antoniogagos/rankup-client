@@ -31,6 +31,9 @@
   outline: none;
 }
 
+.form-control .form-text {
+}
+
 input:focus-visible {
   outline: none;
 }

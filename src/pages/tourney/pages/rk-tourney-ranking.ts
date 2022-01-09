@@ -5,13 +5,13 @@ import { Icons } from '../../../authenticated-icons.js';
 import { property, state } from 'lit/decorators.js';
 import { Task } from '@lit-labs/task';
 // @ts-ignore
-import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
+import ButtonStyles from '/samba/styles/button.css' assert { type: 'css' };
 // @ts-ignore
-import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
+import LinkStyles from '/samba/styles/link.css' assert { type: 'css' };
 // @ts-ignore
-import typographyStyles from '/samba/styles/typography.css' assert { type: 'css' };
+import TypographyStyles from '/samba/styles/typography.css' assert { type: 'css' };
 // @ts-ignore
-import marginStyles from '/samba/styles/margin.css' assert { type: 'css' };
+import MarginStyles from '/samba/styles/margin.css' assert { type: 'css' };
 
 interface UserRanking {
   position: number;
@@ -28,15 +28,15 @@ export enum RankingType {
  * @fires selected-ranking-changed
  */
 export class RkTourneyRanking extends LitElement {
-  // @property({ type: Boolean })
-  // hidden = true;
+  @property({ type: Boolean })
+  hidden = true;
 
-  // shouldUpdate(): boolean {
-  //   return !this.hidden;
-  // }
+  shouldUpdate(): boolean {
+    return !this.hidden;
+  }
 
   @property({ type: Number })
-  selectedRanking = RankingType.SEASON;
+  selectedRanking = RankingType.MATCHDAY;
 
   private _ranking = new Task(
     this,
@@ -46,26 +46,28 @@ export class RkTourneyRanking extends LitElement {
 
   private _onSelectRankingClick(evt: MouseEvent) {
     const selectedRanking = (evt.target as HTMLButtonElement).getAttribute('name');
-    this.selectedRanking = Number(selectedRanking);
-    this.dispatchEvent(
-      new CustomEvent('selected-ranking-changed', {
-        detail: { selectedRanking: Number(selectedRanking) },
-      }),
-    );
+    if (selectedRanking) {
+      this.selectedRanking = Number(selectedRanking);
+      this.dispatchEvent(
+        new CustomEvent('selected-ranking-changed', {
+          detail: { selectedRanking: Number(selectedRanking) },
+        }),
+      );
+    }
   }
 
   private _renderRankingRow(user: UserRanking) {
     const medals = [null, 'gold-medal.svg', 'silver-medal.svg', 'bronze-medal.svg'];
     return html`
-      <div class="row">
+      <div class="row text-bold mt-2 mb-2">
         <img class="avatar" src="/assets/avatars/${user.user.picture}" alt="Avatar" />
         <div class="username">${user.user.username}</div>
-        <div class="position">
+        <div class="position f3">
           ${medals[user.position]
             ? html`
                 <img
-                  width="36"
-                  height="36"
+                  width="42"
+                  height="42"
                   src="/assets/images/${medals[user.position]}"
                   alt="Player position ${user.position}" />
               `
@@ -89,9 +91,11 @@ export class RkTourneyRanking extends LitElement {
       )`;
       return html`
         <div class="row-season-winner f1 text-bold">
-          <div
-            class="row-season-winner-bg"
-            style="background-image: ${winnerBackgroundGradient}, url(${winnerAvatarHref})"></div>
+          <div class="row-season-winner-bg" style="background-image: ${winnerBackgroundGradient}">
+            <div
+              class="row-season-winner-bg-avatar"
+              style="background-image: url(${winnerAvatarHref})"></div>
+          </div>
           ${this._renderRankingRow(winner)}
         </div>
         <div class="ranking-without-winner">
@@ -106,6 +110,14 @@ export class RkTourneyRanking extends LitElement {
   render() {
     return html`
       <div class="main">
+        ${this.selectedRanking === RankingType.MATCHDAY
+          ? html`
+              <div class="matchday-status text-bold">
+                <div class="circle"></div>
+                ${msg('Jornada en juego')}
+              </div>
+            `
+          : ''}
         <div class="ranking">
           ${this._ranking.render({
             pending: () => html``,
@@ -114,17 +126,17 @@ export class RkTourneyRanking extends LitElement {
         </div>
         <div class="buttons mb-3" @click=${this._onSelectRankingClick}>
           <button
-            class="btn btn--primary btn--md f4"
+            class="btn btn--primary btn--s f5"
             name=${RankingType.SEASON}
             ?selected=${this.selectedRanking === RankingType.SEASON}>
             ${msg('Temporada')}
           </button>
           <button
-            class="btn btn--primary btn--md f4 matchday-btn"
+            class="btn btn--primary btn--s f5 matchday-btn"
             name=${RankingType.MATCHDAY}
             ?selected=${this.selectedRanking === RankingType.MATCHDAY}>
             ${msg('Jornada 8')}
-            <span id="chevron">${Icons('chevron-down', 10)}</span>
+            <span id="chevron">${Icons('chevron-down', 16)}</span>
           </button>
         </div>
       </div>
@@ -132,10 +144,10 @@ export class RkTourneyRanking extends LitElement {
   }
 
   static styles = [
-    buttonStyles,
-    linkStyles,
-    typographyStyles,
-    marginStyles,
+    ButtonStyles,
+    LinkStyles,
+    TypographyStyles,
+    MarginStyles,
     css`
       :host {
         display: block;
@@ -151,8 +163,6 @@ export class RkTourneyRanking extends LitElement {
         height: 100%;
         width: 100%;
         box-sizing: border-box;
-        display: grid;
-        grid-template-rows: 1fr max-content;
       }
       .row {
         width: 100%;
@@ -162,7 +172,7 @@ export class RkTourneyRanking extends LitElement {
         padding: 1rem 2rem;
         box-sizing: border-box;
         align-items: center;
-        grid-column-gap: 2rem;
+        grid-column-gap: 1.5rem;
       }
       .row-season-winner {
         align-items: flex-end;
@@ -175,23 +185,57 @@ export class RkTourneyRanking extends LitElement {
         width: 100%;
         font-weight: bold;
       }
+      .matchday-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 2rem 2rem 0.5rem 2rem;
+      }
+      .circle {
+        background-color: var(--color-scale-green-5);
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 1rem;
+      }
       .row-season-winner .row {
-        z-index: 1;
+        z-index: 2;
       }
       .row-season-winner-bg {
         width: 100%;
         height: 100%;
         background-position: top;
         position: absolute;
-        z-index: 0;
+        z-index: 2;
         background-size: cover;
+        pointer-events: none;
+      }
+      .row-season-winner-bg-avatar {
+        background-position: top;
+        background-size: cover;
+        filter: opacity(0.3);
+        height: 100%;
+        margin: 0 auto;
+        max-width: 65.5rem;
+        pointer-events: none;
+        width: 100%;
+        z-index: 2;
+      }
+      .ranking {
+        width: 100%;
+        flex: 1;
       }
       /* row season winner + rk-tourney-header height */
       .ranking-without-winner {
-        padding-top: calc(20.5rem - 6.6rem);
+        padding-top: calc(20.5rem - 7rem);
+      }
+      :host(.router-page-season-ranking) .ranking-without-winner {
+        padding-top: 20.5rem;
       }
       .position {
+        align-items: center;
+        display: flex;
         grid-area: position;
+        justify-content: center;
         text-align: center;
       }
       .avatar {
@@ -226,7 +270,8 @@ export class RkTourneyRanking extends LitElement {
       }
       #chevron {
         position: absolute;
-        right: 20px;
+        right: 7px;
+        filter: opacity(0.8);
       }
     `,
   ];

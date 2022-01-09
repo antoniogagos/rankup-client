@@ -19,7 +19,13 @@ export class HomePage extends LitElement {
     `;
   }
 
-  static styles = [css``];
+  static styles = [
+    css`
+      :host {
+        display: block;
+      }
+    `,
+  ];
 }
 
 customElements.define('rk-home-page', HomePage);

@@ -5,6 +5,7 @@
   color: var(--color-btn-text);
   cursor: pointer;
   display: flex;
+  width: fit-content;
   font-family: inherit;
   font-size: 1.6rem;
   font-weight: 600;
@@ -23,42 +24,45 @@
 }
 
 .btn--xs {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   min-height: 32px;
 }
 
 .btn--s {
-  font-size: 1.3rem;
-  min-height: 36px;
+  font-size: 1.4rem;
+  min-height: 40px;
+  min-width: 120px;
 }
 
 .btn--md {
   font-size: 1.6rem;
-  min-height: 42px;
-  min-width: 155px;
+  min-height: 4rem;
+  min-width: 15.5rem;
 }
 
 .btn--lg {
-  font-size: 2rem;
-  min-height: 48px;
+  font-size: 1.8rem;
+  min-height: 44px;
   min-width: 175px;
+}
+
+.btn--danger {
+  color: var(--color-btn-danger-text);
 }
 
 .btn:hover {
   background-color: var(--color-btn-hover-bg);
 }
 
-/* .btn:focus {
-  background-color: var(--color-btn-focus-bg);
-} */
-
 .btn--primary:hover {
   border-color: var(--color-btn-hover-border);
 }
 
-/* .btn:focus {
-  box-shadow: var(--color-btn-focus-shadow);
-} */
+.btn--danger:hover {
+  color: var(--color-btn-danger-hover-text);
+  border-color: var(--color-btn-danger-hover-border);
+  background-color: var(--color-btn-danger-hover-bg);
+}
 
 a.btn {
   text-decoration: none;
