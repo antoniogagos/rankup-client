@@ -1,5 +1,7 @@
 {
-  "editor.rulers": [100],
+  "editor.rulers": [
+    100
+  ],
   "editor.formatOnSave": true,
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
@@ -31,9 +33,14 @@
   "typescript.preferences.includePackageJsonAutoImports": "on",
   "typescript.preferences.importModuleSpecifierEnding": "auto",
   "typescript.updateImportsOnFileMove.enabled": "never",
-  "html.customData": ["./custom-elements.json"],
-  "cssVariables.lookupFiles": ["**/*.{css,html}"],
+  "html.customData": [
+    "./custom-elements.json"
+  ],
+  "cssVariables.lookupFiles": [
+    "**/*.{css,html}"
+  ],
   "lit-plugin.rules.no-expressionless-property-binding": "off",
   "lit-plugin.rules.no-invalid-css": "off",
+  "lit-plugin.rules.no-incompatible-type-binding": "off",
   "typescript.tsdk": "node_modules/typescript/lib"
 }

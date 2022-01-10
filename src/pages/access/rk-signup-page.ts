@@ -12,7 +12,7 @@ import buttonStyles from '/samba/styles/button.css' assert { type: 'css' };
 
 export class RkSignUpPage extends LitElement {
   @property({ type: Boolean })
-  showPassword = false;
+  _showPassword = false;
 
   @query('form')
   form: HTMLFormElement;
@@ -33,7 +33,7 @@ export class RkSignUpPage extends LitElement {
   signinButton: HTMLInputElement;
 
   togglePassword() {
-    this.showPassword = !this.showPassword;
+    this._showPassword = !this._showPassword;
   }
 
   private _onFormInput() {
@@ -131,7 +131,7 @@ export class RkSignUpPage extends LitElement {
               id="password"
               name="password"
               placeholder=${msg('Contraseña')}
-              type=${this.showPassword ? 'text' : 'password'}
+              type=${this._showPassword ? 'text' : 'password'}
               autocomplete="current-password"
               aria-describedby="password-constraints"
               required />
@@ -140,10 +140,10 @@ export class RkSignUpPage extends LitElement {
               @click=${this.togglePassword}
               type="button"
               tabindex="-1"
-              aria-label=${this.showPassword
+              aria-label=${this._showPassword
                 ? 'Hide password'
                 : 'Show password as plain text. Warning: this will display your password on the screen.'}>
-              ${Icons(`${this.showPassword ? 'eye-hide' : 'eye'}`, 24)}
+              ${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
             </button>
           </div>
         </section>
@@ -156,7 +156,7 @@ export class RkSignUpPage extends LitElement {
               id="repeatedPassword"
               name="password"
               placeholder=${msg('Confirmar contraseña')}
-              type=${this.showPassword ? 'text' : 'password'}
+              type=${this._showPassword ? 'text' : 'password'}
               autocomplete="current-password"
               aria-describedby="password-constraints"
               required />

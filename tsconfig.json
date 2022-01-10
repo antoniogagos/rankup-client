@@ -4,7 +4,11 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmitOnError": true,
-    "lib": ["DOM", "ESNext", "DOM.Iterable"],
+    "lib": [
+      "DOM",
+      "ESNext",
+      "DOM.Iterable"
+    ],
     "strict": true,
     "strictNullChecks": false,
     "esModuleInterop": false,
@@ -21,10 +25,17 @@
     "rootDir": "./",
     "baseUrl": "./",
     "paths": {
-      "samba/*": ["./samba/*"],
-      "modules/*": ["./modules/*"]
+      "samba/*": [
+        "./samba/*"
+      ],
+      "modules/*": [
+        "./modules/*"
+      ]
     },
     "incremental": true
   },
-  "include": ["**/*.ts", "**/*.css", "samba"]
+  "include": [
+    "**/*.ts",
+    "samba"
+  ]
 }

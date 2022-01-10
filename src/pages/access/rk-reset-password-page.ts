@@ -36,6 +36,8 @@ export class RkResetPasswordPage extends LitElement {
 
   private _hidden: boolean = false;
 
+  private _showPassword: boolean = false;
+
   set hidden(val: boolean) {
     this._hidden = val;
     if (!val && this.codeFromURL === null) {
@@ -138,10 +140,10 @@ export class RkResetPasswordPage extends LitElement {
               id="togglePassword"
               @click=${this._togglePassword}
               type="button"
-              aria-label=${this.showPassword
+              aria-label=${this._showPassword
                 ? 'Hide password'
                 : 'Show password as plain text. Warning: this will display your password on the screen.'}>
-              ${Icons(`${this.showPassword ? 'eye-hide' : 'eye'}`, 24)}
+              ${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
             </button>
           </div>
         </section>
@@ -154,7 +156,7 @@ export class RkResetPasswordPage extends LitElement {
               id="repeatPassword"
               name="current-password"
               placeholder=${msg('Confirmar contraseña')}
-              type=${this.showPassword ? 'text' : 'password'}
+              type=${this._showPassword ? 'text' : 'password'}
               autocomplete="current-password"
               aria-describedby="password-constraints"
               required />

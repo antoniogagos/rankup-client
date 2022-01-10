@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { msg } from '@lit/localize';
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
+import { Icons } from '../../authenticated-icons.js';
 import { property } from 'lit/decorators.js';
 import '../../elements/rk-app-header/rk-app-header.js';
 import '../../elements/rk-tourney-list/rk-tourney-list.js';
@@ -21,7 +21,8 @@ export class HomePage extends LitElement {
 
   static styles = [
     css`
-       {
+      :host {
+        display: block;
       }
     `,
   ];

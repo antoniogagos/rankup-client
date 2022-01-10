@@ -16,6 +16,7 @@ app-router > * {
   left: 0;
   width: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
   overflow-x: hidden;
 }
 

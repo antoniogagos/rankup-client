@@ -17,6 +17,7 @@
     "@lit-labs/task": "^1.0.0",
     "@lit/localize": "^0.11.0",
     "amazon-cognito-identity-js": "^5.2.3",
+    "eslint-plugin-lit-a11y": "^1.1.0-next.1",
     "lit": "^2.0.2",
     "page": "^1.11.6"
   },
@@ -84,6 +85,10 @@
       "import/no-absolute-path": "off",
       "import/no-unresolved": "off",
       "prefer-destructuring": "off",
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": [
+        "error"
+      ],
       "import/extensions": [
         "error",
         "always",

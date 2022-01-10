@@ -1,7 +1,17 @@
 .link--primary {
+  display: flex;
+  align-items: center;
   color: var(--color-fg-default);
+  cursor: pointer;
 }
 
 .link--primary:hover {
   color: var(--color-accent-fg);
+}
+
+.link--primary-inverted {
+  display: flex;
+  align-items: center;
+  color: var(--color-header-inverted);
+  cursor: pointer;
 }

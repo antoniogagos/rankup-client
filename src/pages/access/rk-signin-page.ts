@@ -14,7 +14,7 @@ import linkStyles from '/samba/styles/link.css' assert { type: 'css' };
 
 export class RkSignInPage extends LitElement {
   @property({ type: Boolean })
-  showPassword = false;
+  _showPassword = false;
 
   @query('#email')
   emailInput: HTMLInputElement;
@@ -26,7 +26,7 @@ export class RkSignInPage extends LitElement {
   form: HTMLInputElement;
 
   private _togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
+    this._showPassword = !this._showPassword;
   }
 
   private _onGoogleSignInClick() {
@@ -86,7 +86,7 @@ export class RkSignInPage extends LitElement {
               id="currentPassword"
               name="current-password"
               placeholder=${msg('Contraseña')}
-              type=${this.showPassword ? 'text' : 'password'}
+              type=${this._showPassword ? 'text' : 'password'}
               autocomplete="current-password"
               aria-describedby="password-constraints"
               required />
@@ -94,10 +94,10 @@ export class RkSignInPage extends LitElement {
               id="togglePassword"
               @click=${this._togglePasswordVisibility}
               type="button"
-              aria-label=${this.showPassword
+              aria-label=${this._showPassword
                 ? 'Hide password'
                 : 'Show password as plain text. Warning: this will display your password on the screen.'}>
-              ${Icons(`${this.showPassword ? 'eye-hide' : 'eye'}`, 24)}
+              ${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
             </button>
           </div>
         </section>
@@ -156,6 +156,9 @@ export class RkSignInPage extends LitElement {
         position: absolute;
         bottom: 50px;
         font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
       footer a {
         text-decoration: underline;

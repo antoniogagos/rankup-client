@@ -2,7 +2,7 @@ import { OverlayController } from './overlay-controller.js';
 
 /**
  * @template {import('./types').CustomElementClass} T
- * @template [Params=void | null]
+ * @template [Params=any | null]
  * @template [HostEventsMap = import('./events.types').EventsMap<OverlayController<T>>]
  *
  * @param {string} elementName
