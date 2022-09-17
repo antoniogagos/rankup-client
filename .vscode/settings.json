@@ -1,46 +1,41 @@
 {
-  "editor.rulers": [
-    100
-  ],
-  "editor.formatOnSave": true,
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true,
-  "files.exclude": {
-    ".git": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    "/build": true
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[plaintext]": {
-    "files.insertFinalNewline": false
-  },
-  "search.exclude": {
-    "**/node_modules": true,
-    "build/**": true
-  },
-  "javascript.preferences.quoteStyle": "single",
-  "npm.packageManager": "yarn",
-  "explorer.compactFolders": false,
-  "typescript.validate.enable": true,
-  "typescript.preferences.includePackageJsonAutoImports": "on",
-  "typescript.preferences.importModuleSpecifierEnding": "auto",
-  "typescript.updateImportsOnFileMove.enabled": "never",
-  "html.customData": [
-    "./custom-elements.json"
-  ],
-  "cssVariables.lookupFiles": [
-    "**/*.{css,html}"
-  ],
-  "lit-plugin.rules.no-expressionless-property-binding": "off",
-  "lit-plugin.rules.no-invalid-css": "off",
-  "lit-plugin.rules.no-incompatible-type-binding": "off",
-  "typescript.tsdk": "node_modules/typescript/lib"
+	"editor.rulers": [100],
+	"editor.formatOnSave": true,
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	"files.exclude": {
+		".git": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/dist": false
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[plaintext]": {
+		"files.insertFinalNewline": false
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"build/**": true
+	},
+	"cSpell.words": ["MATCHDAY", "middlewares", "Positionize", "Rankup", "tabindex", "urlpattern"],
+	"cssVariables.lookupFiles": ["**/*.{css,html}"],
+	"eslint.lintTask.enable": true,
+	"html.customData": ["./custom-elements.json"],
+	"javascript.preferences.quoteStyle": "single",
+	"lit-plugin.rules.no-expressionless-property-binding": "off",
+	"lit-plugin.rules.no-incompatible-type-binding": "off",
+	"lit-plugin.rules.no-invalid-css": "off",
+	"npm.packageManager": "yarn",
+	"typescript.preferences.importModuleSpecifierEnding": "auto",
+	"typescript.preferences.includePackageJsonAutoImports": "on",
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.updateImportsOnFileMove.enabled": "never",
+	"typescript.validate.enable": true
 }

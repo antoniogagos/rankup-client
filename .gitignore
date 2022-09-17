@@ -5,7 +5,7 @@
 .DS_Store
 
 ## npm
-/node_modules/
+**/node_modules/
 /npm-debug.log
 /.rollup.cache/
 
@@ -16,10 +16,12 @@
 /.tmp/
 
 # build
-/_site/
-/dist/
-/out-tsc/
+**/dist/
 
 storybook-static
 custom-elements.json
 package-lock.json
+
+**/env.json
+
+/**/*js.map

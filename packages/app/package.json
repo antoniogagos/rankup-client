@@ -1,0 +1,38 @@
+{
+	"name": "app",
+	"version": "0.0.0",
+	"packageManager": "yarn@3.0.1",
+	"private": true,
+	"scripts": {
+		"OLD_test": "tsc && wtr --coverage",
+		"OLD_test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
+		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
+		"OLD_start:build": "wds --root-dir dist --app-index index.html --open",
+		"OLD_analyze": "cem analyze --litelement",
+		"start": "concurrently --raw \"tsc --build --watch --preserveWatchOutput\" \"wds --watch\"",
+		"poststart": "cpx './**/*.{css}' dist",
+		"validate": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@lit-labs/motion": "^1.0.3",
+		"@lit-labs/observers": "^1.0.2",
+		"@lit-labs/router": "^0.1.1",
+		"@lit-labs/task": "^1.0.0",
+		"@lit/localize": "^0.11.0",
+		"amazon-cognito-identity-js": "^5.2.3",
+		"lit": "^2.0.2",
+		"page": "^1.11.6",
+		"urlpattern-polyfill": "^5.0.9"
+	},
+	"devDependencies": {
+		"@open-wc/testing": "^3.0.0",
+		"@types/page": "^1.11.4",
+		"@web/dev-server": "^0.1.28",
+		"concurrently": "^5.3.0"
+	},
+	"peerDependencies": {
+		"app": "^1.0.0",
+		"common": "^1.0.0",
+		"samba": "^1.0.0"
+	}
+}
