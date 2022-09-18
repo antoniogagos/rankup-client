@@ -2,9 +2,16 @@
 import { Task } from '@lit-labs/task';
 import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import {
+	chatFilledIcon,
+	chatIcon,
+	fieldFilledIcon,
+	fieldIcon,
+	trophyFilledIcon,
+	trophyIcon,
+} from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import { path, relativePath } from '../../lib/localization/rk-url-paths.js';
 
 enum Tabs {
@@ -45,7 +52,7 @@ export class RkTourneyFooter extends LitElement {
 					name=${Tabs.MATCHDAY}
 					?selected=${this._selectedTab === Tabs.MATCHDAY}>
 					<div class="item-icon">
-						${this._selectedTab === Tabs.MATCHDAY ? Icons('field-filled', 28) : Icons('field', 24)}
+						${this._selectedTab === Tabs.MATCHDAY ? fieldFilledIcon : fieldIcon}
 					</div>
 				</a>
 				<a
@@ -54,7 +61,7 @@ export class RkTourneyFooter extends LitElement {
 					name=${Tabs.RANKING}
 					?selected=${this._selectedTab === Tabs.RANKING}>
 					<div class="item-icon">
-						${this._selectedTab === Tabs.RANKING ? Icons('trophy-filled', 24) : Icons('trophy', 24)}
+						${this._selectedTab === Tabs.RANKING ? trophyFilledIcon : trophyIcon}
 					</div>
 				</a>
 				<a
@@ -63,7 +70,7 @@ export class RkTourneyFooter extends LitElement {
 					name=${Tabs.CHAT}
 					?selected=${this._selectedTab === Tabs.CHAT}>
 					<div class="item-icon">
-						${this._selectedTab === Tabs.CHAT ? Icons('chat-filled', 24) : Icons('chat', 24)}
+						${this._selectedTab === Tabs.CHAT ? chatFilledIcon : chatIcon}
 					</div>
 				</a>
 			</footer>

@@ -1,11 +1,18 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import {
+	arrowRightIcon,
+	emailOpenIcon,
+	eyeHideIcon,
+	eyeIcon,
+	privacyIcon,
+	usernameIcon,
+} from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
 
 @customElement('rk-signup-page')
 export class RkSignUpPage extends LitElement {
@@ -95,7 +102,7 @@ export class RkSignUpPage extends LitElement {
 			<form action="#" method="POST" @submit=${this._onFormSubmit} @input=${this._onFormInput}>
 				<section>
 					<div class="input-wrapper">
-						${Icons('username', 24)}
+						${usernameIcon}
 						<input
 							class="form-control"
 							id="username"
@@ -109,7 +116,7 @@ export class RkSignUpPage extends LitElement {
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('email-open', 24)}
+						${emailOpenIcon}
 						<input
 							class="form-control"
 							id="email"
@@ -123,7 +130,7 @@ export class RkSignUpPage extends LitElement {
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="password"
@@ -141,14 +148,14 @@ export class RkSignUpPage extends LitElement {
 							aria-label=${this._showPassword
 								? 'Hide password'
 								: 'Show password as plain text. Warning: this will display your password on the screen.'}>
-							${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
+							${this._showPassword ? eyeHideIcon : eyeIcon}
 						</button>
 					</div>
 				</section>
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="repeatedPassword"
@@ -162,7 +169,7 @@ export class RkSignUpPage extends LitElement {
 				</section>
 
 				<button class="btn btr--primary btn--md" id="signInButton">
-					${msg('Crear cuenta')} ${Icons('arrow-right', 16)}
+					${msg('Crear cuenta')} ${arrowRightIcon}
 				</button>
 			</form>
 

@@ -178,7 +178,7 @@ export default css`
       <div>${new Intl.DateTimeFormat(['ban', 'id']).format(this.match.date)}</div>
       ${this.match.derbi
         ? html`
-            <div class="card-header--right-content">${Icons('warning', 10)} Derbi</div>
+            <div class="card-header--right-content">${warningIcon} Derbi</div>
           `
         : ''}
     </div>
@@ -188,7 +188,7 @@ export default css`
         <img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
         <div class="bet-handler">
           <button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'home')}>
-            ${Icons('chevron-up', 10)}
+            ${chevronUpIcon}
           </button>
           <input
             min="0"
@@ -200,7 +200,7 @@ export default css`
           <button
             class="chevron-btn"
             @click=${() => this._onInputHandlerClick('subtract', 'home')}>
-            ${Icons('chevron-down', 10)}
+            ${chevronDownIcon}
           </button>
         </div>
       </div>
@@ -212,7 +212,7 @@ export default css`
       <div class="team away-team">
         <div class="bet-handler">
           <button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'away')}>
-            ${Icons('chevron-up', 10)}
+            ${chevronUpIcon}
           </button>
           <input
             min="0"
@@ -224,7 +224,7 @@ export default css`
           <button
             class="chevron-btn"
             @click=${() => this._onInputHandlerClick('subtract', 'away')}>
-            ${Icons('chevron-down', 10)}
+            ${chevronUpDown}
           </button>
         </div>
         <img width="42" height="42" src="/assets/teams/villareal.png" alt="away logo" />
@@ -235,7 +235,7 @@ export default css`
   ${this.match.derbi
     ? html`
         <div class="foot-note">
-          ${Icons('warning', 10)} ¡Derbi! Bonus de +5 puntos al acertar resultado exacto
+          ${warningIcon} ¡Derbi! Bonus de +5 puntos al acertar resultado exacto
         </div>
       `
     : ''}

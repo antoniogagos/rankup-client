@@ -2,10 +2,10 @@ import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { chevronDownIcon, chevronUpIcon, speedometerIcon } from 'samba/icons.js';
 import MatchCardStyles from 'samba/styles/sb-bet-match-card-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../../authenticated-icons.js';
 import type { Match } from '../../../lib/data-service/data-service.js';
 import { calculateOddsHandicap } from '../../../lib/utils/calculate-odds-handicap.js';
 
@@ -45,7 +45,7 @@ export class RkSbBetMatch extends LitElement {
 							  `
 							: ''}
 						${calculateOddsHandicap(this.match.odds)
-							? html` <div>${msg('Sorpresa')} ${Icons('speedometer', 20)}</div> `
+							? html` <div>${msg('Sorpresa')} ${speedometerIcon}</div> `
 							: ''}
 					</div>
 				</div>
@@ -55,7 +55,7 @@ export class RkSbBetMatch extends LitElement {
 						<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
 						<div class="bet-handler">
 							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'home')}>
-								${Icons('chevron-up', 10)}
+								${chevronUpIcon}
 							</button>
 							<input
 								tabindex="-1"
@@ -73,14 +73,14 @@ export class RkSbBetMatch extends LitElement {
 							<button
 								class="chevron-btn"
 								@click=${() => this._onInputHandlerClick('subtract', 'home')}>
-								${Icons('chevron-down', 10)}
+								${chevronDownIcon}
 							</button>
 						</div>
 					</div>
 					<div class="team away-team">
 						<div class="bet-handler">
 							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'away')}>
-								${Icons('chevron-up', 10)}
+								${chevronUpIcon}
 							</button>
 							<input
 								tabindex="-1"
@@ -98,7 +98,7 @@ export class RkSbBetMatch extends LitElement {
 							<button
 								class="chevron-btn"
 								@click=${() => this._onInputHandlerClick('subtract', 'away')}>
-								${Icons('chevron-down', 10)}
+								${chevronDownIcon}
 							</button>
 						</div>
 						<img width="42" height="42" src="/assets/teams/villareal.png" alt="away logo" />
@@ -128,7 +128,7 @@ export class RkSbBetMatch extends LitElement {
 							${calculateOddsHandicap(this.match.odds)
 								? html`
 										<div>
-											${Icons('speedometer', 10)}
+											${speedometerIcon}
 											${msg('¡Sorpresa! Bonus de puntos si empata o gana el Sevilla')}
 										</div>
 								  `

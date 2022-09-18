@@ -26,6 +26,7 @@
 		"strictPropertyInitialization": true,
 		"useUnknownInCatchVariables": true
 	},
+	"exclude": ["**/node_modules/**", "**/dist/**"],
 	"watchOptions": {
 		"excludeDirectories": ["**/node_modules/**", "**/dist/**"]
 	}

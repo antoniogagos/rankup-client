@@ -1,0 +1,9 @@
+# Custom Dictionary Words
+litelement
+MATCHDAY
+Positionize
+poststart
+prestart
+Rankup
+tabindex
+urlpatter

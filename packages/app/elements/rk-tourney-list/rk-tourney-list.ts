@@ -2,12 +2,12 @@
 import { Task } from '@lit-labs/task';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { personIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import marginStyles from 'samba/styles/margin-css.js';
 import tourneyCardStyles from 'samba/styles/tourney-card-css.js';
 import typographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import { AppPaths, path } from '../../lib/localization/rk-url-paths.js';
 // import { appRouterAnimations } from '../../router-animations.js';
 
@@ -26,10 +26,10 @@ export class RkTourneyList extends LitElement {
 		//       <h2>${msg('No estás participando en ninguna liga')}</h2>
 		//       <div class="empty-state-buttons mt-4">
 		//         <button class="btn btn--primary">
-		//           ${msg('Crear liga')} ${Icons('create-tourney', 18)}
+		//           ${msg('Crear liga')} ${createTourneyIcon}
 		//         </button>
 		//         <button class="btn btn--primary">
-		//           ${msg('Unirse a una liga')} ${Icons('join-tourney', 18)}
+		//           ${msg('Unirse a una liga')} ${joinTourneyIcon}
 		//         </button>
 		//       </div>
 		//     </div> -->
@@ -41,7 +41,7 @@ export class RkTourneyList extends LitElement {
           <div><img src="/assets/images/laliga.svg" alt="LaLiga logo" /></div>
           <div class="tourney-description">
             <div class="tourney-name">The Squad Team</div>
-            <span>${Icons('person', 10)} 6</span>
+            <span>${personIcon} 6</span>
           </div>
           <div><img src="/assets/images/gold-medal.svg" alt="Gold medal" /></div>
           <div class="offset-shadows">
@@ -53,7 +53,7 @@ export class RkTourneyList extends LitElement {
           <div><img src="/assets/images/premier-league.svg" alt="Premier League logo" /></div>
           <div class="tourney-description">
             <div class="tourney-name">Una de Premier</div>
-            <span>${Icons('person', 10)} 8</span>
+            <span>${personIcon} 8</span>
           </div>
           <div><img src="/assets/images/silver-medal.svg" alt="Silver medal" /></div>
           <div class="offset-shadows">
@@ -65,7 +65,7 @@ export class RkTourneyList extends LitElement {
           <div><img src="/assets/images/champions-league.svg" alt="Champions League logo" /></div>
           <div class="tourney-description">
             <div class="tourney-name">Champions League</div>
-            <span>${Icons('person', 10)} 12</span>
+            <span>${personIcon} 12</span>
           </div>
           <div><img src="/assets/images/silver-medal.svg" alt="Silver medal" /></div>
           <div class="offset-shadows">

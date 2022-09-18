@@ -1,12 +1,19 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import {
+	arrowLeftIcon,
+	arrowRightIcon,
+	emailOpenIcon,
+	eyeHideIcon,
+	eyeIcon,
+	privacyIcon,
+} from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
 
 @customElement('rk-reset-password-page')
 export class RkResetPasswordPage extends LitElement {
@@ -86,13 +93,13 @@ export class RkResetPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
+				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${arrowLeftIcon}</a>
 				<div>${msg('Restablecer contraseña')}</div>
 			</header>
 			<form @submit=${this._onFormSubmit}>
 				<section ?hidden=${!!this.emailFromURL}>
 					<div class="input-wrapper">
-						${Icons('email-open', 24)}
+						${emailOpenIcon}
 						<input
 							class="form-control"
 							id="email"
@@ -107,7 +114,7 @@ export class RkResetPasswordPage extends LitElement {
 
 				<section ?hidden=${!!this.codeFromURL}>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="verificationCode"
@@ -122,7 +129,7 @@ export class RkResetPasswordPage extends LitElement {
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="password"
@@ -140,14 +147,14 @@ export class RkResetPasswordPage extends LitElement {
 							aria-label=${this._showPassword
 								? 'Hide password'
 								: 'Show password as plain text. Warning: this will display your password on the screen.'}>
-							${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
+							${this._showPassword ? eyeHideIcon : eyeIcon}
 						</button>
 					</div>
 				</section>
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="repeatPassword"
@@ -159,9 +166,7 @@ export class RkResetPasswordPage extends LitElement {
 							required />
 					</div>
 				</section>
-				<button class="btn--primary">
-					${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}
-				</button>
+				<button class="btn--primary">${msg('Restablecer contraseña')} ${arrowRightIcon}</button>
 			</form>
 			<footer>
 				${msg('¿No tienes una cuenta?')}

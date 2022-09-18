@@ -3,7 +3,7 @@
   <img src="/assets/images/premier-league.svg" alt="Premier League logo" />
   <div class="tourney-description">
     <div class="tourney-name">Una de Premier</div>
-    <span>${Icons('person', 10)} 8</span>
+    <span>${personIcon} 8</span>
   </div>
   <img src="/assets/images/silver-medal.svg" alt="Silver medal" />
   <div class="offset-shadows">

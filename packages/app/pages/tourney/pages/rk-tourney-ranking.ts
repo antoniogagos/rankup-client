@@ -2,12 +2,11 @@ import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { chevronDownIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
-
-import { Icons } from '../../../authenticated-icons.js';
 // import { path } from '../../../lib/localization/rk-url-paths.js';
 
 interface UserRanking {
@@ -138,7 +137,7 @@ export class RkTourneyRanking extends LitElement {
 						name=${RankingType.MATCHDAY}
 						?selected=${this.selectedRanking === RankingType.MATCHDAY}>
 						${msg('Jornada 8')}
-						<span id="chevron">${Icons('chevron-down', 16)}</span>
+						<span id="chevron">${chevronDownIcon}</span>
 					</button>
 				</div>
 			</div>

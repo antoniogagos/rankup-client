@@ -1,9 +1,9 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { arrowRightIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import { path } from '../../lib/localization/rk-url-paths.js';
 
 @customElement('rk-welcome-page')
@@ -15,7 +15,7 @@ export class WelcomePage extends LitElement {
 				<span class="title">Rankup</span>
 				<p>${msg('Juega contra tus amigos prediciendo los resultados')}</p>
 				<a class="btn btn--primary btn--lg" href=${path('SIGNIN')}>
-					${msg('Jugar ya')} ${Icons('arrow-right', 16)}
+					${msg('Jugar ya')} ${arrowRightIcon}
 				</a>
 			</div>
 			<picture>

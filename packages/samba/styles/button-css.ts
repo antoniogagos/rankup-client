@@ -1,6 +1,19 @@
 import { css } from 'lit';
 
 export default css`
+	button {
+		outline-offset: 1px;
+	}
+
+	button {
+		padding: 0;
+		margin: 0;
+		background: inherit;
+		border: none;
+		cursor: pointer;
+		color: inherit;
+	}
+
 	.btn {
 		align-items: center;
 		background: var(--color-btn-bg);

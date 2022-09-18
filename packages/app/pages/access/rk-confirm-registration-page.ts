@@ -1,11 +1,11 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { arrowRightIcon, privacyIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
 
 @customElement('rk-confirm-registration-page')
 export class RkConfirmRegistrationPage extends LitElement {
@@ -98,7 +98,7 @@ export class RkConfirmRegistrationPage extends LitElement {
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="verificationCode"
@@ -112,7 +112,7 @@ export class RkConfirmRegistrationPage extends LitElement {
 				</section>
 
 				<button class="btn btr--primary btn--md" id="signinButton">
-					${msg('Confirmar Registro')} ${Icons('arrow-right', 16)}
+					${msg('Confirmar Registro')} ${arrowRightIcon}
 				</button>
 
 				<section>

@@ -1,12 +1,11 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { arrowLeftIcon, shareIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
-
-import { Icons } from '../../../authenticated-icons.js';
 
 @customElement('rk-share-tourney')
 export class RkShareTourney extends LitElement {
@@ -26,7 +25,7 @@ export class RkShareTourney extends LitElement {
 					@click=${this._onGoBackClick}
 					@keydown=${this._onGoBackKeydown}
 					class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>
@@ -37,9 +36,7 @@ export class RkShareTourney extends LitElement {
 					)}
 				</p>
 				<div class="description">
-					<button class="btn btn--primary btn--md">
-						${msg('Compartir enlace')} ${Icons('share', 20)}
-					</button>
+					<button class="btn btn--primary btn--md">${msg('Compartir enlace')} ${shareIcon}</button>
 					<div class="tourney-code-description mt-6">
 						<div>${msg('Código de acceso al torneo:')}</div>
 						<div class="tourney-code text-bold mt-2">PUI_KD</div>

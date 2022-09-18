@@ -3,10 +3,10 @@ import '../rk-drawer/rk-drawer.js';
 // import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { bellWithNumberIcon, hamburgerIcon } from 'samba/icons.js';
 import { openOverlay } from 'samba/overlay/open-overlay.js';
 import buttonStyles from 'samba/styles/button-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import type { RkDrawer } from '../rk-drawer/rk-drawer.js';
 
 @customElement('rk-app-header')
@@ -30,9 +30,9 @@ export class RkAppHeader extends LitElement {
 	render() {
 		return html`
 			<header>
-				<button @click=${this._onMenuClick}>${Icons('hamburger', 24)}</button>
+				<button @click=${this._onMenuClick}>${hamburgerIcon}</button>
 				<section>
-					<button>${Icons('bell-with-number', 24)}</button>
+					<button>${bellWithNumberIcon}</button>
 					<button>
 						<img alt="Player avatar" src="/assets/images/default-avatar.svg" />
 					</button>
@@ -61,6 +61,11 @@ export class RkAppHeader extends LitElement {
 			header section {
 				display: flex;
 				gap: 2rem;
+			}
+
+			svg {
+				height: 24px;
+				width: 24px;
 			}
 		`,
 	];

@@ -1,13 +1,13 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { happyEmojiIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import FormControlStyles from 'samba/styles/form-control-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../../authenticated-icons.js';
 // import { path } from '../../../lib/localization/rk-url-paths.js';
 
 interface Message {
@@ -67,7 +67,7 @@ export class RkTourneyChat extends LitElement {
 				${this._renderMessages()}
 			</ul>
 			<div class="input-container">
-				${Icons('happy-emoji', 24)}
+				${happyEmojiIcon}
 				<input
 					id="textInput"
 					type="text"

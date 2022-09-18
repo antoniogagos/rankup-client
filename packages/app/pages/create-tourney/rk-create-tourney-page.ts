@@ -1,12 +1,12 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { arrowLeftIcon, arrowRightIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 // import { path } from '../../lib/localization/rk-url-paths.js';
 
 const leagues: string[] = ['laliga', 'champions-league', 'premier-league'];
@@ -26,7 +26,7 @@ export class RkCreateTourneyPage extends LitElement {
 		return html`
 			<header>
 				<button id="arrow" @click=${this._onClickGoBack} class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>
@@ -46,7 +46,7 @@ export class RkCreateTourneyPage extends LitElement {
 				<p class="f4 mt-5">${msg('Introduce el nombre de la liga.')}</p>
 				<input class="mb-3" id="textInput" type="text" placeholder=${msg('Nombre de la liga')} />
 				<button class="btn btn--primary btn--lg mt-6">
-					${msg('Empezar liga')} ${Icons('arrow-right', 16)}
+					${msg('Empezar liga')} ${arrowRightIcon}
 				</button>
 			</main>
 		`;

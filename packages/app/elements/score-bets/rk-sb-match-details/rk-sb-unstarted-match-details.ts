@@ -3,13 +3,20 @@ import '../rk-sb-bet-match/rk-sb-bet-match.js';
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import {
+	arrowLeftIcon,
+	calendarIcon,
+	planeIcon,
+	targetIcon,
+	tvIcon,
+	whistleIcon,
+} from 'samba/icons.js';
 import type { OverlayController } from 'samba/overlay/types.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../../authenticated-icons.js';
 import { Match } from '../../../lib/data-service/data-service.js';
 
 export interface RkSbUnStartedMatchDetailsParameters {
@@ -93,7 +100,7 @@ export class RkSbUnStartedMatchDetails
 		return html`
 			<header>
 				<button id="arrow" @click=${this._onClickGoBack} class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>
@@ -102,7 +109,7 @@ export class RkSbUnStartedMatchDetails
 				<div class="match-date">Hoy 21:00</div>
 				<rk-sb-bet-match class="match" .match=${this.match}></rk-sb-bet-match>
 				<section class="odds">
-					<div class="section-title mb-3">${Icons('tv', 28)} Probabilidad de victoria</div>
+					<div class="section-title mb-3">${tvIcon} Probabilidad de victoria</div>
 					<div class="section-content f5">
 						<div class="home-odds odd winner" style="width: 43%">
 							<div class="odd-pct-bar">
@@ -136,7 +143,7 @@ export class RkSbUnStartedMatchDetails
 					</div>
 				</section>
 				<section class="standings">
-					<div class="section-title mb-3">${Icons('target', 20)} ${msg('Temporada actual')}</div>
+					<div class="section-title mb-3">${targetIcon} ${msg('Temporada actual')}</div>
 					<div class="section-content">
 						<div class="row">
 							<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
@@ -175,9 +182,7 @@ export class RkSbUnStartedMatchDetails
 					</div>
 				</section>
 				<section class="last-matches">
-					<div class="section-title mb-3">
-						${Icons('calendar', 28)} ${msg('Últimos partidos en LaLiga')}
-					</div>
+					<div class="section-title mb-3">${calendarIcon} ${msg('Últimos partidos en LaLiga')}</div>
 					<div class="section-content">
 						<div class="left-column column">
 							<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
@@ -187,7 +192,7 @@ export class RkSbUnStartedMatchDetails
 									<div class="result">?</div>
 								</div>
 								<div class="row">
-									${Icons('plane', 10)}
+									${planeIcon}
 									<div class="f5 team-name">Barcelona</div>
 									<div class="result draw">1-1</div>
 								</div>
@@ -196,7 +201,7 @@ export class RkSbUnStartedMatchDetails
 									<div class="result winner">3-1</div>
 								</div>
 								<div class="row">
-									${Icons('plane', 10)}
+									${planeIcon}
 									<div class="f5 team-name">Elche</div>
 									<div class="result winner">0-3</div>
 								</div>
@@ -205,7 +210,7 @@ export class RkSbUnStartedMatchDetails
 									<div class="result lose">0-2</div>
 								</div>
 								<div class="row">
-									${Icons('plane', 10)}
+									${planeIcon}
 									<div class="f5 team-name">Atlético</div>
 									<div class="result lose">3-0</div>
 								</div>
@@ -227,12 +232,12 @@ export class RkSbUnStartedMatchDetails
 									<div class="f5 team-name">Atlético</div>
 								</div>
 								<div class="row row-reversed">
-									${Icons('plane', 10)}
+									${planeIcon}
 									<div class="result winner">0-2</div>
 									<div class="f5 team-name">Alavés</div>
 								</div>
 								<div class="row row-reversed">
-									${Icons('plane', 10)}
+									${planeIcon}
 									<div class="result lose">2-0</div>
 									<div class="f5 team-name">Real Madrid</div>
 								</div>
@@ -245,9 +250,7 @@ export class RkSbUnStartedMatchDetails
 					</div>
 				</section>
 				<section class="h2h">
-					<div class="section-title mb-3">
-						${Icons('whistle', 28)} ${msg('Enfrentamientos anteriores')}
-					</div>
+					<div class="section-title mb-3">${whistleIcon} ${msg('Enfrentamientos anteriores')}</div>
 
 					<div class="section-content">
 						<rk-match-row .match=${this.match}></rk-match-row>

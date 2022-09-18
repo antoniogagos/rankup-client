@@ -2,12 +2,12 @@ import { msg, str } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
 
 @customElement('rk-forgot-password-page')
 export class RkForgotPasswordPage extends LitElement {
@@ -52,7 +52,7 @@ export class RkForgotPasswordPage extends LitElement {
 			<form @submit=${this._onFormSubmit}>
 				<section>
 					<div class="input-wrapper">
-						${Icons('email-open', 24)}
+						${emailOpenIcon}
 						<input
 							id="email"
 							name="email"
@@ -63,9 +63,7 @@ export class RkForgotPasswordPage extends LitElement {
 							required />
 					</div>
 				</section>
-				<button class="btn--primary">
-					${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}
-				</button>
+				<button class="btn--primary">${msg('Restablecer contraseña')} ${arrowRightIcon}</button>
 			</form>
 		`;
 	}
@@ -83,7 +81,7 @@ export class RkForgotPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
+				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${arrowLeftIcon}</a>
 				<div>${msg('Recordar contraseña')}</div>
 			</header>
 

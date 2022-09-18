@@ -1,12 +1,19 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import {
+	arrowRightIcon,
+	emailOpenIcon,
+	eyeHideIcon,
+	eyeIcon,
+	googleIcon,
+	privacyIcon,
+} from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 
 import { path } from '../../lib/localization/rk-url-paths.js';
-import { Icons } from '../../unauthenticated-icons.js';
 
 @customElement('rk-signin-page')
 export class RkSignInPage extends LitElement {
@@ -63,7 +70,7 @@ export class RkSignInPage extends LitElement {
 			<form @submit=${this._onFormSubmit} @input=${this._onFormInput}>
 				<section>
 					<div class="input-wrapper">
-						${Icons('email-open', 24)}
+						${emailOpenIcon}
 						<input
 							id="email"
 							name="email"
@@ -77,7 +84,7 @@ export class RkSignInPage extends LitElement {
 
 				<section>
 					<div class="input-wrapper">
-						${Icons('privacy', 24)}
+						${privacyIcon}
 						<input
 							class="form-control"
 							id="currentPassword"
@@ -94,7 +101,7 @@ export class RkSignInPage extends LitElement {
 							aria-label=${this._showPassword
 								? 'Hide password'
 								: 'Show password as plain text. Warning: this will display your password on the screen.'}>
-							${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}
+							${this._showPassword ? eyeHideIcon : eyeIcon}
 						</button>
 					</div>
 				</section>
@@ -104,7 +111,7 @@ export class RkSignInPage extends LitElement {
 				</a>
 
 				<button class="btn--primary" id="signInButton">
-					${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}
+					${msg('Iniciar sesión')} ${arrowRightIcon}
 				</button>
 			</form>
 
@@ -113,7 +120,7 @@ export class RkSignInPage extends LitElement {
 				<div class="divisor-text">${msg('o continua con')}</div>
 			</div>
 
-			<button id="googleBtn" @click=${this._onGoogleSignInClick}>${Icons('google', 48)}</button>
+			<button id="googleBtn" class="btn" @click=${this._onGoogleSignInClick}>${googleIcon}</button>
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}

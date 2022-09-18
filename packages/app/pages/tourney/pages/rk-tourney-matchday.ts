@@ -6,10 +6,10 @@ import { Task } from '@lit-labs/task';
 import { ListenersController } from 'common/lit-controllers/listeners-controller/listeners-controller.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { chevronDownIcon } from 'samba/icons.js';
 import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../../authenticated-icons.js';
 import type { Match } from '../../../lib/data-service/data-service.js';
 import { hasMatchdayStarted } from '../../../lib/utils/has-matchday-started.js';
 
@@ -53,7 +53,7 @@ export class RkTourneyMatchday extends LitElement {
 						? html`
 								<header>
 									<button class="matchday-select f4 text-bold">
-										Jornada 20 ${Icons('chevron-down', 16)}
+										Jornada 20 ${chevronDownIcon}
 									</button>
 									<div class="points text-bold">
 										<span class="points-number">85</span>
@@ -65,7 +65,7 @@ export class RkTourneyMatchday extends LitElement {
 						: html`
 								<header>
 									<button class="matchday-select f4 text-bold">
-										Jornada 20 ${Icons('chevron-down', 16)}
+										Jornada 20 ${chevronDownIcon}
 									</button>
 								</header>
 								<rk-tourney-matchday-not-started

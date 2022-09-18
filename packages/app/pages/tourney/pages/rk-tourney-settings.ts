@@ -3,13 +3,13 @@ import 'samba/toggle-input/toggle-input.js';
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { arrowLeftIcon, bellIcon, leaveIcon, paperIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import FormControlStyles from 'samba/styles/form-control-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../../authenticated-icons.js';
 import { path, relativePath } from '../../../lib/localization/rk-url-paths.js';
 
 @customElement('rk-tourney-settings')
@@ -38,15 +38,13 @@ export class RkTourneySettings extends LitElement {
 					@click=${this._onGoBackClick}
 					@keydown=${this._onGoBackKeydown}
 					class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>
 				<h1 class="text-bold">${msg('Ajustes')}</h1>
 				<section>
-					<p class="section-title text-bold f3 mt-6 mb-3">
-						${Icons('bell', 24)} ${msg('Notificaciones')}
-					</p>
+					<p class="section-title text-bold f3 mt-6 mb-3">${bellIcon} ${msg('Notificaciones')}</p>
 					<div class="section-list f5">
 						<div class="list--item">
 							<div class="list--item-block f4">
@@ -103,10 +101,10 @@ export class RkTourneySettings extends LitElement {
 				</section>
 				<div class="buttons mt-6">
 					<a class="btn btn--primary btn--md" href=${staticPath + relativePath('RULES_TOURNEY')}>
-						${msg('Ver sistema de puntuación')} ${Icons('paper', 24)}
+						${msg('Ver sistema de puntuación')} ${paperIcon}
 					</a>
 					<button class="btn btn--primary btn--md btn--danger">
-						${msg('Abandonar torneo')} ${Icons('leave', 20)}
+						${msg('Abandonar torneo')} ${leaveIcon}
 					</button>
 				</div>
 			</main>

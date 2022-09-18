@@ -1,13 +1,13 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { arrowLeftIcon, arrowRightIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 // import FormControlStyles from 'samba/styles/form-control-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 // import { path } from '../../lib/localization/rk-url-paths.js';
 
 @customElement('rk-join-tourney-page')
@@ -28,7 +28,7 @@ export class RkJoinTourneyPage extends LitElement {
 					@click=${this._onGoBackClick}
 					@keydown=${this._onGoBackKeydown}
 					class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>
@@ -42,9 +42,7 @@ export class RkJoinTourneyPage extends LitElement {
 					type="text"
 					placeholder=${msg('Escribe el código aquí')} />
 				<div class="description mt-4">
-					<button class="btn btn--primary btn--lg">
-						${msg('Jugar ya')} ${Icons('arrow-right', 16)}
-					</button>
+					<button class="btn btn--primary btn--lg">${msg('Jugar ya')} ${arrowRightIcon}</button>
 				</div>
 			</main>
 		`;

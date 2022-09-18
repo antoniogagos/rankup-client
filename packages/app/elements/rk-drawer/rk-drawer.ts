@@ -2,10 +2,16 @@ import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import {
+	createTourneyIcon,
+	joinTourneyIcon,
+	newsletterIcon,
+	signOutIcon,
+	twitterIcon,
+} from 'samba/icons.js';
 import type { OverlayController } from 'samba/overlay/types.js';
 import buttonStyles from 'samba/styles/button-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import { path } from '../../lib/localization/rk-url-paths.js';
 
 export interface RkDrawerParameters {}
@@ -54,19 +60,17 @@ export class RkDrawer extends LitElement implements RkDrawerParameters {
 				<img src="/assets/images/rk-logo-with-bg.svg" alt="Rankup logo" />
 				<div class="rankup">Rankup</div>
 				<a href=${path('CREATE_TOURNEY')}>
-					<button class="btn btn--md">${Icons('create-tourney', 18)}${msg('Crear liga')}</button>
+					<button class="btn btn--md">${createTourneyIcon}${msg('Crear liga')}</button>
 				</a>
 				<a href=${path('JOIN_TOURNEY')}>
-					<button class="btn btn--md">
-						${Icons('join-tourney', 18)}${msg('Unirse a una liga')}
-					</button>
+					<button class="btn btn--md">${joinTourneyIcon}${msg('Unirse a una liga')}</button>
 				</a>
 				<button id="signoutBtn" @click=${this._onSignOutClicked} class="btn btn--md">
-					${Icons('sign-out', 18)}${msg('Cerrar sesión')}
+					${signOutIcon}${msg('Cerrar sesión')}
 				</button>
 				<div class="divisor-line"></div>
-				<button class="btn btn--md">${Icons('twitter', 18)}${msg('¡Síguenos en Twitter!')}</button>
-				<button class="btn btn--md">${Icons('newsletter', 18)}${msg('Rankup newsletter')}</button>
+				<button class="btn btn--md">${twitterIcon}${msg('¡Síguenos en Twitter!')}</button>
+				<button class="btn btn--md">${newsletterIcon}${msg('Rankup newsletter')}</button>
 			</main>
 		`;
 	}

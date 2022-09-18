@@ -1,12 +1,11 @@
 import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { arrowLeftIcon } from 'samba/icons.js';
 import ButtonStyles from 'samba/styles/button-css.js';
 import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
-
-import { Icons } from '../../../authenticated-icons.js';
 
 @customElement('rk-sb-rules')
 export class RkSbRules extends LitElement {
@@ -26,7 +25,7 @@ export class RkSbRules extends LitElement {
 					@click=${this._onGoBackClick}
 					@keydown=${this._onGoBackKeydown}
 					class="link--primary">
-					${Icons('arrow-left', 20)}
+					${arrowLeftIcon}
 				</button>
 			</header>
 			<main>

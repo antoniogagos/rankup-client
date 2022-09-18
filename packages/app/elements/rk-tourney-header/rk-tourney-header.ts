@@ -3,11 +3,11 @@ import { Task } from '@lit-labs/task';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { addPlayerIcon, arrowLeftIcon, settingsIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 import typographyStyles from 'samba/styles/typography-css.js';
 
-import { Icons } from '../../authenticated-icons.js';
 import { path, relativePath } from '../../lib/localization/rk-url-paths.js';
 
 @customElement('rk-tourney-header')
@@ -22,11 +22,11 @@ export class RkTourneyHeader extends LitElement {
 	);
 
 	render() {
-		const linkClasses = {
+		const staticPath = path('TOURNEY') + '/fj_rew';
+		const linkClasses = classMap({
 			'link--primary': !this.invertedColor,
 			'link--primary-inverted': this.invertedColor,
-		};
-		const staticPath = path('TOURNEY') + '/fj_rew';
+		});
 		return html`
       <header
         class=${classMap({
@@ -36,19 +36,19 @@ export class RkTourneyHeader extends LitElement {
         <section class="left-section">
           <a
             id="arrow"
-            class=${classMap(linkClasses)}
+            class=${linkClasses}
             href=${path('TOURNEYS')}>
-            ${Icons('arrow-left', 20)}
+            ${arrowLeftIcon}
           </a>
         </section>
         <div class="f3 text-bold nowrap tourney-name">The Squad Team</div>
         <section class="right-section">
-          <a href=${staticPath + relativePath('SHARE_TOURNEY')} class=${classMap(
-			linkClasses,
-		)}>${Icons('add-player', 20)}</a>
-          <a href=${staticPath + relativePath('SETTINGS_TOURNEY')} class=${classMap(
-			linkClasses,
-		)}>${Icons('settings', 20)}</button></a>
+          <a href=${
+						staticPath + relativePath('SHARE_TOURNEY')
+					} class=${linkClasses}>${addPlayerIcon}</a>
+          <a href=${
+						staticPath + relativePath('SETTINGS_TOURNEY')
+					} class=${linkClasses}>${settingsIcon}</button></a>
         </section>
       </header>
     `;
