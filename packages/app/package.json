@@ -9,7 +9,8 @@
 		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
 		"OLD_start:build": "wds --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
-		"prestart": "cpx -v \"index.html\" dist",
+		"copy-assets": "cpx \"assets/**\" dist/assets & cpx \"index.html\" dist",
+		"prestart": "npm run copy-assets",
 		"start": "concurrently --raw \"tsc -b -w --preserveWatchOutput\" \"wds --watch\"",
 		"validate": "tsc --noEmit"
 	},

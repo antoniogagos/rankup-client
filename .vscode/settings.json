@@ -24,7 +24,17 @@
 		"node_modules/**": true,
 		"dist/**": true
 	},
-	"cSpell.words": ["MATCHDAY", "middlewares", "Positionize", "Rankup", "tabindex", "urlpattern"],
+	"cSpell.words": [
+		"litelement",
+		"MATCHDAY",
+		"middlewares",
+		"Positionize",
+		"poststart",
+		"prestart",
+		"Rankup",
+		"tabindex",
+		"urlpattern"
+	],
 	"cssVariables.lookupFiles": ["**/*.{css,html}"],
 	"eslint.lintTask.enable": true,
 	"html.customData": ["./custom-elements.json"],

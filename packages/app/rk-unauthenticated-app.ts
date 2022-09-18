@@ -51,6 +51,7 @@ export class RkUnauthenticatedApp extends LitElement {
 	render() {
 		return html`
 			<load-spinner></load-spinner>
+			<img width="32" height="32" src="/assets/teams/sevilla.png" alt="home logo" />
 			<app-router .animations=${appRouterAnimations}>
 				<rk-welcome-page path="/" animation="opacity"></rk-welcome-page>
 				<rk-signin-page path=${path('SIGNIN')} animation="opacity"></rk-signin-page>
