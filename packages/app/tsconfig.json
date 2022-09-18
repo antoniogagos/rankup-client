@@ -28,6 +28,6 @@
 		"useUnknownInCatchVariables": true
 	},
 	"references": [{ "path": "../samba" }, { "path": "../common" }],
-	"include": ["../samba/definitions.d.ts", "**/*.ts", "**/*.js", "**/*.css"],
+	"include": ["**/*.ts", "**/*.js"],
 	"exclude": ["node_modules", "dist"]
 }

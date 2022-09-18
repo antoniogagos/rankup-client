@@ -29,6 +29,6 @@
 		"useUnknownInCatchVariables": true
 	},
 	"references": [{ "path": "../common" }],
-	"include": ["definitions.d.ts", "**/*.ts", "**/*.js"],
+	"include": ["**/*.ts", "**/*.js"],
 	"exclude": ["node_modules", "dist"]
 }

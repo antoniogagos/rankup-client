@@ -5,8 +5,8 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 		<meta name="Description" content="Put your description here." />
-		<link rel="stylesheet" href="samba/styles/root.css" />
-		<link rel="stylesheet" href="samba/styles/theme.css" />
+		<link rel="stylesheet" href="../node_modules/samba/dist/assets/styles/root.css" />
+		<link rel="stylesheet" href="../node_modules/samba/dist/assets/styles/theme.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -22,7 +22,7 @@
 
 		<overlay-container></overlay-container>
 
-		<script type="module" src="./dist/elements/rk-auth-wall/rk-auth-wall.js"></script>
+		<script type="module" src="./elements/rk-auth-wall/rk-auth-wall.js"></script>
 
 		<script>
 			let authAppImported = false;
@@ -34,13 +34,13 @@
 				if (isLogged) {
 					setColorScheme();
 					if (!authAppImported) {
-						import('./dist/rk-app.js');
+						import('./rk-app.js');
 						authAppImported = true;
 					}
 				} else {
 					removeColorScheme();
 					if (!unAuthAppImported) {
-						import('./dist/rk-unauthenticated-app.js');
+						import('./rk-unauthenticated-app.js');
 						unAuthAppImported = true;
 					}
 				}

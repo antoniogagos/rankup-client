@@ -1,12 +1,11 @@
 {
-  "name": "samba",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "lit": "^2.0.2"
-  },
-  "peerDependencies": {
-    "common": "^1.0.0",
-    "samba": "^1.0.0"
-  }
+	"name": "samba",
+	"version": "1.0.0",
+	"private": true,
+	"dependencies": {
+		"lit": "^2.0.2"
+	},
+	"peerDependencies": {
+		"common": "^0.0.1"
+	}
 }

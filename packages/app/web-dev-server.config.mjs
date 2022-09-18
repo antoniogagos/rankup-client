@@ -1,32 +1,55 @@
+import alias from '@rollup/plugin-alias';
+import { fromRollup } from '@web/dev-server-rollup';
 import { readdirSync } from 'fs';
-import Path from 'path';
-// import { hmrPlugin, presets } from '@open-wc/dev-server-hmr';
 
 const MONOREPO_FOLDER = '../../packages';
 const MONOREPO_PACKAGES = getMonorepoPackages();
-const MONOREPO_PACKAGE_URL_REG = new RegExp(`^\/(${MONOREPO_PACKAGES.join('|')})\/.*`);
+// const MONOREPO_PACKAGE_URL_REG = new RegExp(`^\/(${MONOREPO_PACKAGES.join('|')})\/.*`);
 // Use Hot Module replacement by adding --hmr to the start command
 const hmr = process.argv.includes('--hmr');
-// Adding this prefix to an URL, web-dev-server will be able to req at the root level
-const REQ_ROOT_PREFIX = '/__wds-outside-root__/1';
+// Requests to web-dev-server that starts with this will navigate to the
+// upper N (3 in this case) folder, starting from where the web-dev-server is running
+const ROOT_PREFIX_PATH = '/__wds-outside-root__/3';
 
 /** @type {import('@web/dev-server').DevServerConfig} */
 export default {
 	appIndex: 'packages/app/index.html',
-	rootDir: './',
+	rootDir: './dist',
 	watch: !hmr,
-	nodeResolve: {
-		browser: true,
-		// modulesOnly: true,
-		// exportConditions: ['import'],
-		dedupe: ['lit', '@lit'],
-	},
+	// nodeResolve: { dedupe: ['lit', '@lit'], },
+	nodeResolve: true,
 	preserveSymlinks: true,
+	plugins: [
+		/**
+		 * "nodeResolve" is not resolving our monorepo packages bare imports:
+		 *   i.e. `import 'samba/...'`
+		 *   so we're using this plugin to resolve it ourselves.
+		 *
+		 * Longer explanation:
+		 *   - With TS Project References we are already telling the ts compiler that those imports
+		 *     are in their respective folder and that's working well
+		 *   - However, when it comes to serve files in local, nodeResolve has to do the job of resolving
+		 *     bare modules imports.
+		 *   - We have symlinks in node_modules: node_modules/samba => packages/samba/ but that even if
+		 *     nodeResolve would resolve it, we need assets on the dist folder.
+		 */
+		fromRollup(alias)({
+			entries: MONOREPO_PACKAGES.map(packageName => ({
+				find: new RegExp(`^${packageName}`),
+				replacement: `${ROOT_PREFIX_PATH}/node_modules/${packageName}/dist`,
+			})),
+		}),
+	],
 	middleware: [
+		/**
+		 * We already handle ESmodule imports via "nodeResolve" and our plugin, but requests from HTML
+		 * files need rewriting, because web-dev-server doesn't allow requests in an upper folder where it's
+		 * initialized without a specific prefix (ROOT_PREFIX_PATH)
+		 */
 		function rewriteImports(context, next) {
-			if (MONOREPO_PACKAGE_URL_REG.test(context.url)) {
-				context.url = `${REQ_ROOT_PREFIX}${context.url}`;
-			} else console.log(context.url);
+			if (context.url.startsWith('/node_modules/')) {
+				context.url = `${ROOT_PREFIX_PATH}` + context.url;
+			}
 			return next();
 		},
 	],

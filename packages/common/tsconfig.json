@@ -28,5 +28,6 @@
 		"target": "esnext",
 		"useUnknownInCatchVariables": true
 	},
+	"include": ["**/*.ts", "**/*.js"],
 	"exclude": ["node_modules", "dist"]
 }

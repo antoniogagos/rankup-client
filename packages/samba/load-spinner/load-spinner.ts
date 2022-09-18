@@ -1,62 +1,82 @@
 /* eslint-disable max-classes-per-file */
 // import { observeProperties } from 'common/object-property-observer/object-property-observer.js';
-import type { ReactiveController, ReactiveElement } from 'lit';
-import { css, html, LitElement, PropertyValues } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+// import type { PropertyValueMap, ReactiveController, ReactiveElement } from 'lit';
+import { css, html, LitElement /* PropertyValues */ } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
-class PropertiesObserver implements ReactiveController {
-	constructor(
-		public host: ReactiveElement,
-		private callbacks: { [k: string]: (value: any, old: any) => void },
-	) {
-		if (host.nodeType !== Node.ELEMENT_NODE) throw new Error('InvalidHost');
-		this.propertyNames = Object.keys(callbacks);
-		console.log('created-', { callbacks });
-		host.addController(this);
-	}
+// class PropertiesObserver implements ReactiveController {
+// 	constructor(
+// 		public host: ReactiveElement,
+// 		private callbacks: { [k: string]: (value: any, old: any) => void },
+// 	) {
+// 		if (host.nodeType !== Node.ELEMENT_NODE) throw new Error('InvalidHost');
+// 		this.propertyNames = Object.keys(callbacks);
+// 		console.log('created-', { callbacks });
+// 		host.addController(this);
+// 	}
 
-	private propertyNames: string[] = [];
+// 	private propertyNames: string[] = [];
 
-	hostConnected() {
-		//
-	}
+// 	hostConnected() {
+// 		//
+// 	}
 
-	update(changedProperties: PropertyValues) {
-		for (const propName of this.propertyNames) {
-			if (changedProperties.has(propName)) {
-				const value = changedProperties.get(propName);
-				const old = this[propName as keyof this];
-				this.callbacks[propName](value, old);
-			}
-		}
-	}
-}
+// 	update(changedProperties: PropertyValues) {
+// 		console.log('update-called', { changedProperties });
+// 		for (const propName of this.propertyNames) {
+// 			console.log({ propName, has: changedProperties.has(propName) });
+// 			if (changedProperties.has(propName)) {
+// 				const value = changedProperties.get(propName);
+// 				const old = this[propName as keyof this];
+// 				this.callbacks[propName](value, old);
+// 			}
+// 		}
+// 	}
+// }
 
 @customElement('load-spinner')
 export class LoadSpinner extends LitElement {
 	@property({ type: Boolean, reflect: true })
-	active = false;
+	active = true;
 
-	private _propertiesObs = new PropertiesObserver(this, {
-		active: this.#activeChanged,
-	});
+	@query('#spinnerContainer')
+	foo!: HTMLDivElement;
+
+	// static get properties() {
+	// 	return {
+	// 		active: { type: Boolean, reflect: true },
+	// 	};
+	// }
+
+	// constructor() {
+	// 	super();
+	// 	// @ts-ignore
+	// 	this.active = true;
+	// }
+
+	// private _propertiesObs = new PropertiesObserver(this, {
+	// 	active: this.#activeChanged,
+	// });
 
 	// constructor() {
 	//   super();
 	// observeProperties(this, { active: this.#activeChanged });
 	// }
-
 	#coolingDown = false;
 
 	connectedCallback() {
 		super.connectedCallback?.();
-		console.log('connected!!');
 	}
 
-	update(changedProperties: PropertyValues) {
-		this._propertiesObs.update(changedProperties);
-		super.update(changedProperties);
+	protected firstUpdated() {
+		console.log('first-updated', this.foo, this.shadowRoot?.querySelector('#spinnerContainer'));
 	}
+
+	// update(changedProperties: PropertyValues) {
+	// 	console.log('update-instance', { changedProperties });
+	// 	this._propertiesObs.update(changedProperties);
+	// 	super.update(changedProperties);
+	// }
 
 	#activeChanged(active: boolean, old: boolean) {
 		console.log('activeChanged', { active, old });
@@ -74,6 +94,7 @@ export class LoadSpinner extends LitElement {
 	}
 
 	render() {
+		console.log('render...');
 		const classNames = [
 			this.active || this.#coolingDown ? 'active' : '',
 			this.#coolingDown ? 'cooldown' : '',

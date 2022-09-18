@@ -5,12 +5,12 @@
 	"private": true,
 	"scripts": {
 		"OLD_test": "tsc && wtr --coverage",
-		"OLD_test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
+		"OLD_test:watch": "tsc && concurrently -k -r \"tsc -w --preserveWatchOutput\" \"wtr --watch\"",
 		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
 		"OLD_start:build": "wds --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
-		"start": "concurrently --raw \"tsc --build --watch --preserveWatchOutput\" \"wds --watch\"",
-		"poststart": "cpx './**/*.{css}' dist",
+		"prestart": "cpx -v \"index.html\" dist",
+		"start": "concurrently --raw \"tsc -b -w --preserveWatchOutput\" \"wds --watch\"",
 		"validate": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -26,13 +26,16 @@
 	},
 	"devDependencies": {
 		"@open-wc/testing": "^3.0.0",
+		"@rollup/plugin-alias": "^3.1.9",
 		"@types/page": "^1.11.4",
+		"@web/dev-server-rollup": "^0.3.19",
 		"@web/dev-server": "^0.1.28",
-		"concurrently": "^5.3.0"
+		"concurrently": "^5.3.0",
+		"rollup-plugin-lit-css": "^4.0.0",
+		"rollup-plugin-postcss": "^4.0.2"
 	},
 	"peerDependencies": {
-		"app": "^1.0.0",
-		"common": "^1.0.0",
-		"samba": "^1.0.0"
+		"samba": "^0.0.1",
+		"common": "^0.0.1"
 	}
 }
