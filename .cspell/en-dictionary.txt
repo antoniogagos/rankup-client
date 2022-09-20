@@ -1,6 +1,7 @@
 # Custom Dictionary Words
 CODEOWNERS
 deepmerge
+esbuild
 litelement
 MATCHDAY
 Positionize

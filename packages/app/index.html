@@ -22,7 +22,7 @@
 
 		<sb-overlay-container></sb-overlay-container>
 
-		<script type="module" src="./components/rk-auth-wall/rk-auth-wall.js"></script>
+		<script type="module" src="./components/rk-auth-wall/rk-auth-wall.ts"></script>
 
 		<script>
 			let authAppImported = false;
@@ -40,7 +40,7 @@
 				} else {
 					removeColorScheme();
 					if (!unAuthAppImported) {
-						import('./rk-unauthenticated-app.js');
+						import('./rk-unauthenticated-app.ts');
 						unAuthAppImported = true;
 					}
 				}

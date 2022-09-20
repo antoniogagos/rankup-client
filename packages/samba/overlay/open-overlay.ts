@@ -1,17 +1,12 @@
+import type { HTMLElementEvenObject } from 'common/types/html-element-typed-events';
 import { ReactiveElement } from 'lit';
 
-import type { IEventsMap } from '../types/types';
-import type { EventsMap } from './events.types';
 import { OverlayController } from './overlay-controller.js';
-import type { Options } from './types';
+import type { EventsMap as OverlayEventsMap, Options } from './types';
 
 export class CustomElementClass extends ReactiveElement {
 	overlayController?: OverlayController<this>;
 }
-
-type HostEventsMap<T extends ReactiveElement, K extends IEventsMap = IEventsMap> = EventsMap<
-	OverlayController<T, K>
->;
 
 /**
  * It's possible to infer the element class definition from the elementName by using HTMLElementTagNameMap because
@@ -20,10 +15,14 @@ type HostEventsMap<T extends ReactiveElement, K extends IEventsMap = IEventsMap>
  * type HTMLElementTagNames = keyof HTMLElementTagNameMap; // includes all HTMLElements + one of our custom elements
  */
 
-export function openOverlay<T extends CustomElementClass, Params = null>(
+export function openOverlay<
+	T extends CustomElementClass,
+	Params = null,
+	EventsMap extends Record<string, Event> = HTMLElementEvenObject,
+>(
 	elementName: string,
 	params?: Params,
-	overlayOptions?: Options<T, HostEventsMap<T>>,
+	overlayOptions?: Options<T, EventsMap & OverlayEventsMap<OverlayController<T>>>,
 ) {
 	if (!customElements.get(elementName)) {
 		throw new Error(`Open overlay: element ${elementName} is not registered`);
@@ -34,7 +33,7 @@ export function openOverlay<T extends CustomElementClass, Params = null>(
 			view[paramName as keyof T] = paramValue as any;
 		}
 	}
-	const overlayController = new OverlayController<T, HostEventsMap<T>>(view, overlayOptions);
-	view.overlayController = overlayController as OverlayController<T, any>;
+	const overlayController = new OverlayController<T, EventsMap>(view, overlayOptions);
+	view.overlayController = overlayController;
 	return overlayController;
 }

@@ -1,23 +1,21 @@
 import { ListenersController } from 'common/lit-controllers/listeners-controller/listeners-controller.js';
+import { WithEvents } from 'common/types/html-element-typed-events.js';
 import type { ReactiveController } from 'lit';
 import { adoptStyles } from 'lit';
 
-import { IEventsMap } from '../types/types.js';
 import type { AnimationKeys } from './animations-presets.js';
 import { AnimationsPresets } from './animations-presets.js';
 import { whenVisible } from './common/when-visible.js';
 import BoxOverlayStyles from './styles/box-overlay-css.js';
 import type {
 	AnimationOptions,
-	EventsMap,
+	EventsMap as OverlayEventsMap,
 	HorizontalAlign,
 	Options,
 	ReactiveControllerHostElement,
 	Rect,
 	VerticalAlign,
 } from './types';
-
-type Events = keyof EventsMap<OverlayController>;
 
 /**
  * @fires before-close-overlay
@@ -30,7 +28,7 @@ type Events = keyof EventsMap<OverlayController>;
  */
 export class OverlayController<
 	T extends ReactiveControllerHostElement = ReactiveControllerHostElement,
-	EM extends IEventsMap = EventsMap<any>,
+	EventsMap extends Record<string, Event> = OverlayEventsMap<any>,
 > implements ReactiveController
 {
 	/**
@@ -105,19 +103,19 @@ export class OverlayController<
 
 	#attachedToContainer = false;
 
-	#handleOutsideClick: ((evt: MouseEvent) => void) | null = null;
+	#focusedElementBeforeOpeningOverlay: HTMLElement | null = null;
 
-	#isClosing = false;
+	#handleOutsideClick: ((evt: MouseEvent) => void) | null = null;
 
 	#initialized = false;
 
-	#listeners: ListenersController<EM> | null = null;
+	#isClosing = false;
+
+	#listeners: ListenersController<EventsMap> | null = null;
 
 	#opened = false;
 
-	#focusedElementBeforeOpeningOverlay: HTMLElement | null = null;
-
-	constructor(public host: T, opts: Options<T, EM> = {}) {
+	constructor(public host: WithEvents<T, EventsMap>, opts: Options<T, EventsMap> = {}) {
 		this.canceled = false;
 		this.ignored = false;
 		this.addOverlayStyles = opts.addOverlayStyles ?? true;
@@ -612,11 +610,11 @@ export class OverlayController<
 		};
 	}
 
-	#dispatchEvent<EventName extends Events>(
+	#dispatchEvent<EventName extends keyof OverlayEventsMap<OverlayController>>(
 		eventName: EventName,
-		detail: EventsMap<OverlayController>[EventName]['detail'],
+		detail: OverlayEventsMap<OverlayController>[EventName]['detail'],
 		opts?: { target?: EventTarget; cancelable?: boolean },
-	): EventsMap<OverlayController>[EventName] | null {
+	): OverlayEventsMap<OverlayController>[EventName] | null {
 		const { target, cancelable = false } = opts ?? {};
 		try {
 			const evt = new CustomEvent(eventName, {
@@ -626,7 +624,7 @@ export class OverlayController<
 				detail,
 			});
 			(target ?? this.host).dispatchEvent(evt);
-			return evt as EventsMap<OverlayController>[EventName];
+			return evt as OverlayEventsMap<OverlayController>[EventName];
 		} catch (error) {
 			console.error(error);
 		}

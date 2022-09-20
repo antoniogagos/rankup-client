@@ -1,25 +1,27 @@
-import alias from '@rollup/plugin-alias';
-import { fromRollup } from '@web/dev-server-rollup';
-import { readdirSync } from 'fs';
+// import alias from '@rollup/plugin-alias';
+import { esbuildPlugin } from '@web/dev-server-esbuild';
+// import { fromRollup } from '@web/dev-server-rollup';
+// import { readdirSync } from 'fs';
 
-const MONOREPO_FOLDER = '../../packages';
-const MONOREPO_PACKAGES = getMonorepoPackages();
+// const MONOREPO_FOLDER = '../../packages';
+// const MONOREPO_PACKAGES = getMonorepoPackages();
 // const MONOREPO_PACKAGE_URL_REG = new RegExp(`^\/(${MONOREPO_PACKAGES.join('|')})\/.*`);
 // Use Hot Module replacement by adding --hmr to the start command
 const hmr = process.argv.includes('--hmr');
 // Requests to web-dev-server that starts with this will navigate to the
 // upper N (3 in this case) folder, starting from where the web-dev-server is running
-const ROOT_PREFIX_PATH = '/__wds-outside-root__/3';
+const ROOT_PREFIX_PATH = '/__wds-outside-root__/2';
 
 /** @type {import('@web/dev-server').DevServerConfig} */
 export default {
 	appIndex: 'packages/app/index.html',
-	rootDir: './dist',
+	rootDir: './',
 	watch: !hmr,
 	// nodeResolve: { dedupe: ['lit', '@lit'], },
 	nodeResolve: true,
 	preserveSymlinks: true,
 	plugins: [
+		esbuildPlugin({ ts: true, json: true, target: 'auto' }),
 		/**
 		 * "nodeResolve" is not resolving our monorepo packages bare imports:
 		 *   i.e. `import 'samba/...'`
@@ -33,12 +35,12 @@ export default {
 		 *   - We have symlinks in node_modules: node_modules/samba => packages/samba/ but that even if
 		 *     nodeResolve would resolve it, we need assets on the dist folder.
 		 */
-		fromRollup(alias)({
-			entries: MONOREPO_PACKAGES.map(packageName => ({
-				find: new RegExp(`^${packageName}`),
-				replacement: `${ROOT_PREFIX_PATH}/node_modules/${packageName}/dist`,
-			})),
-		}),
+		// fromRollup(alias)({
+		// 	entries: MONOREPO_PACKAGES.map(packageName => ({
+		// 		find: new RegExp(`^${packageName}`),
+		// 		replacement: `${ROOT_PREFIX_PATH}/node_modules/${packageName}/dist`,
+		// 	})),
+		// }),
 	],
 	middleware: [
 		/**
@@ -64,11 +66,11 @@ export default {
 	// ],
 };
 
-function getMonorepoPackages() {
-	return readdirSync(MONOREPO_FOLDER, { withFileTypes: true })
-		.filter(dirent => dirent.isDirectory())
-		.map(dirent => dirent.name);
-}
+// function getMonorepoPackages() {
+// 	return readdirSync(MONOREPO_FOLDER, { withFileTypes: true })
+// 		.filter(dirent => dirent.isDirectory())
+// 		.map(dirent => dirent.name);
+// }
 
 // /** @param {string} url */
 // function parseURL(url) {

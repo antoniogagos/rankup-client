@@ -1,9 +1,8 @@
-import { HTMLElementTypedEvents } from 'common/types/html-element-typed-events';
+import type { WithEvents } from 'common/types/html-element-typed-events';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { EventDetail, IEventsMap } from 'types/types';
 
-export type EventsMap = {
+type EventsMap = {
 	'change-prevented': Event;
 	change: CustomEvent<{
 		old: boolean;
@@ -16,10 +15,7 @@ export type EventsMap = {
  * @fires change-prevented
  */
 @customElement('sb-toggle-input')
-export class SbToggleInput
-	extends LitElement
-	implements HTMLElementTypedEvents<IEventsMap & HTMLElementEventMap>
-{
+export class SbToggleInput extends LitElement {
 	@property({ type: Boolean, reflect: true })
 	checked = false;
 
@@ -31,18 +27,20 @@ export class SbToggleInput
 		const { checked } = input;
 		if (this.disabled) {
 			input.checked = !checked;
-			this.dispatchEvent(
-				new CustomEvent<EventDetail<EventsMap['change-prevented']>>('change-prevented'),
-			);
+			const changePreventedEvt: EventsMap['change-prevented'] = new Event('change-prevented');
+			this.dispatchEvent(changePreventedEvt);
 			return;
 		}
 		const old = this.checked;
 		this.checked = checked;
-		this.dispatchEvent(
-			new CustomEvent<EventDetail<EventsMap['change']>>('change', {
-				detail: { value: checked, old },
-			}),
-		);
+		const changeEvt: EventsMap['change'] = new CustomEvent('change', {
+			detail: { value: checked, old },
+		});
+		this.dispatchEvent(changeEvt);
+	}
+
+	myFunc() {
+		return 1;
 	}
 
 	render() {
@@ -113,6 +111,6 @@ export class SbToggleInput
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'sb-toggle-input': SbToggleInput;
+		'sb-toggle-input': WithEvents<SbToggleInput, EventsMap>;
 	}
 }

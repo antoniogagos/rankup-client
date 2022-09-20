@@ -1,5 +1,6 @@
 import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
+import type { WithEvents } from 'common/types/html-element-typed-events';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import {
@@ -15,6 +16,13 @@ import buttonStyles from 'samba/styles/button-css.js';
 import { path } from '../../lib/url-paths/url-paths.js';
 
 export interface RkDrawerParameters {}
+
+export type EventsMap = {
+	'drawer-opened': CustomEvent<{
+		old: boolean;
+		value: boolean;
+	}>;
+};
 
 @customElement('rk-drawer')
 export class RkDrawer extends LitElement implements RkDrawerParameters {
@@ -127,8 +135,10 @@ export class RkDrawer extends LitElement implements RkDrawerParameters {
 	];
 }
 
+export type RkDrawerWithEvents = WithEvents<RkDrawer, EventsMap>;
+
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-drawer': RkDrawer;
+		'rk-drawer': WithEvents<RkDrawer, EventsMap>;
 	}
 }
