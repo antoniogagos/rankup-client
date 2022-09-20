@@ -1,25 +1,90 @@
-import './elements/app-router/app-router.js';
 import './pages/welcome/rk-welcome-page.js';
 import './pages/access/rk-forgot-password-page.js';
 import './pages/access/rk-reset-password-page.js';
-import './pages/access/rk-signin-page.js';
-import './pages/access/rk-signup-page.js';
+import './pages/access/rk-sign-in-page.js';
+import './pages/access/rk-sign-up-page.js';
 import './pages/access/rk-confirm-registration-page.js';
 import './pages/404/rk-404-page.js';
-import 'samba/load-spinner/load-spinner.js';
 
+import { Router } from '@lit-labs/router';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import RouterPagesStyles from 'samba/styles/router-pages-css.js';
 import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
 
-// import type { EventsMap as AppRouterEventsMap } from './elements/app-router/app-router.js';
-import AppRouterStyles from './elements/app-router/styles.js';
-import { path, PublicPaths } from './lib/localization/rk-url-paths.js';
+import { path, PublicPaths } from './lib/url-paths/url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
-import { appRouterAnimations } from './router-animations.js';
 
 @customElement('rk-unauthenticated-app')
 export class RkUnauthenticatedApp extends LitElement {
+	private enterPageCallback = async (): Promise<boolean> => {
+		// the router only renders one element at a time so we have to wait a bit to animate out on all pages
+		this.shadowRoot!.firstElementChild?.setAttribute('animation', 'exit');
+		await new Promise(resolve => {
+			setTimeout(resolve, 140);
+		});
+		return true;
+	};
+
+	private _router = new Router(this, [
+		{
+			path: path('SIGN_IN'),
+			enter: this.enterPageCallback,
+			render: () => html`<rk-sign-in-page class="page" animation="slide"></rk-sign-in-page>`,
+		},
+		{
+			path: path('SIGN_UP'),
+			enter: this.enterPageCallback,
+			render: () => html`<rk-sign-up-page class="page" animation="slide"></rk-sign-up-page>`,
+		},
+		{
+			path: path('RESET_PASSWORD'),
+			enter: this.enterPageCallback,
+			render: () =>
+				html`<rk-reset-password-page class="page" animation="slide"></rk-reset-password-page>`,
+		},
+		{
+			path: path('FORGOT_PASSWORD'),
+			enter: this.enterPageCallback,
+			render: () =>
+				html`<rk-forgot-password-page class="page" animation="slide"></rk-forgot-password-page>`,
+		},
+		{
+			path: path('CONFIRM_REGISTRATION'),
+			enter: this.enterPageCallback,
+			render: () =>
+				html`<rk-confirm-registration-page
+					class="page"
+					animation="slide"></rk-confirm-registration-page>`,
+		},
+		{
+			path: '/',
+			enter: this.enterPageCallback,
+			render: () => html`<rk-welcome-page class="page" animation="opacity"></rk-welcome-page>`,
+		},
+		{
+			path: '/404',
+			enter: this.enterPageCallback,
+			render: () => html`<rk-404-page class="page" animation="opacity"></rk-404-page>`,
+		},
+		{
+			path: '/oauth',
+			render: () => null,
+			enter: () => {
+				this._router.goto(path('SIGN_IN'));
+				return false;
+			},
+		},
+		{
+			path: '*',
+			render: () => null,
+			enter: () => {
+				this._router.goto('/');
+				return false;
+			},
+		},
+	]);
+
 	sessionManager?: SessionManager;
 
 	constructor() {
@@ -45,36 +110,15 @@ export class RkUnauthenticatedApp extends LitElement {
 		if (queryParams) {
 			url += '?' + new URLSearchParams(queryParams).toString();
 		}
-		this.shadowRoot?.querySelector('app-router')?.navigate(url);
+		this._router.goto(url);
 	}
 
 	render() {
-		return html`
-			<load-spinner></load-spinner>
-			<img width="32" height="32" src="/assets/teams/sevilla.png" alt="home logo" />
-			<app-router .animations=${appRouterAnimations}>
-				<rk-welcome-page path="/" animation="opacity"></rk-welcome-page>
-				<rk-signin-page path=${path('SIGNIN')} animation="opacity"></rk-signin-page>
-				<rk-signup-page path=${path('SIGNUP')} animation="opacity"></rk-signup-page>
-				<rk-confirm-registration-page
-					path=${path('CONFIRM_REGISTRATION')}
-					animation="opacity"></rk-confirm-registration-page>
-				<rk-forgot-password-page
-					path=${path('FORGOT_PASSWORD')}
-					animation="opacity"></rk-forgot-password-page>
-				<rk-reset-password-page
-					path=${path('RESET_PASSWORD')}
-					animation="opacity"></rk-reset-password-page>
-				<rk-404-page path="/404" animation="opacity"></rk-404-page>
-
-				<app-router__redirect path="/oauth" redirect=${path('SIGNIN')}></app-router__redirect>
-				<app-router__redirect path="*" redirect="/"></app-router__redirect>
-			</app-router>
-		`;
+		return html`${this._router.outlet()}`;
 	}
 
 	static styles = [
-		AppRouterStyles,
+		RouterPagesStyles,
 		ScrollbarStyles,
 		css`
 			:host {

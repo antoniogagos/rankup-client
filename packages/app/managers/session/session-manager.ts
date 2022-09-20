@@ -2,7 +2,7 @@ import type { CognitoUserSession, ISignUpResult } from 'amazon-cognito-identity-
 import type { ReactiveController, ReactiveElement } from 'lit';
 
 // } from 'amazon-cognito-identity-js'; // can't be used because is only for node, we use the minified version
-import env from '../../env.json' assert { type: 'json' };
+import env from '../../lib/env/env.js';
 import {
 	AuthenticationDetails,
 	CognitoIdToken,

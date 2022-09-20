@@ -65,4 +65,4 @@ Changing the container for overlays:
 - OverlayController will dispatch a 'find-overlay-container' CustomEvent from the Window object everytime before next overlay insertion.
 - Capture that event and change `evt.detail.container`
 
-That and some other useful functionality can be found by just using the `<overlay-container>` element
+That and some other useful functionality can be found by just using the `<sb-overlay-container>` element

@@ -7,7 +7,7 @@ import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 
-import { path } from '../../lib/localization/rk-url-paths.js';
+import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('rk-forgot-password-page')
 export class RkForgotPasswordPage extends LitElement {
@@ -81,7 +81,7 @@ export class RkForgotPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${arrowLeftIcon}</a>
+				<a class="link--primary go-back-arrow" href=${path('SIGN_IN')}>${arrowLeftIcon}</a>
 				<div>${msg('Recordar contraseña')}</div>
 			</header>
 
@@ -92,7 +92,7 @@ export class RkForgotPasswordPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
+				<a class="link--primary" href=${path('SIGN_UP')}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}
@@ -110,7 +110,7 @@ export class RkForgotPasswordPage extends LitElement {
 				flex-direction: column;
 				height: 100%;
 			}
-			progress-bar {
+			sb-progress-bar {
 				width: 100%;
 			}
 			header {

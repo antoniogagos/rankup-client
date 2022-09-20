@@ -1,0 +1,11 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"composite": true,
+		"baseUrl": "./",
+		"rootDir": "./",
+		"outDir": "./dist"
+	},
+	"references": [{ "path": "../samba" }, { "path": "../common" }],
+	"include": ["**/*.ts", "**/*.js", "**/*.json"]
+}

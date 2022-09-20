@@ -1,0 +1,8 @@
+{
+	"routes": [
+		{
+			"baseRoute": "lobby",
+			"publicPage": false
+		}
+	]
+}

@@ -16,7 +16,8 @@
 /.tmp/
 
 # build
-**/dist/
+dist
+.dist
 
 storybook-static
 custom-elements.json

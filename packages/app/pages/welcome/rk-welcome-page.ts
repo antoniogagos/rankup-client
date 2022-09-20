@@ -4,17 +4,17 @@ import { customElement } from 'lit/decorators.js';
 import { arrowRightIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 
-import { path } from '../../lib/localization/rk-url-paths.js';
+import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('rk-welcome-page')
-export class WelcomePage extends LitElement {
+export class RkWelcomePage extends LitElement {
 	render() {
 		return html`
 			<div class="main">
 				<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
 				<span class="title">Rankup</span>
 				<p>${msg('Juega contra tus amigos prediciendo los resultados')}</p>
-				<a class="btn btn--primary btn--lg" href=${path('SIGNIN')}>
+				<a class="btn btn--primary btn--lg" href=${path('SIGN_IN')}>
 					${msg('Jugar ya')} ${arrowRightIcon}
 				</a>
 			</div>
@@ -79,6 +79,6 @@ export class WelcomePage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-welcome-page': WelcomePage;
+		'rk-welcome-page': RkWelcomePage;
 	}
 }

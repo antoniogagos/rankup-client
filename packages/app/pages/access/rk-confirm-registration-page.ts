@@ -5,7 +5,7 @@ import { arrowRightIcon, privacyIcon } from 'samba/icons.js';
 import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 
-import { path } from '../../lib/localization/rk-url-paths.js';
+import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('rk-confirm-registration-page')
 export class RkConfirmRegistrationPage extends LitElement {
@@ -52,12 +52,12 @@ export class RkConfirmRegistrationPage extends LitElement {
 	private async _confirmRegistration(email: string, code: string) {
 		try {
 			await rkPublicApp.sessionManager!.confirmRegistration(email, code);
-			rkPublicApp.redirectToPage('SIGNIN');
+			rkPublicApp.redirectToPage('SIGN_IN');
 		} catch (error: unknown) {
 			if (error instanceof Error) {
 				if (error.name === 'NotAuthorizedException' && error.message.match('status is CONFIRMED')) {
 					// already confirmed, redirect to login page
-					rkPublicApp.redirectToPage('SIGNIN');
+					rkPublicApp.redirectToPage('SIGN_IN');
 					return;
 				}
 				this.verificationCodeInput.setCustomValidity(error.message);
@@ -74,7 +74,7 @@ export class RkConfirmRegistrationPage extends LitElement {
 			this._confirmRegistration(this.email, this.code);
 		} else if (!this.email) {
 			// request page change, since we can't do anything without an email
-			rkPublicApp.redirectToPage('SIGNUP');
+			rkPublicApp.redirectToPage('SIGN_UP');
 		}
 	}
 
@@ -123,7 +123,7 @@ export class RkConfirmRegistrationPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href=${path('SIGNIN')}>${msg('Inicia sesión')}</a>
+				<a href=${path('SIGN_IN')}>${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}

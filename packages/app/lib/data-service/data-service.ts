@@ -1,6 +1,7 @@
+import type { CompetitionId, Match, MatchStatus, MatchWeather } from 'common/football/types';
 import type { ReactiveElement } from 'lit';
 
-import env from '../../env.json' assert { type: 'json' };
+import env from '../env/env.js';
 
 const { ApiURL } = env;
 
@@ -23,201 +24,11 @@ export type Chat = {
 	pinnedMessage: string;
 };
 
-export type ChatMessage = {
-	// esto vendrá con un tourney seguramente, asi q no incluirá tourneyId
-	tourneyId: string;
-	messageId: string;
-	user: {
-		userId: string;
-		username: string;
-		picture?: string;
-	};
-	message: string;
-	createdAt: Date;
-	inReplyToId?: string;
-	media?: string;
-};
-
 export const chat = {
 	totalMessage: 5,
 	lastMessageAt: new Date(Date.now() - 1000 * 60 * 60),
 	pinnedMessage: 'message-id-1',
 };
-
-export const chatMessages = [
-	{
-		messageId: 'message-id-1',
-		message: 'Normas de la comunidad: 10€ por cabeza el q gana blablablá',
-		createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-		user: {
-			userId: 'user-269',
-			username: 'nachoga',
-		},
-	},
-	{
-		messageId: 'message-id-2',
-		message: 'Como se cambian las apuestas en esta mierda??',
-		createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1.5),
-		user: {
-			userId: 'user-269',
-			username: 'nachoga',
-		},
-	},
-	{
-		messageId: 'message-id-3',
-		message: 'Ah vale ya me di cuenta, vaya pedazo de mierda. Iros a tomar por el culo.',
-		createdAt: new Date(Date.now() - 1000 * 60 * 60),
-		inReplyTo: 'message-id-2',
-		user: {
-			userId: 'user-269',
-			username: 'nachoga',
-		},
-	},
-];
-
-export enum CompetitionId {
-	FOOTBALL_ARGENTINE_LEAGUE_1 = 'FOOTBALL_ARGENTINE_LEAGUE_1',
-	FOOTBALL_CHAMPIONS_LEAGUE = 'FOOTBALL_CHAMPIONS_LEAGUE',
-	FOOTBALL_GERMANY_LEAGUE_1 = 'FOOTBALL_GERMANY_LEAGUE_1',
-	FOOTBALL_ITALIAN_LEAGUE_1 = 'FOOTBALL_ITALIAN_LEAGUE_1',
-	FOOTBALL_MEXICAN_LEAGUE_1 = 'FOOTBALL_MEXICAN_LEAGUE_1',
-	FOOTBALL_SPAIN_CUP = 'FOOTBALL_SPAIN_CUP',
-	FOOTBALL_SPAIN_LEAGUE_1 = 'FOOTBALL_SPAIN_LEAGUE_1',
-	FOOTBALL_UK_LEAGUE_1 = 'FOOTBALL_UK_LEAGUE_1',
-	FOOTBALL_WORLD_CUP = 'FOOTBALL_WORLD_CUP',
-}
-
-export enum MatchWeather {
-	/** clear sky */
-	CLEAR_SKY = 'CLEAR_SKY',
-	/** few clouds */
-	FEW_CLOUDS = 'FEW_CLOUDS',
-	/** scattered clouds */
-	SCATTERED_CLOUDS = 'SCATTERED_CLOUDS',
-	/** broken clouds */
-	BROKEN_CLOUDS = 'BROKEN_CLOUDS',
-	/** shower rain */
-	SHOWER_RAIN = 'SHOWER_RAIN',
-	/** rain */
-	RAIN = 'RAIN',
-	/** thunderstorm */
-	THUNDERSTORM = 'THUNDERSTORM',
-	/** snow */
-	SNOW = 'SNOW',
-	/** mist */
-	MIST = 'MIST',
-	/** clouds */
-	CLOUDS = 'CLOUDS',
-	/** moderate rain */
-	MODERATE_RAIN = 'MODERATE_RAIN',
-	/** haze */
-	HAZE = 'HAZE',
-	/** light intensity shower rain */
-	LIGHT_INTENSITY_SHOWER_RAIN = 'LIGHT_INTENSITY_SHOWER_RAIN',
-	/** light rain */
-	LIGHT_RAIN = 'LIGHT_RAIN',
-	/** overcast clouds */
-	OVERCAST_CLOUDS = 'OVERCAST_CLOUDS',
-	/** fog */
-	FOG = 'FOG',
-	/** heavy intensity rain */
-	HEAVY_INTENSITY_RAIN = 'HEAVY_INTENSITY_RAIN',
-	/** thunderstorm with light rain */
-	THUNDERSTORM_WITH_LIGHT_RAIN = 'THUNDERSTORM_WITH_LIGHT_RAIN',
-	/** thunderstorm with rain */
-	THUNDERSTORM_WITH_RAIN = 'THUNDERSTORM_WITH_RAIN',
-	/** drizzle */
-	DRIZZLE = 'DRIZZLE',
-	/** heavy intensity drizzle */
-	HEAVY_INTENSITY_DRIZZLE = 'HEAVY_INTENSITY_DRIZZLE',
-	/** light intensity drizzle rain */
-	LIGHT_INTENSITY_DRIZZLE_RAIN = 'LIGHT_INTENSITY_DRIZZLE_RAIN',
-	/** drizzle rain */
-	DRIZZLE_RAIN = 'DRIZZLE_RAIN',
-	/** heavy intensity drizzle rain */
-	HEAVY_INTENSITY_DRIZZLE_RAIN = 'HEAVY_INTENSITY_DRIZZLE_RAIN',
-	/** shower rain and drizzle */
-	SHOWER_RAIN_AND_DRIZZLE = 'SHOWER_RAIN_AND_DRIZZLE',
-	/** heavy shower rain and drizzle */
-	HEAVY_SHOWER_RAIN_AND_DRIZZLE = 'HEAVY_SHOWER_RAIN_AND_DRIZZLE',
-	/** shower drizzle */
-	SHOWER_DRIZZLE = 'SHOWER_DRIZZLE',
-	/** light snow */
-	LIGHT_SNOW = 'LIGHT_SNOW',
-	/** heavy snow */
-	HEAVY_SNOW = 'HEAVY_SNOW',
-	/** sleet */
-	SLEET = 'SLEET',
-	/** light shower sleet */
-	LIGHT_SHOWER_SLEET = 'LIGHT_SHOWER_SLEET',
-	/** shower sleet */
-	SHOWER_SLEET = 'SHOWER_SLEET',
-	/** light rain and snow */
-	LIGHT_RAIN_AND_SNOW = 'LIGHT_RAIN_AND_SNOW',
-	/** rain and snow */
-	RAIN_AND_SNOW = 'RAIN_AND_SNOW',
-	/** light shower snow */
-	LIGHT_SHOWER_SNOW = 'LIGHT_SHOWER_SNOW',
-	/** shower snow */
-	SHOWER_SNOW = 'SHOWER_SNOW',
-	/** heavy shower snow */
-	HEAVY_SHOWER_SNOW = 'HEAVY_SHOWER_SNOW',
-}
-
-export enum MatchStatus {
-	/** not started */
-	NS = 'NS',
-	/** being played */
-	LIVE = 'LIVE',
-	/** final time */
-	FT = 'FT',
-	/** half time */
-	HT = 'HT',
-	/** extra time */
-	ET = 'ET',
-	/** penalties live */
-	PEN_LIVE = 'PEN_LIVE',
-	/** finished after extra time 120min, without penalties */
-	AET = 'AET',
-	/** waiting penalties to start after extra time */
-	BREAK = 'BREAK',
-	/** finished after penalties */
-	FT_PEN = 'FT_PEN',
-	/** canceled */
-	CANCL = 'CANCL',
-	/** postponed */
-	POSTP = 'POSTP',
-	/** The game has been interrupted. Can be due to bad weather */
-	INT = 'INT',
-	/** The game has abandoned and will continue at a later time or day */
-	ABAN = 'ABAN',
-	/** The game has suspended and will continue at a later time or day */
-	SUSP = 'SUSP',
-	/** The game does not have a confirmed date and time yet. It will be announced later on */
-	TBA = 'TBA',
-	/** Winner is being decided externally */
-	AWARDED = 'AWARDED',
-	/** The game is delayed so it will start later */
-	DELAYED = 'DELAYED',
-	/** Walk Over: Awarding of a victory to a contestant because there are no other contestants */
-	WO = 'WO',
-}
-
-export interface Match {
-	matchId: string;
-	homeTeamId: string;
-	awayTeamId: string;
-	competitionId: CompetitionId;
-	season: number;
-	matchday: number;
-	date: number;
-	derbi: boolean;
-	weather: MatchWeather;
-	status: MatchStatus;
-	odds: string;
-	result?: string;
-}
-
 export class DataService {
 	host?: ReactiveElement;
 
@@ -367,7 +178,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 20, 2021 18:30:00').getTime(),
-				derbi: true,
+				derby: true,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'LIVE' as MatchStatus,
 				odds: '2-4-3',
@@ -381,7 +192,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 15:30:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '2-4-3',
@@ -394,7 +205,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 18:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'SHOWER_RAIN' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.3-3.8-10',
@@ -407,7 +218,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 19:30:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '2.5-4-3',
@@ -420,7 +231,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: true,
+				derby: true,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',
@@ -433,7 +244,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',
@@ -446,7 +257,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',
@@ -459,7 +270,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',
@@ -472,7 +283,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',
@@ -485,7 +296,7 @@ export class DataService {
 				season: 2021,
 				matchday: 4,
 				date: new Date('December 22, 2021 21:00:00').getTime(),
-				derbi: false,
+				derby: false,
 				weather: 'CLEAR_SKY' as MatchWeather,
 				status: 'NS' as MatchStatus,
 				odds: '1.2-3-8',

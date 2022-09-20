@@ -10,7 +10,8 @@
 		"OLD_start:build": "wds --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
 		"copy-assets": "cpx \"assets/**\" dist/assets & cpx \"index.html\" dist",
-		"prestart": "npm run copy-assets",
+		"load-router-pages": "./.scripts/load-router-pages.mjs",
+		"prestart": "npm run load-router-pages & npm run copy-assets",
 		"start": "concurrently --raw \"tsc -b -w --preserveWatchOutput\" \"wds --watch\"",
 		"validate": "tsc --noEmit"
 	},
@@ -22,8 +23,7 @@
 		"@lit/localize": "^0.11.0",
 		"amazon-cognito-identity-js": "^5.2.3",
 		"lit": "^2.0.2",
-		"page": "^1.11.6",
-		"urlpattern-polyfill": "^5.0.9"
+		"page": "^1.11.6"
 	},
 	"devDependencies": {
 		"@open-wc/testing": "^3.0.0",

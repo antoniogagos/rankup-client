@@ -1,9 +1,14 @@
 # Custom Dictionary Words
+CODEOWNERS
+deepmerge
 litelement
 MATCHDAY
 Positionize
 poststart
 prestart
 Rankup
+signin
 tabindex
+unstarted
 urlpatter
+urlpattern

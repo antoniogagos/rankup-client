@@ -7,7 +7,7 @@ import LinkStyles from 'samba/styles/link-css.js';
 import MarginStyles from 'samba/styles/margin-css.js';
 import TypographyStyles from 'samba/styles/typography-css.js';
 
-// import { path } from '../../lib/localization/rk-url-paths.js';
+// import { path } from '../../lib/url-paths/url-paths.js';
 
 const leagues: string[] = ['laliga', 'champions-league', 'premier-league'];
 const names: { [key: string]: string } = {

@@ -13,7 +13,7 @@ import buttonStyles from 'samba/styles/button-css.js';
 import formControlStyles from 'samba/styles/form-control-css.js';
 import linkStyles from 'samba/styles/link-css.js';
 
-import { path } from '../../lib/localization/rk-url-paths.js';
+import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('rk-reset-password-page')
 export class RkResetPasswordPage extends LitElement {
@@ -93,7 +93,7 @@ export class RkResetPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${arrowLeftIcon}</a>
+				<a class="link--primary go-back-arrow" href=${path('SIGN_IN')}>${arrowLeftIcon}</a>
 				<div>${msg('Restablecer contraseña')}</div>
 			</header>
 			<form @submit=${this._onFormSubmit}>
@@ -170,7 +170,7 @@ export class RkResetPasswordPage extends LitElement {
 			</form>
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
+				<a class="link--primary" href=${path('SIGN_UP')}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}

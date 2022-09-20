@@ -20,16 +20,16 @@
 			<rk-unauthenticated-app id="rkPublicApp" slot="unauthenticated"></rk-unauthenticated-app>
 		</rk-auth-wall>
 
-		<overlay-container></overlay-container>
+		<sb-overlay-container></sb-overlay-container>
 
-		<script type="module" src="./elements/rk-auth-wall/rk-auth-wall.js"></script>
+		<script type="module" src="./components/rk-auth-wall/rk-auth-wall.js"></script>
 
 		<script>
 			let authAppImported = false;
 			let unAuthAppImported = false;
 
 			document.body.querySelector('rk-auth-wall').addEventListener('session-updated', evt => {
-				document.body.querySelector('overlay-container').closeAll?.();
+				document.body.querySelector('sb-overlay-container').closeAll?.();
 				const isLogged = evt.detail.session;
 				if (isLogged) {
 					setColorScheme();

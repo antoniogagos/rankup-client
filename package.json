@@ -5,10 +5,11 @@
 	"private": true,
 	"customElements": "custom-elements.json",
 	"workspaces": [
-		"packages/common",
-		"packages/samba",
-		"packages/app"
+		"packages/*"
 	],
+	"engines": {
+		"node": "16.17.0"
+	},
 	"scripts": {
 		"OLD_lint": "eslint --ext .js,.ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
 		"OLD_format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
@@ -17,9 +18,10 @@
 		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
 		"OLD_start:build": "web-dev-server --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
+		"lint": "eslint ./packages --max-warnings=0",
 		"postinstall": "husky install",
 		"start": "npm run start --workspace=app",
-		"validate": "npm run validate --workspace=app && eslint ./packages --max-warnings=0"
+		"validate": "npm run --workspace app validate && npm run lint"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.4",
@@ -37,8 +39,9 @@
 		"babel-plugin-template-html-minifier": "^4.1.0",
 		"cpx": "^1.5.0",
 		"deepmerge": "^4.2.2",
-		"eslint": "8.21.0",
+		"eslint": "^8.21.0",
 		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-custom-elements": "^0.0.6",
 		"eslint-plugin-import": "^2.26.0",
 		"eslint-plugin-jsx-a11y": "^6.6.1",
 		"eslint-plugin-lit-a11y": "^2.0.0",
@@ -78,8 +81,12 @@
 			"browser": true,
 			"node": false
 		},
+		"parserOptions": {
+			"ecmaVersion": "latest"
+		},
 		"plugins": [
 			"@typescript-eslint",
+			"rankup",
 			"simple-import-sort",
 			"import",
 			"promise",
@@ -87,10 +94,13 @@
 		],
 		"extends": [
 			"@open-wc",
+			"plugin:custom-elements/recommended",
 			"plugin:@typescript-eslint/eslint-recommended",
 			"plugin:@typescript-eslint/recommended",
 			"plugin:import/typescript",
 			"plugin:promise/recommended",
+			"plugin:promise/recommended",
+			"plugin:rankup/recommended",
 			"prettier"
 		],
 		"rules": {
@@ -134,6 +144,10 @@
 			"no-useless-escape": "off",
 			"prefer-destructuring": "off",
 			"prefer-template": "off",
+			"custom-elements/define-tag-after-class-definition": "off",
+			"custom-elements/file-name-matches-element": "error",
+			"custom-elements/expose-class-on-global": "off",
+			"custom-elements/no-constructor": "off",
 			"promise/catch-or-return": "off",
 			"promise/always-return": "off"
 		}

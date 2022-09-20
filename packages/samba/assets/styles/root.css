@@ -33,6 +33,6 @@ body {
   }
 }
 
-overlay-container {
+sb-overlay-container {
   z-index: 10;
 }

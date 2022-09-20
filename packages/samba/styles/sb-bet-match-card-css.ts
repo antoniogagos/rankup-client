@@ -139,12 +139,12 @@ export default css`
 		color: var(--color-fg-muted);
 	}
 
-	#derbiLightningImg {
+	#derbyLightningImg {
 		height: 20px;
 		width: 14px;
 	}
 
-	#derbiLightningImg.xs {
+	#derbyLightningImg.xs {
 		height: 15px;
 		width: 10px;
 	}
@@ -176,7 +176,7 @@ export default css`
   <div class="match-card f6">
     <div class="match-card-header">
       <div>${new Intl.DateTimeFormat(['ban', 'id']).format(this.match.date)}</div>
-      ${this.match.derbi
+      ${this.match.derby
         ? html`
             <div class="card-header--right-content">${warningIcon} Derbi</div>
           `
@@ -204,9 +204,9 @@ export default css`
           </button>
         </div>
       </div>
-      ${this.match.derbi
+      ${this.match.derby
         ? html`
-            <img id="derbiLightningImg" src="/assets/images/lightning.svg" alt="Lightning" />
+            <img id="derbyLightningImg" src="/assets/images/lightning.svg" alt="Lightning" />
           `
         : ''}
       <div class="team away-team">
@@ -232,7 +232,7 @@ export default css`
       </div>
     </div>
   </div>
-  ${this.match.derbi
+  ${this.match.derby
     ? html`
         <div class="foot-note">
           ${warningIcon} ¡Derbi! Bonus de +5 puntos al acertar resultado exacto

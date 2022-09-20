@@ -1,2 +1,3 @@
-packages/app/assets
+packages/**/assets
 dist
+node_modules
