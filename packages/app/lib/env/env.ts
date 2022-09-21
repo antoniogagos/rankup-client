@@ -1,6 +1,6 @@
 import type { Route as RkRoute } from 'common/types/rankup-json';
 
-import _env from '../../env.json' assert { type: 'json' };
+import _env from '../../env.json';
 
 export interface Env {
 	isDevEnv: boolean;

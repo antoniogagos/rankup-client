@@ -29,19 +29,37 @@ type PublicPathsKeys = keyof typeof PublicPaths;
 type AppPathsKeys = keyof typeof AppPaths;
 type AllKeys = PublicPathsKeys | AppPathsKeys;
 
-export function path(key: AllKeys, rest?: string): string {
+export function path(key: AllKeys | string, rest = ''): string {
 	const locale = getLocale();
 	if (key in AppPaths) {
-		return `/${locale}/app/${AppPaths[key as AppPathsKeys]}${rest ? `/${rest}` : ''}`;
+		return `/${pathJoin(locale, 'app', AppPaths[key as AppPathsKeys], rest)}`;
 	}
-	return `/${locale}/${PublicPaths[key as PublicPathsKeys]}${rest ? `/${rest}` : ''}`;
+	if (key in PublicPaths) {
+		return `/${pathJoin(locale, PublicPaths[key as PublicPathsKeys], rest)}`;
+	}
+	return `/${pathJoin(locale, key, rest)}`;
 }
 
-export function relativePath(key: AllKeys, rest?: string): string {
+export function relativePath(key: AllKeys, rest = ''): string {
 	if (key in AppPaths) {
-		return `/${AppPaths[key as AppPathsKeys]}${rest ? `/${rest}` : ''}`;
+		return `/${pathJoin(AppPaths[key as AppPathsKeys], rest)}`;
 	}
-	return `/${PublicPaths[key as PublicPathsKeys]}${rest ? `/${rest}` : ''}`;
+	if (key in PublicPaths) {
+		return `/${pathJoin(PublicPaths[key as PublicPathsKeys], rest)}`;
+	}
+	return `/${pathJoin(key, rest)}`;
+}
+
+function pathJoin(...paths: string[]): string {
+	const parts: string[] = [];
+	for (const str of paths) {
+		if (str) {
+			const start = str.startsWith('/') ? 1 : 0;
+			const end = str.length - (str.endsWith('/') ? -2 : -1);
+			parts.push(str.slice(start, end));
+		}
+	}
+	return parts.join('/');
 }
 
 if (env.isDevEnv) {

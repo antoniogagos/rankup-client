@@ -1,6 +1,6 @@
 import 'samba/overlay/sb-overlay-container.js';
 import './pages/home/rk-home-page.js';
-import './pages/tourney/rk-tourney-page.js';
+// import './pages/tourney/rk-tourney-page.js';
 import './pages/create-tourney/rk-create-tourney-page.js';
 import './pages/join-tourney/rk-join-tourney-page.js';
 
@@ -21,9 +21,6 @@ import { SessionManager } from './managers/session/session-manager.js';
 @customElement('rk-app')
 export class RkApp extends LitElement {
 	private _router = Router(this, [
-		/**
-		 * añadir a este array { path: path('/' + game + '/*')}
-		 */
 		{
 			path: path('TOURNEYS'),
 			render: () => html`<rk-home-page class="page" animation="slide"></rk-home-page>`,
@@ -43,9 +40,15 @@ export class RkApp extends LitElement {
 				html`<rk-create-tourney-page class="page" animation="slide"></rk-create-tourney-page>`,
 		},
 		{
-			path: '/404',
+			path: path('/404'),
 			render: () => html`<rk-404-page class="page" animation="slide"></rk-404-page>`,
 		},
+		...env.Routes.filter(r => !r.publicPage).map(route => ({
+			path: route.baseRoute + '/*',
+			enter: async () => import(route.path),
+			render: () =>
+				unsafeHTML(`<${route.component} class="page" animation="slide"></${route.component}`),
+		})),
 		{
 			path: '*',
 			render: () => null,
@@ -54,12 +57,6 @@ export class RkApp extends LitElement {
 				return false;
 			},
 		},
-		...env.Routes.map(route => ({
-			path: route.baseRoute + '/*',
-			enter: async () => import(route.path),
-			render: () =>
-				unsafeHTML(`<${route.component} class="page" animation="slide"></${route.component}`),
-		})),
 	]);
 
 	ds = new DataService(this);

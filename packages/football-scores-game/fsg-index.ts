@@ -9,30 +9,24 @@ import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
 export class FsgIndex extends LitElement {
 	private _router = Router(this, [
 		{
-			path: '/{id}/ranking',
-			render: () => html`ranking-page`,
+			path: ':id/ranking',
+			render: () => html`<div class="page" animation="slide">ranking-page</div>`,
 		},
 		{
-			path: '/{id}/contest',
-			render: () => html`contest-info`,
+			path: ':id/contest',
+			render: () => html`<div class="page" animation="slide">contest-info</div>`,
 		},
 		{
-			path: '/404',
-			render: () => html`missing`,
-		},
-		{
-			path: '*',
-			enter: () => {
-				this._router.goto('404');
-				return false;
-			},
+			path: ':id',
+			render: params =>
+				html`<div class="page" animation="slide">matchday for tourney "${params.id}"</div>`,
 		},
 	]);
 
 	render() {
 		return html`
-			<fsg-tourney-header></fsg-tourney-header>
-			<div id="routerContainer">${this._router.outlet()}</div>
+			<fsg-tourney-header class="header"></fsg-tourney-header>
+			<div class="router-container">${this._router.outlet()}</div>
 		`;
 	}
 
@@ -41,13 +35,14 @@ export class FsgIndex extends LitElement {
 		ScrollbarStyles,
 		css`
 			:host {
-				display: contents;
+				display: flex;
+				flex-direction: column;
 			}
-			@supports not (display: contents) {
-				:host {
-					display: block;
-					height: 100%;
-				}
+			.router-container {
+				position: relative;
+				flex: 1;
+			}
+			.header {
 			}
 		`,
 	];

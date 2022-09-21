@@ -9,7 +9,7 @@ import { esbuildPlugin } from '@web/dev-server-esbuild';
 // Use Hot Module replacement by adding --hmr to the start command
 const hmr = process.argv.includes('--hmr');
 // Requests to web-dev-server that starts with this will navigate to the
-// upper N (3 in this case) folder, starting from where the web-dev-server is running
+// upper N folder, starting from where the web-dev-server is running
 const ROOT_PREFIX_PATH = '/__wds-outside-root__/2';
 
 /** @type {import('@web/dev-server').DevServerConfig} */
@@ -21,7 +21,11 @@ export default {
 	nodeResolve: true,
 	preserveSymlinks: true,
 	plugins: [
-		esbuildPlugin({ ts: true, json: true, target: 'auto' }),
+		esbuildPlugin({
+			ts: true,
+			json: true,
+			target: 'auto',
+		}),
 		/**
 		 * "nodeResolve" is not resolving our monorepo packages bare imports:
 		 *   i.e. `import 'samba/...'`
@@ -51,6 +55,10 @@ export default {
 		function rewriteImports(context, next) {
 			if (context.url.startsWith('/node_modules/')) {
 				context.url = `${ROOT_PREFIX_PATH}` + context.url;
+			} else if (context.response.status === 404) {
+				if (context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
+					context.url = '/index.html';
+				}
 			}
 			return next();
 		},

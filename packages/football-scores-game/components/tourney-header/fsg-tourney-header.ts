@@ -26,7 +26,7 @@ export class FsgTourneyHeader extends LitElement {
           <a
             id="arrow"
             class=${linkClasses}
-            href="TOURNEYS">
+            href="/">
             ${arrowLeftIcon}
           </a>
         </section>
@@ -45,7 +45,7 @@ export class FsgTourneyHeader extends LitElement {
 		typographyStyles,
 		css`
 			:host {
-				z-index: 3;
+				display: block;
 			}
 			header {
 				align-items: center;

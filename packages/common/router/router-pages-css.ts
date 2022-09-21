@@ -38,7 +38,7 @@ export default css`
 			transform: translateX(0);
 		}
 		to {
-			transform: translateX(50%);
+			transform: translateX(180px);
 			opacity: 0;
 		}
 	}

@@ -5,7 +5,7 @@ import type { ReactiveControllerHost } from 'lit';
 import RouterStyles from './router-pages-css.js';
 import { enterPageCallback } from './utils.js';
 
-if (!('URLPattern' in globalThis)) await import('urlpattern-polyfill');
+// if (!('URLPattern' in globalThis)) await import('urlpattern-polyfill');
 
 export { RouterStyles };
 

@@ -38,8 +38,7 @@ export class RkAuthWall extends LitElement {
 		this.requestUpdate();
 	};
 
-	/** @returns {boolean} */
-	private _isLoggedFromLocalST() {
+	private _isLoggedFromLocalST(): boolean {
 		try {
 			const ns = 'CognitoIdentityServiceProvider';
 			const reg = new RegExp(ns + '\\.\\w+\\.LastAuthUser');

@@ -6,12 +6,13 @@ import './pages/access/rk-sign-up-page.js';
 import './pages/access/rk-confirm-registration-page.js';
 import './pages/404/rk-404-page.js';
 
-import { Router } from '@lit-labs/router';
+import { Router, RouterStyles } from 'common/router/main-router.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import RouterPagesStyles from 'samba/styles/router-pages-css.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
 
+import env from './lib/env/env.js';
 import { path, PublicPaths } from './lib/url-paths/url-paths.js';
 import { SessionManager } from './managers/session/session-manager.js';
 
@@ -26,7 +27,12 @@ export class RkUnauthenticatedApp extends LitElement {
 		return true;
 	};
 
-	private _router = new Router(this, [
+	router = Router(this, [
+		{
+			path: '/',
+			enter: this.enterPageCallback,
+			render: () => html`<rk-welcome-page class="page" animation="opacity"></rk-welcome-page>`,
+		},
 		{
 			path: path('SIGN_IN'),
 			enter: this.enterPageCallback,
@@ -57,29 +63,36 @@ export class RkUnauthenticatedApp extends LitElement {
 					class="page"
 					animation="slide"></rk-confirm-registration-page>`,
 		},
+		...env.Routes.filter(route => route.publicPage).map(route => ({
+			path: path(route.baseRoute, '*'),
+			enter: async () => import('/node_modules/' + route.path),
+			render: () =>
+				unsafeHTML(`<${route.component} class="page" animation="slide"></${route.component}`),
+		})),
 		{
-			path: '/',
-			enter: this.enterPageCallback,
-			render: () => html`<rk-welcome-page class="page" animation="opacity"></rk-welcome-page>`,
-		},
-		{
-			path: '/404',
+			path: path('/404'),
 			enter: this.enterPageCallback,
 			render: () => html`<rk-404-page class="page" animation="opacity"></rk-404-page>`,
 		},
 		{
-			path: '/oauth',
-			render: () => null,
+			path: path('/oauth'),
 			enter: () => {
-				this._router.goto(path('SIGN_IN'));
+				this.redirectToPage('SIGN_IN');
+				return false;
+			},
+		},
+		{
+			path: 'oauth',
+			enter: params => {
+				console.log('redirect', { params });
+				this.redirectToPage('SIGN_IN', params);
 				return false;
 			},
 		},
 		{
 			path: '*',
-			render: () => null,
 			enter: () => {
-				this._router.goto('/');
+				this.redirectToPage('404');
 				return false;
 			},
 		},
@@ -105,20 +118,24 @@ export class RkUnauthenticatedApp extends LitElement {
 		}
 	}
 
-	redirectToPage(pagePath: keyof typeof PublicPaths, queryParams?: { [key: string]: string }) {
+	redirectToPage(
+		pagePath: keyof typeof PublicPaths | string,
+		queryParams?: { [key: string]: string | undefined },
+	) {
 		let url: string = path(pagePath);
 		if (queryParams) {
-			url += '?' + new URLSearchParams(queryParams).toString();
+			url += '?' + new URLSearchParams(queryParams as Record<string, string>).toString();
 		}
-		this._router.goto(url);
+		this.router.goto(url);
+		window.history.replaceState({}, '', url);
 	}
 
 	render() {
-		return html`${this._router.outlet()}`;
+		return html`${this.router.outlet()}`;
 	}
 
 	static styles = [
-		RouterPagesStyles,
+		RouterStyles,
 		ScrollbarStyles,
 		css`
 			:host {

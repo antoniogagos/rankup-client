@@ -6,16 +6,19 @@ import { customElement } from 'lit/decorators.js';
 export class Rk404Page extends LitElement {
 	render() {
 		return html`
-			<h1>404 Missing</h1>
-			<a href="/">${msg('Volver')}</a>
+			<h1>Page not found</h1>
+			<a href="${rkPublicApp.router.link('/')}">${msg('Volver')}</a>
 		`;
 	}
 
 	static styles = [
 		css`
 			:host {
-				display: block;
-				background: beige;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				color: #333;
 			}
 		`,
 	];
