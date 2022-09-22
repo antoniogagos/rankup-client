@@ -1,4 +1,4 @@
-# eslint-plugin-rankup
+# eslint-plugin
 
 Particular rules for rankup
 

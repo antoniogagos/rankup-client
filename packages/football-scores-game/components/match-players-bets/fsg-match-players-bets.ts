@@ -1,7 +1,7 @@
-import type { Match } from 'common/football/types';
+import type { Match } from '@rankup/common/football/types';
+import { OverlayController } from '@rankup/samba/overlay/types.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { OverlayController } from 'samba/overlay/types.js';
 
 export interface FsgMatchPlayersBetsParameters {
 	match: Match;

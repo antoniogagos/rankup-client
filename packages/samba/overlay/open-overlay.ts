@@ -1,4 +1,3 @@
-import type { HTMLElementEvenObject } from 'common/types/html-element-typed-events';
 import { ReactiveElement } from 'lit';
 
 import { OverlayController } from './overlay-controller.js';
@@ -18,11 +17,11 @@ export class CustomElementClass extends ReactiveElement {
 export function openOverlay<
 	T extends CustomElementClass,
 	Params = null,
-	EventsMap extends Record<string, Event> = HTMLElementEvenObject,
+	EventsMap extends Record<string, Event> = OverlayEventsMap,
 >(
 	elementName: string,
 	params?: Params,
-	overlayOptions?: Options<T, EventsMap & OverlayEventsMap<OverlayController<T>>>,
+	overlayOptions?: Options<T, OverlayEventsMap<OverlayController<T>> & EventsMap>,
 ) {
 	if (!customElements.get(elementName)) {
 		throw new Error(`Open overlay: element ${elementName} is not registered`);

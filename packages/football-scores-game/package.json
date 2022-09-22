@@ -1,6 +1,6 @@
 {
-	"name": "football-scores-game",
-	"version": "0.0.0",
+	"name": "@rankup/football-scores-game",
+	"version": "1.0.0",
 	"packageManager": "yarn@3.0.1",
 	"private": true,
 	"scripts": {
@@ -30,7 +30,7 @@
 		"rollup-plugin-postcss": "^4.0.2"
 	},
 	"peerDependencies": {
-		"samba": "^0.0.1",
-		"common": "^0.0.1"
+		"@rankup/samba": "^1.0.0",
+		"@rankup/common": "^1.0.0"
 	}
 }

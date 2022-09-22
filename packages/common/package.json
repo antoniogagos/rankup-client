@@ -1,5 +1,5 @@
 {
-	"name": "common",
+	"name": "@rankup/common",
 	"version": "1.0.0",
 	"private": true,
 	"dependencies": {
@@ -7,5 +7,8 @@
 		"@lit/localize": "^0.11.0",
 		"urlpattern-polyfill": "^5.0.9",
 		"lit": "^2.0.2"
+	},
+	"peerDependencies": {
+		"@lit/reactive-element": "^1.4.1"
 	}
 }

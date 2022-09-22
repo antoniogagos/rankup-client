@@ -1,14 +1,14 @@
 import '../match-details/fsg-unstarted-match-details.js';
 import '../bet-match/fsg-bet-match.js';
 
-import type { Match } from 'common/football/types';
+import type { Match } from '@rankup/common/football/types';
+import { openOverlay } from '@rankup/samba/overlay/open-overlay.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { openOverlay } from 'samba/overlay/open-overlay.js';
 
 import type {
-	FsgUnStartedMatchDetails,
-	FsgUnStartedMatchDetailsParameters,
+	FsgUnstartedMatchDetails,
+	FsgUnstartedMatchDetailsParameters,
 } from '../match-details/fsg-unstarted-match-details.js';
 
 @customElement('fsg-tourney-matchday-not-started')
@@ -17,7 +17,7 @@ export class FsgTourneyMatchdayNotStarted extends LitElement {
 	fixture?: Match[];
 
 	private _onClickMatch(match: Match) {
-		openOverlay<FsgUnStartedMatchDetails, FsgUnStartedMatchDetailsParameters>(
+		openOverlay<FsgUnstartedMatchDetails, FsgUnstartedMatchDetailsParameters>(
 			'fsg-unstarted-match-details',
 			{ match },
 			{

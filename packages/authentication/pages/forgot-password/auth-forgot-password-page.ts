@@ -1,16 +1,16 @@
 import { msg, str } from '@lit/localize';
+import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import formControlStyles from '@rankup/samba/styles/form-control-css.js';
+import linkStyles from '@rankup/samba/styles/link-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
-import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import formControlStyles from 'samba/styles/form-control-css.js';
-import linkStyles from 'samba/styles/link-css.js';
 
-import { path } from '../../lib/url-paths/url-paths.js';
+// import { path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-forgot-password-page')
-export class RkForgotPasswordPage extends LitElement {
+@customElement('auth-forgot-password-page')
+export class AuthForgotPasswordPage extends LitElement {
 	@state()
 	private _sent = false;
 
@@ -81,7 +81,7 @@ export class RkForgotPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${path('SIGN_IN')}>${arrowLeftIcon}</a>
+				<a class="link--primary go-back-arrow" href="/auth/sign-in">${arrowLeftIcon}</a>
 				<div>${msg('Recordar contraseña')}</div>
 			</header>
 
@@ -92,7 +92,7 @@ export class RkForgotPasswordPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGN_UP')}>${msg('Crea una')}</a>
+				<a class="link--primary" href="/auth/sign-up">${msg('Crea una')}</a>
 			</footer>
 		`;
 	}
@@ -172,6 +172,6 @@ export class RkForgotPasswordPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-forgot-password-page': RkForgotPasswordPage;
+		'auth-forgot-password-page': AuthForgotPasswordPage;
 	}
 }

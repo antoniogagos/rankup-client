@@ -1,11 +1,11 @@
 import { msg } from '@lit/localize';
+import { arrowLeftIcon, arrowRightIcon } from '@rankup/samba/icons.js';
+import ButtonStyles from '@rankup/samba/styles/button-css.js';
+import LinkStyles from '@rankup/samba/styles/link-css.js';
+import MarginStyles from '@rankup/samba/styles/margin-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { arrowLeftIcon, arrowRightIcon } from 'samba/icons.js';
-import ButtonStyles from 'samba/styles/button-css.js';
-import LinkStyles from 'samba/styles/link-css.js';
-import MarginStyles from 'samba/styles/margin-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 // import { path } from '../../lib/url-paths/url-paths.js';
 
@@ -16,8 +16,8 @@ const names: { [key: string]: string } = {
 	'premier-league': 'Premier League',
 };
 
-@customElement('rk-create-tourney-page')
-export class RkCreateTourneyPage extends LitElement {
+@customElement('app-create-tourney-page')
+export class AppCreateTourneyPage extends LitElement {
 	private _onClickGoBack() {
 		window.history.back();
 	}
@@ -132,6 +132,6 @@ export class RkCreateTourneyPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-create-tourney-page': RkCreateTourneyPage;
+		'rk-create-tourney-page': AppCreateTourneyPage;
 	}
 }

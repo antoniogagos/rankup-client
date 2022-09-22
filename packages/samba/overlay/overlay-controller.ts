@@ -1,5 +1,5 @@
-import { ListenersController } from 'common/lit-controllers/listeners-controller/listeners-controller.js';
-import { WithEvents } from 'common/types/html-element-typed-events.js';
+import { EventsListenerController } from '@rankup/common/lit-controllers/listeners-controller/events-listener-controller.js';
+import { WithEvents } from '@rankup/common/types/html-element-typed-events.js';
 import type { ReactiveController } from 'lit';
 import { adoptStyles } from 'lit';
 
@@ -111,7 +111,7 @@ export class OverlayController<
 
 	#isClosing = false;
 
-	#listeners: ListenersController<EventsMap> | null = null;
+	#listeners: EventsListenerController<EventsMap> | null = null;
 
 	#opened = false;
 
@@ -158,9 +158,7 @@ export class OverlayController<
 		this.verticalAlign = opts.verticalAlign ?? 'top';
 		this.verticalOffset = opts.verticalOffset ?? 0;
 		if (opts.listeners) {
-			this.#listeners = new ListenersController(host, [[host, opts.listeners]], {
-				removeListenersOnHostDisconnected: false,
-			});
+			this.#listeners = new EventsListenerController(host, opts.listeners);
 		}
 		this.#handleOutsideClick = opts.handleOutsideClick ?? null;
 		host.addController(this);

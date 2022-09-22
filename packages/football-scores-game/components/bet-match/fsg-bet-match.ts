@@ -1,11 +1,11 @@
 import { msg } from '@lit/localize';
-import type { Match } from 'common/football/types';
+import type { Match } from '@rankup/common/football/types';
+import { chevronDownIcon, chevronUpIcon, speedometerIcon } from '@rankup/samba/icons.js';
+import MatchCardStyles from '@rankup/samba/styles/sb-bet-match-card-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { chevronDownIcon, chevronUpIcon, speedometerIcon } from 'samba/icons.js';
-import MatchCardStyles from 'samba/styles/sb-bet-match-card-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
 
 import { calculateOddsHandicap } from '../../lib/utils/calculate-odds-handicap.js';
 

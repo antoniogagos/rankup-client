@@ -24,7 +24,7 @@ export default {
 		esbuildPlugin({
 			ts: true,
 			json: true,
-			target: 'auto',
+			target: 'es2020', // without using es2020 decorators fail, because esbuildPlugin doesn't read useDefineForClassFields from tsconfig
 		}),
 		/**
 		 * "nodeResolve" is not resolving our monorepo packages bare imports:

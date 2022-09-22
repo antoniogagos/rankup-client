@@ -1,9 +1,7 @@
 import '../bet-match/fsg-bet-match.js';
 
 import { msg } from '@lit/localize';
-import type { Match } from 'common/football/types';
-import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import type { Match } from '@rankup/common/football/types';
 import {
 	arrowLeftIcon,
 	calendarIcon,
@@ -11,12 +9,14 @@ import {
 	targetIcon,
 	tvIcon,
 	whistleIcon,
-} from 'samba/icons.js';
-import type { OverlayController } from 'samba/overlay/types.js';
-import ButtonStyles from 'samba/styles/button-css.js';
-import LinkStyles from 'samba/styles/link-css.js';
-import MarginStyles from 'samba/styles/margin-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
+} from '@rankup/samba/icons.js';
+import type { OverlayController } from '@rankup/samba/overlay/types.js';
+import ButtonStyles from '@rankup/samba/styles/button-css.js';
+import LinkStyles from '@rankup/samba/styles/link-css.js';
+import MarginStyles from '@rankup/samba/styles/margin-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 export interface FsgUnstartedMatchDetailsParameters {
 	match: Match;

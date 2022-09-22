@@ -1,6 +1,6 @@
 {
 	"name": "rk-app",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"packageManager": "yarn@3.0.1",
 	"private": true,
 	"customElements": "custom-elements.json",
@@ -18,6 +18,7 @@
 		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
 		"OLD_start:build": "web-dev-server --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
+		"build": "npm run build --workspace app",
 		"lint": "eslint ./packages --max-warnings=0",
 		"postinstall": "husky install",
 		"start": "npm run start --workspace=app",
@@ -74,83 +75,5 @@
 		"bracketSpacing": true,
 		"bracketSameLine": true,
 		"trailingComma": "all"
-	},
-	"eslintConfig": {
-		"parser": "@typescript-eslint/parser",
-		"env": {
-			"es6": true,
-			"browser": true,
-			"node": false
-		},
-		"parserOptions": {
-			"ecmaVersion": "latest"
-		},
-		"plugins": [
-			"@typescript-eslint",
-			"rankup",
-			"simple-import-sort",
-			"import",
-			"promise",
-			"prettier"
-		],
-		"extends": [
-			"@open-wc",
-			"plugin:custom-elements/recommended",
-			"plugin:@typescript-eslint/eslint-recommended",
-			"plugin:@typescript-eslint/recommended",
-			"plugin:import/typescript",
-			"plugin:promise/recommended",
-			"plugin:promise/recommended",
-			"plugin:rankup/recommended",
-			"prettier"
-		],
-		"rules": {
-			"@typescript-eslint/ban-ts-comment": "off",
-			"@typescript-eslint/no-empty-interface": "off",
-			"@typescript-eslint/no-explicit-any": "off",
-			"@typescript-eslint/no-non-null-assertion": "off",
-			"@typescript-eslint/no-shadow": [
-				"error"
-			],
-			"@typescript-eslint/no-use-before-define": [
-				"error",
-				{
-					"functions": false,
-					"classes": false,
-					"variables": true,
-					"ignoreTypeReferences": true
-				}
-			],
-			"class-methods-use-this": "off",
-			"consistent-return": "off",
-			"import/extensions": [
-				"error",
-				"always",
-				{
-					"ignorePackages": true
-				}
-			],
-			"import/no-absolute-path": "off",
-			"import/no-unresolved": "off",
-			"simple-import-sort/exports": "error",
-			"simple-import-sort/imports": "error",
-			"import/newline-after-import": "off",
-			"no-await-in-loop": "off",
-			"no-console": "off",
-			"no-dupe-class-members": "off",
-			"no-shadow": "off",
-			"no-undef": "off",
-			"no-unused-vars": 0,
-			"no-use-before-define": "off",
-			"no-useless-escape": "off",
-			"prefer-destructuring": "off",
-			"prefer-template": "off",
-			"custom-elements/define-tag-after-class-definition": "off",
-			"custom-elements/file-name-matches-element": "error",
-			"custom-elements/expose-class-on-global": "off",
-			"custom-elements/no-constructor": "off",
-			"promise/catch-or-return": "off",
-			"promise/always-return": "off"
-		}
 	}
 }

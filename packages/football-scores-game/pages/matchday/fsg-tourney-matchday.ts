@@ -3,13 +3,13 @@ import '../../components/tourney-matchday/fsg-tourney-matchday-not-started.js';
 
 // import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
-import type { Match } from 'common/football/types';
-import { ListenersController } from 'common/lit-controllers/listeners-controller/listeners-controller.js';
+import type { Match } from '@rankup/common/football/types';
+import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
+import { chevronDownIcon } from '@rankup/samba/icons.js';
+import ScrollbarStyles from '@rankup/samba/styles/scrollbar-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { chevronDownIcon } from 'samba/icons.js';
-import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
 
 import { hasMatchdayStarted } from '../../lib/utils/has-matchday-started.js';
 
@@ -22,12 +22,9 @@ export class FsgTourneyMatchday extends LitElement {
 		return !this.hidden;
 	}
 
-	private _listeners = new ListenersController(this, [
-		// prettier-ignore
-		[/* rkApp */ this, {
-      'match-update': this._onMatchUpdated.bind(this)
-    }],
-	]);
+	// private _listeners = new EventsListenerController(this, {
+	// 	'match-update': this._onMatchUpdated.bind(this),
+	// });
 
 	private _fixture: Task<number[], Match[]> = new Task(
 		this,
@@ -37,7 +34,8 @@ export class FsgTourneyMatchday extends LitElement {
 
 	private _lastUpdate: number = Date.now();
 
-	private _onMatchUpdated(evt: CustomEvent) {
+	@eventListener({ eventName: 'match-update' })
+	_onMatchUpdated(evt: CustomEvent) {
 		const matchUpdated = this._fixture.value?.find(m => m.matchId === evt.detail.match.matchId);
 		if (matchUpdated) {
 			this._lastUpdate = Date.now();

@@ -1,17 +1,17 @@
 import { msg } from '@lit/localize';
+import { arrowLeftIcon, arrowRightIcon } from '@rankup/samba/icons.js';
+import ButtonStyles from '@rankup/samba/styles/button-css.js';
+// import FormControlStyles from '@rankup/samba/styles/form-control-css.js';
+import LinkStyles from '@rankup/samba/styles/link-css.js';
+import MarginStyles from '@rankup/samba/styles/margin-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { arrowLeftIcon, arrowRightIcon } from 'samba/icons.js';
-import ButtonStyles from 'samba/styles/button-css.js';
-// import FormControlStyles from 'samba/styles/form-control-css.js';
-import LinkStyles from 'samba/styles/link-css.js';
-import MarginStyles from 'samba/styles/margin-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 // import { path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-join-tourney-page')
-export class RkJoinTourneyPage extends LitElement {
+@customElement('app-join-tourney-page')
+export class AppJoinTourneyPage extends LitElement {
 	private _onGoBackClick() {
 		window.history.back();
 	}
@@ -131,6 +131,6 @@ export class RkJoinTourneyPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-join-tourney-page': RkJoinTourneyPage;
+		'rk-join-tourney-page': AppJoinTourneyPage;
 	}
 }

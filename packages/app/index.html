@@ -4,9 +4,9 @@
 		<title>Rankup</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-		<meta name="Description" content="Put your description here." />
-		<link rel="stylesheet" href="/node_modules/samba/assets/styles/root.css" />
-		<link rel="stylesheet" href="/node_modules/samba/assets/styles/theme.css" />
+		<meta name="Description" content="" />
+		<link rel="stylesheet" href="/node_modules/@rankup/samba/assets/styles/root.css" />
+		<link rel="stylesheet" href="/node_modules/@rankup/samba/assets/styles/theme.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -14,55 +14,20 @@
 			rel="stylesheet" />
 	</head>
 
+	<script type="module" src="/app-shell.ts"></script>
+	<script>
+		let theme = 'light';
+		if (localStorage.getItem('theme')) {
+			theme = localStorage.getItem('theme');
+		} else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+			theme = 'dark';
+		}
+		theme = 'light'; // TODO dark theme
+		document.documentElement.setAttribute('data-color-mode', theme);
+	</script>
+
 	<body>
-		<rk-auth-wall>
-			<rk-app id="rkApp" slot="authenticated"></rk-app>
-			<rk-unauthenticated-app id="rkPublicApp" slot="unauthenticated"></rk-unauthenticated-app>
-		</rk-auth-wall>
-
+		<app-shell id="rkApp" slot="authenticated"></app-shell>
 		<sb-overlay-container></sb-overlay-container>
-
-		<script type="module" src="/components/rk-auth-wall/rk-auth-wall.ts"></script>
-
-		<script>
-			let authAppImported = false;
-			let unAuthAppImported = false;
-
-			document.body.querySelector('rk-auth-wall').addEventListener('session-updated', evt => {
-				document.body.querySelector('sb-overlay-container').closeAll?.();
-				const isLogged = evt.detail.session;
-				if (isLogged) {
-					setColorScheme();
-					if (!authAppImported) {
-						import('/rk-app.ts');
-						authAppImported = true;
-					}
-				} else {
-					removeColorScheme();
-					if (!unAuthAppImported) {
-						import('/rk-unauthenticated-app.ts');
-						unAuthAppImported = true;
-					}
-				}
-			});
-
-			function setColorScheme() {
-				let theme = 'light';
-				if (localStorage.getItem('theme')) {
-					theme = localStorage.getItem('theme');
-				} else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-					theme = 'dark';
-				}
-				if (theme === 'dark') {
-					// document.documentElement.setAttribute('data-color-mode', 'dark');
-				} else {
-					removeColorScheme();
-				}
-			}
-
-			function removeColorScheme() {
-				document.documentElement.removeAttribute('data-color-mode');
-			}
-		</script>
 	</body>
 </html>

@@ -1,17 +1,17 @@
 // import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
+import { personIcon } from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import marginStyles from '@rankup/samba/styles/margin-css.js';
+import tourneyCardStyles from '@rankup/samba/styles/tourney-card-css.js';
+import typographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { personIcon } from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import marginStyles from 'samba/styles/margin-css.js';
-import tourneyCardStyles from 'samba/styles/tourney-card-css.js';
-import typographyStyles from 'samba/styles/typography-css.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 import { AppPaths, path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-tourney-list')
-export class RkTourneyList extends LitElement {
+@customElement('app-tourney-list')
+export class AppTourneyList extends LitElement {
 	private _tourneys = new Task(
 		this,
 		() => rkApp.ds.GetUserTourneys(),
@@ -139,6 +139,6 @@ export class RkTourneyList extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-tourney-list': RkTourneyList;
+		'app-tourney-list': AppTourneyList;
 	}
 }

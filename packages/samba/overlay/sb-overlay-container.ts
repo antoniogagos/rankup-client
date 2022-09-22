@@ -1,5 +1,5 @@
 import { adoptStyles } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 import OverlayContainerStyles from './styles/overlay-container-css.js';
 import type { CustomElementClass, EventsMap, OverlayController } from './types';

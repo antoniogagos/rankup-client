@@ -1,18 +1,18 @@
-import '../rk-drawer/rk-drawer.js';
+import '../drawer/app-drawer.js';
 
+import { bellWithNumberIcon, hamburgerIcon } from '@rankup/samba/icons.js';
+import { openOverlay } from '@rankup/samba/overlay/open-overlay.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
 // import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { bellWithNumberIcon, hamburgerIcon } from 'samba/icons.js';
-import { openOverlay } from 'samba/overlay/open-overlay.js';
-import buttonStyles from 'samba/styles/button-css.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
-import type { RkDrawer } from '../rk-drawer/rk-drawer.js';
+import type { AppDrawer } from '../drawer/app-drawer.js';
 
-@customElement('rk-app-header')
-export class RkAppHeader extends LitElement {
+@customElement('app-header')
+export class AppHeader extends LitElement {
 	private _onMenuClick() {
-		openOverlay<RkDrawer>('rk-drawer', null, {
+		openOverlay<AppDrawer>('app-drawer', null, {
 			addOverlayStyles: false,
 			cancelOnOutsideClick: true,
 			withBackdrop: true,
@@ -73,6 +73,6 @@ export class RkAppHeader extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-app-header': RkAppHeader;
+		'app-header': AppHeader;
 	}
 }

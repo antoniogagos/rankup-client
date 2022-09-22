@@ -1,21 +1,21 @@
 import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
-import type { WithEvents } from 'common/types/html-element-typed-events';
-import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import {
 	createTourneyIcon,
 	joinTourneyIcon,
 	newsletterIcon,
 	signOutIcon,
 	twitterIcon,
-} from 'samba/icons.js';
-import type { OverlayController } from 'samba/overlay/types.js';
-import buttonStyles from 'samba/styles/button-css.js';
+} from '@rankup/samba/icons.js';
+import type { OverlayController } from '@rankup/samba/overlay/types.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import { css, html, LitElement } from 'lit';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 import { path } from '../../lib/url-paths/url-paths.js';
 
-export interface RkDrawerParameters {}
+export interface AppDrawerParameters {}
 
 export type EventsMap = {
 	'drawer-opened': CustomEvent<{
@@ -24,8 +24,8 @@ export type EventsMap = {
 	}>;
 };
 
-@customElement('rk-drawer')
-export class RkDrawer extends LitElement implements RkDrawerParameters {
+@customElement('app-drawer')
+export class AppDrawer extends LitElement implements AppDrawerParameters {
 	private _tourneys = new Task(
 		this,
 		() => rkApp.ds.GetUserTourneys(),
@@ -135,10 +135,10 @@ export class RkDrawer extends LitElement implements RkDrawerParameters {
 	];
 }
 
-export type RkDrawerWithEvents = WithEvents<RkDrawer, EventsMap>;
+export type AppDrawerWithEvents = WithEvents<AppDrawer, EventsMap>;
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-drawer': WithEvents<RkDrawer, EventsMap>;
+		'app-drawer': WithEvents<AppDrawer, EventsMap>;
 	}
 }

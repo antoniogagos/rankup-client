@@ -1,7 +1,7 @@
-import type { Match } from 'common/football/types';
+import type { Match } from '@rankup/common/football/types';
+import MatchRowStyles from '@rankup/samba/styles/rk-match-row-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import MatchRowStyles from 'samba/styles/rk-match-row-css.js';
 
 @customElement('fsg-match-row')
 export class FsgMatchRow extends LitElement {

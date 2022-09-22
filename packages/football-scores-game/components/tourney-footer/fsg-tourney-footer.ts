@@ -1,5 +1,3 @@
-import { css, html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
 import {
 	chatFilledIcon,
 	chatIcon,
@@ -7,8 +5,10 @@ import {
 	fieldIcon,
 	trophyFilledIcon,
 	trophyIcon,
-} from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
+} from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
 
 enum Tabs {
 	RANKING = 1,

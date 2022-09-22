@@ -1,9 +1,9 @@
 import './components/tourney-header/fsg-tourney-header.js';
 
-import { Router, RouterStyles } from 'common/router/nested-router.js';
+import { Router, RouterStyles } from '@rankup/common/router/nested-router.js';
+import ScrollbarStyles from '@rankup/samba/styles/scrollbar-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import ScrollbarStyles from 'samba/styles/scrollbar-css.js';
+import { customElement } from 'lit/decorators/custom-element.js';
 
 @customElement('fsg-index')
 export class FsgIndex extends LitElement {

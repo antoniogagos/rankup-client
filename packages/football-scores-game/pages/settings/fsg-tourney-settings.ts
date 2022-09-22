@@ -1,14 +1,14 @@
 import 'samba/toggle-input/sb-toggle-input.js';
 
 import { msg } from '@lit/localize';
+import { arrowLeftIcon, bellIcon, leaveIcon, paperIcon } from '@rankup/samba/icons.js';
+import ButtonStyles from '@rankup/samba/styles/button-css.js';
+import FormControlStyles from '@rankup/samba/styles/form-control-css.js';
+import LinkStyles from '@rankup/samba/styles/link-css.js';
+import MarginStyles from '@rankup/samba/styles/margin-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { arrowLeftIcon, bellIcon, leaveIcon, paperIcon } from 'samba/icons.js';
-import ButtonStyles from 'samba/styles/button-css.js';
-import FormControlStyles from 'samba/styles/form-control-css.js';
-import LinkStyles from 'samba/styles/link-css.js';
-import MarginStyles from 'samba/styles/margin-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
 
 @customElement('fsg-tourney-settings')
 export class FsgTourneySettings extends LitElement {

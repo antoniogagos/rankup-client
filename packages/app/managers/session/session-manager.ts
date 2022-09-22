@@ -11,7 +11,27 @@ import {
 	CognitoUserAttribute,
 	CognitoUserPool,
 } from './amazon-cognito-identity-js.js';
-import type { EventsMap, Providers, Session } from './types';
+
+export type Providers = 'Google' | 'Cognito';
+
+export interface Session {
+	idToken: string;
+	accessToken: string;
+	refreshToken: string;
+	provider: Providers;
+	email: string;
+	userId: string;
+	expiresAt: number;
+	userConfirmationNecessary?: boolean;
+}
+
+export type EventsMap = {
+	'session-updated': CustomEvent<{
+		session: Session | null;
+		old: Session | null;
+	}>;
+	foo: CustomEvent<{ bar: boolean }>;
+};
 
 const { Auth } = env;
 const { ClientId, OAuthServerURL, RedirectURI, UserPoolId } = Auth;
@@ -28,12 +48,46 @@ export class SessionManager implements ReactiveController {
 	}
 
 	hostConnected() {
+		_session = this._updateSessionFromLocalStorage();
 		this._finishExternalProviderLoginIfNeeded();
 		this._restoreAndRefreshSession();
 	}
 
 	hostDisconnected() {
 		//
+	}
+
+	private _updateSessionFromLocalStorage(): Session | null {
+		try {
+			const ns = 'CognitoIdentityServiceProvider';
+			const reg = new RegExp(ns + '\\.\\w+\\.LastAuthUser');
+			const key = Object.keys(window.localStorage).find(k => k.match(reg));
+			if (key) {
+				const { localStorage } = window;
+				const userId = localStorage.getItem(key);
+				const clientId = key.split('.')[1];
+				const accessToken = localStorage.getItem(`${ns}.${clientId}.${userId}.accessToken`);
+				const idToken = localStorage.getItem(`${ns}.${clientId}.${userId}.idToken`);
+				const refreshToken = localStorage.getItem(`${ns}.${clientId}.${userId}.refreshToken`);
+				const email = localStorage.getItem(`${ns}.${clientId}.${userId}.email`);
+				const provider = localStorage.getItem(`${ns}.${clientId}.${userId}.provider`);
+				const expiresAt = Number(localStorage.getItem(`${ns}.${clientId}.${userId}.expiresAt`));
+				if (!this._isExpired(expiresAt)) {
+					return {
+						email,
+						userId,
+						accessToken,
+						idToken,
+						refreshToken,
+						expiresAt,
+						provider,
+					} as Session;
+				}
+			}
+		} catch {
+			return null;
+		}
+		return null;
 	}
 
 	get isLogged(): boolean {
@@ -192,7 +246,7 @@ export class SessionManager implements ReactiveController {
 		if (urlParams.has('googleAuth') && urlParams.has('code')) {
 			const code = urlParams.get('code');
 			if (code) {
-				const session = await this._getSesssionFromCode(code, 'Google');
+				const session = await this._getSessionFromCode(code, 'Google');
 				this.session = session;
 				const { userId } = session;
 				// These are the keys used by the amazon-cognito-identity-js module to keep the session.
@@ -202,6 +256,8 @@ export class SessionManager implements ReactiveController {
 				window.localStorage.setItem(`${base}.${userId}.accessToken`, this.session.accessToken);
 				window.localStorage.setItem(`${base}.${userId}.idToken`, this.session.idToken);
 				window.localStorage.setItem(`${base}.${userId}.refreshToken`, this.session.refreshToken);
+				window.localStorage.setItem(`${base}.${userId}.provider`, 'Google');
+				window.localStorage.setItem(`${base}.${userId}.expiresAt`, String(session.expiresAt));
 				window.localStorage.setItem(`${base}.LastAuthUser`, userId);
 				window.localStorage.setItem(`${base}.clockDrift`, '0');
 				this._removeLoginInfoFromCurrentURL();
@@ -210,14 +266,18 @@ export class SessionManager implements ReactiveController {
 	}
 
 	private _sessionNeedsRefresh(session: Session): boolean {
-		return session && Date.now() > session.expiresAt - 10 * 60 * 1000; // remains less than 10 minutes to expiration
+		return session && this._isExpired(session.expiresAt);
+	}
+
+	private _isExpired(expiresAt: number): boolean {
+		return Date.now() > expiresAt - 10 * 60 * 1000; // remains less than 10 minutes to expiration
 	}
 
 	private _getCurrentCognitoUser() {
 		return new CognitoUserPool({ UserPoolId, ClientId }).getCurrentUser();
 	}
 
-	private async _getSesssionFromCode(code: string, provider: Providers): Promise<Session> {
+	private async _getSessionFromCode(code: string, provider: Providers): Promise<Session> {
 		// https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html
 		const authResp = await fetch(`${OAuthServerURL}/token`, {
 			method: 'POST',

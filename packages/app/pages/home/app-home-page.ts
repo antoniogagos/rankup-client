@@ -1,23 +1,23 @@
-import '../../components/rk-app-header/rk-app-header.js';
-import '../../components/rk-tourney-list/rk-tourney-list.js';
+import '../../components/header/app-header.js';
+import '../../components/tourney-list/app-tourney-list.js';
 
+import buttonStyles from '@rankup/samba/styles/button-css.js';
 // import { msg } from '@lit/localize';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import buttonStyles from 'samba/styles/button-css.js';
 
 // import { Icons } from '../../authenticated-icons.js';
 // import { path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-home-page')
-export class RkHomePage extends LitElement {
+@customElement('app-home-page')
+export class AppHomePage extends LitElement {
 	@property({ type: Boolean })
 	toggleDrawer = false;
 
 	render() {
 		return html`
-			<rk-app-header></rk-app-header>
-			<rk-tourney-list></rk-tourney-list>
+			<app-header></app-header>
+			<app-tourney-list></app-tourney-list>
 		`;
 	}
 
@@ -33,6 +33,6 @@ export class RkHomePage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-home-page': RkHomePage;
+		'home-page': AppHomePage;
 	}
 }

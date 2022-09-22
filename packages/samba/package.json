@@ -1,11 +1,11 @@
 {
-	"name": "samba",
+	"name": "@rankup/samba",
 	"version": "1.0.0",
 	"private": true,
 	"dependencies": {
 		"lit": "^2.0.2"
 	},
 	"peerDependencies": {
-		"common": "^0.0.1"
+		"@rankup/common": "^1.0.0"
 	}
 }

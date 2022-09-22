@@ -1,12 +1,12 @@
 import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
+import { chevronDownIcon } from '@rankup/samba/icons.js';
+import ButtonStyles from '@rankup/samba/styles/button-css.js';
+import LinkStyles from '@rankup/samba/styles/link-css.js';
+import MarginStyles from '@rankup/samba/styles/margin-css.js';
+import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { chevronDownIcon } from 'samba/icons.js';
-import ButtonStyles from 'samba/styles/button-css.js';
-import LinkStyles from 'samba/styles/link-css.js';
-import MarginStyles from 'samba/styles/margin-css.js';
-import TypographyStyles from 'samba/styles/typography-css.js';
 // import { path } from '../../../lib/url-paths/url-paths.js';
 
 interface UserRanking {

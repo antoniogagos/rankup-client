@@ -1,7 +1,8 @@
 {
 	"routes": [
 		{
-			"baseRoute": "lobby",
+			"path": "lobby",
+			"componentName": "lobby-index",
 			"publicPage": false
 		}
 	]

@@ -1,14 +1,12 @@
 import { msg } from '@lit/localize';
+import { arrowRightIcon, privacyIcon } from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import formControlStyles from '@rankup/samba/styles/form-control-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { arrowRightIcon, privacyIcon } from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import formControlStyles from 'samba/styles/form-control-css.js';
 
-import { path } from '../../lib/url-paths/url-paths.js';
-
-@customElement('rk-confirm-registration-page')
-export class RkConfirmRegistrationPage extends LitElement {
+@customElement('auth-confirm-registration-page')
+export class AuthConfirmRegistrationPage extends LitElement {
 	@property({ type: Boolean })
 	showPassword = false;
 
@@ -123,7 +121,7 @@ export class RkConfirmRegistrationPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href=${path('SIGN_IN')}>${msg('Inicia sesión')}</a>
+				<a href="/auth/sign-in">${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}
@@ -186,6 +184,6 @@ export class RkConfirmRegistrationPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-confirm-registration-page': RkConfirmRegistrationPage;
+		'auth-confirm-registration-page': AuthConfirmRegistrationPage;
 	}
 }

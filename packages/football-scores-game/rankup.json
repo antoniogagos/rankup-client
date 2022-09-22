@@ -1,8 +1,8 @@
 {
 	"routes": [
 		{
-			"baseRoute": "football-scores",
-			"component": "fsg-index",
+			"path": "football-scores",
+			"componentName": "fsg-index",
 			"publicPage": false
 		}
 	]

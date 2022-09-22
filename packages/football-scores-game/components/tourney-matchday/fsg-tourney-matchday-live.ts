@@ -1,9 +1,9 @@
 import '../match-row/fsg-match-row.js';
 
-import type { Match } from 'common/football/types';
+import type { Match } from '@rankup/common/football/types';
+import { openOverlay } from '@rankup/samba/overlay/open-overlay.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { openOverlay } from 'samba/overlay/open-overlay.js';
 
 import type {
 	FsgMatchPlayersBets,

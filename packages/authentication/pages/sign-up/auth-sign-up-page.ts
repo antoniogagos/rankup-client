@@ -1,6 +1,4 @@
 import { msg } from '@lit/localize';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -8,14 +6,16 @@ import {
 	eyeIcon,
 	privacyIcon,
 	usernameIcon,
-} from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import formControlStyles from 'samba/styles/form-control-css.js';
+} from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import formControlStyles from '@rankup/samba/styles/form-control-css.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
-import { path } from '../../lib/url-paths/url-paths.js';
+// import { path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-sign-up-page')
-export class RkSignUpPage extends LitElement {
+@customElement('auth-sign-up-page')
+export class AuthSignUpPage extends LitElement {
 	@property({ type: Boolean })
 	_showPassword = false;
 
@@ -175,7 +175,7 @@ export class RkSignUpPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href=${path('SIGN_IN')}>${msg('Inicia sesión')}</a>
+				<a href="auth/sign-in">${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}
@@ -250,6 +250,6 @@ export class RkSignUpPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-sign-up-page': RkSignUpPage;
+		'auth-sign-up-page': AuthSignUpPage;
 	}
 }

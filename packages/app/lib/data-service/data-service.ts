@@ -1,4 +1,9 @@
-import type { CompetitionId, Match, MatchStatus, MatchWeather } from 'common/football/types';
+import type {
+	CompetitionId,
+	Match,
+	MatchStatus,
+	MatchWeather,
+} from '@rankup/common/football/types';
 import type { ReactiveElement } from 'lit';
 
 import env from '../env/env.js';

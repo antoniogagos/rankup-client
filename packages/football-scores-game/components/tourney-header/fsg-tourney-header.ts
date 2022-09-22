@@ -1,10 +1,10 @@
+import { addPlayerIcon, arrowLeftIcon, settingsIcon } from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import linkStyles from '@rankup/samba/styles/link-css.js';
+import typographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { addPlayerIcon, arrowLeftIcon, settingsIcon } from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import linkStyles from 'samba/styles/link-css.js';
-import typographyStyles from 'samba/styles/typography-css.js';
 
 @customElement('fsg-tourney-header')
 export class FsgTourneyHeader extends LitElement {

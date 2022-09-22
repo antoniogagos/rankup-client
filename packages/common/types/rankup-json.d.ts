@@ -5,14 +5,20 @@ export interface RankupJSON {
 
 export interface Route {
 	/** Path that will render our component */
-	baseRoute: string;
+	path: string;
 
 	/** If true, the path will be added to the public-app */
 	publicPage: boolean;
 
 	/**
-	 * Name of the web component to be rendered in baseRoute
+	 * Name of the web component to be rendered in this route
 	 * It defaults to the same package folder name
 	 */
-	component?: string;
+	componentName?: string;
+
+	/**
+	 * Path to the component file. It must be RELATIVE to the package, not the whole repo
+	 * It defaults to `./{package}/{componentName}.ts`
+	 */
+	componentPath?: string;
 }

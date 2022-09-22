@@ -1,4 +1,4 @@
-import type { Route as RkRoute } from 'common/types/rankup-json';
+import type { Route } from '@rankup/common/types/rankup-json';
 
 import _env from '../../env.json';
 
@@ -13,12 +13,7 @@ export interface Env {
 		OAuthServerURL: string;
 		RedirectURI: string;
 	};
-	Routes: Route[];
-}
-
-export interface Route extends RkRoute {
-	path: string;
-	componentFileName: string;
+	Routes: Required<Route>[];
 }
 
 export default _env as Env;

@@ -1,5 +1,5 @@
 import { msg } from '@lit/localize';
-import { getLocale } from 'common/i18n/locales.js';
+import { getLocale } from '@rankup/common/i18n/locales.js';
 
 import env from '../env/env.js';
 

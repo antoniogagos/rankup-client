@@ -13,7 +13,7 @@ import { PACKAGE_NAMES, getRankupFile } from '../../../.scripts/packages.mjs';
 import { relativeFromFileURL } from '../../../.scripts/path.mjs';
 
 /** @typedef {import('common/types/rankup-json').RankupJSON} RankupJSON */
-/** @typedef {import('../lib/env/env').Route} EnvRoute */
+/** @typedef {import('common/types/rankup-json').Route} Route */
 
 const envJsonPath = relativeFromFileURL(import.meta.url, '../env.json');
 const envJson = getEnvJsonContent(envJsonPath);
@@ -40,27 +40,32 @@ function getEnvJsonContent(envJsonPath) {
 	}
 }
 
-/** @returns {EnvRoute[]} */
+/** @returns {Required<Route>[]} */
 function getRoutes() {
 	const routes = [];
 	PACKAGE_NAMES.forEach(pkgName => {
 		const rankupFile = getRankupFile(pkgName);
 		if (rankupFile?.routes) {
 			for (const route of rankupFile?.routes) {
-				const component = route.component ?? pkgName;
-				const componentFileName = component + '.ts';
-				const routeInfo = /** @type {EnvRoute} */ ({
-					baseRoute: route.baseRoute,
-					publicPage: route.publicPage,
-					path: Path.join(pkgName, componentFileName),
-					component,
-					componentFileName,
-				});
+				const path = route.path.startsWith('/') ? route.path : '/' + route.path;
+				const componentName = route.componentName ?? pkgName;
+				let componentPath = Path.join(
+					'/node_modules/@rankup/',
+					pkgName,
+					route.componentPath ?? componentName + '.ts',
+				);
+				/** @type {Required<Route>} */
+				const routeInfo = {
+					...route,
+					path,
+					componentName,
+					componentPath,
+				};
 				if (isValidRouteInfo(routeInfo)) {
-					const found = routes.find(route => route.baseRoute === routeInfo.baseRoute);
+					const found = routes.find(route => route.route === routeInfo.path);
 					if (found) {
 						console.error('Found 2 packages with same base route', { routeInfo, found });
-						throw new Error('Found 2 packages with same baseRoute');
+						throw new Error('Found 2 packages with same route');
 					}
 					routes.push(routeInfo);
 				} else {
@@ -73,11 +78,14 @@ function getRoutes() {
 }
 
 /**
- * @param {EnvRoute} routeInfo
+ * @param {Required<Route>} routeInfo
  * @returns {boolean}
  */
 function isValidRouteInfo(routeInfo) {
-	const pathToComponent = relativeFromFileURL(import.meta.url, ...['../../', routeInfo.path]);
+	const pathToComponent = relativeFromFileURL(
+		import.meta.url,
+		...['../../', routeInfo.componentPath.replace(/^\/node_modules\/@rankup\//, '')],
+	);
 	const componentFileExists = fs.existsSync(pathToComponent);
 	return componentFileExists && typeof routeInfo.publicPage === 'boolean';
 }

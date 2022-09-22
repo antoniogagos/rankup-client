@@ -1,5 +1,7 @@
-export type HTMLElementEvenObject = {
-	[K in keyof HTMLElementEventMap]: HTMLElementEventMap[K];
+export interface DOMEventMap extends HTMLElementEventMap, DocumentEventMap {}
+
+export type DOMEventObject = {
+	[K in keyof DOMEventMap]: DOMEventMap[K];
 };
 
 /**
@@ -19,11 +21,11 @@ interface HTMLElementTypedEvents<EventsMap extends Record<string, Event>> {
 		options?: boolean | AddEventListenerOptions,
 	): void;
 
-	addEventListener<T extends keyof HTMLElementEvenObject>(
+	addEventListener<T extends keyof DOMEventObject>(
 		type: T,
 		listener:
-			| ((this: this, ev: HTMLElementEvenObject[T]) => void)
-			| { handleEvent(object: HTMLElementEvenObject[T]): void },
+			| ((this: this, ev: DOMEventObject[T]) => void)
+			| { handleEvent(object: DOMEventObject[T]): void },
 		options?: boolean | AddEventListenerOptions,
 	): void;
 
@@ -41,11 +43,11 @@ interface HTMLElementTypedEvents<EventsMap extends Record<string, Event>> {
 		options?: boolean | EventListenerOptions,
 	): void;
 
-	removeEventListener<T extends keyof HTMLElementEvenObject>(
+	removeEventListener<T extends keyof DOMEventObject>(
 		type: T,
 		listener:
-			| ((this: this, ev: HTMLElementEvenObject[T]) => void)
-			| { handleEvent(object: HTMLElementEvenObject[T]): void },
+			| ((this: this, ev: DOMEventObject[T]) => void)
+			| { handleEvent(object: DOMEventObject[T]): void },
 		options?: boolean | EventListenerOptions,
 	): void;
 

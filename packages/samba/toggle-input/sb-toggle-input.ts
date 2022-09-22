@@ -1,4 +1,4 @@
-import type { WithEvents } from 'common/types/html-element-typed-events';
+import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

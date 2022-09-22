@@ -1,6 +1,4 @@
 import { msg } from '@lit/localize';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -8,15 +6,17 @@ import {
 	eyeIcon,
 	googleIcon,
 	privacyIcon,
-} from 'samba/icons.js';
-import buttonStyles from 'samba/styles/button-css.js';
-import formControlStyles from 'samba/styles/form-control-css.js';
-import linkStyles from 'samba/styles/link-css.js';
+} from '@rankup/samba/icons.js';
+import buttonStyles from '@rankup/samba/styles/button-css.js';
+import formControlStyles from '@rankup/samba/styles/form-control-css.js';
+import linkStyles from '@rankup/samba/styles/link-css.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
-import { path } from '../../lib/url-paths/url-paths.js';
+// import { path } from '../../lib/url-paths/url-paths.js';
 
-@customElement('rk-sign-in-page')
-export class RkSignInPage extends LitElement {
+@customElement('auth-sign-in-page')
+export class AuthSignInPage extends LitElement {
 	@property({ type: Boolean })
 	_showPassword = false;
 
@@ -106,7 +106,7 @@ export class RkSignInPage extends LitElement {
 					</div>
 				</section>
 
-				<a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}>
+				<a class="link--primary forgot-password-link" href="auth/forgot-password">
 					${msg('Olvidaste la contraseña?')}
 				</a>
 
@@ -124,7 +124,7 @@ export class RkSignInPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGN_UP')}>${msg('Crea una')}</a>
+				<a class="link--primary" href="auth/sign-up">${msg('Crea una')}</a>
 			</footer>
 		`;
 	}
@@ -234,6 +234,6 @@ export class RkSignInPage extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'rk-sign-in-page': RkSignInPage;
+		'auth-sign-in-page': AuthSignInPage;
 	}
 }

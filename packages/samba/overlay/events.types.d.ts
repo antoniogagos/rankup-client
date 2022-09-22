@@ -35,12 +35,12 @@ export type EventsMap<T extends OverlayController = OverlayController> = {
 
 declare global {
 	interface WindowEventMap {
-		'before-close-overlay': EventsMap['before-close-overlay'];
-		'before-open-overlay': EventsMap['before-open-overlay'];
-		'close-transition-end': EventsMap['close-transition-end'];
-		'find-overlay-container': EventsMap['find-overlay-container'];
-		'open-transition-end': EventsMap['open-transition-end'];
-		'overlay-closed': EventsMap['overlay-closed'];
-		'overlay-opened': EventsMap['overlay-opened'];
+		'before-close-overlay': EventsMap<OverlayController>['before-close-overlay'];
+		'before-open-overlay': EventsMap<OverlayController>['before-open-overlay'];
+		'close-transition-end': EventsMap<OverlayController>['close-transition-end'];
+		'find-overlay-container': EventsMap<OverlayController>['find-overlay-container'];
+		'open-transition-end': EventsMap<OverlayController>['open-transition-end'];
+		'overlay-closed': EventsMap<OverlayController>['overlay-closed'];
+		'overlay-opened': EventsMap<OverlayController>['overlay-opened'];
 	}
 }

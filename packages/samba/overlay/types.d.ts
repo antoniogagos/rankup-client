@@ -1,8 +1,9 @@
+import { Listeners } from '@rankup/common/lit-controllers/listeners-controller/events-listener-controller.js';
 import { ReactiveControllerHost, ReactiveElement } from 'lit';
 
 import type { AnimationKeys } from './animations-presets.js';
-import type { ListenersObject } from './common/listeners';
-import { EventsMap as OverlayEventsMap } from './events.types.js';
+// import type { ListenersObject } from './common/listeners';
+import { EventsMap } from './events.types.js';
 import { OverlayController } from './overlay-controller.js';
 
 export { EventsMap } from './events.types.js';
@@ -31,7 +32,10 @@ export type Rect = Writeable<
 	Pick<DOMRect, 'bottom' | 'height' | 'left' | 'right' | 'top' | 'width'>
 >;
 
-export interface Options<Host, EventsMap extends Record<string, Event> = OverlayEventsMap> {
+export interface Options<
+	Host extends ReactiveControllerHostElement,
+	Events extends Record<string, Event> = EventsMap<OverlayController<Host>>,
+> {
 	/** By default, it adds custom stylesheet to the overlay host to make it look like an overlay */
 	addOverlayStyles?: boolean;
 	animationIn?: Animation;
@@ -66,7 +70,7 @@ export interface Options<Host, EventsMap extends Record<string, Event> = Overlay
 	globalMargin?: number;
 	horizontalAlign?: HorizontalAlign;
 	horizontalOffset?: number;
-	listeners?: ListenersObject<EventsMap>;
+	listeners?: Partial<Listeners<Events>>;
 	/** @default false */
 	noAutoFocus?: boolean;
 	/** @default false */

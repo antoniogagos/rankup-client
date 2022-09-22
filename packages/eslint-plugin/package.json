@@ -1,5 +1,5 @@
 {
-	"name": "eslint-plugin-rankup",
+	"name": "@rankup/eslint-plugin",
 	"version": "1.0.0",
 	"description": "Check uniqueness of web component names",
 	"main": "./lib/index.js",
