@@ -1,4 +1,4 @@
-import { msg } from '@lit/localize';
+import { localizePath, msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -12,8 +12,6 @@ import formControlStyles from '@rankup/samba/styles/form-control-css.js';
 import linkStyles from '@rankup/samba/styles/link-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
-// import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('auth-sign-in-page')
 export class AuthSignInPage extends LitElement {
@@ -34,7 +32,7 @@ export class AuthSignInPage extends LitElement {
 	}
 
 	private _onGoogleSignInClick() {
-		rkPublicApp.sessionManager!.signInWithOAuth('Google');
+		appShell.sessionManager!.signInWithOAuth('Google');
 	}
 
 	private _onFormSubmit(evt: FormDataEvent) {
@@ -55,7 +53,7 @@ export class AuthSignInPage extends LitElement {
 
 	async _signIn(email: string, password: string) {
 		try {
-			await rkPublicApp.sessionManager!.signInWithPassword({ email, password });
+			await appShell.sessionManager!.signInWithPassword({ email, password });
 		} catch (error: any) {
 			if (error?.name === 'NotAuthorizedException' || error?.name === 'UserNotFoundException') {
 				this.passwordInput.setCustomValidity(msg('Email o contraseña inválidos'));
@@ -106,7 +104,7 @@ export class AuthSignInPage extends LitElement {
 					</div>
 				</section>
 
-				<a class="link--primary forgot-password-link" href="auth/forgot-password">
+				<a class="link--primary forgot-password-link" href=${localizePath('/recuperar-contraseña')}>
 					${msg('Olvidaste la contraseña?')}
 				</a>
 
@@ -124,7 +122,7 @@ export class AuthSignInPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href="auth/sign-up">${msg('Crea una')}</a>
+				<a class="link--primary" href=${localizePath('/registro')}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}

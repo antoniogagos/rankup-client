@@ -1,4 +1,4 @@
-import { msg } from '@lit/localize';
+import { localizePath, msg } from '@rankup/common/i18n/localize';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -11,8 +11,6 @@ import buttonStyles from '@rankup/samba/styles/button-css.js';
 import formControlStyles from '@rankup/samba/styles/form-control-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
-// import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('auth-sign-up-page')
 export class AuthSignUpPage extends LitElement {
@@ -68,12 +66,12 @@ export class AuthSignUpPage extends LitElement {
 	private async _signUp(email: string, password: string, username: string) {
 		try {
 			this.signInButton.disabled = true;
-			await rkPublicApp.sessionManager!.signUpWithPassword({
+			await appShell.sessionManager!.signUpWithPassword({
 				email,
 				password,
 				username,
 			});
-			rkPublicApp.redirectToPage('CONFIRM_REGISTRATION', { email });
+			appShell.redirect(msg('/confirmar-registro'), { email });
 		} catch (error: any) {
 			if (error?.name === 'UsernameExistsException') {
 				this.emailInput.setCustomValidity(msg('An account with this email already exists'));
@@ -99,7 +97,7 @@ export class AuthSignUpPage extends LitElement {
 		return html`
 			<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
 
-			<form action="#" method="POST" @submit=${this._onFormSubmit} @input=${this._onFormInput}>
+			<form action="#" method="post" @submit=${this._onFormSubmit} @input=${this._onFormInput}>
 				<section>
 					<div class="input-wrapper">
 						${usernameIcon}
@@ -175,7 +173,7 @@ export class AuthSignUpPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href="auth/sign-in">${msg('Inicia sesión')}</a>
+				<a href=${localizePath(msg('iniciar-sesion'))}>${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}

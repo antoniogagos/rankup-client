@@ -21,6 +21,9 @@ module.exports = {
 		'prettier',
 	],
 	rules: {
+		'@rankup/filename-matches-element': ['error'],
+		'@rankup/no-duplicated-web-component': ['error'],
+		'@rankup/no-custom-elements-define': ['error'],
 		'@typescript-eslint/ban-ts-comment': 'off',
 		'@typescript-eslint/no-empty-interface': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',

@@ -1,4 +1,4 @@
-import { msg } from '@lit/localize';
+import { localizePath, msg } from '@rankup/common/i18n/localize';
 import {
 	arrowLeftIcon,
 	arrowRightIcon,
@@ -13,18 +13,16 @@ import linkStyles from '@rankup/samba/styles/link-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-// import { path } from '../../lib/url-paths/url-paths.js';
-
 @customElement('auth-reset-password-page')
 export class AuthResetPasswordPage extends LitElement {
 	@property({ type: Boolean })
 	showPassword = false;
 
 	@property({ type: String })
-	codeFromURL?: string | null;
+	codeFromURL?: string;
 
 	@property({ type: String })
-	emailFromURL?: string | null;
+	emailFromURL?: string;
 
 	@query('#verificationCode')
 	verificationCodeInput!: HTMLInputElement;
@@ -72,13 +70,13 @@ export class AuthResetPasswordPage extends LitElement {
 
 	private _processEmailAndCodeFromURL() {
 		const url = new URL(window.location.toString());
-		this.emailFromURL ??= url.searchParams.get('email');
+		this.emailFromURL ??= url.searchParams.get('email') ?? '';
 		this.codeFromURL ??= url.searchParams.get('code') ?? '';
 	}
 
 	private async _resetPassword(email: string, verificationCode: string, newPassword: string) {
 		try {
-			const resp = await rkPublicApp.sessionManager!.confirmForgottenPassword(
+			const resp = await appShell.sessionManager!.confirmForgottenPassword(
 				email,
 				verificationCode,
 				newPassword,
@@ -93,7 +91,9 @@ export class AuthResetPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href="auth/sign-in" }>${arrowLeftIcon}</a>
+				<a class="link--primary go-back-arrow" href=${localizePath(msg('iniciar-sesion'))}
+					>${arrowLeftIcon}</a
+				>
 				<div>${msg('Restablecer contraseña')}</div>
 			</header>
 			<form @submit=${this._onFormSubmit}>
@@ -108,7 +108,7 @@ export class AuthResetPasswordPage extends LitElement {
 							autocomplete="email"
 							placeholder=${msg('Email')}
 							required
-							.value=${this.emailFromURL} />
+							.value=${this.emailFromURL ?? ''} />
 					</div>
 				</section>
 
@@ -123,7 +123,7 @@ export class AuthResetPasswordPage extends LitElement {
 							autocomplete="off"
 							placeholder=${msg('Código recibido por email')}
 							required
-							.value=${this.codeFromURL} />
+							.value=${this.codeFromURL ?? ''} />
 					</div>
 				</section>
 
@@ -170,7 +170,7 @@ export class AuthResetPasswordPage extends LitElement {
 			</form>
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href="/auth/sign-up" }>${msg('Crea una')}</a>
+				<a class="link--primary" href=${localizePath(msg('/auth/sign-up'))}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}

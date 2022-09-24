@@ -1,7 +1,7 @@
 {
 	"routes": [
 		{
-			"path": "football-scores",
+			"path": "resultados/*",
 			"componentName": "fsg-index",
 			"publicPage": false
 		}

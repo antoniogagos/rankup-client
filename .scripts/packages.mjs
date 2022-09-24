@@ -3,8 +3,7 @@ import { relativeFromFileURL } from './path.mjs';
 import fs from 'fs';
 import Path from 'path';
 
-/** @typedef {import('common/types/rankup-json').RankupJSON} RankupJSON */
-/** @typedef {import('common/types/rankup-json').Routing} Routing */
+/** @typedef {import('@rankup/common/types/rankup-json').RankupJSON} RankupJSON */
 
 const MONOREPO_FOLDER = relativeFromFileURL(import.meta.url, '../packages');
 

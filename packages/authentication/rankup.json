@@ -1,31 +1,37 @@
 {
 	"routes": [
 		{
-			"path": "auth/sign-in",
+			"path": "/oauth",
+			"localize": false,
+			"redirect": "/mis-torneos",
+			"publicPage": true
+		},
+		{
+			"path": "/iniciar-sesion",
 			"componentName": "auth-sign-in-page",
 			"componentPath": "./pages/sign-in/auth-sign-in-page.ts",
 			"publicPage": true
 		},
 		{
-			"path": "auth/sign-up",
+			"path": "/registro",
 			"componentName": "auth-sign-up-page",
 			"componentPath": "./pages/sign-up/auth-sign-up-page.ts",
 			"publicPage": true
 		},
 		{
-			"path": "auth/reset-password",
+			"path": "/restablecer-contraseña",
 			"componentName": "auth-reset-password-page",
 			"componentPath": "./pages/reset-password/auth-reset-password-page.ts",
 			"publicPage": true
 		},
 		{
-			"path": "auth/forgot-password",
+			"path": "/recuperar-contraseña",
 			"componentName": "auth-forgot-password-page",
 			"componentPath": "./pages/forgot-password/auth-forgot-password-page.ts",
 			"publicPage": true
 		},
 		{
-			"path": "auth/confirm-registration",
+			"path": "/confirmar-registro",
 			"componentName": "auth-confirm-registration-page",
 			"componentPath": "./pages/confirm-registration/auth-confirm-registration-page.ts",
 			"publicPage": true

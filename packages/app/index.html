@@ -15,6 +15,24 @@
 	</head>
 
 	<script type="module" src="/app-shell.ts"></script>
+
+	<script type="module">
+		import env from '/env.json';
+
+		const { localStorage } = window;
+		const ns = 'CognitoIdentityServiceProvider';
+		const reg = new RegExp(ns + '\\.\\w+\\.LastAuthUser');
+		const isLogged = Object.keys(localStorage).find(k => k.match(reg))?.length > 0;
+		const preloadScript = document.createElement('script');
+		preloadScript.setAttribute('type', 'module');
+		if (!isLogged) {
+			const home = env.Routes.find(route => route.path === '/');
+			// TODO: search in env.json the componentPath of the route "/"
+			preloadScript.setAttribute('src', home.componentPath);
+		}
+		document.documentElement.appendChild(preloadScript);
+	</script>
+
 	<script>
 		let theme = 'light';
 		if (localStorage.getItem('theme')) {
@@ -27,7 +45,7 @@
 	</script>
 
 	<body>
-		<app-shell id="rkApp" slot="authenticated"></app-shell>
+		<app-shell id="appShell" slot="authenticated"></app-shell>
 		<sb-overlay-container></sb-overlay-container>
 	</body>
 </html>

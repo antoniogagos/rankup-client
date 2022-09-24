@@ -12,7 +12,7 @@ export default css`
 		overflow-x: hidden;
 	}
 
-	@keyframes entryFromLeft {
+	@keyframes RouterEntryLeft {
 		from {
 			transform: translateX(-30px);
 			opacity: 0;
@@ -23,7 +23,7 @@ export default css`
 		}
 	}
 
-	@keyframes opacity {
+	@keyframes RouterEntryOpacity {
 		from {
 			opacity: 0;
 		}
@@ -32,7 +32,7 @@ export default css`
 		}
 	}
 
-	@keyframes exitRight {
+	@keyframes RouterExitRight {
 		from {
 			opacity: 1;
 			transform: translateX(0);
@@ -44,21 +44,21 @@ export default css`
 	}
 
 	[animation='slide'] {
-		animation-name: entryFromLeft;
+		animation-name: RouterEntryLeft;
 		animation-duration: 380ms;
 		animation-timing-function: ease-out;
 		animation-fill-mode: forwards;
 	}
 
 	[animation='opacity'] {
-		animation-name: opacity;
+		animation-name: RouterEntryOpacity;
 		animation-duration: 380ms;
 		animation-timing-function: ease-out;
 		animation-fill-mode: forwards;
 	}
 
 	[animation='exit'] {
-		animation-name: exitRight;
+		animation-name: RouterExitRight;
 		animation-duration: 140ms;
 		animation-timing-function: ease-in;
 		animation-fill-mode: forwards;

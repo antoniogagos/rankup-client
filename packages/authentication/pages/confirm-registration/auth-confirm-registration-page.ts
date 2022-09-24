@@ -1,4 +1,4 @@
-import { msg } from '@lit/localize';
+import { localizePath, msg } from '@rankup/common/i18n/localize';
 import { arrowRightIcon, privacyIcon } from '@rankup/samba/icons.js';
 import buttonStyles from '@rankup/samba/styles/button-css.js';
 import formControlStyles from '@rankup/samba/styles/form-control-css.js';
@@ -49,13 +49,13 @@ export class AuthConfirmRegistrationPage extends LitElement {
 
 	private async _confirmRegistration(email: string, code: string) {
 		try {
-			await rkPublicApp.sessionManager!.confirmRegistration(email, code);
-			rkPublicApp.redirectToPage('SIGN_IN');
+			await appShell.sessionManager!.confirmRegistration(email, code);
+			appShell.redirect(localizePath('/iniciar-sesion'));
 		} catch (error: unknown) {
 			if (error instanceof Error) {
 				if (error.name === 'NotAuthorizedException' && error.message.match('status is CONFIRMED')) {
 					// already confirmed, redirect to login page
-					rkPublicApp.redirectToPage('SIGN_IN');
+					appShell.redirect(localizePath('/iniciar-sesion'));
 					return;
 				}
 				this.verificationCodeInput.setCustomValidity(error.message);
@@ -72,13 +72,13 @@ export class AuthConfirmRegistrationPage extends LitElement {
 			this._confirmRegistration(this.email, this.code);
 		} else if (!this.email) {
 			// request page change, since we can't do anything without an email
-			rkPublicApp.redirectToPage('SIGN_UP');
+			appShell.redirect(localizePath('/registro'));
 		}
 	}
 
 	private async _resendCode() {
 		try {
-			await rkPublicApp.sessionManager!.resendConfirmationCode(this.email!);
+			await appShell.sessionManager!.resendConfirmationCode(this.email!);
 		} catch (error: unknown) {
 			this.verificationCodeInput.setCustomValidity((error as Error).message);
 			this.form.reportValidity();
@@ -89,7 +89,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 		return html`
 			<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
 
-			<form action="#" method="POST" @submit=${this._handleFormSubmit} @input=${this._onFormInput}>
+			<form action="#" method="post" @submit=${this._handleFormSubmit} @input=${this._onFormInput}>
 				<section>
 					${msg('Se ha enviado un código a tu email. Introdúcelo abajo para confirmar tu cuenta.')}
 				</section>
@@ -121,7 +121,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href="/auth/sign-in">${msg('Inicia sesión')}</a>
+				<a href=${localizePath(msg('/iniciar-sesion'))}>${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}

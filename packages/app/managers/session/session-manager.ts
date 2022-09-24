@@ -30,7 +30,6 @@ export type EventsMap = {
 		session: Session | null;
 		old: Session | null;
 	}>;
-	foo: CustomEvent<{ bar: boolean }>;
 };
 
 const { Auth } = env;
@@ -55,6 +54,20 @@ export class SessionManager implements ReactiveController {
 
 	hostDisconnected() {
 		//
+	}
+
+	waitLoginComplete() {
+		return new Promise<void>(resolve => {
+			const urlParams = new URLSearchParams(window.location.search);
+			const hasOauthParams = urlParams.has('googleAuth') && urlParams.has('code');
+			if (hasOauthParams) {
+				this.host.addEventListener('session-updated', () => {
+					resolve();
+				});
+			} else {
+				resolve();
+			}
+		});
 	}
 
 	private _updateSessionFromLocalStorage(): Session | null {

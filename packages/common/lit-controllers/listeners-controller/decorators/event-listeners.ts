@@ -1,6 +1,7 @@
 import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import { ReactiveElement } from 'lit';
+import { DOMEventObject } from 'types/html-element-typed-events';
 
 import type { IDisposable } from '../../../utils/disposable';
 import { listen } from '../events-listener-controller.js';
@@ -14,7 +15,7 @@ import { listen } from '../events-listener-controller.js';
  *
  * @category Decorator
  */
-export function eventListener<T extends Record<string, any> | null = null>({
+export function eventListener<T extends Record<string, any> = DOMEventObject>({
 	eventName,
 	target,
 	once,
@@ -22,12 +23,12 @@ export function eventListener<T extends Record<string, any> | null = null>({
 	signal,
 }: {
 	eventName: keyof T;
-	target?: Element;
+	target?: Element | Window | Document;
 	once?: boolean;
 	passive?: boolean;
 	signal?: AbortSignal;
 }): <K extends PropertyKey>(
-	protoOrDescriptor: ReactiveElement & Record<K, (evt: any) => void>,
+	protoOrDescriptor: ReactiveElement /*  & Record<K, (evt: any) => void> */,
 	name?: K,
 	// Note TypeScript requires the return type to be `void|any`
 ) => void | any {
@@ -51,7 +52,7 @@ class ListenerController implements ReactiveController {
 		public host: ReactiveControllerHost & HTMLElement,
 		private name: PropertyKey,
 		private eventName: string,
-		private target?: Element,
+		private target?: Element | Window | Document,
 		private opts?: AddEventListenerOptions,
 	) {}
 

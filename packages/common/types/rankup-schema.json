@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Route": {
+            "properties": {
+                "componentName": {
+                    "description": "Name of the web component to be rendered in this route\nIt defaults to the same package folder name",
+                    "type": "string"
+                },
+                "componentPath": {
+                    "description": "Path to the component file. It must be RELATIVE to the package, not the whole repo\nIt defaults to `./{package}/{componentName}.ts`",
+                    "type": "string"
+                },
+                "displayFooter": {
+                    "type": "boolean"
+                },
+                "displayHeader": {
+                    "type": "boolean"
+                },
+                "localize": {
+                    "description": "Defaults to true. It'll prepend a localization string at the beginning of the path\ni.e. /en/my-path from /my-path",
+                    "type": "boolean"
+                },
+                "path": {
+                    "description": "Path that will render our component",
+                    "type": "string"
+                },
+                "publicPage": {
+                    "description": "If true, the path will be added to the public-app",
+                    "type": "boolean"
+                },
+                "redirect": {
+                    "description": "This route is a redirect to this path",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "routes": {
+            "description": "define pages in public-app or auth-app",
+            "items": {
+                "$ref": "#/definitions/Route"
+            },
+            "type": "array"
+        }
+    },
+    "type": "object"
+}
+

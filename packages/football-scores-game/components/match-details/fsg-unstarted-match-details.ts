@@ -1,7 +1,7 @@
 import '../bet-match/fsg-bet-match.js';
 
-import { msg } from '@lit/localize';
 import type { Match } from '@rankup/common/football/types';
+import { msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowLeftIcon,
 	calendarIcon,

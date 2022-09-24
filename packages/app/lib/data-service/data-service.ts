@@ -20,20 +20,6 @@ type ParamsLocation = {
 };
 
 type strMap = { [key: string]: string };
-
-export type Chat = {
-	// esto vendrá con un tourney seguramente, asi q no incluirá tourneyId
-	tourneyId: string;
-	totalMessages: number;
-	lastMessageAt: Date;
-	pinnedMessage: string;
-};
-
-export const chat = {
-	totalMessage: 5,
-	lastMessageAt: new Date(Date.now() - 1000 * 60 * 60),
-	pinnedMessage: 'message-id-1',
-};
 export class DataService {
 	host?: ReactiveElement;
 
@@ -100,20 +86,18 @@ export class DataService {
 	async GetUserTourneys() {
 		return [
 			{
-				// user-tourney info
-				tourneyId: 'tourney-1',
+				// user-contest info
+				contestId: 'contest-1',
 				role: 'ADMIN',
 				group: 'ACTIVE',
-				chatReadCount: 2,
 				pushChatEnabled: true,
 				rankingPosition: 3,
 				name: 'The Squad Team',
-				// tourney info
+				// contest info
 				ownerId: 'user-phoga',
 				isPublic: false,
 				invitationCode: '?',
 				open: false,
-				chatEnabled: true,
 				totalPlayers: 18,
 				competitionId: 'laliga',
 				season: 2021,

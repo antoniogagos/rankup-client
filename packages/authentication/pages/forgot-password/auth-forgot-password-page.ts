@@ -1,4 +1,4 @@
-import { msg, str } from '@lit/localize';
+import { localizePath, msg, str } from '@rankup/common/i18n/localize';
 import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from '@rankup/samba/icons.js';
 import buttonStyles from '@rankup/samba/styles/button-css.js';
 import formControlStyles from '@rankup/samba/styles/form-control-css.js';
@@ -6,8 +6,6 @@ import linkStyles from '@rankup/samba/styles/link-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
-
-// import { path } from '../../lib/url-paths/url-paths.js';
 
 @customElement('auth-forgot-password-page')
 export class AuthForgotPasswordPage extends LitElement {
@@ -34,7 +32,7 @@ export class AuthForgotPasswordPage extends LitElement {
 	private async _forgotPassword(email: string) {
 		try {
 			this._loading = true;
-			await rkPublicApp.sessionManager!.forgotPassword(email);
+			await appShell.sessionManager!.forgotPassword(email);
 		} finally {
 			this._loading = false;
 			this._sent = true;
@@ -81,7 +79,9 @@ export class AuthForgotPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href="/auth/sign-in">${arrowLeftIcon}</a>
+				<a class="link--primary go-back-arrow" href=${localizePath(msg('/iniciar-sesion'))}
+					>${arrowLeftIcon}</a
+				>
 				<div>${msg('Recordar contraseña')}</div>
 			</header>
 
@@ -92,7 +92,7 @@ export class AuthForgotPasswordPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href="/auth/sign-up">${msg('Crea una')}</a>
+				<a class="link--primary" href=${localizePath(msg('/registro'))}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}

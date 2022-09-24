@@ -13,7 +13,7 @@ export interface Env {
 		OAuthServerURL: string;
 		RedirectURI: string;
 	};
-	Routes: Required<Route>[];
+	Routes: Route[];
 }
 
 export default _env as Env;

@@ -20,16 +20,16 @@ export type Listeners<EventsMap> = {
 };
 
 export function listen(
-	target: Element,
+	target: Element | Window | Document,
 	evtName: string,
 	handleEvent: (evt: Event) => void | Promise<void>,
 	opts?: AddEventListenerOptions,
 ): IDisposable {
-	console.log('addEventListener::', { evtName, target, handleEvent, opts });
+	// console.log('addEventListener::', { evtName, target, handleEvent, opts });
 	target.addEventListener(evtName, handleEvent, opts);
 	return {
 		dispose() {
-			console.log('removeEventListener::', { evtName, target, handleEvent, opts });
+			// console.log('removeEventListener::', { evtName, target, handleEvent, opts });
 			target.removeEventListener(evtName, handleEvent, opts);
 		},
 	};

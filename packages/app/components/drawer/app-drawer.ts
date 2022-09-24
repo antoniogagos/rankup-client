@@ -1,5 +1,5 @@
-import { msg } from '@lit/localize';
 import { Task } from '@lit-labs/task';
+import { localizePath, msg } from '@rankup/common/i18n/localize';
 import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import {
 	createTourneyIcon,
@@ -13,8 +13,6 @@ import buttonStyles from '@rankup/samba/styles/button-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
 
-import { path } from '../../lib/url-paths/url-paths.js';
-
 export interface AppDrawerParameters {}
 
 export type EventsMap = {
@@ -26,9 +24,9 @@ export type EventsMap = {
 
 @customElement('app-drawer')
 export class AppDrawer extends LitElement implements AppDrawerParameters {
-	private _tourneys = new Task(
+	private _contests = new Task(
 		this,
-		() => rkApp.ds.GetUserTourneys(),
+		() => appShell.ds.GetUserTourneys(),
 		() => [null],
 	);
 
@@ -58,8 +56,9 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 	};
 
 	private _onSignOutClicked() {
-		this.overlayController?.close();
-		rkApp.sessionManager.signOut();
+		// TODO specify different animation (opacity?)
+		this.overlayController?.close({ noAnimation: true });
+		appShell.sessionManager.signOut();
 	}
 
 	render() {
@@ -67,13 +66,13 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 			<main opened>
 				<img src="/assets/images/rk-logo-with-bg.svg" alt="Rankup logo" />
 				<div class="rankup">Rankup</div>
-				<a href=${path('CREATE_TOURNEY')}>
+				<a href=${localizePath(msg('crear-torneo'))}>
 					<button class="btn btn--md">${createTourneyIcon}${msg('Crear liga')}</button>
 				</a>
-				<a href=${path('JOIN_TOURNEY')}>
+				<a href=${localizePath(msg('unirse-torneo'))}>
 					<button class="btn btn--md">${joinTourneyIcon}${msg('Unirse a una liga')}</button>
 				</a>
-				<button id="signoutBtn" @click=${this._onSignOutClicked} class="btn btn--md">
+				<button id="signOutBtn" @click=${this._onSignOutClicked} class="btn btn--md">
 					${signOutIcon}${msg('Cerrar sesión')}
 				</button>
 				<div class="divisor-line"></div>
@@ -114,7 +113,7 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 			a {
 				width: 100%;
 			}
-			#signoutBtn {
+			#signOutBtn {
 				margin-top: 3.5rem;
 			}
 			.rankup {
