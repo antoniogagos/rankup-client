@@ -4,7 +4,7 @@ export default css`
 	:host {
 		display: flex;
 		flex-direction: column;
-		gap: 24px 0;
+		gap: 2.4rem 0;
 	}
 
 	.header {
@@ -15,7 +15,7 @@ export default css`
 		/* justify-content: center; */
 	}
 	.header--border {
-		padding-bottom: 14px;
+		padding-bottom: 1.4rem;
 		border-bottom: 1px solid var(--border-color-low);
 	}
 
@@ -36,7 +36,7 @@ export default css`
 
 	.header-buttons {
 		display: flex;
-		gap: 0 4px;
+		gap: 0 0.4rem;
 		align-items: baseline;
 		margin-left: auto;
 	}
@@ -65,11 +65,11 @@ export default css`
 	.footer {
 		display: flex;
 		justify-content: flex-end;
-		gap: 0 4px;
+		gap: 0 0.4rem;
 	}
 
 	.header + .footer {
-		margin-top: 12px;
+		margin-top: 1.2rem;
 	}
 
 	/**
@@ -80,10 +80,10 @@ export default css`
 	}
 	:host([sm]) .header,
 	:host([sm]) .footer {
-		padding: 10px 12px;
+		padding: 10px 1.2rem;
 	}
 	:host([sm]) .main {
-		padding: 0 12px;
+		padding: 0 1.2rem;
 	}
 	:host([sm]) .header-title {
 		font-size: 1.3rem;

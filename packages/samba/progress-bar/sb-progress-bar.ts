@@ -87,7 +87,7 @@ export class SbProgressBar extends LitElement {
 		:host {
 			background: #e0e0e0;
 			display: block;
-			height: 2px;
+			height: 0.2rem;
 			left: 0;
 			pointer-events: none;
 			position: fixed;
@@ -113,7 +113,7 @@ export class SbProgressBar extends LitElement {
 			right: 0px;
 			width: 100px;
 			height: 100%;
-			box-shadow: 0 0 10px var(--primary-color-600), 0 0 5px var(--primary-color-600);
+			box-shadow: 0 0 10px var(--primary-color-600), 0 0 0.5rem var(--primary-color-600);
 			opacity: 1;
 
 			-webkit-transform: rotate(3deg) translate(0px, -4px);

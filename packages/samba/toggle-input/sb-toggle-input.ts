@@ -65,7 +65,7 @@ export class SbToggleInput extends LitElement {
 			align-items: center;
 			position: relative;
 			display: grid;
-			grid-template-columns: 28px 1fr;
+			grid-template-columns: 2.8rem 1fr;
 			cursor: pointer;
 		}
 		input {
@@ -84,7 +84,7 @@ export class SbToggleInput extends LitElement {
 		#toggle::after {
 			content: '';
 			position: absolute;
-			top: 4px;
+			top: 0.4rem;
 			left: 6px;
 			border-radius: 1.6rem;
 			width: 1.3rem;
@@ -92,7 +92,7 @@ export class SbToggleInput extends LitElement {
 			background: #fff;
 			display: block;
 			transition: left 0.15s;
-			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 0 1px 0 rgba(0, 0, 0, 0.21);
+			box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2), 0 0 1px 0 rgba(0, 0, 0, 0.21);
 		}
 		input:checked + #toggle {
 			background: #0066ff;
@@ -101,10 +101,10 @@ export class SbToggleInput extends LitElement {
 			background: var(--background-color-500, #9e9e9e);
 		}
 		input:checked + #toggle::after {
-			left: calc(100% - 20px);
+			left: calc(100% - 2rem);
 		}
 		.text:not(:empty) {
-			margin-left: 5px;
+			margin-left: 0.5rem;
 		}
 	`;
 }

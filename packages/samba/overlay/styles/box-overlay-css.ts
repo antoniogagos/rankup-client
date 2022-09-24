@@ -4,7 +4,7 @@ export default css`
 	:host {
 		background: var(--background-color-0);
 		/* box-shadow: rgba(0, 0, 0, 0.23) 0px 1px 33px 0px; */
-		box-shadow: rgba(0, 0, 0, 0.05) 0 1px 8px 0, rgba(0, 0, 0, 0.08) 0 5px 20px 0;
+		box-shadow: rgba(0, 0, 0, 0.05) 0 1px 8px 0, rgba(0, 0, 0, 0.08) 0 0.5rem 2rem 0;
 		border-radius: 11px;
 		max-height: 750px;
 		max-width: 70vw;

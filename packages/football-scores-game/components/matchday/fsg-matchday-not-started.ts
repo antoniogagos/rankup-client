@@ -57,7 +57,7 @@ export class FsgMatchdayNotStarted extends LitElement {
 				box-sizing: border-box;
 			}
 			#match {
-				margin: 3rem 0px;
+				margin: 3rem 0;
 			}
 
 			:host > #match:first-child {

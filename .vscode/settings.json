@@ -5,6 +5,7 @@
 	"files.trimTrailingWhitespace": true,
 	"files.exclude": {
 		".git": true,
+		"dist": true,
 		"**/.DS_Store": true,
 		"**/Thumbs.db": true
 	},

@@ -81,7 +81,7 @@ export class MycCreateContestPage extends LitElement {
 			main {
 				box-sizing: border-box;
 				margin: 0 auto;
-				max-width: 450px;
+				max-width: 45rem;
 				padding: 0 2rem;
 				width: 100%;
 			}
@@ -97,7 +97,7 @@ export class MycCreateContestPage extends LitElement {
 				align-items: center;
 				background: var(--color-canvas-secondary);
 				border-radius: 0.8rem;
-				border: 2px solid var(--color-border-muted);
+				border: 0.2rem solid var(--color-border-muted);
 				box-sizing: border-box;
 				display: flex;
 				height: 4.6rem;
@@ -116,7 +116,7 @@ export class MycCreateContestPage extends LitElement {
 				padding: 1rem;
 				width: 100%;
 				border: none;
-				border-bottom: 3px solid var(--color-canvas-inverted);
+				border-bottom: 0.3rem solid var(--color-canvas-inverted);
 			}
 			#textInput::placeholder {
 				color: var(--color-fg-subtle);

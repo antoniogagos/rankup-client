@@ -289,7 +289,7 @@ export class FsgUnstartedMatchDetails
 			main {
 				padding: 0 2rem;
 				width: 100%;
-				max-width: 450px;
+				max-width: 45rem;
 				margin: 0 auto;
 				box-sizing: border-box;
 			}
@@ -321,12 +321,12 @@ export class FsgUnstartedMatchDetails
 				text-overflow: ellipsis;
 			}
 			.home-odds .odd-pct-bar {
-				border-top-left-radius: 4px;
-				border-bottom-left-radius: 4px;
+				border-top-left-radius: 0.4rem;
+				border-bottom-left-radius: 0.4rem;
 			}
 			.away-odds .odd-pct-bar {
-				border-top-right-radius: 4px;
-				border-bottom-right-radius: 4px;
+				border-top-right-radius: 0.4rem;
+				border-bottom-right-radius: 0.4rem;
 			}
 			.winner .odds-number {
 				color: rgb(24 203 31);
@@ -363,8 +363,8 @@ export class FsgUnstartedMatchDetails
 				bottom: 0;
 				color: #fff;
 				position: absolute;
-				right: -6px;
-				top: -3px;
+				right: -0.6rem;
+				top: -0.3rem;
 				z-index: 2;
 			}
 			.away-odds {
@@ -380,7 +380,7 @@ export class FsgUnstartedMatchDetails
 			.standings .row {
 				display: flex;
 				justify-content: space-between;
-				width: 225px;
+				width: 22.5rem;
 			}
 			.standings .row-info {
 				box-sizing: border-box;
@@ -392,7 +392,7 @@ export class FsgUnstartedMatchDetails
 			}
 			.row-info--number {
 				padding: 0 0.8rem;
-				border-radius: 4px;
+				border-radius: 0.4rem;
 			}
 			.row-info--number.winner {
 				background-color: #c4ffc6;
@@ -401,8 +401,8 @@ export class FsgUnstartedMatchDetails
 			.last-matches .section-content {
 				gap: 5rem;
 				justify-content: center;
-				margin: 0px auto;
-				padding: 0px 2rem;
+				margin: 0 auto;
+				padding: 0 2rem;
 			}
 			.last-matches .column {
 				display: flex;
@@ -441,7 +441,7 @@ export class FsgUnstartedMatchDetails
 				top: 0;
 			}
 			.last-matches .result {
-				border-radius: 4px;
+				border-radius: 0.4rem;
 				color: #282828c7;
 				box-sizing: border-box;
 				padding: 0.2rem 0.8rem;

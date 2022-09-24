@@ -204,7 +204,7 @@ export class AuthResetPasswordPage extends LitElement {
 			}
 			footer {
 				position: absolute;
-				bottom: 50px;
+				bottom: 5rem;
 				font-size: 1.5rem;
 			}
 			footer a {
@@ -212,7 +212,7 @@ export class AuthResetPasswordPage extends LitElement {
 			}
 			p {
 				text-align: center;
-				max-width: 275px;
+				max-width: 27.5rem;
 				margin: 0 auto;
 			}
 			form {
@@ -220,8 +220,8 @@ export class AuthResetPasswordPage extends LitElement {
 				box-sizing: border-box;
 				display: flex;
 				flex-direction: column;
-				max-width: 500px;
-				padding: 0 20px;
+				max-width: 50rem;
+				padding: 0 2rem;
 				width: 100%;
 			}
 			form section {
@@ -240,7 +240,7 @@ export class AuthResetPasswordPage extends LitElement {
 				left: auto;
 				margin: auto;
 				position: absolute;
-				right: 20px;
+				right: 2rem;
 				top: 0;
 			}
 			.input-wrapper {
@@ -248,7 +248,7 @@ export class AuthResetPasswordPage extends LitElement {
 			}
 			.input-wrapper > svg {
 				bottom: 0;
-				left: 20px;
+				left: 2rem;
 				margin: auto;
 				position: absolute;
 				top: 0;

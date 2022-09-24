@@ -64,8 +64,8 @@ export class FsgFooter extends LitElement {
 				font-weight: 600;
 			}
 			footer {
-				border-top: 1px solid var(--color-border-subtle);
-				max-width: 450px;
+				border-top: 0.1rem solid var(--color-border-subtle);
+				max-width: 45rem;
 				margin: 0 auto;
 				box-sizing: border-box;
 				display: flex;
@@ -101,7 +101,7 @@ export class FsgFooter extends LitElement {
 				height: 100%;
 				justify-content: center;
 				margin: 0 auto;
-				max-width: 60px;
+				max-width: 60rem;
 				width: 70%;
 			}
 		`,

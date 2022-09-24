@@ -168,7 +168,7 @@ export class FsgRankingPage extends LitElement {
 				width: 100%;
 				display: grid;
 				grid-template-areas: 'position avatar username points';
-				grid-template-columns: 36px 45px auto 50px;
+				grid-template-columns: 3.6rem 4.5rem auto 5rem;
 				padding: 1rem 2rem;
 				box-sizing: border-box;
 				align-items: center;
@@ -180,8 +180,8 @@ export class FsgRankingPage extends LitElement {
 				display: flex;
 				height: 20.5rem;
 				position: absolute;
-				text-shadow: 0px 1px 0px hsl(0deg 0% 0% / 14%);
-				top: 0px;
+				text-shadow: 0 0.1rem 0 hsl(0deg 0% 0% / 14%);
+				top: 0;
 				width: 100%;
 				font-weight: bold;
 			}
@@ -270,7 +270,7 @@ export class FsgRankingPage extends LitElement {
 			}
 			#chevron {
 				position: absolute;
-				right: 7px;
+				right: 0.7rem;
 				filter: opacity(0.8);
 			}
 		`,

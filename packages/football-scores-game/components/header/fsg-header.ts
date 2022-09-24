@@ -28,7 +28,7 @@ export class FsgHeader extends LitElement {
           <a
             id="arrow"
             class=${linkClasses}
-            href="/">
+            href=${localizePath(msg('/mis-torneos'))}>
             ${arrowLeftIcon}
           </a>
         </section>

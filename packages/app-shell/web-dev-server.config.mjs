@@ -14,7 +14,7 @@ const ROOT_PREFIX_PATH = '/__wds-outside-root__/2';
 
 /** @type {import('@web/dev-server').DevServerConfig} */
 export default {
-	appIndex: 'packages/app/index.html',
+	appIndex: 'packages/app-shell/index.html',
 	rootDir: './',
 	watch: !hmr,
 	// nodeResolve: { dedupe: ['lit', '@lit'], },
@@ -64,7 +64,7 @@ export default {
 		},
 	],
 	// middleware: [
-	//   // Redirect all request from /app/* (without an extension) to app.html
+	//   // Redirect all request from /app-shell/* (without an extension) to app.html
 	//   function rewriteIndex(context, next) {
 	//     if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
 	//       context.url = '/index.html';

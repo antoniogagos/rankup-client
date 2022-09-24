@@ -197,7 +197,7 @@ export class AuthSignUpPage extends LitElement {
 				display: flex;
 				flex-direction: column;
 				max-width: 500px;
-				padding: 0 20px;
+				padding: 0 2rem;
 				width: 100%;
 			}
 			form section {
@@ -226,7 +226,7 @@ export class AuthSignUpPage extends LitElement {
 				left: auto;
 				margin: auto;
 				position: absolute;
-				right: 20px;
+				right: 2rem;
 				top: 0;
 			}
 			.logo {
@@ -237,7 +237,7 @@ export class AuthSignUpPage extends LitElement {
 			}
 			.input-wrapper > svg {
 				bottom: 0;
-				left: 20px;
+				left: 2rem;
 				margin: auto;
 				position: absolute;
 				top: 0;

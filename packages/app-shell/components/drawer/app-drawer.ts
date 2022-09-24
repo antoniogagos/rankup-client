@@ -1,4 +1,3 @@
-import { Task } from '@lit-labs/task';
 import { localizePath, msg } from '@rankup/common/i18n/localize';
 import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import {
@@ -24,12 +23,6 @@ export type EventsMap = {
 
 @customElement('app-drawer')
 export class AppDrawer extends LitElement implements AppDrawerParameters {
-	private _contests = new Task(
-		this,
-		() => appShell.ds.GetUserTourneys(),
-		() => [null],
-	);
-
 	overlayController?: OverlayController<this>;
 
 	connectedCallback(): void {
@@ -104,7 +97,6 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 				position: absolute;
 				transform: translateX(-100%);
 				transition: transform 350ms ease-in-out;
-				width: 65vw;
 				z-index: 2;
 			}
 			main[opened] {
@@ -123,7 +115,7 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 			}
 			.btn {
 				width: 100%;
-				border-radius: 8px;
+				border-radius: 0.8rem;
 			}
 			.divisor-line {
 				background-color: var(--color-canvas-subtle);

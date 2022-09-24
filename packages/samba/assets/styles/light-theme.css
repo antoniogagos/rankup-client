@@ -100,7 +100,7 @@
   --color-shadow-small: 0 1px 0 rgba(27, 31, 36, 0.04);
   --color-shadow-medium: 0 3px 6px rgba(140, 149, 159, 0.15);
   --color-shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
-  --color-shadow-extra-large: 0 12px 28px rgba(140, 149, 159, 0.3);
+  --color-shadow-extra-large: 0 1.2rem 2.8rem rgba(140, 149, 159, 0.3);
 
   --color-canvas-default-transparent: rgba(255, 255, 255, 0);
   --color-marketing-icon-primary: #218bff;
@@ -251,8 +251,8 @@
   --color-mktg-btn-bg: #1b1f23;
   --color-mktg-btn-shadow-outline: rgb(0 0 0 / 15%) 0 0 0 1px inset;
   --color-mktg-btn-shadow-focus: rgb(0 0 0 / 15%) 0 0 0 4px;
-  --color-mktg-btn-shadow-hover: 0 3px 2px rgba(0, 0, 0, 0.07), 0 7px 5px rgba(0, 0, 0, 0.04),
-    0 12px 10px rgba(0, 0, 0, 0.03), 0 22px 18px rgba(0, 0, 0, 0.03),
+  --color-mktg-btn-shadow-hover: 0 3px 2px rgba(0, 0, 0, 0.07), 0 7px 0.5rem rgba(0, 0, 0, 0.04),
+    0 1.2rem 10px rgba(0, 0, 0, 0.03), 0 22px 18px rgba(0, 0, 0, 0.03),
     0 42px 33px rgba(0, 0, 0, 0.02), 0 100px 80px rgba(0, 0, 0, 0.02);
   --color-mktg-btn-shadow-hover-muted: rgb(0 0 0 / 70%) 0 0 0 2px inset;
   --color-avatar-bg: #ffffff;

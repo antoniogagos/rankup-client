@@ -2,7 +2,7 @@ import { localizePath, msg } from '@rankup/common/i18n/localize.js';
 import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners';
 import { arrowRightIcon } from '@rankup/samba/icons.js';
 import buttonStyles from '@rankup/samba/styles/button-css.js';
-import type { EventsMap as SessionManagerEvents } from 'app/managers/session/session-manager';
+import type { EventsMap as SessionManagerEvents } from 'app-shell/managers/session/session-manager';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 import { customElement } from 'lit/decorators/custom-element.js';
@@ -61,7 +61,7 @@ export class PpWelcomePage extends LitElement {
 
 			.main p {
 				font-size: 1.8rem;
-				max-width: 260px;
+				max-width: 26rem;
 				margin: 0;
 				text-align: center;
 			}

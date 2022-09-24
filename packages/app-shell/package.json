@@ -1,8 +1,9 @@
 {
-	"name": "app",
+	"name": "app-shell",
 	"version": "0.0.0",
 	"packageManager": "yarn@3.0.1",
 	"private": true,
+	"@lit-labs/observers": "^1.0.2",
 	"scripts": {
 		"OLD_test": "tsc && wtr --coverage",
 		"OLD_test:watch": "tsc && concurrently -k -r \"tsc -w --preserveWatchOutput\" \"wtr --watch\"",
@@ -19,10 +20,7 @@
 		"validate": "tsc -b & tsc --noEmit"
 	},
 	"dependencies": {
-		"@lit-labs/motion": "^1.0.3",
-		"@lit-labs/observers": "^1.0.2",
 		"@lit-labs/router": "^0.1.1",
-		"@lit-labs/task": "^1.0.0",
 		"amazon-cognito-identity-js": "^5.2.3",
 		"lit": "^2.0.2"
 	},

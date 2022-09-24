@@ -136,7 +136,6 @@ export class AuthConfirmRegistrationPage extends LitElement {
 				color: var(--color-fg-default);
 				display: flex;
 				flex-direction: column;
-				height: 100%;
 				justify-content: center;
 			}
 			form {
@@ -144,8 +143,8 @@ export class AuthConfirmRegistrationPage extends LitElement {
 				box-sizing: border-box;
 				display: flex;
 				flex-direction: column;
-				max-width: 500px;
-				padding: 0 20px;
+				max-width: 50rem;
+				padding: 0 2rem;
 				width: 100%;
 			}
 			form section {
@@ -153,7 +152,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 			}
 			footer {
 				position: absolute;
-				bottom: 50px;
+				bottom: 5rem;
 				font-size: 1.5rem;
 			}
 			footer a {
@@ -165,15 +164,12 @@ export class AuthConfirmRegistrationPage extends LitElement {
 				white-space: nowrap;
 				width: fit-content;
 			}
-			.logo {
-				margin-top: -2rem;
-			}
 			.input-wrapper {
 				position: relative;
 			}
 			.input-wrapper > svg {
 				bottom: 0;
-				left: 20px;
+				left: 2rem;
 				margin: auto;
 				position: absolute;
 				top: 0;

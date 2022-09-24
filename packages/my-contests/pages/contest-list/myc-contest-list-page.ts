@@ -86,8 +86,8 @@ export class MycContestListPage extends LitElement {
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				gap: 40px;
-				margin-top: 3rem;
+				gap: 3rem;
+				margin-top: 1rem;
 			}
 			main {
 				align-items: center;

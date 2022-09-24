@@ -1,5 +1,5 @@
 <figure align="center">
-  <img width="160" src="./packages/app/assets/icons/rk-logo.svg"></img>
+  <img width="160" src="./packages/app-shell/assets/icons/rk-logo.svg"></img>
   <figcaption><h1 style="margin-top: -10px">Rankup</h1></figcaption>
 </figure>
 
@@ -18,7 +18,7 @@ This is a monorepo contains several packages/[workspaces](https://classic.yarnpk
 
 | Directory      | Description                                                                  |
 | -------------- | ---------------------------------------------------------------------------- |
-| app            | App shell                                                                    |
+| app-shell      | Rankup App                                                                   |
 | common         | Contains common assets, libraries, and type definitions                      |
 | eslint-plugin  | Adds some important rules for our monorepo                                   |
 | samba          | Our design system                                                            |

@@ -83,7 +83,7 @@ export class FsgMatchRow extends LitElement {
 
 			.result .divisor-line {
 				height: calc(100% - 0.4rem);
-				width: 2px;
+				width: 0.2rem;
 				background: #374060;
 			}
 
@@ -134,7 +134,7 @@ export class FsgMatchRow extends LitElement {
 				bottom: -0.05rem;
 				left: 0;
 				width: 70%;
-				height: 2px;
+				height: 0.2rem;
 				background: #00eb00;
 				border-radius: 0.3rem;
 			}

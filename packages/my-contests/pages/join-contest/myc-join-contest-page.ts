@@ -67,7 +67,7 @@ export class MycJoinContestPage extends LitElement {
 				z-index: 2;
 			}
 			p {
-				max-width: 300px;
+				max-width: 30rem;
 				text-align: left;
 			}
 			header {
@@ -82,7 +82,7 @@ export class MycJoinContestPage extends LitElement {
 			main {
 				padding: 0 2rem;
 				width: 100%;
-				max-width: 450px;
+				max-width: 45rem;
 				margin: 0 auto;
 				box-sizing: border-box;
 			}

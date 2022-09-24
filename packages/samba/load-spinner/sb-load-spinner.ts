@@ -70,8 +70,8 @@ export class SbLoadSpinner extends LitElement {
 			:host {
 				display: inline-block;
 				position: relative;
-				width: 28px;
-				height: 28px;
+				width: 2.8rem;
+				height: 2.8rem;
 				color: var(--primary-color, rgb(30, 136, 229));
 			}
 

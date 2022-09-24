@@ -53,7 +53,7 @@ export class AppHeader extends LitElement {
 				color: var(--color-header-text);
 				display: flex;
 				flex-direction: row;
-				height: 70px;
+				height: 7rem;
 				justify-content: space-between;
 				padding: 2rem;
 				width: 100%;
@@ -65,8 +65,8 @@ export class AppHeader extends LitElement {
 			}
 
 			svg {
-				height: 24px;
-				width: 24px;
+				height: 2.4rem;
+				width: 2.4rem;
 			}
 		`,
 	];

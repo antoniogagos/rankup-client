@@ -94,12 +94,12 @@ export class FsgRulesPage extends LitElement {
 			main {
 				padding: 0 2rem;
 				width: 100%;
-				max-width: 450px;
+				max-width: 45rem;
 				margin: 0 auto;
 				box-sizing: border-box;
 			}
 			p {
-				max-width: 400px;
+				max-width: 40rem;
 				text-align: left;
 			}
 			.rules li {
@@ -114,7 +114,7 @@ export class FsgRulesPage extends LitElement {
 				margin: 0;
 			}
 			.rule-text {
-				max-width: 250px;
+				max-width: 25rem;
 			}
 			.rule-points {
 				padding: 0.3rem 0.6rem;

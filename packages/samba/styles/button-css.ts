@@ -25,29 +25,29 @@ export default css`
 		font-family: inherit;
 		font-size: 1.6rem;
 		font-weight: 600;
-		gap: 10px;
+		gap: 1rem;
 		pointer-events: all;
 		transition: all 125ms;
 		white-space: nowrap;
 	}
 
 	.btn--primary {
-		border-radius: 24px;
-		border: 2px solid var(--color-btn-border);
+		border-radius: 2.4rem;
+		border: 0.2rem solid var(--color-btn-border);
 		box-shadow: var(--color-btn-shadow);
 		justify-content: center;
-		padding: 6px 20px;
+		padding: 0.6rem 2rem;
 	}
 
 	.btn--xs {
 		font-size: 1.4rem;
-		min-height: 32px;
+		min-height: 3.2rem;
 	}
 
 	.btn--s {
 		font-size: 1.4rem;
-		min-height: 40px;
-		min-width: 120px;
+		min-height: 4rem;
+		min-width: 12rem;
 	}
 
 	.btn--md {
@@ -58,8 +58,8 @@ export default css`
 
 	.btn--lg {
 		font-size: 1.8rem;
-		min-height: 44px;
-		min-width: 175px;
+		min-height: 4.4rem;
+		min-width: 17.5rem;
 	}
 
 	.btn--danger {

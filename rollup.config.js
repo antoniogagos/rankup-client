@@ -17,11 +17,11 @@ import { generateSW } from 'rollup-plugin-workbox';
 
 // export default merge(baseConfig, {
 // 	// any <script type="module"> inside will be bundled by rollup
-// 	input: './packages/app/index.html',
+// 	input: './packages/app-shell/index.html',
 // });
 
 export default {
-	input: './packages/app/index.html',
+	input: './packages/app-shell/index.html',
 	output: {
 		entryFileNames: '[hash].js',
 		chunkFileNames: '[hash].js',

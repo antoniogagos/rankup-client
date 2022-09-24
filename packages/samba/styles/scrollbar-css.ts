@@ -25,8 +25,8 @@ export default css`
 
 		:host(.scroll-lg)::-webkit-scrollbar,
 		.scroll-target.scroll-lg::-webkit-scrollbar {
-			width: 12px;
-			height: 12px;
+			width: 1.2rem;
+			height: 1.2rem;
 		}
 
 		:host(.scroll-md)::-webkit-scrollbar,
@@ -44,13 +44,13 @@ export default css`
 		:host::-webkit-scrollbar-thumb,
 		.scroll-target::-webkit-scrollbar-thumb {
 			background-color: rgba(0, 0, 0, 0.05);
-			border-radius: 12px;
+			border-radius: 1.2rem;
 		}
 
 		:host(:hover)::-webkit-scrollbar-thumb,
 		.scroll-target:hover::-webkit-scrollbar-thumb {
 			background-color: rgba(100, 100, 100, 0.2);
-			border-radius: 12px;
+			border-radius: 1.2rem;
 		}
 	}
 `;

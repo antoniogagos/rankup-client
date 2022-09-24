@@ -1,5 +1,5 @@
 {
-	"name": "rk-app",
+	"name": "rankup",
 	"version": "1.0.0",
 	"packageManager": "yarn@3.0.1",
 	"private": true,
@@ -18,11 +18,11 @@
 		"OLD_build": "rimraf dist && tsc && rollup -c rollup.config.js && npm run analyze -- --exclude dist",
 		"OLD_start:build": "web-dev-server --root-dir dist --app-index index.html --open",
 		"OLD_analyze": "cem analyze --litelement",
-		"build": "npm run build --workspace app",
+		"build": "npm run build --workspace app-shell",
 		"lint": "eslint ./packages --max-warnings=0",
 		"postinstall": "husky install",
-		"start": "npm run start --workspace=app",
-		"validate": "npm run --workspace app validate && npm run lint"
+		"start": "npm run start --workspace=app-shell",
+		"validate": "npm run --workspace=app-shell validate && npm run lint"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.4",

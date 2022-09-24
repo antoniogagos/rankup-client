@@ -146,8 +146,8 @@ export class AuthSignInPage extends LitElement {
 				box-sizing: border-box;
 				display: flex;
 				flex-direction: column;
-				max-width: 500px;
-				padding: 0 20px;
+				max-width: 50rem;
+				padding: 0 2rem;
 				width: 100%;
 			}
 			form section {
@@ -155,7 +155,7 @@ export class AuthSignInPage extends LitElement {
 			}
 			footer {
 				position: absolute;
-				bottom: 50px;
+				bottom: 5rem;
 				font-size: 1.5rem;
 				display: flex;
 				align-items: center;
@@ -173,7 +173,7 @@ export class AuthSignInPage extends LitElement {
 				left: auto;
 				margin: auto;
 				position: absolute;
-				right: 20px;
+				right: 2rem;
 				top: 0;
 			}
 			#signInButton {
@@ -186,7 +186,7 @@ export class AuthSignInPage extends LitElement {
 			}
 			.divisor {
 				margin: 3.5rem;
-				max-width: 500px;
+				max-width: 50rem;
 				position: relative;
 				text-align: center;
 				width: 100%;
@@ -194,19 +194,19 @@ export class AuthSignInPage extends LitElement {
 			.divisor-text {
 				background: var(--color-canvas-default);
 				color: var(--color-fg-subtle);
-				font-size: 15px;
-				left: 0px;
+				font-size: 1.5rem;
+				left: 0;
 				margin: -1rem auto;
-				padding: 0 20px;
+				padding: 0 2rem;
 				position: absolute;
-				right: 0px;
+				right: 0;
 				text-align: center;
 				width: fit-content;
 				z-index: 2;
 			}
 			.cross {
 				background: var(--color-canvas-subtle);
-				height: 3px;
+				height: 0.3rem;
 				position: absolute;
 				top: 0;
 				width: 100%;
@@ -216,7 +216,7 @@ export class AuthSignInPage extends LitElement {
 			}
 			.input-wrapper > svg {
 				bottom: 0;
-				left: 20px;
+				left: 2rem;
 				margin: auto;
 				position: absolute;
 				top: 0;

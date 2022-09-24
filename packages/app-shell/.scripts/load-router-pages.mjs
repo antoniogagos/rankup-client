@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @file Writes into "public-app/env.json" or "auth-app/env.json" the routes defined at packages
+ * @file Writes into "app-shell/env.json" or "app-shell/env.json" the routes defined at packages
  *
  * To define routes (normally a single /{package}/* route), a package needs to define the at a rankup.json file
  * @see {@link /common/types/rankup-json.d.ts} for details about the "rankup.json" file

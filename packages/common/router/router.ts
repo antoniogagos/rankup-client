@@ -60,7 +60,7 @@ export function redirect(
 		return true;
 	}
 	router.goto(_path.replace(/\?.*/, ''));
-	window.history.replaceState({}, '', _path);
+	window.history.pushState({}, '', _path);
 	window.dispatchEvent(new Event('router-redirect'));
 	return false;
 }

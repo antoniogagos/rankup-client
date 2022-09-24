@@ -14,7 +14,7 @@ export default css`
 
 	@keyframes RouterEntryLeft {
 		from {
-			transform: translateX(-30px);
+			transform: translateX(-3rem);
 			opacity: 0;
 		}
 		to {

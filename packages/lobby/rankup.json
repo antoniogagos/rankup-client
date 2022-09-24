@@ -2,8 +2,10 @@
 	"routes": [
 		{
 			"path": "lobby",
-			"componentName": "lobby-index",
-			"publicPage": false
+			"componentPath": "./pages/index/lobby-index-page.ts",
+			"publicPage": false,
+			"displayFooter": true,
+			"displayHeader": true
 		}
 	]
 }

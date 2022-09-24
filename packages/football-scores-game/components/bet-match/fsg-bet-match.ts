@@ -155,8 +155,8 @@ export class FsgBetMatch extends LitElement {
 				gap: 0.5rem;
 				height: 13rem;
 				justify-content: space-between;
-				margin: 0px auto;
-				max-width: 450px;
+				margin: 0 auto;
+				max-width: 45rem;
 				padding: 1rem 2rem;
 				position: relative;
 				width: 100%;
@@ -214,20 +214,20 @@ export class FsgBetMatch extends LitElement {
 			.bet-handler {
 				align-items: center;
 				display: grid;
-				grid-template-rows: auto 30px auto;
+				grid-template-rows: auto 3rem auto;
 				height: 100%;
 			}
 
 			.bet-input {
 				background-color: var(--color-canvas-muted);
-				border-radius: 20px;
+				border-radius: 2rem;
 				border: none;
 				box-sizing: border-box;
 				color: var(--color-fg-subtle);
 				font-weight: 600;
-				height: 35px;
+				height: 3.5rem;
 				text-align: center;
-				width: 35px;
+				width: 3.5rem;
 				font-size: 1.8rem;
 				cursor: default;
 			}
@@ -266,7 +266,7 @@ export class FsgBetMatch extends LitElement {
 				font-weight: 600;
 				margin: 0 auto;
 				margin-top: 1.25rem;
-				max-width: 450px;
+				max-width: 45rem;
 				padding: 0.2rem 0.5rem;
 			}
 
@@ -284,20 +284,20 @@ export class FsgBetMatch extends LitElement {
 			}
 
 			#derbyLightningImg {
-				height: 20px;
-				width: 14px;
+				height: 2rem;
+				width: 1.4rem;
 			}
 
 			#derbyLightningImg.xs {
-				height: 15px;
+				height: 1.5rem;
 				width: 10px;
 			}
 
 			.offset-shadows > div {
 				position: absolute;
 				height: 6px;
-				border-bottom-left-radius: 40px;
-				border-bottom-right-radius: 40px;
+				border-bottom-left-radius: 4rem;
+				border-bottom-right-radius: 4rem;
 				left: 0;
 				right: 0;
 				margin: auto;
@@ -305,13 +305,13 @@ export class FsgBetMatch extends LitElement {
 
 			.offset-shadows div:first-child {
 				width: 90%;
-				bottom: -5px;
+				bottom: -0.5rem;
 				background: rgb(238, 242, 246);
 			}
 
 			.offset-shadows div:last-child {
 				width: 70%;
-				bottom: -10px;
+				bottom: -1rem;
 				background: rgb(241, 245, 248);
 			}
 		`,

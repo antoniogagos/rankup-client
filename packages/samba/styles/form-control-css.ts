@@ -6,10 +6,10 @@ export default css`
 	}
 
 	.form-control {
-		/* border: 2px solid var(--color-border-default); */
+		/* border: 0.2rem solid var(--color-border-default); */
 		background: var(--color-canvas-inset);
-		border-radius: 24px;
-		border: 1px solid var(--color-border-subtle);
+		border-radius: 2.4rem;
+		border: 0.1rem solid var(--color-border-subtle);
 		box-shadow: var(--color-primer-shadow-inset);
 		box-sizing: border-box;
 		color: var(--color-fg-default);
@@ -17,7 +17,7 @@ export default css`
 		font-family: inherit;
 		font-size: 1.6rem;
 		height: 48px;
-		padding: 0 55px;
+		padding: 0 5.5rem;
 		width: 100%;
 		transition: box-shadow 300ms;
 	}

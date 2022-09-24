@@ -22,7 +22,7 @@ export default css`
 		box-sizing: border-box;
 		color: var(--color-fg-on-emphasis);
 		display: grid;
-		grid-column-gap: 10px;
+		grid-column-gap: 1rem;
 		grid-template-columns: max-content auto max-content;
 		height: 12.4rem;
 		max-height: 14.4rem;
@@ -43,9 +43,9 @@ export default css`
 
 	.offset-shadows > div {
 		position: absolute;
-		height: 10px;
-		border-bottom-left-radius: 40px;
-		border-bottom-right-radius: 40px;
+		height: 1rem;
+		border-bottom-left-radius: 4rem;
+		border-bottom-right-radius: 4rem;
 		left: 0;
 		right: 0;
 		margin: auto;
@@ -53,12 +53,12 @@ export default css`
 
 	.offset-shadows div:first-child {
 		width: 90%;
-		bottom: -10px;
+		bottom: -1rem;
 	}
 
 	.offset-shadows div:last-child {
 		width: 75%;
-		bottom: -20px;
+		bottom: -2rem;
 	}
 
 	.contest-name {
