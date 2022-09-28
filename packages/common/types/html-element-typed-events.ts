@@ -1,5 +1,7 @@
 export interface DOMEventMap extends HTMLElementEventMap, DocumentEventMap {}
 
+export interface GlobalEventMap extends DOMEventMap, GlobalEventHandlersEventMap {}
+
 export type DOMEventObject = {
 	[K in keyof DOMEventMap]: DOMEventMap[K];
 };

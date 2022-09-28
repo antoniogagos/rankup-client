@@ -1,113 +1,94 @@
-import 'samba/toggle-input/sb-toggle-input.js';
+import '@rankup/samba/toggle-input/sb-toggle-input.js';
 
-import { localizePath, msg, str } from '@rankup/common/i18n/localize.js';
-import { arrowLeftIcon, bellIcon, leaveIcon, paperIcon } from '@rankup/samba/icons.js';
-import ButtonStyles from '@rankup/samba/styles/button-css.js';
+import { contextProvided } from '@lit-labs/context';
+import { msg } from '@rankup/common/i18n/localize.js';
+import { bellIcon, leaveIcon, paperIcon } from '@rankup/samba/icons.js';
+import ButtonStyles from '@rankup/samba/styles/buttons-css.js';
 import FormControlStyles from '@rankup/samba/styles/form-control-css.js';
-import LinkStyles from '@rankup/samba/styles/link-css.js';
+import LinkStyles from '@rankup/samba/styles/links-css.js';
 import MarginStyles from '@rankup/samba/styles/margin-css.js';
 import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
+
+import { routerContext, RoutesController } from '../../contexts/router-context.js';
 
 @customElement('fsg-settings-page')
 export class FsgSettingsPage extends LitElement {
-	@property({ type: Boolean })
-	hidden = true;
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
 
-	shouldUpdate(): boolean {
-		return !this.hidden;
-	}
-
-	private _onGoBackKeydown() {
-		//
-	}
-
-	private _onGoBackClick() {
-		window.history.back();
-	}
+	contestId = 'fj_rew';
 
 	render() {
-		const id = 'fj_rew';
 		return html`
-			<header>
-				<button
-					id="arrow"
-					@click=${this._onGoBackClick}
-					@keydown=${this._onGoBackKeydown}
-					class="link--primary">
-					${arrowLeftIcon}
-				</button>
-			</header>
-			<main>
-				<h1 class="text-bold">${msg('Ajustes')}</h1>
-				<section>
-					<p class="section-title text-bold f3 mt-6 mb-3">${bellIcon} ${msg('Notificaciones')}</p>
-					<div class="section-list f5">
-						<div class="list--item">
-							<div class="list--item-block f4">
-								<!-- <img
+			<h1 class="text-bold">${msg('Ajustes')}</h1>
+			<section>
+				<p class="section-title text-bold f3 mt-6 mb-3">${bellIcon} ${msg('Notificaciones')}</p>
+				<div class="section-list f5">
+					<div class="list--item">
+						<div class="list--item-block f4">
+							<!-- <img
                   width="28"
                   height="28"
                   src="/assets/images/finished-match.webp"
                   alt="Finished match" /> -->
-								${msg('Partidos finalizados')}
-							</div>
-							<sb-toggle-input tabindex="0"></sb-toggle-input>
+							${msg('Partidos finalizados')}
 						</div>
-						<div class="list--item">
-							<div class="list--item-block f4">
-								<!-- <img
+						<sb-toggle-input tabindex="0"></sb-toggle-input>
+					</div>
+					<div class="list--item">
+						<div class="list--item-block f4">
+							<!-- <img
                   width="28"
                   height="28"
                   src="/assets/images/postponed-match.webp"
                   alt="Postponed match" /> -->
-								${msg('Partidos postpuestos a punto de comenzar')}
-							</div>
-							<sb-toggle-input tabindex="0"></sb-toggle-input>
+							${msg('Partidos postpuestos a punto de comenzar')}
 						</div>
-						<div class="list--item">
-							<div class="list--item-block f4">
-								<!-- <img width="28" height="28" src="/assets/images/goal.webp" alt="Goal" /> -->
-								${msg('Goles en vivo')}
-							</div>
-							<sb-toggle-input tabindex="0"></sb-toggle-input>
+						<sb-toggle-input tabindex="0"></sb-toggle-input>
+					</div>
+					<div class="list--item">
+						<div class="list--item-block f4">
+							<!-- <img width="28" height="28" src="/assets/images/goal.webp" alt="Goal" /> -->
+							${msg('Goles en vivo')}
 						</div>
-						<div class="list--item">
-							<div class="list--item-block f4">
-								<!-- <img
+						<sb-toggle-input tabindex="0"></sb-toggle-input>
+					</div>
+					<div class="list--item">
+						<div class="list--item-block f4">
+							<!-- <img
                   width="28"
                   height="28"
                   src="/assets/images/finished-matchday.webp"
                   alt="Finished matchday" /> -->
-								${msg('Jornada finalizada')}
-							</div>
-							<sb-toggle-input tabindex="0"></sb-toggle-input>
+							${msg('Jornada finalizada')}
 						</div>
-						<div class="list--item">
-							<div class="list--item-block f4">
-								<!-- <img
+						<sb-toggle-input tabindex="0"></sb-toggle-input>
+					</div>
+					<div class="list--item">
+						<div class="list--item-block f4">
+							<!-- <img
                   width="28"
                   height="28"
                   src="/assets/images/new-messages.webp"
                   alt="New message" /> -->
-								${msg('Nuevos mensajes en el chat')}
-							</div>
-							<sb-toggle-input tabindex="0"></sb-toggle-input>
+							${msg('Nuevos mensajes en el chat')}
 						</div>
+						<sb-toggle-input tabindex="0"></sb-toggle-input>
 					</div>
-				</section>
-				<div class="buttons mt-6">
-					<a
-						class="btn btn--primary btn--md"
-						href=${localizePath(msg(str`resultados/${id}/informacion`))}>
-						${msg('Ver sistema de puntuación')} ${paperIcon}
-					</a>
-					<button class="btn btn--primary btn--md btn--danger">
-						${msg('Abandonar torneo')} ${leaveIcon}
-					</button>
 				</div>
-			</main>
+			</section>
+			<div class="buttons mt-6">
+				<a
+					class="btn btn--primary btn--md"
+					href=${this.router.link('rules', { id: this.contestId })}>
+					${msg('Ver sistema de puntuación')} ${paperIcon}
+				</a>
+				<button class="btn btn--primary btn--md btn--danger">
+					${msg('Abandonar torneo')} ${leaveIcon}
+				</button>
+			</div>
 		`;
 	}
 
@@ -119,34 +100,10 @@ export class FsgSettingsPage extends LitElement {
 		FormControlStyles,
 		css`
 			:host {
+				display: flex;
 				align-items: flex-start;
-				background: var(--color-canvas-default);
-				box-sizing: border-box;
-				color: var(--color-fg-default);
-				display: block;
-				display: flex;
 				flex-direction: column;
-				height: 100%;
-				position: absolute;
-				top: 0;
-				width: 100%;
-				z-index: 10;
-			}
-			header {
-				width: 100%;
-				box-sizing: border-box;
-				height: 6.6rem;
-				padding: 2rem;
-				display: flex;
-				align-items: center;
-				justify-content: flex-start;
-			}
-			main {
 				padding: 0 2rem;
-				width: 100%;
-				max-width: 450px;
-				margin: 0 auto;
-				box-sizing: border-box;
 			}
 			.section-title {
 				align-items: center;

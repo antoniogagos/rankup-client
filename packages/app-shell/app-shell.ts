@@ -1,21 +1,27 @@
-import '@rankup/samba/overlay/sb-overlay-container.js';
 import './components/layout/app-layout.js';
+import './lib/utils/request-idle-callback-polyfill.js';
 
-import { localizePath } from '@rankup/common/i18n/localize.js';
+import { contextProvider } from '@lit-labs/context';
+import { routerContext } from '@rankup/common/contexts/main-router-context.js';
 import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
-import { MainRouter, redirect, RouterStyles } from '@rankup/common/router/router.js';
-import type { Route } from '@rankup/common/types/rankup-json.js';
+import { RouterController, RouterStyles } from '@rankup/common/router/router.js';
+import type { ComponentRoute, RedirectRoute } from '@rankup/common/router/types';
 import ScrollbarStyles from '@rankup/samba/styles/scrollbar-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
+import { property } from 'lit/decorators/property.js';
 import { state } from 'lit/decorators/state.js';
 
+import Routes from './global-routes.js';
 import { DataService } from './lib/data-service/data-service.js';
-import env from './lib/env/env.js';
 import {
 	EventsMap as SessionManagerEvents,
 	SessionManager,
 } from './managers/session/session-manager.js';
+
+// const root = new ContextRoot();
+// root.attach(document.body);
+requestIdleCallback(() => import('./lazy-imports.js'));
 
 /**
  * @fires session-updated
@@ -23,53 +29,56 @@ import {
 @customElement('app-shell')
 export class AppShell extends LitElement {
 	@state()
-	showHeader = true;
+	showHeader?: boolean;
 
 	@state()
-	showFooter = true;
+	showFooter?: boolean;
 
 	ds = new DataService(this);
 
 	sessionManager = new SessionManager(this);
 
-	private _router = MainRouter(this, [
-		...env.Routes.map(route => ({
+	@contextProvider({ context: routerContext })
+	@property({ attribute: false })
+	router = new RouterController(
+		this,
+		Routes.map(route => ({
 			...route,
-			// localize (prepend /lang-code/) unless specified by the attr "localize": false
-			path: route.localize !== false ? localizePath(route.path) : route.path,
-			redirect: this._computeRedirect(route, env.Routes),
 			enter: async () => {
+				if ((route as RedirectRoute).redirect) {
+					return true;
+				}
 				// redirection for auth-protected pages
-				if (!route.publicPage) {
+				const _route = route as ComponentRoute;
+				if (!_route.publicPage) {
 					await this.sessionManager.waitLoginComplete();
 					if (!this.sessionManager.isLogged) {
-						this.redirect('/iniciar-sesion');
+						this.router.redirect('/iniciar-sesion');
 						return false;
 					}
 				}
-				this.showFooter = route.displayFooter ?? false;
-				this.showHeader = route.displayHeader ?? false;
+				this.showFooter = _route.displayFooter ?? false;
+				this.showHeader = _route.displayHeader ?? false;
 				return true;
 			},
 		})),
-	]);
+	);
 
 	constructor() {
 		super();
 		window.appShell ??= this;
 	}
 
-	/**
-	 * The redirect page might need to be localized before using it. We must find it to check.
-	 */
-	private _computeRedirect(route: Route, routes: Route[]): string | undefined {
-		if (route.redirect) {
-			const redirectRoute = routes.find(r => r.path === route.redirect);
-			if (redirectRoute?.localize !== false) {
-				return localizePath(route.redirect);
+	get currentRoute() {
+		const { pathname } = window.location;
+		return Routes.find(route => {
+			if (!(route as RedirectRoute).redirect) {
+				const _route = route as ComponentRoute;
+				const pattern = new URLPattern({ pathname: _route.path });
+				return pattern.test({ pathname });
 			}
-			return route.redirect;
-		}
+			return false;
+		});
 	}
 
 	@eventListener({ eventName: 'session-updated' })
@@ -78,34 +87,30 @@ export class AppShell extends LitElement {
 		this.ds.userId = session?.userId ?? null;
 		this.ds.authorizationToken = session?.accessToken ?? null;
 		if (session) {
-			// test
-			this.ds
-				.GetUser()
-				.then(resp => resp.json())
-				.then(data => console.log('getUserResponse', data))
-				.catch(error => console.error('getUserResp', error));
+			// this.ds
+			// 	.GetUser()
+			// 	.then(resp => resp.json())
+			// 	.then(data => console.log('getUserResponse', data))
+			// 	.catch(error => console.error('getUserResp', error));
 		} else {
-			this.redirect('/');
+			this.router.redirect('/');
 		}
 	}
 
-	redirect(pagePath: string, searchParams?: { [key: string]: string | undefined }) {
-		redirect(this._router, pagePath, searchParams);
-	}
-
 	protected shouldUpdate(): boolean {
-		// Wait until a route has been computed to avoid a first render with layout and no content.
-		// This way we can pass the appropriate showHeader/Footer for the route to be render
-		return !!this._router.outlet();
+		// All routes will set showHeader/Footer (false by default) - wait until it's set so that we
+		// know on first-paint if we want to display them or not
+		return typeof this.showHeader === 'boolean' && typeof this.showFooter === 'boolean';
 	}
 
 	render() {
 		return html`
+			<sb-overlay-container></sb-overlay-container>
 			<app-layout
-				?header-hidden=${!this.showHeader}
-				?footer-hidden=${!this.showFooter}
-				class="router-container">
-				${this._router.outlet()}
+				id="routerContainer"
+				.headerHidden=${!this.showHeader}
+				.footerHidden=${!this.showFooter}>
+				${this.router.outlet()}
 			</app-layout>
 		`;
 	}
@@ -122,6 +127,12 @@ export class AppShell extends LitElement {
 					display: block;
 					height: 100%;
 				}
+			}
+			app-layout {
+				/** same as app-layout, so that it behaves the same when not loaded */
+				display: flex;
+				flex-direction: column;
+				height: 100%;
 			}
 		`,
 	];

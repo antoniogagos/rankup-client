@@ -6,6 +6,16 @@
 		"rootDir": "./",
 		"outDir": "./dist"
 	},
+	"ts-node": {
+		"compilerOptions": {
+			"target": "ESNext",
+			"module": "CommonJS",
+			"resolveJsonModule": true,
+			"esModuleInterop": true,
+			"moduleResolution": "node",
+			"allowSyntheticDefaultImports": true
+		}
+	},
 	"references": [{ "path": "../samba" }, { "path": "../common" }],
 	"include": ["**/*.ts", "**/*.js", "**/*.json"]
 }

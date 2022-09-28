@@ -9,9 +9,6 @@
 		"start": "concurrently --raw \"tsc -b -w --preserveWatchOutput\" \"wds --watch\"",
 		"validate": "tsc --noEmit"
 	},
-	"dependencies": {
-		"lit": "^2.0.2"
-	},
 	"devDependencies": {
 		"@open-wc/testing": "^3.0.0",
 		"@web/dev-server": "^0.1.28",
@@ -19,6 +16,7 @@
 		"concurrently": "^5.3.0"
 	},
 	"peerDependencies": {
+		"lit": "^2.0.2",
 		"@rankup/samba": "^1.0.0",
 		"@rankup/common": "^1.0.0"
 	}

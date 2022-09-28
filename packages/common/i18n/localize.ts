@@ -4,7 +4,9 @@ import AllLocales from './locales.json' assert { type: 'json' };
 
 export { msg, str };
 
-export const { getLocale } = configureTransformLocalization({ sourceLocale: 'es' });
+const { getLocale } = configureTransformLocalization({ sourceLocale: 'es' });
+
+export const locale = getLocale(); // we reload on change, so it never changes
 
 type LocaleType = 'en' | 'es' | 'es-mx' | 'pt-br';
 
@@ -19,16 +21,13 @@ export function updateLocale(newLocale: LocaleType) {
 	}
 }
 
-export function localizePath(...paths: string[]): string {
-	const parts: string[] = [getLocale()];
-	for (const path of paths) {
-		if (path) {
-			const start = path.startsWith('/') ? 1 : 0;
-			const end = path.length - (path.endsWith('/') ? -2 : -1);
-			parts.push(path.slice(start, end));
-		}
+export function localizePath(path: string): string {
+	if (!path.startsWith('/' + locale + '/')) {
+		const start = path.startsWith('/') ? 1 : 0;
+		const end = path.length - (path.endsWith('/') ? -2 : -1);
+		return `/${locale}/${path.slice(start, end)}`;
 	}
-	return `/${parts.join('/')}`;
+	return path;
 }
 
 const LangCodesReg = new RegExp(`^\/?(${AllLocales.join('|')})\/`);

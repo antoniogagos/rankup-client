@@ -1,8 +1,11 @@
-import { localizePath, msg, str } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import type { RoutesController } from '@rankup/common/router/routes.js';
 import { fieldFilledIcon, fieldIcon, trophyFilledIcon, trophyIcon } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
+
+import { routerContext } from '../../contexts/router-context.js';
 
 enum Tabs {
 	RANKING = 1,
@@ -12,8 +15,14 @@ enum Tabs {
 
 @customElement('fsg-footer')
 export class FsgFooter extends LitElement {
+	@property({ type: String })
+	contestId = 'fj_rew';
+
 	@state()
 	private _selectedTab = Tabs.MATCHDAY;
+
+	@contextProvided({ context: routerContext })
+	_router!: RoutesController;
 
 	private _onTabClick(evt: MouseEvent) {
 		if (evt.button === 0) {
@@ -27,11 +36,10 @@ export class FsgFooter extends LitElement {
 	}
 
 	render() {
-		const id = 'fj_rew';
 		return html`
 			<footer @click=${this._onTabClick} @keydown=${this._onTabKeydown}>
 				<a
-					href=${localizePath(msg(str`resultados/${id}/jornada`, { desc: 'url' }))}
+					href=${this._router.link('matchday', { id: this.contestId })}
 					class="header--item"
 					name=${Tabs.MATCHDAY}
 					?selected=${this._selectedTab === Tabs.MATCHDAY}>
@@ -40,7 +48,7 @@ export class FsgFooter extends LitElement {
 					</div>
 				</a>
 				<a
-					href=${localizePath(msg(str`resultados/${id}/ranking`, { desc: 'url' }))}
+					href=${this._router.link('ranking', { id: this.contestId })}
 					class="header--item"
 					name=${Tabs.RANKING}
 					?selected=${this._selectedTab === Tabs.RANKING}>
@@ -53,7 +61,7 @@ export class FsgFooter extends LitElement {
 	}
 
 	static styles = [
-		buttonStyles,
+		buttonsStyles,
 		css`
 			:host {
 				display: block;

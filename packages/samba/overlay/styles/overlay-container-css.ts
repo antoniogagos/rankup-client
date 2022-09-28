@@ -9,6 +9,7 @@ export default css`
 		position: fixed;
 		right: 0;
 		top: 0;
+		z-index: 10;
 	}
 	#container {
 		pointer-events: all;

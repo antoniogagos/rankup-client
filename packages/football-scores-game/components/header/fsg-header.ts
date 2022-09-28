@@ -1,14 +1,26 @@
-import { localizePath, msg, str } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import {
+	routerContext as mainRouterContext,
+	RoutesController,
+} from '@rankup/common/contexts/main-router-context.js';
 import { addPlayerIcon, arrowLeftIcon, settingsIcon } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import linkStyles from '@rankup/samba/styles/link-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import linksCss from '@rankup/samba/styles/links-css.js';
 import typographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import { routerContext } from '../../contexts/router-context.js';
+
 @customElement('fsg-header')
 export class FsgHeader extends LitElement {
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
+
+	@contextProvided({ context: mainRouterContext })
+	mainRouter!: RoutesController;
+
 	@property({ type: Boolean, attribute: 'inverted-color' })
 	invertedColor = false;
 
@@ -28,26 +40,24 @@ export class FsgHeader extends LitElement {
           <a
             id="arrow"
             class=${linkClasses}
-            href=${localizePath(msg('/mis-torneos'))}>
+            href=${this.mainRouter.link('my-contests')}>
             ${arrowLeftIcon}
           </a>
         </section>
         <div class="f3 text-bold nowrap contest-name">The Squad Team</div>
         <section class="right-section">
-          <a href=${localizePath(
-						msg(str`resultados/${id}/compartir-torneo`),
-					)} class=${linkClasses}>${addPlayerIcon}</a>
-          <a href=${localizePath(
-						msg(str`resultados/${id}/ajustes`),
-					)} class=${linkClasses}>${settingsIcon}</button></a>
+          <a href=${this.router.link(`share`, { id })} class=${linkClasses}>${addPlayerIcon}</a>
+          <a href=${this.router.link(`settings`, {
+						id,
+					})} class=${linkClasses}>${settingsIcon}</button></a>
         </section>
       </header>
     `;
 	}
 
 	static styles = [
-		linkStyles,
-		buttonStyles,
+		linksCss,
+		buttonsStyles,
 		typographyStyles,
 		css`
 			:host {
@@ -96,6 +106,6 @@ export class FsgHeader extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'fsg-contest-header': FsgHeader;
+		'fsg-header': FsgHeader;
 	}
 }

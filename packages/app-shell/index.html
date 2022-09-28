@@ -9,15 +9,12 @@
 		<link rel="stylesheet" href="/node_modules/@rankup/samba/assets/styles/theme.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap"
-			rel="stylesheet" />
 	</head>
 
 	<script type="module" src="/app-shell.ts"></script>
 
 	<script type="module">
-		import env from '/env.json';
+		import Routes from '/global-routes.ts';
 
 		const { localStorage } = window;
 		const ns = 'CognitoIdentityServiceProvider';
@@ -26,7 +23,7 @@
 		const preloadScript = document.createElement('script');
 		preloadScript.setAttribute('type', 'module');
 		if (!isLogged) {
-			const home = env.Routes.find(route => route.path === '/');
+			const home = Routes.find(route => route.path === '/');
 			// TODO: search in env.json the componentPath of the route "/"
 			preloadScript.setAttribute('src', home.componentPath);
 		}
@@ -45,7 +42,6 @@
 	</script>
 
 	<body>
-		<app-shell id="appShell" slot="authenticated"></app-shell>
-		<sb-overlay-container></sb-overlay-container>
+		<app-shell id="appShell" slot="authenticated"> </app-shell>
 	</body>
 </html>

@@ -5,8 +5,9 @@ import { Task } from '@lit-labs/task';
 import type { Match } from '@rankup/common/football/types';
 import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
 import { chevronDownIcon } from '@rankup/samba/icons.js';
-import ScrollbarStyles from '@rankup/samba/styles/scrollbar-css.js';
-import TypographyStyles from '@rankup/samba/styles/typography-css.js';
+import buttonsCss from '@rankup/samba/styles/buttons-css.js';
+import ScrollbarCss from '@rankup/samba/styles/scrollbar-css.js';
+import TypographyCss from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -17,9 +18,9 @@ export class FsgMatchdayPage extends LitElement {
 	@property({ type: Boolean })
 	hidden = true;
 
-	shouldUpdate(): boolean {
-		return !this.hidden;
-	}
+	// shouldUpdate(): boolean {
+	// 	return !this.hidden;
+	// }
 
 	// private _listeners = new EventsListenerController(this, {
 	// 	'match-update': this._onMatchUpdated.bind(this),
@@ -72,18 +73,15 @@ export class FsgMatchdayPage extends LitElement {
 	}
 
 	static styles = [
-		TypographyStyles,
-		ScrollbarStyles,
+		buttonsCss,
+		TypographyCss,
+		ScrollbarCss,
 		css`
 			:host {
-				box-sizing: border-box;
-				color: var(--color-fg-default);
-				display: block;
-				padding-bottom: 3.5rem;
-				padding: 0 1.5rem;
-				right: 0;
-				max-width: 450px;
-				margin: 0 auto;
+				display: flex;
+				align-items: flex-start;
+				flex-direction: column;
+				padding: 0 2rem;
 			}
 			header {
 				display: flex;

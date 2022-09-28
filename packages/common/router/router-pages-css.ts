@@ -43,24 +43,27 @@ export default css`
 		}
 	}
 
-	[animation='slide'] {
-		animation-name: RouterEntryLeft;
+	[entry-animation] {
 		animation-duration: 380ms;
 		animation-timing-function: ease-out;
 		animation-fill-mode: forwards;
+	}
+
+	[exit-animation] {
+		animation-duration: 140ms;
+		animation-timing-function: ease-in;
+		animation-fill-mode: forwards;
+	}
+
+	[animation='slideEntry'] {
+		animation-name: RouterEntryLeft;
+	}
+
+	[animation='slideExit'] {
+		animation-name: RouterExitRight;
 	}
 
 	[animation='opacity'] {
 		animation-name: RouterEntryOpacity;
-		animation-duration: 380ms;
-		animation-timing-function: ease-out;
-		animation-fill-mode: forwards;
-	}
-
-	[animation='exit'] {
-		animation-name: RouterExitRight;
-		animation-duration: 140ms;
-		animation-timing-function: ease-in;
-		animation-fill-mode: forwards;
 	}
 `;

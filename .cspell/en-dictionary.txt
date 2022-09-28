@@ -12,5 +12,4 @@ Rankup
 signin
 tabindex
 unstarted
-urlpatter
 urlpattern

@@ -1,6 +1,4 @@
-import type { Route } from '@rankup/common/types/rankup-json';
-
-import _env from '../../env.json';
+import _env from '../../env.js';
 
 export interface Env {
 	isDevEnv: boolean;
@@ -13,7 +11,6 @@ export interface Env {
 		OAuthServerURL: string;
 		RedirectURI: string;
 	};
-	Routes: Route[];
 }
 
 export default _env as Env;

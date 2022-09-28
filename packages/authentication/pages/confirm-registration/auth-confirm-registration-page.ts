@@ -1,12 +1,17 @@
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
 import { localizePath, msg } from '@rankup/common/i18n/localize';
 import { arrowRightIcon, privacyIcon } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import formControlStyles from '@rankup/samba/styles/form-control-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import formControlCss from '@rankup/samba/styles/form-control-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('auth-confirm-registration-page')
 export class AuthConfirmRegistrationPage extends LitElement {
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
+
 	@property({ type: Boolean })
 	showPassword = false;
 
@@ -50,12 +55,12 @@ export class AuthConfirmRegistrationPage extends LitElement {
 	private async _confirmRegistration(email: string, code: string) {
 		try {
 			await appShell.sessionManager!.confirmRegistration(email, code);
-			appShell.redirect(localizePath('/iniciar-sesion'));
+			this.router.redirect(localizePath('/iniciar-sesion'));
 		} catch (error: unknown) {
 			if (error instanceof Error) {
 				if (error.name === 'NotAuthorizedException' && error.message.match('status is CONFIRMED')) {
 					// already confirmed, redirect to login page
-					appShell.redirect(localizePath('/iniciar-sesion'));
+					this.router.redirect(localizePath('/iniciar-sesion'));
 					return;
 				}
 				this.verificationCodeInput.setCustomValidity(error.message);
@@ -72,7 +77,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 			this._confirmRegistration(this.email, this.code);
 		} else if (!this.email) {
 			// request page change, since we can't do anything without an email
-			appShell.redirect(localizePath('/registro'));
+			this.router.redirect(localizePath('/registro'));
 		}
 	}
 
@@ -121,14 +126,14 @@ export class AuthConfirmRegistrationPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href=${localizePath(msg('/iniciar-sesion'))}>${msg('Inicia sesión')}</a>
+				<a href=${this.router.link('sign-in')}>${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}
 
 	static styles = [
-		formControlStyles,
-		buttonStyles,
+		formControlCss,
+		buttonsStyles,
 		css`
 			:host {
 				align-items: center;

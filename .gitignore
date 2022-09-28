@@ -1,3 +1,5 @@
+/packages/app-shell/global-routes.ts
+
 ## editors
 /.idea
 
@@ -24,5 +26,6 @@ custom-elements.json
 package-lock.json
 
 **/env.json
+**/env.ts
 
 /**/*js.map

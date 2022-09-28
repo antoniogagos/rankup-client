@@ -2,16 +2,40 @@ import '../drawer/app-drawer.js';
 
 import { bellWithNumberIcon, hamburgerIcon } from '@rankup/samba/icons.js';
 import { openOverlay } from '@rankup/samba/overlay/open-overlay.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import { css, html, LitElement } from 'lit';
+import type { OverlayController } from '@rankup/samba/overlay/overlay-controller.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import { css, html, LitElement, PropertyValues } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
+import { property } from 'lit/decorators/property.js';
 
 import type { AppDrawer } from '../drawer/app-drawer.js';
 
 @customElement('app-header')
 export class AppHeader extends LitElement {
+	_drawer?: OverlayController<AppDrawer>;
+
+	@property({ type: Boolean, reflect: true })
+	hidden = false;
+
+	updated(changedProperties: PropertyValues): void {
+		const hidden = changedProperties.get('hidden');
+		if (hidden === false) {
+			this._closeDrawer();
+		}
+	}
+
+	disconnectedCallback() {
+		super.disconnectedCallback?.();
+		this._closeDrawer();
+	}
+
+	private _closeDrawer() {
+		this._drawer?.close();
+		this._drawer = undefined;
+	}
+
 	private _onMenuClick() {
-		openOverlay<AppDrawer>('app-drawer', null, {
+		this._drawer = openOverlay<AppDrawer>('app-drawer', null, {
 			addOverlayStyles: false,
 			cancelOnOutsideClick: true,
 			withBackdrop: true,
@@ -41,7 +65,7 @@ export class AppHeader extends LitElement {
 	}
 
 	static styles = [
-		buttonStyles,
+		buttonsStyles,
 		css`
 			:host {
 				display: block;

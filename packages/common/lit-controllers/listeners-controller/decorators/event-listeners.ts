@@ -1,7 +1,7 @@
 import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import { ReactiveElement } from 'lit';
-import { DOMEventObject } from 'types/html-element-typed-events';
+import { GlobalEventMap } from 'types/html-element-typed-events';
 
 import type { IDisposable } from '../../../utils/disposable';
 import { listen } from '../events-listener-controller.js';
@@ -15,7 +15,7 @@ import { listen } from '../events-listener-controller.js';
  *
  * @category Decorator
  */
-export function eventListener<T extends Record<string, any> = DOMEventObject>({
+export function eventListener<T extends Record<string, any> = GlobalEventMap>({
 	eventName,
 	target,
 	once,
@@ -61,7 +61,7 @@ class ListenerController implements ReactiveController {
 	hostConnected() {
 		const target = this.target ?? this.host;
 		const callback = (this.host as any)[this.name];
-		this.disposable = listen(target, this.eventName, callback, this.opts);
+		this.disposable = listen(target, this.eventName, callback.bind(this.host), this.opts);
 	}
 
 	hostDisconnected() {

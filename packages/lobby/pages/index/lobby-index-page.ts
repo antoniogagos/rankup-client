@@ -1,5 +1,5 @@
 import { Task } from '@lit-labs/task';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import marginStyles from '@rankup/samba/styles/margin-css.js';
 import typographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
@@ -45,7 +45,7 @@ export class LobbyIndexPage extends LitElement {
 
 	static styles = [
 		typographyStyles,
-		buttonStyles,
+		buttonsStyles,
 		marginStyles,
 		css`
 			:host {

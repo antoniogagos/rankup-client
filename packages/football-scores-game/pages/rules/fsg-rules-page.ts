@@ -1,7 +1,6 @@
 import { msg } from '@rankup/common/i18n/localize.js';
-import { arrowLeftIcon } from '@rankup/samba/icons.js';
-import ButtonStyles from '@rankup/samba/styles/button-css.js';
-import LinkStyles from '@rankup/samba/styles/link-css.js';
+import ButtonStyles from '@rankup/samba/styles/buttons-css.js';
+import LinkStyles from '@rankup/samba/styles/links-css.js';
 import MarginStyles from '@rankup/samba/styles/margin-css.js';
 import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
@@ -9,56 +8,37 @@ import { customElement } from 'lit/decorators/custom-element.js';
 
 @customElement('fsg-rules-page')
 export class FsgRulesPage extends LitElement {
-	private _onGoBackClick() {
-		window.history.back();
-	}
-
-	private _onGoBackKeydown() {
-		//
-	}
-
 	render() {
 		return html`
-			<header>
-				<button
-					id="arrow"
-					@click=${this._onGoBackClick}
-					@keydown=${this._onGoBackKeydown}
-					class="link--primary">
-					${arrowLeftIcon}
-				</button>
-			</header>
-			<main>
-				<h1 class="text-bold">${msg('Sistema de puntuación')}</h1>
-				<p class="f3 mt-4 mb-4">
-					${msg(
-						`Al finalizar cada partido, se calcularán los puntos para ese partido.
+			<h1 class="text-bold">${msg('Sistema de puntuación')}</h1>
+			<p class="f3 mt-4 mb-4">
+				${msg(
+					`Al finalizar cada partido, se calcularán los puntos para ese partido.
             Según tu pronóstico y el resultado final tendrás una determinada puntuación.`,
-					)}
-				</p>
-				<div class="f3 description mt-4">
-					${msg('Al acertar el...')}
-					<ul class="rules">
-						<li>
-							<span class="rule-text">Ganador del partido</span>
-							<span class="rule-points text-bold positive">+8</span>
-						</li>
-						<li>
-							<span class="rule-text">Resultado exacto</span>
-							<span class="rule-points text-bold positive">+6</span>
-						</li>
-						<li>
-							<span class="rule-text">Goles exactos de un equipo</span>
-							<span class="rule-points text-bold positive">+2</span>
-						</li>
-						<li>
-							<span class="rule-text">Fallar goles exactos de ambos equipos (excepto empates)</span>
-							<span class="rule-points text-bold negative">-2</span>
-						</li>
-					</ul>
-					<img src="/assets/images/fsg-live-match-card.png" alt="" />
-				</div>
-			</main>
+				)}
+			</p>
+			<div class="f3 description mt-4">
+				${msg('Al acertar el...')}
+				<ul class="rules">
+					<li>
+						<span class="rule-text">Ganador del partido</span>
+						<span class="rule-points text-bold positive">+8</span>
+					</li>
+					<li>
+						<span class="rule-text">Resultado exacto</span>
+						<span class="rule-points text-bold positive">+6</span>
+					</li>
+					<li>
+						<span class="rule-text">Goles exactos de un equipo</span>
+						<span class="rule-points text-bold positive">+2</span>
+					</li>
+					<li>
+						<span class="rule-text">Fallar goles exactos de ambos equipos (excepto empates)</span>
+						<span class="rule-points text-bold negative">-2</span>
+					</li>
+				</ul>
+				<img src="/assets/images/fsg-live-match-card.png" alt="" />
+			</div>
 		`;
 	}
 
@@ -69,34 +49,10 @@ export class FsgRulesPage extends LitElement {
 		MarginStyles,
 		css`
 			:host {
+				display: flex;
 				align-items: flex-start;
-				background: var(--color-canvas-default);
-				box-sizing: border-box;
-				color: var(--color-fg-default);
-				display: block;
-				display: flex;
 				flex-direction: column;
-				height: 100%;
-				position: absolute;
-				top: 0;
-				width: 100%;
-				z-index: 10;
-			}
-			header {
-				width: 100%;
-				box-sizing: border-box;
-				height: 6.6rem;
-				padding: 2rem;
-				display: flex;
-				align-items: center;
-				justify-content: flex-start;
-			}
-			main {
 				padding: 0 2rem;
-				width: 100%;
-				max-width: 45rem;
-				margin: 0 auto;
-				box-sizing: border-box;
 			}
 			p {
 				max-width: 40rem;

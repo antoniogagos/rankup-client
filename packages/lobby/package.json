@@ -4,17 +4,16 @@
 	"packageManager": "yarn@3.0.1",
 	"private": true,
 	"scripts": {},
-	"dependencies": {
-		"@lit-labs/task": "^1.0.0",
-		"lit": "^2.0.2"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@open-wc/testing": "^3.0.0",
 		"@web/dev-server-esbuild": "^0.3.2",
 		"@web/dev-server": "^0.1.28"
 	},
 	"peerDependencies": {
+		"@lit-labs/task": "^1.0.0",
 		"@rankup/samba": "^1.0.0",
-		"@rankup/common": "^1.0.0"
+		"@rankup/common": "^1.0.0",
+		"lit": "^2.0.2"
 	}
 }

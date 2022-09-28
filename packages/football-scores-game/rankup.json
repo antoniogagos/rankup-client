@@ -1,9 +1,0 @@
-{
-	"routes": [
-		{
-			"path": "resultados/*",
-			"componentName": "fsg-index",
-			"publicPage": false
-		}
-	]
-}

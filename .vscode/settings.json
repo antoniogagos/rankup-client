@@ -24,12 +24,6 @@
 		"node_modules/**": true,
 		"dist/**": true
 	},
-	"json.schemas": [
-		{
-			"fileMatch": ["rankup.json"],
-			"url": "./packages/common/types/rankup-schema.json"
-		}
-	],
 	"cssVariables.lookupFiles": ["**/*.{css,html}"],
 	"eslint.lintTask.enable": true,
 	"html.customData": ["./custom-elements.json"],

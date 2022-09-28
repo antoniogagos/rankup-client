@@ -1,7 +1,7 @@
 import { msg } from '@rankup/common/i18n/localize.js';
 import { arrowLeftIcon, arrowRightIcon } from '@rankup/samba/icons.js';
-import ButtonStyles from '@rankup/samba/styles/button-css.js';
-import LinkStyles from '@rankup/samba/styles/link-css.js';
+import ButtonStyles from '@rankup/samba/styles/buttons-css.js';
+import LinkStyles from '@rankup/samba/styles/links-css.js';
 import MarginStyles from '@rankup/samba/styles/margin-css.js';
 import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';

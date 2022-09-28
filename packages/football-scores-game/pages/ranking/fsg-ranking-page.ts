@@ -1,8 +1,8 @@
 import { Task } from '@lit-labs/task';
 import { msg } from '@rankup/common/i18n/localize.js';
 import { chevronDownIcon } from '@rankup/samba/icons.js';
-import ButtonStyles from '@rankup/samba/styles/button-css.js';
-import LinkStyles from '@rankup/samba/styles/link-css.js';
+import ButtonStyles from '@rankup/samba/styles/buttons-css.js';
+import LinkStyles from '@rankup/samba/styles/links-css.js';
 import MarginStyles from '@rankup/samba/styles/margin-css.js';
 import TypographyStyles from '@rankup/samba/styles/typography-css.js';
 import { css, html, LitElement } from 'lit';
@@ -24,13 +24,6 @@ export enum RankingType {
  */
 @customElement('fsg-ranking-page')
 export class FsgRankingPage extends LitElement {
-	@property({ type: Boolean })
-	hidden = true;
-
-	shouldUpdate(): boolean {
-		return !this.hidden;
-	}
-
 	@property({ type: Number })
 	selectedRanking = RankingType.MATCHDAY;
 
@@ -106,39 +99,37 @@ export class FsgRankingPage extends LitElement {
 
 	render() {
 		return html`
-			<div class="main">
-				${this.selectedRanking === RankingType.MATCHDAY
-					? html`
-							<div class="matchday-status text-bold">
-								<div class="circle"></div>
-								${msg('Jornada en juego')}
-							</div>
-					  `
-					: ''}
-				<div class="ranking">
-					${this._ranking.render({
-						pending: () => html``,
-						complete: ranking => this._renderRanking(ranking),
-					})}
-				</div>
-				<div
-					class="buttons mb-3"
-					@click=${this._onSelectRankingClick}
-					@keydown=${this._onSelectRankingKeydown}>
-					<button
-						class="btn btn--primary btn--s f5"
-						name=${RankingType.SEASON}
-						?selected=${this.selectedRanking === RankingType.SEASON}>
-						${msg('Temporada')}
-					</button>
-					<button
-						class="btn btn--primary btn--s f5 matchday-btn"
-						name=${RankingType.MATCHDAY}
-						?selected=${this.selectedRanking === RankingType.MATCHDAY}>
-						${msg('Jornada 8')}
-						<span id="chevron">${chevronDownIcon}</span>
-					</button>
-				</div>
+			${this.selectedRanking === RankingType.MATCHDAY
+				? html`
+						<div class="matchday-status text-bold">
+							<div class="circle"></div>
+							${msg('Jornada en juego')}
+						</div>
+				  `
+				: ''}
+			<div class="ranking">
+				${this._ranking.render({
+					pending: () => html``,
+					complete: ranking => this._renderRanking(ranking),
+				})}
+			</div>
+			<div
+				class="buttons mb-3"
+				@click=${this._onSelectRankingClick}
+				@keydown=${this._onSelectRankingKeydown}>
+				<button
+					class="btn btn--primary btn--s f5"
+					name=${RankingType.SEASON}
+					?selected=${this.selectedRanking === RankingType.SEASON}>
+					${msg('Temporada')}
+				</button>
+				<button
+					class="btn btn--primary btn--s f5 matchday-btn"
+					name=${RankingType.MATCHDAY}
+					?selected=${this.selectedRanking === RankingType.MATCHDAY}>
+					${msg('Jornada 8')}
+					<span id="chevron">${chevronDownIcon}</span>
+				</button>
 			</div>
 		`;
 	}
@@ -150,19 +141,10 @@ export class FsgRankingPage extends LitElement {
 		MarginStyles,
 		css`
 			:host {
-				display: block;
-				width: 100%;
-			}
-			.main {
-				align-items: center;
-				background: var(--color-canvas-default);
-				color: var(--color-fg-default);
 				display: flex;
 				align-items: flex-start;
 				flex-direction: column;
-				height: 100%;
-				width: 100%;
-				box-sizing: border-box;
+				padding: 0 2rem;
 			}
 			.row {
 				width: 100%;

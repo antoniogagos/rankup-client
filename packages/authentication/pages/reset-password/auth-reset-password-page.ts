@@ -1,4 +1,6 @@
-import { localizePath, msg } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { msg } from '@rankup/common/i18n/localize';
 import {
 	arrowLeftIcon,
 	arrowRightIcon,
@@ -7,14 +9,17 @@ import {
 	eyeIcon,
 	privacyIcon,
 } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import formControlStyles from '@rankup/samba/styles/form-control-css.js';
-import linkStyles from '@rankup/samba/styles/link-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import formControlCss from '@rankup/samba/styles/form-control-css.js';
+import linksCss from '@rankup/samba/styles/links-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('auth-reset-password-page')
 export class AuthResetPasswordPage extends LitElement {
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
+
 	@property({ type: Boolean })
 	showPassword = false;
 
@@ -91,7 +96,7 @@ export class AuthResetPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${localizePath(msg('iniciar-sesion'))}
+				<a class="link--primary go-back-arrow" href=${this.router.link('sign-in')}
 					>${arrowLeftIcon}</a
 				>
 				<div>${msg('Restablecer contraseña')}</div>
@@ -170,15 +175,15 @@ export class AuthResetPasswordPage extends LitElement {
 			</form>
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${localizePath(msg('/auth/sign-up'))}>${msg('Crea una')}</a>
+				<a class="link--primary" href=${this.router.link('sign-up')}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}
 
 	static styles = [
-		linkStyles,
-		formControlStyles,
-		buttonStyles,
+		linksCss,
+		formControlCss,
+		buttonsStyles,
 		css`
 			:host {
 				align-items: center;

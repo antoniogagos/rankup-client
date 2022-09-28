@@ -1,4 +1,6 @@
-import { localizePath, msg } from '@rankup/common/i18n/localize.js';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -7,14 +9,17 @@ import {
 	googleIcon,
 	privacyIcon,
 } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import formControlStyles from '@rankup/samba/styles/form-control-css.js';
-import linkStyles from '@rankup/samba/styles/link-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import formControlCss from '@rankup/samba/styles/form-control-css.js';
+import linksCss from '@rankup/samba/styles/links-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('auth-sign-in-page')
 export class AuthSignInPage extends LitElement {
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
+
 	@property({ type: Boolean })
 	_showPassword = false;
 
@@ -104,7 +109,7 @@ export class AuthSignInPage extends LitElement {
 					</div>
 				</section>
 
-				<a class="link--primary forgot-password-link" href=${localizePath('/recuperar-contraseña')}>
+				<a class="link--primary forgot-password-link" href=${this.router.link('forgot-password')}>
 					${msg('Olvidaste la contraseña?')}
 				</a>
 
@@ -122,15 +127,15 @@ export class AuthSignInPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${localizePath('/registro')}>${msg('Crea una')}</a>
+				<a class="link--primary" href=${this.router.link('sign-up')}>${msg('Crea una')}</a>
 			</footer>
 		`;
 	}
 
 	static styles = [
-		linkStyles,
-		formControlStyles,
-		buttonStyles,
+		linksCss,
+		formControlCss,
+		buttonsStyles,
 		css`
 			:host {
 				align-items: center;

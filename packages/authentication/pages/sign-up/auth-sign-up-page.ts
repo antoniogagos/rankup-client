@@ -1,4 +1,6 @@
-import { localizePath, msg } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { msg } from '@rankup/common/i18n/localize';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -7,14 +9,17 @@ import {
 	privacyIcon,
 	usernameIcon,
 } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import formControlStyles from '@rankup/samba/styles/form-control-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import formControlCss from '@rankup/samba/styles/form-control-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 @customElement('auth-sign-up-page')
 export class AuthSignUpPage extends LitElement {
-	@property({ type: Boolean })
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
+
+	@state()
 	_showPassword = false;
 
 	@query('form')
@@ -71,7 +76,7 @@ export class AuthSignUpPage extends LitElement {
 				password,
 				username,
 			});
-			appShell.redirect(msg('/confirmar-registro'), { email });
+			this.router.redirect(msg('/confirmar-registro'), { email });
 		} catch (error: any) {
 			if (error?.name === 'UsernameExistsException') {
 				this.emailInput.setCustomValidity(msg('An account with this email already exists'));
@@ -173,14 +178,14 @@ export class AuthSignUpPage extends LitElement {
 
 			<footer>
 				${msg('¿Ya tienes cuenta?')}
-				<a href=${localizePath(msg('iniciar-sesion'))}>${msg('Inicia sesión')}</a>
+				<a href=${this.router.link('sign-in')}>${msg('Inicia sesión')}</a>
 			</footer>
 		`;
 	}
 
 	static styles = [
-		formControlStyles,
-		buttonStyles,
+		formControlCss,
+		buttonsStyles,
 		css`
 			:host {
 				align-items: center;

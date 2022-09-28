@@ -1,4 +1,6 @@
-import { localizePath, msg } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { msg } from '@rankup/common/i18n/localize';
 import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import {
 	createTourneyIcon,
@@ -8,7 +10,7 @@ import {
 	twitterIcon,
 } from '@rankup/samba/icons.js';
 import type { OverlayController } from '@rankup/samba/overlay/types.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
 
@@ -23,34 +25,53 @@ export type EventsMap = {
 
 @customElement('app-drawer')
 export class AppDrawer extends LitElement implements AppDrawerParameters {
+	@contextProvided({ context: routerContext, subscribe: true })
+	router!: RoutesController;
+
 	overlayController?: OverlayController<this>;
 
 	connectedCallback(): void {
 		super.connectedCallback?.();
-		const url = new URL(window.location.toString());
-		url.searchParams.set('drawer', '1');
-		window.history.pushState({ drawer: 1, ...window.history.state }, '', url.toString());
 		window.addEventListener('popstate', this._onPopstate);
+		this._addDrawerSearchParam();
 	}
 
 	disconnectedCallback(): void {
 		super.disconnectedCallback?.();
-		const { drawer, ..._state } = window.history.state ?? {};
-		if (drawer) {
-			const url = new URL(window.location.toString());
-			url.searchParams.delete('drawer');
-			window.history.replaceState(_state, '', url);
-		}
 		window.removeEventListener('popstate', this._onPopstate);
+		this._deleteDrawerSearchParam();
+	}
+
+	/**
+	 * We add a "?drawer=1" search param to the url so that the back button when is opened closes the drawer
+	 */
+	private _addDrawerSearchParam() {
+		const url = new URL(window.location.toString());
+		if (!url.searchParams.has('drawer')) {
+			url.searchParams.set('drawer', '1');
+			window.history.pushState({}, '', url.toString());
+		}
+	}
+
+	private _deleteDrawerSearchParam() {
+		const url = new URL(window.location.toString());
+		if (url.searchParams.has('drawer')) {
+			url.searchParams.delete('drawer');
+			window.history.replaceState({}, '', url);
+		}
 	}
 
 	private _onPopstate = () => {
+		window.history.forward();
+		this._deleteDrawerSearchParam();
 		this.overlayController?.close();
+		this.overlayController = undefined;
 	};
 
 	private _onSignOutClicked() {
 		// TODO specify different animation (opacity?)
 		this.overlayController?.close({ noAnimation: true });
+		this.overlayController = undefined;
 		appShell.sessionManager.signOut();
 	}
 
@@ -59,10 +80,10 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 			<main opened>
 				<img src="/assets/images/rk-logo-with-bg.svg" alt="Rankup logo" />
 				<div class="rankup">Rankup</div>
-				<a href=${localizePath(msg('crear-torneo'))}>
+				<a href=${this.router.link('create-contest')}>
 					<button class="btn btn--md">${createTourneyIcon}${msg('Crear liga')}</button>
 				</a>
-				<a href=${localizePath(msg('unirse-torneo'))}>
+				<a href=${this.router.link('join-contest')}>
 					<button class="btn btn--md">${joinTourneyIcon}${msg('Unirse a una liga')}</button>
 				</a>
 				<button id="signOutBtn" @click=${this._onSignOutClicked} class="btn btn--md">
@@ -76,7 +97,7 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 	}
 
 	static styles = [
-		buttonStyles,
+		buttonsStyles,
 		css`
 			:host {
 				display: inline-block;

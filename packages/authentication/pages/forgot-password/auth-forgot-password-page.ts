@@ -1,14 +1,20 @@
-import { localizePath, msg, str } from '@rankup/common/i18n/localize';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { msg, str } from '@rankup/common/i18n/localize';
 import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from '@rankup/samba/icons.js';
-import buttonStyles from '@rankup/samba/styles/button-css.js';
-import formControlStyles from '@rankup/samba/styles/form-control-css.js';
-import linkStyles from '@rankup/samba/styles/link-css.js';
+import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
+import formControlCss from '@rankup/samba/styles/form-control-css.js';
+import linksCss from '@rankup/samba/styles/links-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 @customElement('auth-forgot-password-page')
 export class AuthForgotPasswordPage extends LitElement {
+	@contextProvided({ context: routerContext })
+	@state()
+	router!: RoutesController;
+
 	@state()
 	private _sent = false;
 
@@ -79,7 +85,7 @@ export class AuthForgotPasswordPage extends LitElement {
 	render() {
 		return html`
 			<header>
-				<a class="link--primary go-back-arrow" href=${localizePath(msg('/iniciar-sesion'))}
+				<a class="link--primary go-back-arrow" href=${this.router.link('sign-in')}
 					>${arrowLeftIcon}</a
 				>
 				<div>${msg('Recordar contraseña')}</div>
@@ -92,15 +98,17 @@ export class AuthForgotPasswordPage extends LitElement {
 
 			<footer>
 				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${localizePath(msg('/registro'))}>${msg('Crea una')}</a>
+				<a class="link--primary" href=${this.router.link('sign-up')}
+					>${msg('Crea una', { desc: 'Create a new account' })}</a
+				>
 			</footer>
 		`;
 	}
 
 	static styles = [
-		linkStyles,
-		formControlStyles,
-		buttonStyles,
+		linksCss,
+		formControlCss,
+		buttonsStyles,
 		css`
 			:host {
 				align-items: center;
