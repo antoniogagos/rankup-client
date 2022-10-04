@@ -1,6 +1,10 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { msg } from '@rankup/common/i18n/localize';
+import {
+	SessionManager,
+	sessionManagerContext,
+} from '@rankup/common/contexts/session-manager-context';
+import { msg } from '@rankup/common/i18n/localize.js';
 import type { WithEvents } from '@rankup/common/types/html-element-typed-events';
 import {
 	createTourneyIcon,
@@ -25,6 +29,9 @@ export type EventsMap = {
 
 @customElement('app-drawer')
 export class AppDrawer extends LitElement implements AppDrawerParameters {
+	@contextProvided({ context: sessionManagerContext, subscribe: true })
+	sessionManager!: SessionManager;
+
 	@contextProvided({ context: routerContext, subscribe: true })
 	router!: RoutesController;
 
@@ -40,6 +47,11 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 		super.disconnectedCallback?.();
 		window.removeEventListener('popstate', this._onPopstate);
 		this._deleteDrawerSearchParam();
+	}
+
+	close() {
+		this.overlayController?.close({ animation: 'fade-out' });
+		this.overlayController = undefined;
 	}
 
 	/**
@@ -64,15 +76,16 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 	private _onPopstate = () => {
 		window.history.forward();
 		this._deleteDrawerSearchParam();
-		this.overlayController?.close();
-		this.overlayController = undefined;
+		this.close();
 	};
 
 	private _onSignOutClicked() {
-		// TODO specify different animation (opacity?)
-		this.overlayController?.close({ noAnimation: true });
-		this.overlayController = undefined;
-		appShell.sessionManager.signOut();
+		this.sessionManager.signOut();
+		this.close();
+	}
+
+	private _onLinkClick() {
+		this.close();
 	}
 
 	render() {
@@ -80,10 +93,10 @@ export class AppDrawer extends LitElement implements AppDrawerParameters {
 			<main opened>
 				<img src="/assets/images/rk-logo-with-bg.svg" alt="Rankup logo" />
 				<div class="rankup">Rankup</div>
-				<a href=${this.router.link('create-contest')}>
+				<a href=${this.router.link('create-contest')} @click=${this._onLinkClick}>
 					<button class="btn btn--md">${createTourneyIcon}${msg('Crear liga')}</button>
 				</a>
-				<a href=${this.router.link('join-contest')}>
+				<a href=${this.router.link('join-contest')} @click=${this._onLinkClick}>
 					<button class="btn btn--md">${joinTourneyIcon}${msg('Unirse a una liga')}</button>
 				</a>
 				<button id="signOutBtn" @click=${this._onSignOutClicked} class="btn btn--md">

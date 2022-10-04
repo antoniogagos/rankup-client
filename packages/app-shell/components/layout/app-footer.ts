@@ -1,7 +1,7 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { msg } from '@rankup/common/i18n/localize';
-import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners';
+import { eventListener } from '@rankup/common/decorators/event-listener.js';
+import { msg } from '@rankup/common/i18n/localize.js';
 import { EventsMap as RouterEventsMap } from '@rankup/common/router/extended-lit-router-mixin';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
@@ -26,7 +26,10 @@ export class AppFooter extends LitElement {
 		this._updateActivePage(appShell.currentRoute?.name ?? '');
 	}
 
-	@eventListener({ eventName: 'router-page-changed', target: appShell })
+	// TODO: contextProvided is using contextController which doesn't notify of the
+	// router change, so we can't react to this.router change to add listeners to the
+	// context. But that should be the way, instead of listening to the appShell here.
+	@eventListener({ eventName: 'router-page-changed' /* target: appShell */ })
 	protected _onRouteChanges(evt: RouterEventsMap['router-page-changed']) {
 		this._updateActivePage(evt.detail.route.name ?? '');
 	}

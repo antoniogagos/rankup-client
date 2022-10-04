@@ -8,7 +8,7 @@ import AllLocales from '../i18n/locales.json' assert { type: 'json' };
 import { languageCodeFromPath, localizePath } from '../i18n/localize.js';
 import type { ComponentRoute, RedirectRoute, Route } from './types';
 
-type QueryParams = { [key: string]: string | undefined };
+type Params = { [key: string]: string | undefined };
 
 type Host = ReactiveControllerHost & HTMLElement;
 
@@ -17,8 +17,8 @@ type ExtendedLitRouter = new (
 	routes: Array<Route>,
 	options?: { containerSelector?: string },
 ) => LitRoutes & {
-	link(pathnameOrName?: string | undefined, params?: QueryParams): string;
-	redirect(path: string, searchParams?: QueryParams): boolean;
+	link(pathnameOrName?: string | undefined, params?: Params): string;
+	redirect(path: string, params?: Params): boolean;
 };
 
 export type EventsMap = {
@@ -54,7 +54,7 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		 * @param pathnameOrName "name" attribute of the destination Route - it can also be a path
 		 * @param params if the destination path has variables (:foo) or catch all (*), replace those with  variables in the obj, including '*'
 		 */
-		link(pathnameOrName?: string | undefined, params?: QueryParams): string {
+		link(pathnameOrName?: string | undefined, params?: Params): string {
 			const route = pathnameOrName ? this._findRoute(pathnameOrName) : null;
 			if (!route && pathnameOrName && pathnameOrName.charAt(0) !== '/') {
 				// should we warn? how can we know that the passed param is intended to be a name instead of path?
@@ -70,35 +70,38 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		}
 
 		/**
+		 * @param path can be the "name" attribute of a route
+		 * @param params params for the path named params (/bar/:foo/somewhere)
 		 * @returns boolean indicating that redirect was NOT performed - so that it can be used
 		 * in the "enter" callback to prevent redirection
 		 */
-		redirect(path: string, searchParams?: QueryParams): boolean {
-			const parsed = parsePath(path);
-			// edge case: called with both "path" having search params, and searchParams parameter
-			const _searchParams = { ...parsed.searchParams, ...searchParams };
-			// remove queryParams from path
-			let _path = parsed.path.replace(/\?.*/, '');
-			// auto localize if it comes only from the main router, as it's the one that
-			// adds the base path, and if it's not already localize
-			const isMainRouter = this instanceof LitRouter;
-			const isAlreadyLocalized = AllLocales.includes(languageCodeFromPath(path)!);
-			const mustLocalize = isMainRouter && !isAlreadyLocalized;
-			if (mustLocalize) {
-				const route = (this.routes as Route[]).find(r => r.path === path);
-				if (route?.localize !== false) {
+		redirect(path: string, params?: Params): boolean {
+			const url = pathToURL(path);
+			let _path = path;
+			const route = this._findRoute(url.pathname);
+			if (route) {
+				_path = route.path;
+				// add search params to the resolved path
+				if (url.search) {
+					_path += `?${url.searchParams.toString()}`;
+				}
+			} else {
+				// prepend lang code
+				// must come from the main router (it's the one that adds the base path)
+				const isMainRouter = this instanceof LitRouter;
+				const isAlreadyLocalized = AllLocales.includes(languageCodeFromPath(path)!);
+				if (isMainRouter && !isAlreadyLocalized) {
 					_path = localizePath(_path);
 				}
 			}
-			// add combined query params from both path & searchParams
-			if (Object.keys(_searchParams).length > 0) {
-				_path += `?${new URLSearchParams(_searchParams as Record<string, string>).toString()}`;
+			if (params) {
+				_path = this._replaceParams(_path, params);
 			}
 			if (isCurrentUrl(_path)) {
 				return true;
 			}
-			this.goto(_path.replace(/\?.*/, ''));
-			window.history.pushState({}, '', _path);
+			this.goto(route?.path ?? _path.replace(/\?.*/, '').slice(4));
+			window.history.replaceState({}, '', _path);
 			window.dispatchEvent(new Event('router-redirect'));
 			return false;
 		}
@@ -110,7 +113,7 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 			}
 		}
 
-		private _replaceParams(path: string, params?: QueryParams): string {
+		private _replaceParams(path: string, params?: Params): string {
 			if (!params) return path;
 			const res = path.replaceAll(
 				/:[^\/]*/g,
@@ -124,10 +127,13 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		}
 
 		private _findRoute(pathnameOrName: string) {
-			return this.routes.find(r => r.name === pathnameOrName || r.path === pathnameOrName);
+			const localized = localizePath(pathnameOrName);
+			return this.routes.find(
+				r => r.name === pathnameOrName || r.path === pathnameOrName || r.path === localized,
+			);
 		}
 
-		private _computeRedirect(route: RedirectRoute, params?: QueryParams): string {
+		private _computeRedirect(route: RedirectRoute, params?: Params): string {
 			const destination = this._findRoute(route.redirect);
 			if (destination) {
 				return this._replaceParams(destination.path, params);
@@ -142,7 +148,7 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		private async _enterCallback(
 			route: Route,
 			origEnter: Route['enter'],
-			params: QueryParams,
+			params: Params,
 		): Promise<boolean> {
 			if (isRedirectRoute(route)) {
 				const redirect = this._computeRedirect(route, params);
@@ -181,7 +187,7 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		/**
 		 * Our router supports fetching + rendering a component from the componentPath & componentName
 		 */
-		private _renderCallback(route: Route, origRender: Route['render'], params: QueryParams) {
+		private _renderCallback(route: Route, origRender: Route['render'], params: Params) {
 			if (typeof origRender === 'function') {
 				// TODO: we don't really know if route changed because render can be called multiple times.
 				// Lit router has a _currentRoute prop, but it's private
@@ -214,8 +220,8 @@ export default (superClass: typeof LitRoutes): ExtendedLitRouter =>
 		}
 
 		async _whenRouterAnimationEnds(element: HTMLElement): Promise<void> {
-			const animationExists = element.getAnimations().length > 0;
-			if (animationExists) {
+			const animationsExist = element.getAnimations().length > 0;
+			if (animationsExist) {
 				await new Promise<void>(resolve => {
 					element.addEventListener(
 						'animationend',
@@ -269,19 +275,19 @@ function isRedirectRoute(route: Route): route is RedirectRoute {
 	return !!(route as RedirectRoute).redirect?.length;
 }
 
-function parsePath(path: string): { path: string; searchParams?: QueryParams } {
-	let url: URL;
+function pathToURL(path: string): URL {
+	// let url: URL;
 	try {
 		// We expect path to be a path and not a full URL, but this will prevent this from failing
 		// and extract only the path
-		url = new URL(path);
+		return new URL(path);
 	} catch {
-		url = new URL(`local:${path}`);
+		return new URL(`local:${path}`);
 	}
-	return {
-		path: url.pathname,
-		searchParams: url.searchParams ? Object.fromEntries(url.searchParams) : undefined,
-	};
+	// return {
+	// 	path: url.pathname,
+	// 	searchParams: url.searchParams ? Object.fromEntries(url.searchParams) : undefined,
+	// };
 }
 
 declare global {

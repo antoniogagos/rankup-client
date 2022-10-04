@@ -1,72 +1,125 @@
 import './components/layout/app-layout.js';
 import './lib/utils/request-idle-callback-polyfill.js';
 
-import { contextProvider } from '@lit-labs/context';
+import type { ContextKey, ContextType } from '@lit-labs/context';
+import { ContextProvider, contextProvider, ContextRoot } from '@lit-labs/context';
+import type {
+	EventsMap as SessionManagerEvents,
+	SessionManager,
+} from '@rankup/authentication/managers/session/session-manager.js';
+import { envContext } from '@rankup/common/contexts/env-context.js';
 import { routerContext } from '@rankup/common/contexts/main-router-context.js';
-import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
+import { sessionManagerContext } from '@rankup/common/contexts/session-manager-context.js';
+import { eventListener } from '@rankup/common/decorators/event-listener.js';
 import { RouterController, RouterStyles } from '@rankup/common/router/router.js';
-import type { ComponentRoute, RedirectRoute } from '@rankup/common/router/types';
+import type { ComponentRoute, RedirectRoute, Route } from '@rankup/common/router/types';
+import type { ManagerClass } from '@rankup/common/utils/managers.js';
 import ScrollbarStyles from '@rankup/samba/styles/scrollbar-css.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
 import { property } from 'lit/decorators/property.js';
 import { state } from 'lit/decorators/state.js';
 
+import env from './env.js';
 import Routes from './global-routes.js';
 import { DataService } from './lib/data-service/data-service.js';
-import {
-	EventsMap as SessionManagerEvents,
-	SessionManager,
-} from './managers/session/session-manager.js';
 
-// const root = new ContextRoot();
-// root.attach(document.body);
-requestIdleCallback(() => import('./lazy-imports.js'));
+// <-- Workaround: there is another bug with @lit-labs/context at ContextRoot, which is registering
+// event.target for later re-dispatching of the event, instead of composedPath()[0]
+// https://github.com/lit/lit/issues/3319
+document.body.addEventListener('context-request', evt => {
+	// redefine target for the event before the ContextRoot captures it
+	const target = evt.composedPath()[0];
+	Object.defineProperty(evt, 'target', { get: () => target });
+});
+// --->
 
-/**
- * @fires session-updated
- */
+const root = new ContextRoot();
+root.attach(document.body);
+
 @customElement('app-shell')
 export class AppShell extends LitElement {
+	ds = new DataService(this);
+
+	managers: Map<string, ManagerClass<AppShell>> = new Map();
+
+	private _providersByManagerController: WeakMap<
+		ManagerClass<AppShell>,
+		ContextProvider<ContextKey<unknown, unknown>>
+	> = new WeakMap();
+
 	@state()
 	showHeader?: boolean;
 
 	@state()
 	showFooter?: boolean;
 
-	ds = new DataService(this);
-
-	sessionManager = new SessionManager(this);
+	@contextProvider({ context: envContext })
+	@state()
+	env = env;
 
 	@contextProvider({ context: routerContext })
 	@property({ attribute: false })
 	router = new RouterController(
 		this,
-		Routes.map(route => ({
-			...route,
-			enter: async () => {
-				if ((route as RedirectRoute).redirect) {
-					return true;
-				}
-				// redirection for auth-protected pages
-				const _route = route as ComponentRoute;
-				if (!_route.publicPage) {
-					await this.sessionManager.waitLoginComplete();
-					if (!this.sessionManager.isLogged) {
-						this.router.redirect('/iniciar-sesion');
-						return false;
-					}
-				}
-				this.showFooter = _route.displayFooter ?? false;
-				this.showHeader = _route.displayHeader ?? false;
-				return true;
-			},
-		})),
+		Routes.map(route => ({ ...route, enter: this._routeEnterCallback.bind(this, route) })),
 	);
 
 	constructor() {
 		super();
 		window.appShell ??= this;
+		this._lazyLoadResources();
+	}
+
+	private _lazyLoadResources() {
+		requestIdleCallback(
+			async deadline => {
+				if (deadline.didTimeout || deadline.timeRemaining() > 40) {
+					import('./lazy-imports.js');
+					this._loadSessionManager();
+				} else {
+					this._lazyLoadResources();
+				}
+			},
+			{ timeout: 1000 },
+		);
+	}
+
+	/**
+	 * Allows any package to add globally accessible managers.
+	 * Other packages will use these manager via contexts, not referring to the appShell.
+	 *
+	 * i.e. import { myManagerContext } from '@rankup/common/contexts/my-manager-context.js'
+	 *
+	 * The only difference is that implementations can go in another packages and be lazy (with the
+	 * subscribe option for contextConsumer's)
+	 */
+	private async registerManager<
+		K extends typeof ManagerClass<AppShell>,
+		T extends ContextKey<unknown, InstanceType<K>>,
+	>(name: string, context: T, Manager: K): Promise<ManagerClass<AppShell>> {
+		if (this.managers.has(name)) {
+			throw new Error('Manager name already in use');
+		}
+		// <----
+		// Workaround: there is a bug with the context provider dispatching an event before adding listeners
+		// https://github.com/lit/lit/issues/3319
+		this.addEventListener(
+			'context-provider',
+			async evt => {
+				evt.stopPropagation();
+				// stop the event and fire it on next microtask
+				await Promise.resolve();
+				this.dispatchEvent(evt);
+			},
+			{ once: true },
+		);
+		// ---->
+		const controller = new Manager(this);
+		const provider = new ContextProvider(this, context, controller as ContextType<T>);
+		this.managers.set(name, controller);
+		this._providersByManagerController.set(controller, provider); // is this needed?
+		return controller;
 	}
 
 	get currentRoute() {
@@ -83,7 +136,7 @@ export class AppShell extends LitElement {
 
 	@eventListener({ eventName: 'session-updated' })
 	protected onSessionUpdated(evt: SessionManagerEvents['session-updated']) {
-		const { session } = evt.detail;
+		const { session, old } = evt.detail;
 		this.ds.userId = session?.userId ?? null;
 		this.ds.authorizationToken = session?.accessToken ?? null;
 		if (session) {
@@ -92,9 +145,37 @@ export class AppShell extends LitElement {
 			// 	.then(resp => resp.json())
 			// 	.then(data => console.log('getUserResponse', data))
 			// 	.catch(error => console.error('getUserResp', error));
-		} else {
+		} else if (old) {
 			this.router.redirect('/');
 		}
+	}
+
+	async _routeEnterCallback(route: Route): Promise<boolean> {
+		if (!(route as RedirectRoute).redirect) {
+			// redirection for auth-protected pages
+			const _route = route as ComponentRoute;
+			if (!_route.publicPage) {
+				const sessionManager = await this._loadSessionManager(); // sessionManager is lazily loaded
+				await sessionManager.waitLoginComplete();
+				if (!sessionManager.isLogged) {
+					this.router.redirect('sign-in');
+					return false;
+				}
+			}
+			this.showFooter = _route.displayFooter ?? false;
+			this.showHeader = _route.displayHeader ?? false;
+		}
+		return true;
+	}
+
+	// lazy loads the session manager
+	async _loadSessionManager(): Promise<SessionManager> {
+		const pkg = await import('@rankup/authentication/managers/session/session-manager.js');
+		// this fn can be called multiple times so after the import the manager might be registered
+		return (
+			(this.managers.get('sessionManager') as SessionManager) ??
+			this.registerManager('sessionManager', sessionManagerContext, pkg.SessionManager)
+		);
 	}
 
 	protected shouldUpdate(): boolean {

@@ -1,26 +1,25 @@
-import { localizePath, msg } from '@rankup/common/i18n/localize.js';
-import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners';
+import { contextProvided } from '@lit-labs/context';
+import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { SessionManagerConsumer } from '@rankup/common/contexts/session-manager-context.js';
+import { msg } from '@rankup/common/i18n/localize.js';
 import { arrowRightIcon } from '@rankup/samba/icons.js';
 import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
-import type { EventsMap as SessionManagerEvents } from 'app-shell/managers/session/session-manager';
 import { css, html, LitElement } from 'lit';
-import { state } from 'lit/decorators.js';
 import { customElement } from 'lit/decorators/custom-element.js';
 
 @customElement('pp-welcome-page')
 export class PpWelcomePage extends LitElement {
-	@state()
-	isLogged: boolean = appShell?.sessionManager.isLogged ?? false;
+	sessionManager = new SessionManagerConsumer(this, () => this.requestUpdate(), {
+		'session-updated': () => this.requestUpdate(),
+	});
 
-	@eventListener({ eventName: 'session-updated', target: appShell })
-	protected onSessionChanged(evt: SessionManagerEvents['session-updated']) {
-		this.isLogged = !!evt.detail.session;
-	}
+	@contextProvided({ context: routerContext })
+	router!: RoutesController;
 
 	render() {
-		const playNowLink = this.isLogged
-			? localizePath(msg('/mis-torneos'))
-			: localizePath(msg('/iniciar-sesion'));
+		const playNowLink = this.sessionManager.value?.isLogged
+			? this.router.link('my-contests')
+			: this.router.link('sign-in');
 		return html`
 			<div class="main">
 				<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />

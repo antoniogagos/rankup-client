@@ -6,9 +6,11 @@ import type {
 } from '@rankup/common/football/types';
 import type { ReactiveElement } from 'lit';
 
-import env from '../env/env.js';
+// import env from '../env/env.js';
 
-const { ApiURL } = env;
+// const { ApiURL } = env;
+
+const ApiURL = 'test';
 
 type onUserChangedCallback = (loggedUser: any) => void;
 

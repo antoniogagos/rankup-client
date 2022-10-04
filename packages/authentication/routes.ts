@@ -1,12 +1,14 @@
-import { msg } from '@rankup/common/i18n/localize';
+import { msg } from '@rankup/common/i18n/localize.js';
 import type { Route } from '@rankup/common/router/types';
 
 export const Routes: Route[] = [
 	{
 		name: 'oauth-redirect',
-		path: msg('oauth', { desc: 'url' }),
+		path: 'oauth',
 		localize: false,
-		redirect: 'my-contests',
+		// redirect: 'my-contests',
+		componentName: 'auth-sign-in-page',
+		componentPath: './pages/sign-in/auth-sign-in-page.ts',
 		publicPage: true,
 		animation: 'slide',
 	},

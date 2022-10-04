@@ -2,8 +2,8 @@ import '../../components/matchday/fsg-matchday-live.js';
 import '../../components/matchday/fsg-matchday-not-started.js';
 
 import { Task } from '@lit-labs/task';
+import { eventListener } from '@rankup/common/decorators/event-listener.js';
 import type { Match } from '@rankup/common/football/types';
-import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
 import { chevronDownIcon } from '@rankup/samba/icons.js';
 import buttonsCss from '@rankup/samba/styles/buttons-css.js';
 import ScrollbarCss from '@rankup/samba/styles/scrollbar-css.js';

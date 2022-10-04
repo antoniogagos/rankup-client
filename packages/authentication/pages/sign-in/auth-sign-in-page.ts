@@ -1,5 +1,7 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
+import { SessionManagerConsumer } from '@rankup/common/contexts/session-manager-context.js';
+import { bound } from '@rankup/common/decorators/bound.js';
 import { msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowRightIcon,
@@ -13,14 +15,18 @@ import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import formControlCss from '@rankup/samba/styles/form-control-css.js';
 import linksCss from '@rankup/samba/styles/links-css.js';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 @customElement('auth-sign-in-page')
 export class AuthSignInPage extends LitElement {
+	sessionManager = new SessionManagerConsumer(this, this._onSessionChanged, {
+		'session-updated': this._onSessionChanged,
+	});
+
 	@contextProvided({ context: routerContext })
 	router!: RoutesController;
 
-	@property({ type: Boolean })
+	@state()
 	_showPassword = false;
 
 	@query('#email')
@@ -32,12 +38,15 @@ export class AuthSignInPage extends LitElement {
 	@query('form')
 	form!: HTMLInputElement;
 
-	private _togglePasswordVisibility() {
-		this._showPassword = !this._showPassword;
+	@bound
+	private _onSessionChanged() {
+		if (this.sessionManager.value?.isLogged) {
+			this.router.redirect('my-contests');
+		}
 	}
 
 	private _onGoogleSignInClick() {
-		appShell.sessionManager!.signInWithOAuth('Google');
+		this.sessionManager.value!.signInWithOAuth('Google');
 	}
 
 	private _onFormSubmit(evt: FormDataEvent) {
@@ -56,9 +65,13 @@ export class AuthSignInPage extends LitElement {
 		this.passwordInput.setCustomValidity('');
 	}
 
-	async _signIn(email: string, password: string) {
+	private _togglePasswordVisibility() {
+		this._showPassword = !this._showPassword;
+	}
+
+	private async _signIn(email: string, password: string) {
 		try {
-			await appShell.sessionManager!.signInWithPassword({ email, password });
+			await this.sessionManager.value!.signInWithPassword({ email, password });
 		} catch (error: any) {
 			if (error?.name === 'NotAuthorizedException' || error?.name === 'UserNotFoundException') {
 				this.passwordInput.setCustomValidity(msg('Email o contraseña inválidos'));

@@ -1,6 +1,11 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { msg, str } from '@rankup/common/i18n/localize';
+import {
+	SessionManager,
+	sessionManagerContext,
+} from '@rankup/common/contexts/session-manager-context.js';
+import { bound } from '@rankup/common/decorators/bound.js';
+import { msg, str } from '@rankup/common/i18n/localize.js';
 import { arrowLeftIcon, arrowRightIcon, emailOpenIcon } from '@rankup/samba/icons.js';
 import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import formControlCss from '@rankup/samba/styles/form-control-css.js';
@@ -12,8 +17,10 @@ import { choose } from 'lit/directives/choose.js';
 @customElement('auth-forgot-password-page')
 export class AuthForgotPasswordPage extends LitElement {
 	@contextProvided({ context: routerContext })
-	@state()
 	router!: RoutesController;
+
+	@contextProvided({ context: sessionManagerContext, subscribe: true })
+	sessionManager!: SessionManager;
 
 	@state()
 	private _sent = false;
@@ -38,13 +45,14 @@ export class AuthForgotPasswordPage extends LitElement {
 	private async _forgotPassword(email: string) {
 		try {
 			this._loading = true;
-			await appShell.sessionManager!.forgotPassword(email);
+			await this.sessionManager!.forgotPassword(email);
 		} finally {
 			this._loading = false;
 			this._sent = true;
 		}
 	}
 
+	@bound
 	private _formRender() {
 		return html`
 			<p>
@@ -72,6 +80,7 @@ export class AuthForgotPasswordPage extends LitElement {
 		`;
 	}
 
+	@bound
 	private _sentRender() {
 		return html`
 			<p>
@@ -92,8 +101,8 @@ export class AuthForgotPasswordPage extends LitElement {
 			</header>
 
 			${choose(this._sent, [
-				[false, this._formRender.bind(this)],
-				[true, this._sentRender.bind(this)],
+				[false, this._formRender],
+				[true, this._sentRender],
 			])}
 
 			<footer>

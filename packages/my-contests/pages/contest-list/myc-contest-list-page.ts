@@ -19,7 +19,7 @@ export class MycContestListPage extends LitElement {
 
 	private _contestList = new Task(
 		this,
-		async () => appShell.ds.GetUserTourneys(),
+		async () => [],
 		() => [null],
 	);
 

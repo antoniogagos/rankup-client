@@ -1,6 +1,10 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { localizePath, msg } from '@rankup/common/i18n/localize';
+import {
+	SessionManager,
+	sessionManagerContext,
+} from '@rankup/common/contexts/session-manager-context.js';
+import { localizePath, msg } from '@rankup/common/i18n/localize.js';
 import { arrowRightIcon, privacyIcon } from '@rankup/samba/icons.js';
 import buttonsStyles from '@rankup/samba/styles/buttons-css.js';
 import formControlCss from '@rankup/samba/styles/form-control-css.js';
@@ -11,6 +15,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 export class AuthConfirmRegistrationPage extends LitElement {
 	@contextProvided({ context: routerContext })
 	router!: RoutesController;
+
+	@contextProvided({ context: sessionManagerContext, subscribe: true })
+	sessionManager!: SessionManager;
 
 	@property({ type: Boolean })
 	showPassword = false;
@@ -54,7 +61,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 
 	private async _confirmRegistration(email: string, code: string) {
 		try {
-			await appShell.sessionManager!.confirmRegistration(email, code);
+			await this.sessionManager!.confirmRegistration(email, code);
 			this.router.redirect(localizePath('/iniciar-sesion'));
 		} catch (error: unknown) {
 			if (error instanceof Error) {
@@ -83,7 +90,7 @@ export class AuthConfirmRegistrationPage extends LitElement {
 
 	private async _resendCode() {
 		try {
-			await appShell.sessionManager!.resendConfirmationCode(this.email!);
+			await this.sessionManager!.resendConfirmationCode(this.email!);
 		} catch (error: unknown) {
 			this.verificationCodeInput.setCustomValidity((error as Error).message);
 			this.form.reportValidity();

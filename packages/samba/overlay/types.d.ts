@@ -1,4 +1,4 @@
-import { Listeners } from '@rankup/common/lit-controllers/listeners-controller/events-listener-controller.js';
+import { Listeners } from '@rankup/common/lit-controllers/events-listener-controller.js';
 import { ReactiveControllerHost, ReactiveElement } from 'lit';
 
 import type { AnimationKeys } from './animations-presets.js';

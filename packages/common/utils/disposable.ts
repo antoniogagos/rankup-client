@@ -1,4 +1,6 @@
 /* eslint-disable max-classes-per-file */
+import { ReactiveController, ReactiveControllerHost } from 'lit';
+
 export interface IDisposable {
 	dispose(): void;
 }
@@ -72,12 +74,23 @@ export class MultiDisposeError extends Error {
 	}
 }
 
-export class DisposableStore implements IDisposable {
+export class DisposableStore implements IDisposable, ReactiveController {
 	static DISABLE_DISPOSED_WARNING = false;
 
 	private _toDispose = new Set<IDisposable>();
 
 	private _isDisposed = false;
+
+	/**
+	 * @param host if passed, the disposable store will be removed when the host is removed from the DOM
+	 */
+	constructor(host?: ReactiveControllerHost) {
+		host?.addController(this);
+	}
+
+	hostDisconnected(): void {
+		this.clear();
+	}
 
 	/**
 	 * Dispose of all registered disposables and mark this object as disposed.

@@ -1,4 +1,4 @@
-import { EventsListenerController } from '@rankup/common/lit-controllers/listeners-controller/events-listener-controller.js';
+import { EventsListenerController } from '@rankup/common/lit-controllers/events-listener-controller.js';
 import { WithEvents } from '@rankup/common/types/html-element-typed-events.js';
 import type { ReactiveController } from 'lit';
 import { adoptStyles } from 'lit';
@@ -270,15 +270,15 @@ export class OverlayController<
 		});
 	}
 
-	async close(opts?: { noAnimation?: boolean }) {
-		const { noAnimation = false } = opts ?? {};
+	async close(opts?: { noAnimation?: boolean; animation?: AnimationKeys | Keyframe[] }) {
+		const { noAnimation = false, animation } = opts ?? {};
 		if (this.#isClosing) return;
 		this.#isClosing = true;
 		try {
 			this.#dispatchEvent('before-close-overlay', { overlayController: this, overlay: this.host });
 			this.endAnimation();
-			if (noAnimation === false) {
-				await this.#animateExit();
+			if (!noAnimation) {
+				await this.#animateExit({ animation });
 			}
 			this.host.remove();
 		} finally {
@@ -396,15 +396,25 @@ export class OverlayController<
 		});
 	}
 
-	#animateExit(): Promise<void> {
+	#animateExit({ animation }: { animation?: AnimationKeys | Keyframe[] } = {}): Promise<void> {
 		return new Promise(resolve => {
 			try {
-				if (this.withAnimation && this.animationOut != null) {
-					const animationOut = Array.isArray(this.animationOut)
-						? this.animationOut
-						: this.#getAnimationPreset(this.animationOut);
-					if (animationOut) {
-						this.#animation = this.host.animate(animationOut, {
+				if ((this.withAnimation && this.animationOut != null) || animation) {
+					let _animOut;
+					if (animation) {
+						if (Array.isArray(animation)) {
+							_animOut = animation;
+						} else {
+							_animOut = this.#getAnimationPreset(animation);
+						}
+					}
+					if (!_animOut) {
+						_animOut = Array.isArray(this.animationOut)
+							? this.animationOut
+							: this.#getAnimationPreset(this.animationOut);
+					}
+					if (_animOut) {
+						this.#animation = this.host.animate(_animOut, {
 							...this.animationOutOptions,
 							/** @type {FillMode} */
 							fill: 'forwards',

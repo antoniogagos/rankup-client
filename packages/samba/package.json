@@ -2,9 +2,8 @@
 	"name": "@rankup/samba",
 	"version": "1.0.0",
 	"private": true,
-	"dependencies": {},
 	"peerDependencies": {
-		"lit": "^2.0.2",
-		"@rankup/common": "^1.0.0"
+		"@rankup/common": "^1.0.0",
+		"lit": "^2.0.2"
 	}
 }

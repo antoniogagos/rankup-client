@@ -1,7 +1,7 @@
 {
 	"name": "app-shell",
 	"version": "0.0.0",
-	"packageManager": "yarn@3.0.1",
+	"packageManager": "yarn@3.2.3",
 	"private": true,
 	"@lit-labs/observers": "^1.0.2",
 	"scripts": {
@@ -14,15 +14,14 @@
 		"copy-assets": "cpx \"assets/**\" dist/assets & cpx \"index.html\" dist",
 		"load-router-pages": "ts-node ./.scripts/load-router-pages.ts",
 		"prebuild": "npm run load-router-pages & npm run copy-assets",
-		"build": "tsc -b",
+		"build": "wireit",
 		"prestart": "npm run load-router-pages",
 		"start": "wds --watch",
-		"validate": "tsc -b & tsc --noEmit"
+		"validate": "wireit"
 	},
 	"dependencies": {
 		"@lit-labs/context": "^0.1.3",
 		"@lit-labs/task": "^1.0.0",
-		"amazon-cognito-identity-js": "^5.2.3",
 		"lit": "^2.0.2"
 	},
 	"devDependencies": {
@@ -35,5 +34,16 @@
 	"peerDependencies": {
 		"@rankup/common": "^1.0.0",
 		"@rankup/samba": "^1.0.0"
+	},
+	"wireit": {
+		"build": {
+			"command": "tsc -b"
+		},
+		"validate": {
+			"command": "tsc --noEmit",
+			"dependencies": [
+				"build"
+			]
+		}
 	}
 }

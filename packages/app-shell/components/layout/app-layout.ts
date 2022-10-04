@@ -2,7 +2,7 @@ import '../drawer/app-drawer.js';
 import './app-footer.js';
 import './app-header.js';
 
-import { eventListener } from '@rankup/common/lit-controllers/listeners-controller/decorators/event-listeners.js';
+import { eventListener } from '@rankup/common/decorators/event-listener.js';
 import { EventsMap as RouterEvents, RouterStyles } from '@rankup/common/router/router.js';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
@@ -43,9 +43,9 @@ export class AppLayout extends LitElement {
 
 	@eventListener({ eventName: 'router-page-changed' })
 	protected _onRouterPageChanged(evt: RouterEvents['router-page-changed']) {
-		// This.headerHidden(footer) will be set from outside
+		// This.headerHidden will be set from outside
+		// This event occurs before entry animation starts, after exit animations start but haven't
 		// During animations, we need the old hidden and the new hidden values to compute the animation
-		// But this event occurs before any animation start, so we avoid
 		if (evt.detail.host === appShell && !this._pageChangeIsAnimating) {
 			this._headerHidden = this.headerHidden;
 			this._footerHidden = this.footerHidden;
@@ -78,10 +78,10 @@ export class AppLayout extends LitElement {
 				this.header!.toggleAttribute('entry', !nextHeaderHidden && headerHiddenChanged);
 				this.footer!.toggleAttribute('entry', !nextFooterHidden && footerHiddenChanged);
 				if (prevHeaderHidden && !nextHeaderHidden) {
-					this.header!.removeAttribute('hidden');
+					this._headerHidden = this.headerHidden;
 				}
 				if (prevFooterHidden && !nextFooterHidden) {
-					this.footer!.removeAttribute('hidden');
+					this._footerHidden = this.footerHidden;
 				}
 				this.section!.style.removeProperty('height');
 				this.section!.style.removeProperty('top');

@@ -1,6 +1,8 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { msg } from '@rankup/common/i18n/localize';
+import { SessionManagerConsumer } from '@rankup/common/contexts/session-manager-context.js';
+import { eventListener } from '@rankup/common/decorators/event-listener.js';
+import { msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowRightIcon,
 	emailOpenIcon,
@@ -16,6 +18,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 
 @customElement('auth-sign-up-page')
 export class AuthSignUpPage extends LitElement {
+	sessionManager = new SessionManagerConsumer(this, sessionManager => {
+		if (sessionManager?.isLogged) this.router.redirect('my-contests');
+	});
+
 	@contextProvided({ context: routerContext })
 	router!: RoutesController;
 
@@ -42,6 +48,13 @@ export class AuthSignUpPage extends LitElement {
 
 	togglePassword() {
 		this._showPassword = !this._showPassword;
+	}
+
+	@eventListener({ eventName: 'session-updated', target: document })
+	protected onSessionChanged() {
+		if (this.sessionManager.value?.isLogged) {
+			this.router.redirect('my-contests');
+		}
 	}
 
 	private _onFormInput() {
@@ -71,12 +84,12 @@ export class AuthSignUpPage extends LitElement {
 	private async _signUp(email: string, password: string, username: string) {
 		try {
 			this.signInButton.disabled = true;
-			await appShell.sessionManager!.signUpWithPassword({
+			await this.sessionManager.value!.signUpWithPassword({
 				email,
 				password,
 				username,
 			});
-			this.router.redirect(msg('/confirmar-registro'), { email });
+			this.router.redirect(`confirm-registration?email=${email}`);
 		} catch (error: any) {
 			if (error?.name === 'UsernameExistsException') {
 				this.emailInput.setCustomValidity(msg('An account with this email already exists'));

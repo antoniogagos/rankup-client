@@ -1,18 +1,15 @@
 window.requestIdleCallback =
 	window.requestIdleCallback ||
-	function requestIdleCallback(
-		callback: IdleRequestCallback,
-		options?: IdleRequestOptions,
-	): number {
+	function requestIdleCallback(callback: IdleRequestCallback): number {
 		const start = Date.now();
 		return window.setTimeout(() => {
 			callback({
 				didTimeout: false,
 				timeRemaining() {
-					return (options?.timeout ?? 16) - Date.now() - start;
+					return Math.max(0, 50 - (Date.now() - start));
 				},
 			});
-		}, options?.timeout ?? 16);
+		}, 1);
 	};
 
 window.cancelIdleCallback =

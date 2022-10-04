@@ -1,7 +1,4 @@
-// import alias from '@rollup/plugin-alias';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
-// import { fromRollup } from '@web/dev-server-rollup';
-// import { readdirSync } from 'fs';
 
 // const MONOREPO_FOLDER = '../../packages';
 // const MONOREPO_PACKAGES = getMonorepoPackages();
@@ -26,25 +23,6 @@ export default {
 			json: true,
 			target: 'es2020', // without using es2020 decorators fail, because esbuildPlugin doesn't read useDefineForClassFields from tsconfig
 		}),
-		/**
-		 * "nodeResolve" is not resolving our monorepo packages bare imports:
-		 *   i.e. `import 'samba/...'`
-		 *   so we're using this plugin to resolve it ourselves.
-		 *
-		 * Longer explanation:
-		 *   - With TS Project References we are already telling the ts compiler that those imports
-		 *     are in their respective folder and that's working well
-		 *   - However, when it comes to serve files in local, nodeResolve has to do the job of resolving
-		 *     bare modules imports.
-		 *   - We have symlinks in node_modules: node_modules/samba => packages/samba/ but that even if
-		 *     nodeResolve would resolve it, we need assets on the dist folder.
-		 */
-		// fromRollup(alias)({
-		// 	entries: MONOREPO_PACKAGES.map(packageName => ({
-		// 		find: new RegExp(`^${packageName}`),
-		// 		replacement: `${ROOT_PREFIX_PATH}/node_modules/${packageName}/dist`,
-		// 	})),
-		// }),
 	],
 	middleware: [
 		/**
@@ -53,7 +31,10 @@ export default {
 		 * initialized without a specific prefix (ROOT_PREFIX_PATH)
 		 */
 		function rewriteImports(context, next) {
-			if (context.url.startsWith('/node_modules/')) {
+			if (context.url.endsWith('amazon-cognito-identity-js/es/index.js')) {
+				// we need to use the min version since the main is only for node
+				context.url = context.url.replace('/es/index.js', '/dist/amazon-cognito-identity.min.js');
+			} else if (context.url.startsWith('/node_modules/')) {
 				context.url = `${ROOT_PREFIX_PATH}` + context.url;
 			} else if (context.response.status === 404) {
 				if (context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
@@ -63,15 +44,6 @@ export default {
 			return next();
 		},
 	],
-	// middleware: [
-	//   // Redirect all request from /app-shell/* (without an extension) to app.html
-	//   function rewriteIndex(context, next) {
-	//     if (context.url === '/' || context.url.match(/(?<=\/).*(?<!\.\w+)$/)) {
-	//       context.url = '/index.html';
-	//     }
-	//     return next();
-	//   },
-	// ],
 };
 
 // function getMonorepoPackages() {

@@ -1,6 +1,10 @@
 import { contextProvided } from '@lit-labs/context';
 import { routerContext, RoutesController } from '@rankup/common/contexts/main-router-context.js';
-import { msg } from '@rankup/common/i18n/localize';
+import {
+	SessionManager,
+	sessionManagerContext,
+} from '@rankup/common/contexts/session-manager-context.js';
+import { msg } from '@rankup/common/i18n/localize.js';
 import {
 	arrowLeftIcon,
 	arrowRightIcon,
@@ -19,6 +23,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 export class AuthResetPasswordPage extends LitElement {
 	@contextProvided({ context: routerContext })
 	router!: RoutesController;
+
+	@contextProvided({ context: sessionManagerContext, subscribe: true })
+	sessionManager!: SessionManager;
 
 	@property({ type: Boolean })
 	showPassword = false;
@@ -81,7 +88,7 @@ export class AuthResetPasswordPage extends LitElement {
 
 	private async _resetPassword(email: string, verificationCode: string, newPassword: string) {
 		try {
-			const resp = await appShell.sessionManager!.confirmForgottenPassword(
+			const resp = await this.sessionManager!.confirmForgottenPassword(
 				email,
 				verificationCode,
 				newPassword,

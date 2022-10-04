@@ -1,3 +1,4 @@
+import { bound } from '@rankup/common/decorators/bound.js';
 import { adoptStyles } from 'lit';
 import { customElement } from 'lit/decorators/custom-element.js';
 
@@ -50,45 +51,50 @@ export class SbOverlayContainer extends HTMLElement {
 	#toggleListeners({ enable }: { enable: boolean }) {
 		const m = enable ? 'addEventListener' : 'removeEventListener';
 		const _m = /** @type {'addEventListener'} */ m;
-		window[_m]('find-overlay-container', this.#onFindOverlayContainer);
-		window[_m]('before-close-overlay', this.#onBeforeOverlayClose);
-		window[_m]('before-open-overlay', this.#onBeforeOpenOverlay);
-		window[_m]('overlay-opened', this.#onOverlayOpened);
-		window[_m]('popstate', this.#onPopstate);
+		window[_m]('find-overlay-container', this._onFindOverlayContainer);
+		window[_m]('before-close-overlay', this._onBeforeOverlayClose);
+		window[_m]('before-open-overlay', this._onBeforeOpenOverlay);
+		window[_m]('overlay-opened', this._onOverlayOpened);
+		window[_m]('popstate', this._onPopstate);
 	}
 
 	#toggleListenersForOpenedOverlays({ enable }: { enable: boolean }) {
 		const m = enable ? 'addEventListener' : 'removeEventListener';
 		const _m = /** @type {'addEventListener'} */ m;
-		document[_m]('keydown', this.#onDocumentKeydown, { capture: true });
-		document[_m]('mousedown', this.#onDocumentMousedown, { capture: true });
+		document[_m]('keydown', this._onDocumentKeydown, { capture: true });
+		document[_m]('mousedown', this._onDocumentMousedown, { capture: true });
 	}
 
-	#onFindOverlayContainer = (evt: Event) => {
+	@bound
+	_onFindOverlayContainer(evt: Event) {
 		const _evt = evt as EventsMap['find-overlay-container'];
 		_evt.detail.container = this._containerEl;
-	};
+	}
 
-	#onBeforeOpenOverlay = (evt: Event) => {
+	@bound
+	_onBeforeOpenOverlay(evt: Event) {
 		const { overlay, overlayController } = (evt as EventsMap['before-open-overlay']).detail;
 		this.#closeOthers({ overlay, overlayController });
-	};
+	}
 
-	#onBeforeOverlayClose = (evt: Event) => {
+	@bound
+	_onBeforeOverlayClose(evt: Event) {
 		const { overlay, overlayController } = (evt as EventsMap['before-close-overlay']).detail;
 		this.#removeOverlayBackdrop({ overlay, overlayController });
-	};
+	}
 
-	#onOverlayOpened = (evt: Event) => {
+	@bound
+	_onOverlayOpened(evt: Event) {
 		const { overlay, overlayController } = (evt as EventsMap['overlay-opened']).detail;
 		const withAnimation = !this._removeBackdropAnimation;
 		this.#addOverlayBackdrop({ overlay, overlayController, withAnimation });
 		if (overlayController.cancelOnPopState) {
 			window.history.pushState({}, '', window.location.href);
 		}
-	};
+	}
 
-	#onDocumentMousedown = (evt: Event) => {
+	@bound
+	_onDocumentMousedown(evt: Event) {
 		const _evt = evt as MouseEvent;
 		const overlays = this.#overlays;
 		const lastOverlay = overlays[overlays.length - 1];
@@ -102,9 +108,10 @@ export class SbOverlayContainer extends HTMLElement {
 				}
 			}
 		}
-	};
+	}
 
-	#onDocumentKeydown = (evt: Event) => {
+	@bound
+	_onDocumentKeydown(evt: Event) {
 		const _evt = evt as KeyboardEvent;
 		if (_evt.key === 'Escape' || _evt.keyCode === 27) {
 			const overlays = this.#overlays;
@@ -117,9 +124,10 @@ export class SbOverlayContainer extends HTMLElement {
 				}
 			}
 		}
-	};
+	}
 
-	#onPopstate = () => {
+	@bound
+	_onPopstate() {
 		const overlays = this.#overlays;
 		const lastOverlay = overlays[overlays.length - 1];
 		if (lastOverlay) {
@@ -128,7 +136,7 @@ export class SbOverlayContainer extends HTMLElement {
 				overlayController.close();
 			}
 		}
-	};
+	}
 
 	#updateContentFilterStyle() {
 		const qs = '.backdrop:not(.transparent):not([is-closing])';
