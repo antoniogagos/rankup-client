@@ -98,7 +98,7 @@ The app uses Amazon Cognito Identity JS for authentication. There are separate a
 
 ## Important Notes
 - This is a private repository (not published to npm)
-- Node version specified in `.nvmrc`
+- Node version: 16.16.0 (specified in `.nvmrc`)
 - Husky git hooks configured for pre-commit checks
 - Custom elements manifest generation via `@custom-elements-manifest/analyzer`
 
