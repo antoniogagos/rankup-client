@@ -2,7 +2,7 @@ import type { CognitoUserSession, ISignUpResult } from 'amazon-cognito-identity-
 import type { ReactiveController, ReactiveElement } from 'lit';
 
 // } from 'amazon-cognito-identity-js'; // can't be used because is only for node, we use the minified version
-import env from '../../env.json' assert { type: 'json' };
+import { authConfig, isMockMode } from '../../lib/env.js';
 import {
   AuthenticationDetails,
   CognitoIdToken,
@@ -13,8 +13,7 @@ import {
 } from './amazon-cognito-identity-js.js';
 import type { EventsMap, Providers, Session } from './types';
 
-const { Auth } = env;
-const { ClientId, OAuthServerURL, RedirectURI, UserPoolId } = Auth;
+const { ClientId, OAuthServerURL, RedirectURI, UserPoolId } = authConfig;
 
 let _session: Session | null = null;
 let _scheduledSessionRefresh: NodeJS.Timeout | null = null;
@@ -28,8 +27,10 @@ export class SessionManager implements ReactiveController {
   }
 
   hostConnected() {
-    this._finishExternalProviderLoginIfNeeded();
-    this._restoreAndRefreshSession();
+    if (!isMockMode) {
+      this._finishExternalProviderLoginIfNeeded();
+      this._restoreAndRefreshSession();
+    }
   }
 
   hostDisconnected() {
@@ -56,22 +57,51 @@ export class SessionManager implements ReactiveController {
     userId: string;
     userConfirmed: boolean;
   }> {
+    if (isMockMode) {
+      const userId = `mock-user-${params.username}`;
+      this.session = {
+        email: params.email,
+        userId,
+        accessToken: 'mock-access-token',
+        idToken: 'mock-id-token',
+        refreshToken: 'mock-refresh-token',
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        provider: 'Cognito',
+      };
+      return { email: params.email, userId, userConfirmed: true };
+    }
     return this._signupInWithCognitoUserPass(params.email, params.password, params.username);
   }
 
   async signUpWithOAuth(provider: Providers): Promise<void> {
+    if (isMockMode) {
+      this.session = this._mockSession(provider);
+      return;
+    }
     this._redirectToOauthProviderLogin(provider);
   }
 
   async signInWithPassword(params: { email: string; password: string }): Promise<void> {
+    if (isMockMode) {
+      this.session = this._mockSession('Cognito', params.email);
+      return;
+    }
     this.session = await this._signInInWithCognitoUserPass(params.email, params.password);
   }
 
   async signInWithOAuth(provider: Providers): Promise<void> {
+    if (isMockMode) {
+      this.session = this._mockSession(provider);
+      return;
+    }
     this._redirectToOauthProviderLogin(provider);
   }
 
   signOut() {
+    if (isMockMode) {
+      this.session = null;
+      return;
+    }
     const user = new CognitoUserPool({ UserPoolId, ClientId }).getCurrentUser();
     if (user) {
       user.signOut();
@@ -88,6 +118,9 @@ export class SessionManager implements ReactiveController {
   }
 
   async forgotPassword(email: string): Promise<void> {
+    if (isMockMode) {
+      return;
+    }
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: new CognitoUserPool({ UserPoolId, ClientId }),
@@ -104,6 +137,9 @@ export class SessionManager implements ReactiveController {
   }
 
   async confirmForgottenPassword(email: string, verificationCode: string, newPassword: string) {
+    if (isMockMode) {
+      return;
+    }
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: new CognitoUserPool({ UserPoolId, ClientId }),
@@ -117,6 +153,9 @@ export class SessionManager implements ReactiveController {
   }
 
   async changePassword(email: string, oldPassword: string, newPassword: string) {
+    if (isMockMode) {
+      return;
+    }
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: new CognitoUserPool({ UserPoolId, ClientId }),
@@ -135,6 +174,9 @@ export class SessionManager implements ReactiveController {
   }
 
   async confirmRegistration(email: string, confirmCode: string): Promise<void> {
+    if (isMockMode) {
+      return;
+    }
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: new CognitoUserPool({ UserPoolId, ClientId }),
@@ -152,6 +194,9 @@ export class SessionManager implements ReactiveController {
   }
 
   async resendConfirmationCode(email: string) {
+    if (isMockMode) {
+      return;
+    }
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: new CognitoUserPool({ UserPoolId, ClientId }),
@@ -169,6 +214,12 @@ export class SessionManager implements ReactiveController {
   }
 
   async refreshSession(): Promise<Session> {
+    if (isMockMode) {
+      if (!this.session) {
+        this.session = this._mockSession('Cognito');
+      }
+      return this.session;
+    }
     if (!_session) {
       throw new Error('No session');
     }
@@ -374,5 +425,17 @@ export class SessionManager implements ReactiveController {
     const params = { bubbles: true, composed: true, detail, ...opts };
     const evt = new CustomEvent(eventName, params);
     this.host.dispatchEvent(evt);
+  }
+
+  private _mockSession(provider: Providers, email = 'mock@rankup.local'): Session {
+    return {
+      email,
+      userId: `mock-${provider.toLowerCase()}`,
+      accessToken: 'mock-access-token',
+      idToken: 'mock-id-token',
+      refreshToken: 'mock-refresh-token',
+      expiresAt: Date.now() + 60 * 60 * 1000,
+      provider,
+    };
   }
 }

@@ -1,8 +1,8 @@
 import type { ReactiveElement } from 'lit';
 
-import env from '../../env.json' assert { type: 'json' };
+import { apiURL, isMockMode } from '../env.js';
 
-const { ApiURL } = env;
+const ApiURL = apiURL;
 
 type onUserChangedCallback = (loggedUser: any) => void;
 
@@ -246,6 +246,16 @@ export class DataService {
   }
 
   async GetUser() {
+    if (isMockMode) {
+      return new Response(
+        JSON.stringify({
+          userId: this.userId ?? 'user-antonio',
+          username: 'Antonio',
+          picture: 'rocket.svg',
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
     return this._fetch(`${ApiURL}/user/{userId}`, {
       method: 'GET',
       params: {
@@ -505,6 +515,12 @@ export class DataService {
       paramsLocation?: ParamsLocation;
     } = {},
   ): Promise<any> {
+    if (isMockMode) {
+      return new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     const pathParams = filterParams(params, paramsLocation.path ?? []);
     const resolvedPath = computePath(path, pathParams);
     if (/{[^}]+}/.test(resolvedPath)) {
