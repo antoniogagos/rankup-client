@@ -58,6 +58,12 @@ export class RkSignInPage extends LitElement {
     }
   }
 
+  private _onMockSignInClick() {
+    const email = this.emailInput?.value || 'mock@rankup.local';
+    const password = this.passwordInput?.value || 'mock-password';
+    this._signIn(email, password);
+  }
+
   render() {
     return html`
       <img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
@@ -115,6 +121,9 @@ export class RkSignInPage extends LitElement {
       </div>
 
       <button id="googleBtn" @click=${this._onGoogleSignInClick}>${Icons('google', 48)}</button>
+      <button class="btn--primary" id="mockBtn" @click=${this._onMockSignInClick}>
+        ${msg('Entrar sin backend')}
+      </button>
 
       <footer>
         ${msg('¿No tienes una cuenta?')}
@@ -217,6 +226,9 @@ export class RkSignInPage extends LitElement {
         margin: auto;
         position: absolute;
         top: 0;
+      }
+      #mockBtn {
+        margin-top: 1.5rem;
       }
       .forgot-password-link {
         margin-left: auto;
