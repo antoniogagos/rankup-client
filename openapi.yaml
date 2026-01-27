@@ -135,7 +135,7 @@ paths:
           variables:
             authBaseUrl:
               default: https://auth.example.com
-              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com.
+              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com
       parameters:
         - name: identity_provider
           in: query
@@ -186,7 +186,7 @@ paths:
           variables:
             authBaseUrl:
               default: https://auth.example.com
-              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com.
+              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com
       requestBody:
         required: true
         content:
@@ -383,7 +383,7 @@ components:
           type: integer
           format: int64
           description: Unix timestamp in milliseconds.
-          example: 1767225600000
+          example: 1735689600000
         derbi:
           type: boolean
           description: True if the match is a derby (derbi/local rivalry). Field name follows the current API (Spanish).
