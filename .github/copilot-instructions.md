@@ -102,6 +102,19 @@ The app uses Amazon Cognito Identity JS for authentication. There are separate a
 - Husky git hooks configured for pre-commit checks
 - Custom elements manifest generation via `@custom-elements-manifest/analyzer`
 
+## Copilot Coding Agent Setup
+
+### Pre-firewall setup steps
+Configure the `copilot-setup-steps` workflow in `.github/workflows/copilot-setup-steps.yml` to run before the firewall is enabled. It should install dependencies and set up Node via `.nvmrc`.
+
+### Custom allowlist (admins only)
+Ensure the Copilot coding agent allowlist includes:
+- gh.io
+- github.com
+- api.github.com
+- registry.yarnpkg.com
+- registry.npmjs.org
+
 ## When Making Changes
 1. Follow existing code style and patterns
 2. Maintain workspace separation (app, samba, common)
