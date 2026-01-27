@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "common": "workspace:*",
     "lit": "^2.0.2"
-  },
-  "peerDependencies": {
-    "common": "^1.0.0",
-    "samba": "^1.0.0"
   }
 }
