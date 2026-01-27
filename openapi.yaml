@@ -383,9 +383,10 @@ components:
           type: integer
           format: int64
           description: Unix timestamp in milliseconds.
+          example: 1640101800000
         derbi:
           type: boolean
-          description: True if the match is a derby (derbi/local rivalry).
+          description: True if the match is a derby (derbi/local rivalry). Field name follows the current API.
         weather:
           $ref: '#/components/schemas/MatchWeather'
         status:
