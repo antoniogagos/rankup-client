@@ -126,6 +126,86 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - BearerAuth: []
+  /authorize:
+    get:
+      summary: Start OAuth authorization
+      operationId: authorize
+      servers:
+        - url: '{authBaseUrl}'
+          variables:
+            authBaseUrl:
+              default: https://auth.example.com
+              description: OAuth server URL (matches OAuthServerURL).
+      parameters:
+        - name: identity_provider
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to the provider login.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /token:
+    post:
+      summary: Exchange authorization code for tokens
+      operationId: token
+      servers:
+        - url: '{authBaseUrl}'
+          variables:
+            authBaseUrl:
+              default: https://auth.example.com
+              description: OAuth server URL (matches OAuthServerURL).
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+      responses:
+        '200':
+          description: Token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthTokenResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   securitySchemes:
     BearerAuth:
@@ -173,15 +253,15 @@ components:
         name:
           type: string
         sport:
-          type: string
+          $ref: '#/components/schemas/CompetitionSport'
         game:
-          type: string
+          $ref: '#/components/schemas/CompetitionGame'
         season:
           type: integer
         type:
-          type: string
+          $ref: '#/components/schemas/CompetitionType'
         status:
-          type: string
+          $ref: '#/components/schemas/CompetitionStatus'
         groupPhase:
           type: boolean
         knockoutPhase:
@@ -195,7 +275,7 @@ components:
         currentMatchday:
           type: integer
         currentMatchdayStatus:
-          type: string
+          $ref: '#/components/schemas/MatchdayStatus'
         startsAt:
           type: string
           format: date-time
@@ -302,8 +382,10 @@ components:
         date:
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds.
         derbi:
           type: boolean
+          description: True if the match is a derby (derbi/local rivalry).
         weather:
           $ref: '#/components/schemas/MatchWeather'
         status:
@@ -325,6 +407,26 @@ components:
         - FOOTBALL_SPAIN_LEAGUE_1
         - FOOTBALL_UK_LEAGUE_1
         - FOOTBALL_WORLD_CUP
+    CompetitionSport:
+      type: string
+      enum:
+        - FOOTBALL
+    CompetitionGame:
+      type: string
+      enum:
+        - SCORE_BETS
+    CompetitionType:
+      type: string
+      enum:
+        - DOMESTIC
+    CompetitionStatus:
+      type: string
+      enum:
+        - LIVE
+    MatchdayStatus:
+      type: string
+      enum:
+        - TIMED
     MatchWeather:
       type: string
       enum:
@@ -386,6 +488,44 @@ components:
         - AWARDED
         - DELAYED
         - WO
+    OAuthTokenRequest:
+      type: object
+      required:
+        - grant_type
+        - client_id
+        - redirect_uri
+        - code
+        - scope
+      properties:
+        grant_type:
+          type: string
+        client_id:
+          type: string
+        redirect_uri:
+          type: string
+          format: uri
+        code:
+          type: string
+        scope:
+          type: string
+    OAuthTokenResponse:
+      type: object
+      required:
+        - access_token
+        - expires_in
+        - id_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+        id_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
     ErrorResponse:
       type: object
       required:
