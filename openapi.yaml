@@ -1,0 +1,536 @@
+openapi: 3.0.3
+info:
+  title: RankUp API
+  version: 0.1.0
+  description: API contract consumed by the RankUp client.
+servers:
+  - url: '{apiBaseUrl}'
+    variables:
+      apiBaseUrl:
+        default: https://api.example.com
+        description: Base API URL (matches ApiURL from the runtime environment).
+paths:
+  /user/{userId}:
+    get:
+      summary: Get user profile
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique user identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /competitions:
+    get:
+      summary: List competitions
+      operationId: listCompetitions
+      responses:
+        '200':
+          description: Competition list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /tourneys:
+    get:
+      summary: List user tourneys
+      operationId: listUserTourneys
+      responses:
+        '200':
+          description: Tourney list for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserTourney'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /ranking:
+    get:
+      summary: Get ranking
+      operationId: getRanking
+      responses:
+        '200':
+          description: Ranking entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RankingEntry'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /matchday/matches:
+    get:
+      summary: Get matchday matches
+      operationId: getMatchdayMatches
+      responses:
+        '200':
+          description: Matchday matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /authorize:
+    get:
+      summary: Start OAuth authorization
+      operationId: authorize
+      servers:
+        - url: '{authBaseUrl}'
+          variables:
+            authBaseUrl:
+              default: https://auth.example.com
+              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com
+      parameters:
+        - name: identity_provider
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to the provider login.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /token:
+    post:
+      summary: Exchange authorization code for tokens
+      operationId: token
+      servers:
+        - url: '{authBaseUrl}'
+          variables:
+            authBaseUrl:
+              default: https://auth.example.com
+              description: Placeholder OAuth base URL including protocol, e.g. https://auth.example.com
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+      responses:
+        '200':
+          description: Token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthTokenResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - userId
+        - username
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        picture:
+          type: string
+          nullable: true
+          description: Profile picture URL.
+          format: uri
+    Competition:
+      type: object
+      required:
+        - competitionId
+        - name
+        - sport
+        - game
+        - season
+        - type
+        - status
+        - groupPhase
+        - knockoutPhase
+        - knockoutPhaseSingleMatch
+        - totalMatchdays
+        - totalParticipants
+        - currentMatchday
+        - currentMatchdayStatus
+        - startsAt
+        - matchdays
+      properties:
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        name:
+          type: string
+        sport:
+          $ref: '#/components/schemas/CompetitionSport'
+        game:
+          $ref: '#/components/schemas/CompetitionGame'
+        season:
+          type: integer
+        type:
+          $ref: '#/components/schemas/CompetitionType'
+        status:
+          $ref: '#/components/schemas/CompetitionStatus'
+        groupPhase:
+          type: boolean
+        knockoutPhase:
+          type: boolean
+        knockoutPhaseSingleMatch:
+          type: boolean
+        totalMatchdays:
+          type: integer
+        totalParticipants:
+          type: integer
+        currentMatchday:
+          type: integer
+        currentMatchdayStatus:
+          $ref: '#/components/schemas/MatchdayStatus'
+        startsAt:
+          type: string
+          format: date-time
+        matchdays:
+          type: array
+          items:
+            type: string
+          nullable: true
+    UserTourney:
+      type: object
+      required:
+        - tourneyId
+        - role
+        - group
+        - chatReadCount
+        - pushChatEnabled
+        - rankingPosition
+        - name
+        - ownerId
+        - isPublic
+        - invitationCode
+        - open
+        - chatEnabled
+        - totalPlayers
+        - competitionId
+        - season
+        - format
+        - pointsVersion
+      properties:
+        tourneyId:
+          type: string
+        role:
+          type: string
+        group:
+          type: string
+        chatReadCount:
+          type: integer
+        pushChatEnabled:
+          type: boolean
+        rankingPosition:
+          type: integer
+        name:
+          type: string
+        ownerId:
+          type: string
+        isPublic:
+          type: boolean
+        invitationCode:
+          type: string
+        open:
+          type: boolean
+        chatEnabled:
+          type: boolean
+        totalPlayers:
+          type: integer
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        season:
+          type: integer
+        format:
+          type: string
+        pointsVersion:
+          type: integer
+    RankingEntry:
+      type: object
+      required:
+        - position
+        - points
+        - user
+      properties:
+        position:
+          type: integer
+        points:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+    Match:
+      type: object
+      required:
+        - matchId
+        - homeTeamId
+        - awayTeamId
+        - competitionId
+        - season
+        - matchday
+        - date
+        - derbi
+        - weather
+        - status
+        - odds
+      properties:
+        matchId:
+          type: string
+        homeTeamId:
+          type: string
+        awayTeamId:
+          type: string
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        season:
+          type: integer
+        matchday:
+          type: integer
+        date:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds (e.g. 1735689600000 for 2025-01-01T00:00:00Z).
+          example: 1735689600000
+        derbi:
+          type: boolean
+          description: True if the match is a derby (derbi/local rivalry). Field name follows the existing API (Spanish) for backward compatibility.
+        weather:
+          $ref: '#/components/schemas/MatchWeather'
+        status:
+          $ref: '#/components/schemas/MatchStatus'
+        odds:
+          type: string
+        result:
+          type: string
+          nullable: true
+    CompetitionId:
+      type: string
+      enum:
+        - FOOTBALL_ARGENTINE_LEAGUE_1
+        - FOOTBALL_CHAMPIONS_LEAGUE
+        - FOOTBALL_GERMANY_LEAGUE_1
+        - FOOTBALL_ITALIAN_LEAGUE_1
+        - FOOTBALL_MEXICAN_LEAGUE_1
+        - FOOTBALL_SPAIN_CUP
+        - FOOTBALL_SPAIN_LEAGUE_1
+        - FOOTBALL_UK_LEAGUE_1
+        - FOOTBALL_WORLD_CUP
+    CompetitionSport:
+      type: string
+      enum:
+        - FOOTBALL
+    CompetitionGame:
+      type: string
+      enum:
+        - SCORE_BETS
+    CompetitionType:
+      type: string
+      enum:
+        - DOMESTIC
+    CompetitionStatus:
+      type: string
+      enum:
+        - LIVE
+    MatchdayStatus:
+      type: string
+      enum:
+        - TIMED
+    MatchWeather:
+      type: string
+      enum:
+        - CLEAR_SKY
+        - FEW_CLOUDS
+        - SCATTERED_CLOUDS
+        - BROKEN_CLOUDS
+        - SHOWER_RAIN
+        - RAIN
+        - THUNDERSTORM
+        - SNOW
+        - MIST
+        - CLOUDS
+        - MODERATE_RAIN
+        - HAZE
+        - LIGHT_INTENSITY_SHOWER_RAIN
+        - LIGHT_RAIN
+        - OVERCAST_CLOUDS
+        - FOG
+        - HEAVY_INTENSITY_RAIN
+        - THUNDERSTORM_WITH_LIGHT_RAIN
+        - THUNDERSTORM_WITH_RAIN
+        - DRIZZLE
+        - HEAVY_INTENSITY_DRIZZLE
+        - LIGHT_INTENSITY_DRIZZLE_RAIN
+        - DRIZZLE_RAIN
+        - HEAVY_INTENSITY_DRIZZLE_RAIN
+        - SHOWER_RAIN_AND_DRIZZLE
+        - HEAVY_SHOWER_RAIN_AND_DRIZZLE
+        - SHOWER_DRIZZLE
+        - LIGHT_SNOW
+        - HEAVY_SNOW
+        - SLEET
+        - LIGHT_SHOWER_SLEET
+        - SHOWER_SLEET
+        - LIGHT_RAIN_AND_SNOW
+        - RAIN_AND_SNOW
+        - LIGHT_SHOWER_SNOW
+        - SHOWER_SNOW
+        - HEAVY_SHOWER_SNOW
+    MatchStatus:
+      type: string
+      enum:
+        - NS
+        - LIVE
+        - FT
+        - HT
+        - ET
+        - PEN_LIVE
+        - AET
+        - BREAK
+        - FT_PEN
+        - CANCL
+        - POSTP
+        - INT
+        - ABAN
+        - SUSP
+        - TBA
+        - AWARDED
+        - DELAYED
+        - WO
+    OAuthTokenRequest:
+      type: object
+      required:
+        - grant_type
+        - client_id
+        - redirect_uri
+        - code
+        - scope
+      properties:
+        grant_type:
+          type: string
+        client_id:
+          type: string
+        redirect_uri:
+          type: string
+          format: uri
+        code:
+          type: string
+        scope:
+          type: string
+    OAuthTokenResponse:
+      type: object
+      required:
+        - access_token
+        - expires_in
+        - id_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+        id_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
