@@ -42,6 +42,90 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - BearerAuth: []
+  /competitions:
+    get:
+      summary: List competitions
+      operationId: listCompetitions
+      responses:
+        '200':
+          description: Competition list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /tourneys:
+    get:
+      summary: List user tourneys
+      operationId: listUserTourneys
+      responses:
+        '200':
+          description: Tourney list for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserTourney'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /ranking:
+    get:
+      summary: Get ranking
+      operationId: getRanking
+      responses:
+        '200':
+          description: Ranking entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RankingEntry'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /matchday/matches:
+    get:
+      summary: Get matchday matches
+      operationId: getMatchdayMatches
+      responses:
+        '200':
+          description: Matchday matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
 components:
   securitySchemes:
     BearerAuth:
@@ -64,6 +148,244 @@ components:
           nullable: true
           description: Profile picture URL.
           format: uri
+    Competition:
+      type: object
+      required:
+        - competitionId
+        - name
+        - sport
+        - game
+        - season
+        - type
+        - status
+        - groupPhase
+        - knockoutPhase
+        - knockoutPhaseSingleMatch
+        - totalMatchdays
+        - totalParticipants
+        - currentMatchday
+        - currentMatchdayStatus
+        - startsAt
+        - matchdays
+      properties:
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        name:
+          type: string
+        sport:
+          type: string
+        game:
+          type: string
+        season:
+          type: integer
+        type:
+          type: string
+        status:
+          type: string
+        groupPhase:
+          type: boolean
+        knockoutPhase:
+          type: boolean
+        knockoutPhaseSingleMatch:
+          type: boolean
+        totalMatchdays:
+          type: integer
+        totalParticipants:
+          type: integer
+        currentMatchday:
+          type: integer
+        currentMatchdayStatus:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        matchdays:
+          type: array
+          items:
+            type: string
+          nullable: true
+    UserTourney:
+      type: object
+      required:
+        - tourneyId
+        - role
+        - group
+        - chatReadCount
+        - pushChatEnabled
+        - rankingPosition
+        - name
+        - ownerId
+        - isPublic
+        - invitationCode
+        - open
+        - chatEnabled
+        - totalPlayers
+        - competitionId
+        - season
+        - format
+        - pointsVersion
+      properties:
+        tourneyId:
+          type: string
+        role:
+          type: string
+        group:
+          type: string
+        chatReadCount:
+          type: integer
+        pushChatEnabled:
+          type: boolean
+        rankingPosition:
+          type: integer
+        name:
+          type: string
+        ownerId:
+          type: string
+        isPublic:
+          type: boolean
+        invitationCode:
+          type: string
+        open:
+          type: boolean
+        chatEnabled:
+          type: boolean
+        totalPlayers:
+          type: integer
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        season:
+          type: integer
+        format:
+          type: string
+        pointsVersion:
+          type: integer
+    RankingEntry:
+      type: object
+      required:
+        - position
+        - points
+        - user
+      properties:
+        position:
+          type: integer
+        points:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+    Match:
+      type: object
+      required:
+        - matchId
+        - homeTeamId
+        - awayTeamId
+        - competitionId
+        - season
+        - matchday
+        - date
+        - derbi
+        - weather
+        - status
+        - odds
+      properties:
+        matchId:
+          type: string
+        homeTeamId:
+          type: string
+        awayTeamId:
+          type: string
+        competitionId:
+          $ref: '#/components/schemas/CompetitionId'
+        season:
+          type: integer
+        matchday:
+          type: integer
+        date:
+          type: integer
+          format: int64
+        derbi:
+          type: boolean
+        weather:
+          $ref: '#/components/schemas/MatchWeather'
+        status:
+          $ref: '#/components/schemas/MatchStatus'
+        odds:
+          type: string
+        result:
+          type: string
+          nullable: true
+    CompetitionId:
+      type: string
+      enum:
+        - FOOTBALL_ARGENTINE_LEAGUE_1
+        - FOOTBALL_CHAMPIONS_LEAGUE
+        - FOOTBALL_GERMANY_LEAGUE_1
+        - FOOTBALL_ITALIAN_LEAGUE_1
+        - FOOTBALL_MEXICAN_LEAGUE_1
+        - FOOTBALL_SPAIN_CUP
+        - FOOTBALL_SPAIN_LEAGUE_1
+        - FOOTBALL_UK_LEAGUE_1
+        - FOOTBALL_WORLD_CUP
+    MatchWeather:
+      type: string
+      enum:
+        - CLEAR_SKY
+        - FEW_CLOUDS
+        - SCATTERED_CLOUDS
+        - BROKEN_CLOUDS
+        - SHOWER_RAIN
+        - RAIN
+        - THUNDERSTORM
+        - SNOW
+        - MIST
+        - CLOUDS
+        - MODERATE_RAIN
+        - HAZE
+        - LIGHT_INTENSITY_SHOWER_RAIN
+        - LIGHT_RAIN
+        - OVERCAST_CLOUDS
+        - FOG
+        - HEAVY_INTENSITY_RAIN
+        - THUNDERSTORM_WITH_LIGHT_RAIN
+        - THUNDERSTORM_WITH_RAIN
+        - DRIZZLE
+        - HEAVY_INTENSITY_DRIZZLE
+        - LIGHT_INTENSITY_DRIZZLE_RAIN
+        - DRIZZLE_RAIN
+        - HEAVY_INTENSITY_DRIZZLE_RAIN
+        - SHOWER_RAIN_AND_DRIZZLE
+        - HEAVY_SHOWER_RAIN_AND_DRIZZLE
+        - SHOWER_DRIZZLE
+        - LIGHT_SNOW
+        - HEAVY_SNOW
+        - SLEET
+        - LIGHT_SHOWER_SLEET
+        - SHOWER_SLEET
+        - LIGHT_RAIN_AND_SNOW
+        - RAIN_AND_SNOW
+        - LIGHT_SHOWER_SNOW
+        - SHOWER_SNOW
+        - HEAVY_SHOWER_SNOW
+    MatchStatus:
+      type: string
+      enum:
+        - NS
+        - LIVE
+        - FT
+        - HT
+        - ET
+        - PEN_LIVE
+        - AET
+        - BREAK
+        - FT_PEN
+        - CANCL
+        - POSTP
+        - INT
+        - ABAN
+        - SUSP
+        - TBA
+        - AWARDED
+        - DELAYED
+        - WO
     ErrorResponse:
       type: object
       required:
