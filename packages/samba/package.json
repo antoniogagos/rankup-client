@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "common": "workspace:*",
+    "common": "1.0.0",
     "lit": "^2.0.2"
   }
 }
