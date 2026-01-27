@@ -20,10 +20,10 @@
 		"@lit-labs/task": "^1.0.0",
 		"@lit/localize": "^0.11.0",
 		"amazon-cognito-identity-js": "^5.2.3",
-		"common": "workspace:*",
+		"common": "1.0.0",
 		"lit": "^2.0.2",
 		"page": "^1.11.6",
-		"samba": "workspace:*",
+		"samba": "1.0.0",
 		"urlpattern-polyfill": "^5.0.9"
 	},
 	"devDependencies": {
