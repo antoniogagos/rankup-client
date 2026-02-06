@@ -1,0 +1,1107 @@
+tags:
+  - name: sports
+    summary: Sports data
+    description: Public sports catalog and schedules (read-only).
+    kind: nav
+
+  - name: sports.catalog
+    summary: Catalog
+    description: Sports, competitions, seasons, teams.
+    parent: sports
+    kind: nav
+
+  - name: sports.schedule
+    summary: Schedule
+    description: Matchdays, matches, and match events.
+    parent: sports
+    kind: nav
+
+paths:
+  /sports:
+    get:
+      tags: [sports.catalog]
+      operationId: listSports
+      summary: List supported sports
+      description: |
+        Returns the sports supported by Rankup.
+
+        Caching:
+        - Safe to cache for long periods.
+        - Supports ETag + 304 for efficient revalidation.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Sports list.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SportList"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions:
+    get:
+      tags: [sports.catalog]
+      operationId: listCompetitions
+      summary: List competitions
+      description: |
+        Lists competitions that Rankup supports for building tournaments.
+
+        Notes:
+        - This is a *Rankup-supported* subset (not a full provider directory).
+        - Designed to power "create tournament" and curated discovery.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CompetitionType"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CompetitionStatus"
+        - name: countryCode
+          in: query
+          required: false
+          description: ISO 3166-1 alpha-2 (optional filter).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+          example: ES
+        - name: q
+          in: query
+          required: false
+          description: Free-text search (name).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 64
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Competition page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitionPage"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions/{competitionId}:
+    get:
+      tags: [sports.catalog]
+      operationId: getCompetition
+      summary: Get competition
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/CompetitionId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Competition.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Competition"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions/{competitionId}/seasons:
+    get:
+      tags: [sports.catalog]
+      operationId: listCompetitionSeasons
+      summary: List seasons for a competition
+      description: |
+        Lists seasons available for a competition.
+
+        Caching: seasons change infrequently; cache long.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/CompetitionId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Seasons list.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonList"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions/{competitionId}/seasons/{seasonId}:
+    get:
+      tags: [sports.catalog]
+      operationId: getCompetitionSeason
+      summary: Get season
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/CompetitionId"
+        - $ref: "#/components/parameters/SeasonId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Season details.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Season"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions/{competitionId}/seasons/{seasonId}/matchdays:
+    get:
+      tags: [sports.schedule]
+      operationId: listMatchdays
+      summary: List matchdays for a competition season
+      description: |
+        Lists matchdays (rounds) for a season.
+
+        A matchday is a grouping concept used to power Rankup's "by jornada" gameplay.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/CompetitionId"
+        - $ref: "#/components/parameters/SeasonId"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MatchdayStatus"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Matchdays list.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchdayList"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /competitions/{competitionId}/seasons/{seasonId}/matchdays/{matchday}/matches:
+    get:
+      tags: [sports.schedule]
+      operationId: listMatchdayMatches
+      summary: List matches for a matchday
+      description: |
+        Lists matches for a competition season matchday.
+
+        Designed for low-latency "fixtures" views:
+        - returns match status + score + basic event counters (optional)
+        - cache short and revalidate aggressively (ETag)
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/CompetitionId"
+        - $ref: "#/components/parameters/SeasonId"
+        - $ref: "#/components/parameters/Matchday"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MatchStatus"
+        - name: include
+          in: query
+          required: false
+          description: Optional expansions (kept small to avoid payload bloat).
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/MatchInclude"
+          examples:
+            minimal:
+              value: []
+            withCounters:
+              value: [eventCounters]
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Matches page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchPage"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /matches:
+    get:
+      tags: [sports.schedule]
+      operationId: searchMatches
+      summary: Search matches
+      description: |
+        Generic match search endpoint.
+
+        Intended for:
+        - debugging tools
+        - cross-competition views
+        - future sports with large schedules
+
+        For Rankup gameplay screens, prefer tournament-scoped endpoints where possible.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: competitionId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CompetitionId"
+        - name: seasonId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SeasonId"
+        - name: matchday
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: teamId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TeamId"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MatchStatus"
+        - name: from
+          in: query
+          required: false
+          description: Return matches scheduled at/after this time.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: false
+          description: Return matches scheduled before this time.
+          schema:
+            type: string
+            format: date-time
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Matches page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchPage"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /matches/{matchId}:
+    get:
+      tags: [sports.schedule]
+      operationId: getMatch
+      summary: Get match
+      description: |
+        Returns match details.
+
+        Caching:
+        - Cache short. Live matches update frequently, but ETag revalidation keeps it efficient.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/MatchId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Match.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /matches/{matchId}/events:
+    get:
+      tags: [sports.schedule]
+      operationId: listMatchEvents
+      summary: List match events
+      description: |
+        Returns a time-ordered list of match events (goals, cards, period transitions, etc.).
+
+        This powers Rankup's "app feels alive" requirement:
+        - clients can poll this endpoint for incremental updates using `since`
+        - servers can use the same event stream internally for notifications and live feeds
+
+        Caching: `no-store` (events are live and user polling should always fetch fresh).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/MatchId"
+        - name: since
+          in: query
+          required: false
+          description: Return events occurring strictly after this timestamp.
+          schema:
+            type: string
+            format: date-time
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Match events page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchEventPage"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /teams/{teamId}:
+    get:
+      tags: [sports.catalog]
+      operationId: getTeam
+      summary: Get team
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TeamId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Team.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  headers:
+    Cache-Control-Public-Medium:
+      description: Public cache, moderate TTL (schedules/metadata that change occasionally).
+      schema:
+        type: string
+      example: public, max-age=300
+
+    Cache-Control-Public-Long:
+      description: Public cache, long TTL (catalog data that changes rarely).
+      schema:
+        type: string
+      example: public, max-age=3600
+
+  parameters:
+    CompetitionId:
+      name: competitionId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/CompetitionId"
+
+    SeasonId:
+      name: seasonId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/SeasonId"
+
+    Matchday:
+      name: matchday
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    MatchId:
+      name: matchId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/MatchId"
+
+    TeamId:
+      name: teamId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/TeamId"
+
+  schemas:
+    SportId:
+      type: string
+      description: Stable sport identifier.
+      examples: [football, basketball, esports]
+
+    CompetitionId:
+      type: string
+      description: Stable competition identifier (Rankup canonical id).
+      examples: [FOOTBALL_SPAIN_LEAGUE_1, FOOTBALL_CHAMPIONS_LEAGUE]
+
+    SeasonId:
+      type: string
+      description: Stable season identifier.
+      examples: ["2025-2026", "2026"]
+
+    MatchId:
+      type: string
+      description: Stable match identifier (provider-derived or Rankup canonical).
+      example: m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+    TeamId:
+      type: string
+      description: Stable team identifier.
+      example: team_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+    SportStatus:
+      type: string
+      enum: [active, planned, deprecated]
+
+    Sport:
+      type: object
+      additionalProperties: false
+      required: [sportId, name, status]
+      properties:
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        name:
+          type: string
+          description: Localized display name (Accept-Language).
+          example: Football
+        status:
+          $ref: "#/components/schemas/SportStatus"
+        iconUrl:
+          type: string
+          format: uri
+          description: Optional sport icon.
+
+    SportList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sport"
+
+    CompetitionType:
+      type: string
+      enum: [domestic, cup, international]
+
+    CompetitionStatus:
+      type: string
+      enum: [upcoming, live, finished]
+
+    Competition:
+      type: object
+      additionalProperties: false
+      required: [competitionId, sportId, name, type, status]
+      properties:
+        competitionId:
+          $ref: "#/components/schemas/CompetitionId"
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        name:
+          type: string
+          description: Localized display name (Accept-Language).
+        shortName:
+          type: string
+          description: Optional short label.
+        countryCode:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: ISO 3166-1 alpha-2 (optional).
+        type:
+          $ref: "#/components/schemas/CompetitionType"
+        status:
+          $ref: "#/components/schemas/CompetitionStatus"
+        logoUrl:
+          type: string
+          format: uri
+        activeSeasonId:
+          $ref: "#/components/schemas/SeasonId"
+
+    CompetitionPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Competition"
+        nextCursor:
+          type: string
+
+    SeasonStatus:
+      type: string
+      enum: [upcoming, live, finished]
+
+    MatchdayStatus:
+      type: string
+      enum: [upcoming, live, finished]
+
+    Season:
+      type: object
+      additionalProperties: false
+      required: [seasonId, competitionId, status]
+      properties:
+        seasonId:
+          $ref: "#/components/schemas/SeasonId"
+        competitionId:
+          $ref: "#/components/schemas/CompetitionId"
+        label:
+          type: string
+          description: Localized season label.
+          example: "2025/2026"
+        status:
+          $ref: "#/components/schemas/SeasonStatus"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        totalMatchdays:
+          type: integer
+          minimum: 0
+        currentMatchday:
+          type: integer
+          minimum: 1
+        currentMatchdayStatus:
+          $ref: "#/components/schemas/MatchdayStatus"
+        lastUpdatedAt:
+          type: string
+          format: date-time
+
+    SeasonList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Season"
+
+    Matchday:
+      type: object
+      additionalProperties: false
+      required: [matchday, status]
+      properties:
+        matchday:
+          type: integer
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/MatchdayStatus"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        matchCount:
+          type: integer
+          minimum: 0
+
+    MatchdayList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Matchday"
+
+    MatchStatus:
+      type: string
+      description: |
+        Provider-driven match status. Not an enum for forward compatibility.
+        Examples for football providers: NS, LIVE, HT, FT, POSTP, CANCL, AET, PEN.
+      examples: [NS, LIVE, HT, FT, POSTP, CANCL]
+
+    MatchInclude:
+      type: string
+      enum: [eventCounters]
+
+    TeamRef:
+      type: object
+      additionalProperties: false
+      required: [teamId, name]
+      properties:
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        name:
+          type: string
+        shortName:
+          type: string
+        crestUrl:
+          type: string
+          format: uri
+
+    MatchScore:
+      type: object
+      additionalProperties: false
+      properties:
+        home:
+          type: integer
+          minimum: 0
+        away:
+          type: integer
+          minimum: 0
+        isFinal:
+          type: boolean
+
+    MatchEventCounters:
+      type: object
+      additionalProperties: false
+      properties:
+        goals:
+          type: integer
+          minimum: 0
+        redCards:
+          type: integer
+          minimum: 0
+        yellowCards:
+          type: integer
+          minimum: 0
+        lastEventAt:
+          type: string
+          format: date-time
+
+    Match:
+      type: object
+      additionalProperties: false
+      required: [matchId, sportId, status, scheduledAt]
+      properties:
+        matchId:
+          $ref: "#/components/schemas/MatchId"
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        competitionId:
+          $ref: "#/components/schemas/CompetitionId"
+        seasonId:
+          $ref: "#/components/schemas/SeasonId"
+        matchday:
+          type: integer
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/MatchStatus"
+        scheduledAt:
+          type: string
+          format: date-time
+          description: Scheduled start time (kickoff/tipoff).
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        homeTeam:
+          $ref: "#/components/schemas/TeamRef"
+        awayTeam:
+          $ref: "#/components/schemas/TeamRef"
+        score:
+          $ref: "#/components/schemas/MatchScore"
+        isDerby:
+          type: boolean
+        weather:
+          type: object
+          additionalProperties: true
+          description: Optional provider weather payload (football first).
+        odds:
+          type: object
+          additionalProperties: true
+          description: Optional odds payload for display only (no betting).
+        eventCounters:
+          $ref: "#/components/schemas/MatchEventCounters"
+        lastUpdatedAt:
+          type: string
+          format: date-time
+
+    MatchPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Match"
+        nextCursor:
+          type: string
+
+    MatchEventType:
+      type: string
+      description: |
+        Event type identifier. Not an enum for forward compatibility.
+        Examples: kickoff, goal, yellow_card, red_card, half_time, full_time, period_start, period_end.
+      examples: [kickoff, goal, yellow_card, red_card, half_time, full_time]
+
+    MatchEvent:
+      type: object
+      additionalProperties: false
+      required: [eventId, matchId, type, occurredAt]
+      properties:
+        eventId:
+          type: string
+          example: evt_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        matchId:
+          $ref: "#/components/schemas/MatchId"
+        type:
+          $ref: "#/components/schemas/MatchEventType"
+        occurredAt:
+          type: string
+          format: date-time
+        minute:
+          type: integer
+          minimum: 0
+          description: Provider minute marker when applicable (football).
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        playerName:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+          description: Provider/sport-specific details.
+
+    MatchEventPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchEvent"
+        nextCursor:
+          type: string
+
+    Team:
+      type: object
+      additionalProperties: false
+      required: [teamId, name]
+      properties:
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        name:
+          type: string
+        shortName:
+          type: string
+        countryCode:
+          type: string
+          minLength: 2
+          maxLength: 2
+        crestUrl:
+          type: string
+          format: uri
+        primaryColor:
+          type: string
+          description: Optional UI hint (hex).
+          example: "#FFFFFF"

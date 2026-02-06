@@ -1,0 +1,403 @@
+tags:
+  - name: tournaments.invitationCodes
+    summary: Invitation codes
+    description: Join tournaments using invitation codes (no spectator access).
+    parent: tournaments
+    kind: nav
+
+paths:
+  /tournaments/{tournamentId}/invitation-codes:
+    get:
+      tags: [tournaments.invitationCodes]
+      operationId: listTournamentInvitationCodes
+      summary: List invitation codes for a tournament (admin-only)
+      description: |
+        Lists invitation codes for a tournament.
+
+        Security & abuse posture:
+        - Admin/owner only by default.
+        - Codes are sensitive join tokens; do not expose to non-authorized members unless the product explicitly decides so.
+
+        Notes:
+        - If Rankup later wants "any member can invite", switch authz policy server-side or add a separate
+          read-only endpoint that returns the *active code only* to members with invite permission.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: status
+          in: query
+          required: false
+          description: Filter by code status.
+          schema:
+            $ref: "#/components/schemas/InvitationCodeStatus"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Invitation codes page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationCodePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [tournaments.invitationCodes]
+      operationId: createTournamentInvitationCode
+      summary: Create/rotate an invitation code (admin-only)
+      description: |
+        Creates a new invitation code for joining the tournament.
+
+        Recommended default behavior:
+        - `revokeExisting=true` to invalidate previous active codes (rotation).
+        - Optional expiry/maxUses for special cases (e.g., limited drops).
+
+        Idempotency:
+        - Clients SHOULD provide `X-Idempotency-Key` to avoid accidental multiple codes on retry.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationCodeRequest"
+      responses:
+        "201":
+          description: Invitation code created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Location:
+              description: Canonical URL of the invitation code resource.
+              schema:
+                type: string
+                format: uri-reference
+              example: /invitation-codes/AB12CD34
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationCode"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /invitation-codes/{code}:
+    get:
+      tags: [tournaments.invitationCodes]
+      operationId: resolveInvitationCode
+      summary: Resolve an invitation code (preview + joinability)
+      description: |
+        Resolves an invitation code to the minimal information needed for a join flow.
+
+        Product rule: "No spectators"
+        - This endpoint MUST NOT disclose tournament internals (ranking, chat history, other players' submissions).
+        - It may return the same safe preview content as `/tournaments/{tournamentId}/preview`.
+
+        Auth is optional:
+        - Anonymous users can see the join screen preview (then login).
+        - Authenticated users additionally get `alreadyMember` hint to avoid redundant join attempts.
+
+        Anti-abuse:
+        - Rate-limit and monitor brute-force attempts.
+        - Codes SHOULD be high-entropy (server-generated).
+      security:
+        - {}
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/InvitationCode"
+      responses:
+        "200":
+          description: Invitation code resolved (exists). Joinability provided in response body.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationCodeResolution"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /invitation-codes/{code}/members/me:
+    put:
+      tags: [tournaments.invitationCodes]
+      operationId: joinTournamentByInvitationCode
+      summary: Join a tournament using an invitation code
+      description: |
+        Joins the tournament referenced by the invitation code.
+
+        Idempotency:
+        - PUT is idempotent: if the user is already a member, the server SHOULD return 200 with `joined=false`.
+
+        Authorization:
+        - Requires authentication.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/InvitationCode"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinByInvitationCodeRequest"
+      responses:
+        "200":
+          description: Join request processed (already a member or joined successfully).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinByInvitationCodeResult"
+        "201":
+          description: Joined successfully (optional first-join status code).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinByInvitationCodeResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    InvitationCode:
+      name: code
+      in: path
+      required: true
+      description: High-entropy invitation code.
+      schema:
+        type: string
+        minLength: 6
+        maxLength: 32
+        pattern: "^[A-Za-z0-9_-]{6,32}$"
+      example: AB12CD34
+
+  schemas:
+    InvitationCodeStatus:
+      type: string
+      description: Invitation code lifecycle state.
+      enum: [active, revoked, expired]
+
+    InvitationCode:
+      type: object
+      additionalProperties: false
+      required: [code, tournamentId, status, createdAt]
+      properties:
+        code:
+          type: string
+          minLength: 6
+          maxLength: 32
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        status:
+          $ref: "#/components/schemas/InvitationCodeStatus"
+        createdAt:
+          type: string
+          format: date-time
+        createdByUserId:
+          type: string
+          description: Optional creator user id (when created by a user/admin).
+        label:
+          type: string
+          maxLength: 60
+          description: Optional human label (e.g., "Family WhatsApp").
+        expiresAt:
+          type: string
+          format: date-time
+        revokedAt:
+          type: string
+          format: date-time
+        maxUses:
+          type: integer
+          minimum: 1
+          description: Optional cap on uses.
+        useCount:
+          type: integer
+          minimum: 0
+          description: Server-tracked number of successful joins using this code.
+
+    InvitationCodePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvitationCode"
+        nextCursor:
+          type: string
+
+    CreateInvitationCodeRequest:
+      type: object
+      additionalProperties: false
+      description: |
+        Creates a new code and optionally revokes existing active codes.
+      properties:
+        revokeExisting:
+          type: boolean
+          default: true
+          description: If true, revoke all active codes for the tournament.
+        expiresAt:
+          type: string
+          format: date-time
+          description: Optional expiration timestamp.
+        maxUses:
+          type: integer
+          minimum: 1
+          description: Optional max uses cap.
+        label:
+          type: string
+          maxLength: 60
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional audit reason.
+
+    InvitationCodeJoinNotAllowedReason:
+      type: string
+      enum:
+        - codeRevoked
+        - codeExpired
+        - tournamentLocked
+        - joinClosed
+        - tournamentFull
+        - tournamentArchived
+        - tournamentCancelled
+        - alreadyMember
+
+    InvitationCodeResolution:
+      type: object
+      additionalProperties: false
+      required: [code, codeStatus, joinable, tournament]
+      properties:
+        code:
+          type: string
+        codeStatus:
+          $ref: "#/components/schemas/InvitationCodeStatus"
+        joinable:
+          type: boolean
+          description: Whether the viewer can join right now (subject to authentication).
+        joinNotAllowedReason:
+          $ref: "#/components/schemas/InvitationCodeJoinNotAllowedReason"
+        alreadyMember:
+          type: boolean
+          description: Present when Authorization is provided; indicates viewer is already a member.
+        tournament:
+          $ref: "#/components/schemas/TournamentPreview"
+
+    JoinByInvitationCodeRequest:
+      type: object
+      additionalProperties: false
+      description: Optional join payload (reserved for future policy gates).
+      properties:
+        acceptTournamentRules:
+          type: boolean
+          description: |
+            Optional explicit acceptance flag (some jurisdictions/products like explicit confirmations).
+            Server may ignore if not required.
+        clientContext:
+          type: object
+          additionalProperties: true
+          description: Optional client hints (campaign tracking, deep-link context).
+
+    JoinByInvitationCodeResult:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, joined, membership, tournament]
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        joined:
+          type: boolean
+          description: True if the user joined as a result of this request; false if already a member.
+        membership:
+          $ref: "#/components/schemas/MyMembershipSummary"
+        tournament:
+          $ref: "#/components/schemas/TournamentSummary"

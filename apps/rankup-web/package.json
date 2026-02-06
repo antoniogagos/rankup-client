@@ -1,0 +1,34 @@
+{
+	"name": "@rankup/web",
+	"version": "0.0.0",
+	"private": true,
+	"packageManager": "yarn@4.12.0",
+	"type": "module",
+	"scripts": {
+		"start": "wireit",
+		"start-compile-css": "wireit",
+		"build": "wireit",
+		"clean": "wireit"
+	},
+	"wireit": {
+		"start": {
+			"command": "wds --watch",
+			"service": true
+		},
+		"start-compile-css": {
+			"command": "wds --watch --compile-css",
+			"service": true
+		},
+		"build": {
+			"command": "tsc -b"
+		},
+		"clean": {
+			"command": "tsc -b --clean"
+		}
+	},
+	"devDependencies": {
+		"@web/dev-server": "^0.4.6",
+		"tsx": "4.19.2",
+		"wireit": "^0.14.12"
+	}
+}

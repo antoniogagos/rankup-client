@@ -1,0 +1,1352 @@
+tags:
+    - name: ranked
+      summary: Ranked
+      description: Verified progression (global rating/ladder) driven only by ranked-eligible (verified) participation.
+      kind: nav
+
+    - name: ranked.meta
+      summary: Meta
+      description: Ranked system meta/config surfaces.
+      parent: ranked
+      kind: nav
+
+    - name: ranked.tracks
+      summary: Tracks
+      description: Ranked tracks (ladders) define scope (game mode/sport) and progression rules.
+      parent: ranked
+      kind: nav
+
+    - name: ranked.seasons
+      summary: Seasons
+      description: Ranked seasons per track (e.g., monthly/seasonal ladders).
+      parent: ranked
+      kind: nav
+
+    - name: ranked.leaderboards
+      summary: Leaderboards
+      description: Ranked leaderboards for verified progression.
+      parent: ranked
+      kind: nav
+
+    - name: ranked.me
+      summary: My ranked
+      description: My ranked profile, ratings, settings, and rating history.
+      parent: ranked
+      kind: nav
+
+    - name: ranked.users
+      summary: User ranked
+      description: Public/permissioned ranked profile for users (privacy-aware).
+      parent: ranked
+      kind: nav
+
+paths:
+    /ranked/meta:
+        get:
+            tags: [ranked.meta]
+            operationId: getRankedMeta
+            summary: Get ranked system meta
+            description: |
+                Returns ranked system meta/config for clients:
+                - supported ranked tracks
+                - defaults (e.g., defaultTrackId)
+                - current server time
+
+                This endpoint intentionally supports **multiple tracks** so the product can decide later whether
+                to run a single cross-app ladder or separate ladders per game mode/sport without breaking clients.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedMetaInclude"
+            responses:
+                "200":
+                    description: Ranked meta.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Meta may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedMeta"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /ranked/tracks:
+        get:
+            tags: [ranked.tracks]
+            operationId: listRankedTracks
+            summary: List ranked tracks
+            description: |
+                Lists ranked tracks (ladders). A track defines:
+                - the eligible scope (game mode / sport / region)
+                - rating model
+                - tier system
+                - season cadence
+
+                Tracks are the mechanism that keeps the "single ladder vs per-mode ladder" decision flexible.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedTrackStatus"
+                - name: scopeKind
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedTrackScopeKind"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for directory UI.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedTrackInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedTrackSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Ranked tracks page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Tracks list may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedTrackPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /ranked/tracks/{rankedTrackId}:
+        get:
+            tags: [ranked.tracks]
+            operationId: getRankedTrack
+            summary: Get ranked track
+            description: Returns ranked track details (tiers, rating model, active season).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedTrackInclude"
+            responses:
+                "200":
+                    description: Ranked track.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Track detail may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedTrack"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /ranked/tracks/{rankedTrackId}/seasons:
+        get:
+            tags: [ranked.seasons]
+            operationId: listRankedSeasons
+            summary: List ranked seasons for a track
+            description: |
+                Lists seasons for a given track.
+
+                Seasons allow Clash Royale-like cadence:
+                - monthly ladders
+                - seasonal arcs
+                - archival for history/recap
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonStatus"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedSeasonInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Ranked seasons page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Seasons list may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedSeasonPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /ranked/tracks/{rankedTrackId}/seasons/{rankedSeasonId}:
+        get:
+            tags: [ranked.seasons]
+            operationId: getRankedSeason
+            summary: Get ranked season
+            description: Returns season details for a track.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - $ref: "#/components/parameters/RankedSeasonId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedSeasonInclude"
+            responses:
+                "200":
+                    description: Ranked season.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Season detail may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedSeason"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /ranked/tracks/{rankedTrackId}/leaderboard:
+        get:
+            tags: [ranked.leaderboards]
+            operationId: getRankedLeaderboard
+            summary: Get ranked leaderboard (current season by default)
+            description: |
+                Returns the leaderboard for a ranked track. By default, it uses the track's active season.
+
+                Views:
+                - `top`: paginated list (for thousands+ users)
+                - `aroundMe`: small window around the authenticated user
+                - `friends`: small list of friends (auth required)
+
+                Privacy:
+                - Users who have opted out / set visibility to private are excluded or anonymized per policy.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: seasonId
+                  in: query
+                  required: false
+                  description: Optional explicit season id (alternative to /seasons/{id}/leaderboard).
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonId"
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedLeaderboardView"
+                - name: region
+                  in: query
+                  required: false
+                  description: Optional region key (server-defined) for regional boards.
+                  schema:
+                      type: string
+                      maxLength: 32
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedLeaderboardInclude"
+                - name: cursor
+                  in: query
+                  required: false
+                  description: Cursor for `top` view pagination.
+                  schema:
+                      type: string
+                - name: pageSize
+                  in: query
+                  required: false
+                  description: Page size for `top` view pagination.
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 200
+                      default: 50
+            responses:
+                "200":
+                    description: Ranked leaderboard.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Leaderboards may be cached briefly; viewer personalization may reduce cacheability.
+                            schema:
+                                type: string
+                            example: public, max-age=15
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedLeaderboard"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /ranked/tracks/{rankedTrackId}/seasons/{rankedSeasonId}/leaderboard:
+        get:
+            tags: [ranked.leaderboards]
+            operationId: getRankedSeasonLeaderboard
+            summary: Get ranked leaderboard for a specific season
+            description: Same as /ranked/tracks/{rankedTrackId}/leaderboard but season-scoped.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - $ref: "#/components/parameters/RankedSeasonId"
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedLeaderboardView"
+                - name: region
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      maxLength: 32
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankedLeaderboardInclude"
+                - name: cursor
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: pageSize
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 200
+                      default: 50
+            responses:
+                "200":
+                    description: Ranked leaderboard.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Leaderboards may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=15
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedLeaderboard"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/ranked:
+        get:
+            tags: [ranked.me]
+            operationId: getMyRankedProfile
+            summary: Get my ranked profile (all tracks)
+            description: |
+                Returns the current user's ranked profile across tracks.
+
+                Notes:
+                - Ratings only change from ranked-eligible participation (typically verified tournaments/events).
+                - Server may return `provisional=true` if recalculation is pending due to live results corrections.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (e.g., include tier definitions).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyRankedInclude"
+            responses:
+                "200":
+                    description: My ranked profile.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyRankedProfile"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/ranked/settings:
+        get:
+            tags: [ranked.me]
+            operationId: getMyRankedSettings
+            summary: Get my ranked settings
+            description: |
+                Returns ranked privacy/visibility settings for the current user.
+
+                Policy intent:
+                - Keep progression meaningful and verified.
+                - Still allow user control over public exposure (subject to product rules).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Ranked settings.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedSettings"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+        patch:
+            tags: [ranked.me]
+            operationId: updateMyRankedSettings
+            summary: Update my ranked settings
+            description: |
+                Updates ranked privacy/visibility settings.
+
+                Notes:
+                - Server may restrict certain settings for compliance or competitive integrity.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateRankedSettingsRequest"
+            responses:
+                "200":
+                    description: Updated settings.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedSettings"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/ranked/tracks/{rankedTrackId}:
+        get:
+            tags: [ranked.me]
+            operationId: getMyRankedTrack
+            summary: Get my ranked standing for a track (active season)
+            description: |
+                Returns my current rating + tier progress for the track (active season by default).
+
+                This is the canonical endpoint for rendering the "ELO/progresión" screen.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: seasonId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonId"
+            responses:
+                "200":
+                    description: My ranked track standing.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyRankedTrackStanding"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/ranked/tracks/{rankedTrackId}/history:
+        get:
+            tags: [ranked.me]
+            operationId: listMyRankedHistory
+            summary: List my ranked history events for a track
+            description: |
+                Returns rating delta events that explain "why did my rating change?"
+
+                Sources may include:
+                - tournament completion
+                - matchday resolution
+                - correction/recalculation event (should be rare but must exist)
+
+                This endpoint is critical to prevent "desengaño" when users feel the rating system is opaque.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: seasonId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonId"
+                - name: since
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      format: date-time
+                - name: until
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      format: date-time
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Ranked history page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RankedHistoryPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /users/{userId}/ranked:
+        get:
+            tags: [ranked.users]
+            operationId: getUserRankedProfile
+            summary: Get a user's ranked profile (public/permissioned)
+            description: |
+                Returns the user's ranked profile as allowed by their privacy settings.
+
+                Privacy posture:
+                - If the viewer is not allowed to see ranked info, return 404 (avoid leaking).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/UserRankedInclude"
+            responses:
+                "200":
+                    description: User ranked profile.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PublicRankedProfile"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /users/{userId}/ranked/tracks/{rankedTrackId}:
+        get:
+            tags: [ranked.users]
+            operationId: getUserRankedTrack
+            summary: Get a user's ranked standing for a track (public/permissioned)
+            description: Privacy-aware track-level view.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+                - $ref: "#/components/parameters/RankedTrackId"
+                - name: seasonId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankedSeasonId"
+            responses:
+                "200":
+                    description: User ranked track standing.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PublicRankedTrackStanding"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        RankedTrackId:
+            name: rankedTrackId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/RankedTrackId"
+
+        RankedSeasonId:
+            name: rankedSeasonId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/RankedSeasonId"
+
+    schemas:
+        RankedMetaInclude:
+            type: string
+            enum: [tracks]
+
+        RankedTrackInclude:
+            type: string
+            enum: [tiers, activeSeason, eligibility]
+
+        RankedSeasonInclude:
+            type: string
+            enum: [eligibility]
+
+        RankedLeaderboardInclude:
+            type: string
+            enum: [myEntry, tiers]
+
+        MyRankedInclude:
+            type: string
+            enum: [tiers]
+
+        UserRankedInclude:
+            type: string
+            enum: [tracks]
+
+        RankedTrackId:
+            type: string
+            description: Stable ranked track identifier.
+            example: rtk_scorePrediction_global
+
+        RankedSeasonId:
+            type: string
+            description: Stable ranked season identifier.
+            example: rsn_2026_02
+
+        RankedTrackStatus:
+            type: string
+            enum: [active, disabled, upcoming]
+
+        RankedSeasonStatus:
+            type: string
+            enum: [upcoming, live, ended]
+
+        RankedTrackSort:
+            type: string
+            enum: [featured, nameAsc, popular]
+            default: featured
+
+        RankedSeasonSort:
+            type: string
+            enum: [newest, oldest, startTimeDesc]
+            default: startTimeDesc
+
+        RankedTrackScopeKind:
+            type: string
+            description: |
+                Scope kind for a track. This is what makes the "single vs separate ladder" decision flexible.
+            enum:
+                - allGamesAllSports
+                - gameModeAllSports
+                - gameModeSport
+                - custom
+
+        RankedRatingModel:
+            type: string
+            description: Rating model used for the track.
+            enum: [elo, ladderPoints, mmr]
+
+        RankedVisibility:
+            type: string
+            description: Visibility of ranked participation for a viewer.
+            enum: [public, friends, private]
+
+        RankedEligibilityPolicy:
+            type: object
+            additionalProperties: false
+            description: Defines what participation impacts ranked progression.
+            required: [requiresVerified, requiresEloEnabled]
+            properties:
+                requiresVerified:
+                    type: boolean
+                    description: If true, only verified/curated participation counts.
+                requiresEloEnabled:
+                    type: boolean
+                    description: If true, only tournaments/events with eloEnabled=true count.
+                allowedVerifiedEventIds:
+                    type: array
+                    description: Optional allow-list (when ranked is confined to specific official events).
+                    items:
+                        $ref: "#/components/schemas/VerifiedEventId"
+                notes:
+                    type: string
+                    description: Localized short explanation shown to users.
+
+        RankedTierId:
+            type: string
+            description: Stable tier identifier.
+            example: tier_gold
+
+        RankedTierRewardPreview:
+            type: object
+            additionalProperties: false
+            properties:
+                rewardType:
+                    type: string
+                    description: Visual-only rewards (no "skins" requirement; can still be frames/titles/badges).
+                    enum: [badge, title, profileFrame, emote, recapCard]
+                rewardId:
+                    type: string
+                label:
+                    type: string
+                    description: Localized label.
+                imageUrl:
+                    type: string
+                    format: uri
+
+        RankedTierDefinition:
+            type: object
+            additionalProperties: false
+            required: [tierId, name]
+            properties:
+                tierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                name:
+                    type: string
+                    description: Localized tier name.
+                description:
+                    type: string
+                    description: Localized short description.
+                iconUrl:
+                    type: string
+                    format: uri
+                minRating:
+                    type: integer
+                    description: Inclusive min rating for this tier (rating model dependent).
+                maxRating:
+                    type: integer
+                    description: Exclusive max rating for this tier (rating model dependent).
+                rewards:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedTierRewardPreview"
+
+        RankedTrackScope:
+            type: object
+            additionalProperties: false
+            required: [scopeKind]
+            properties:
+                scopeKind:
+                    $ref: "#/components/schemas/RankedTrackScopeKind"
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                region:
+                    type: string
+                    maxLength: 32
+                    description: Optional region key (server-defined).
+
+        RankedSeasonCadence:
+            type: string
+            enum: [monthly, seasonal, yearly, none]
+
+        RankedTrackSummary:
+            type: object
+            additionalProperties: false
+            required: [rankedTrackId, status, name, ratingModel, scope]
+            properties:
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                status:
+                    $ref: "#/components/schemas/RankedTrackStatus"
+                name:
+                    type: string
+                    description: Localized track name.
+                description:
+                    type: string
+                ratingModel:
+                    $ref: "#/components/schemas/RankedRatingModel"
+                cadence:
+                    $ref: "#/components/schemas/RankedSeasonCadence"
+                scope:
+                    $ref: "#/components/schemas/RankedTrackScope"
+                activeSeasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                featured:
+                    type: boolean
+                heroImageUrl:
+                    type: string
+                    format: uri
+
+        RankedTrack:
+            allOf:
+                - $ref: "#/components/schemas/RankedTrackSummary"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      eligibility:
+                          $ref: "#/components/schemas/RankedEligibilityPolicy"
+                      tiers:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/RankedTierDefinition"
+                      activeSeason:
+                          $ref: "#/components/schemas/RankedSeason"
+
+        RankedTrackPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedTrackSummary"
+                nextCursor:
+                    type: string
+
+        RankedSeasonSummary:
+            type: object
+            additionalProperties: false
+            required: [rankedSeasonId, status, startsAt, endsAt]
+            properties:
+                rankedSeasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                status:
+                    $ref: "#/components/schemas/RankedSeasonStatus"
+                title:
+                    type: string
+                    description: Localized title (e.g., "Febrero 2026").
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                joinOpensAt:
+                    type: string
+                    format: date-time
+                joinClosesAt:
+                    type: string
+                    format: date-time
+
+        RankedSeason:
+            allOf:
+                - $ref: "#/components/schemas/RankedSeasonSummary"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      eligibility:
+                          $ref: "#/components/schemas/RankedEligibilityPolicy"
+                      recapRecapType:
+                          type: string
+                          description: Hint for recap system integration (e.g., use RecapType seasonal/monthly).
+                          examples: [monthly, seasonal]
+
+        RankedSeasonPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedSeasonSummary"
+                nextCursor:
+                    type: string
+
+        RankedMeta:
+            type: object
+            additionalProperties: false
+            required: [serverTime, defaultTrackId]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                defaultTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                tracks:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedTrackSummary"
+                notes:
+                    type: string
+                    description: Localized ranked disclaimer/explanation.
+
+        RankedTierProgress:
+            type: object
+            additionalProperties: false
+            required: [tierId]
+            properties:
+                tierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                rating:
+                    type: integer
+                    description: Current rating value (model dependent).
+                nextTierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                nextTierAtRating:
+                    type: integer
+                progressToNextTier:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+
+        RankedStandingBase:
+            type: object
+            additionalProperties: false
+            required: [rankedTrackId, seasonId, rating, tier]
+            properties:
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                seasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                rating:
+                    type: integer
+                tier:
+                    $ref: "#/components/schemas/RankedTierProgress"
+                provisional:
+                    type: boolean
+                    description: True when rating is subject to recalculation due to pending/corrected results.
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        RankedLeaderboardView:
+            type: string
+            enum: [top, aroundMe, friends]
+            default: top
+
+        RankedLeaderboardEntry:
+            type: object
+            additionalProperties: false
+            required: [position, rating]
+            properties:
+                position:
+                    type: integer
+                    minimum: 1
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                rating:
+                    type: integer
+                tierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                deltaSinceYesterday:
+                    type: integer
+                    description: Optional approximate delta signal (server-defined cadence).
+                percentile:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+
+        RankedLeaderboard:
+            type: object
+            additionalProperties: false
+            required: [serverTime, rankedTrackId, seasonId, view, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                seasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                view:
+                    $ref: "#/components/schemas/RankedLeaderboardView"
+                region:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedLeaderboardEntry"
+                nextCursor:
+                    type: string
+                    description: Present for `top` view.
+                myEntry:
+                    $ref: "#/components/schemas/RankedLeaderboardEntry"
+                tiers:
+                    type: array
+                    description: Optional tier definitions for client rendering (when include=tiers).
+                    items:
+                        $ref: "#/components/schemas/RankedTierDefinition"
+
+        RankedSettings:
+            type: object
+            additionalProperties: false
+            required: [defaultVisibility]
+            properties:
+                defaultVisibility:
+                    $ref: "#/components/schemas/RankedVisibility"
+                perTrackVisibility:
+                    type: object
+                    additionalProperties:
+                        $ref: "#/components/schemas/RankedVisibility"
+                    description: Map of rankedTrackId -> visibility.
+                showOnPublicLeaderboards:
+                    type: boolean
+                    default: true
+                    description: If false, user is excluded from public boards (still sees own progress).
+                allowFriendComparisons:
+                    type: boolean
+                    default: true
+
+        UpdateRankedSettingsRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                defaultVisibility:
+                    $ref: "#/components/schemas/RankedVisibility"
+                perTrackVisibility:
+                    type: object
+                    additionalProperties:
+                        $ref: "#/components/schemas/RankedVisibility"
+                showOnPublicLeaderboards:
+                    type: boolean
+                allowFriendComparisons:
+                    type: boolean
+
+        MyRankedTrackStanding:
+            allOf:
+                - $ref: "#/components/schemas/RankedStandingBase"
+                - type: object
+                  additionalProperties: false
+                  required: [me]
+                  properties:
+                      me:
+                          $ref: "#/components/schemas/MeSummary"
+                      position:
+                          type: integer
+                          minimum: 1
+                          description: My current leaderboard position (if eligible/visible).
+                      percentile:
+                          type: number
+                          format: float
+                          minimum: 0
+                          maximum: 1
+                      lastDelta:
+                          $ref: "#/components/schemas/RankedHistoryEvent"
+
+        PublicRankedTrackStanding:
+            allOf:
+                - $ref: "#/components/schemas/RankedStandingBase"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+                      position:
+                          type: integer
+                          minimum: 1
+                      percentile:
+                          type: number
+                          format: float
+                          minimum: 0
+                          maximum: 1
+
+        MyRankedProfile:
+            type: object
+            additionalProperties: false
+            required: [serverTime, user, tracks]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                tracks:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MyRankedTrackStanding"
+
+        PublicRankedProfile:
+            type: object
+            additionalProperties: false
+            required: [user, tracks]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                tracks:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PublicRankedTrackStanding"
+
+        RankedHistoryEventId:
+            type: string
+            example: rhe_01J8W0K7E2ZQZ6P0M4NQW2Y7DA
+
+        RankedHistorySourceType:
+            type: string
+            enum: [tournament, matchday, correction, seasonReset]
+
+        RankedHistorySource:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+                type:
+                    $ref: "#/components/schemas/RankedHistorySourceType"
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                verifiedEventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                note:
+                    type: string
+                    description: Localized short explanation.
+
+        RankedHistoryEvent:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    eventId,
+                    rankedTrackId,
+                    seasonId,
+                    occurredAt,
+                    deltaRating,
+                    newRating,
+                    source,
+                ]
+            properties:
+                eventId:
+                    $ref: "#/components/schemas/RankedHistoryEventId"
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                seasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                occurredAt:
+                    type: string
+                    format: date-time
+                deltaRating:
+                    type: integer
+                    description: Can be negative.
+                newRating:
+                    type: integer
+                oldTierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                newTierId:
+                    $ref: "#/components/schemas/RankedTierId"
+                source:
+                    $ref: "#/components/schemas/RankedHistorySource"
+                provisional:
+                    type: boolean
+                    description: True when this change may still be recalculated.
+
+        RankedHistoryPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedHistoryEvent"
+                nextCursor:
+                    type: string

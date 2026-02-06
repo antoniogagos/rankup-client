@@ -1,0 +1,734 @@
+tags:
+    - name: trustSafety
+      summary: Trust & Safety
+      description: Reporting, enforcement, safety policies, and user-facing safety surfaces.
+      kind: nav
+
+    - name: trustSafety.reporting
+      summary: Reporting
+      description: User reports for abuse/spam across chat, profiles, tournaments, and content.
+      parent: trustSafety
+      kind: nav
+
+    - name: trustSafety.blocks
+      summary: Blocking
+      description: Safety-related user blocking endpoints (overlaps with Social blocks; here for enforcement context).
+      parent: trustSafety
+      kind: nav
+
+    - name: trustSafety.enforcement
+      summary: Enforcement
+      description: User-facing enforcement status and appeals (no internal staff tools exposed).
+      parent: trustSafety
+      kind: nav
+
+    - name: trustSafety.policies
+      summary: Policies
+      description: Public policy documents and safety configuration.
+      parent: trustSafety
+      kind: nav
+
+paths:
+    /trust/policies:
+        get:
+            tags: [trustSafety.policies]
+            operationId: listTrustPolicies
+            summary: List Trust & Safety policies
+            description: |
+                Lists public policy documents (community guidelines, content policy, privacy/safety notes).
+
+                Cacheable public content.
+            security:
+                - {}
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: include
+                  in: query
+                  required: false
+                  schema:
+                      type: array
+                      style: form
+                      explode: false
+                      items:
+                          $ref: "#/components/schemas/TrustPolicyInclude"
+            responses:
+                "200":
+                    description: Policies list.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Policies can be cached.
+                            schema:
+                                type: string
+                            example: public, max-age=86400
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TrustPolicyList"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /trust/policies/{policyId}:
+        get:
+            tags: [trustSafety.policies]
+            operationId: getTrustPolicy
+            summary: Get policy document
+            description: Returns a specific policy document.
+            security:
+                - {}
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TrustPolicyId"
+            responses:
+                "200":
+                    description: Policy.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Policy can be cached.
+                            schema:
+                                type: string
+                            example: public, max-age=86400
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TrustPolicy"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /me/trust/enforcement:
+        get:
+            tags: [trustSafety.enforcement]
+            operationId: getMyEnforcementStatus
+            summary: Get my enforcement status
+            description: |
+                Returns user-facing enforcement status (mutes, suspensions, restrictions) and basic reasons.
+
+                Goal:
+                - Avoid "desengaño": user should understand why actions are blocked.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Enforcement status.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EnforcementStatus"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+    /me/trust/appeals:
+        get:
+            tags: [trustSafety.enforcement]
+            operationId: listMyAppeals
+            summary: List my appeals
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AppealStatus"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Appeals page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AppealPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+        post:
+            tags: [trustSafety.enforcement]
+            operationId: createMyAppeal
+            summary: Create an appeal
+            description: |
+                Creates an appeal for an enforcement action.
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateAppealRequest"
+            responses:
+                "201":
+                    description: Appeal created.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical URL of the created appeal.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /me/trust/appeals/apl_01J8W0K7E2ZQZ6P0M4NQW2Y7GA
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Appeal"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/trust/appeals/{appealId}:
+        get:
+            tags: [trustSafety.enforcement]
+            operationId: getMyAppeal
+            summary: Get an appeal
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/AppealId"
+            responses:
+                "200":
+                    description: Appeal.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Appeal"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /me/trust/reports:
+        get:
+            tags: [trustSafety.reporting]
+            operationId: listMyReports
+            summary: List my submitted reports
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/ReportStatus"
+                - name: type
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/ReportType"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Reports page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ReportPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+        post:
+            tags: [trustSafety.reporting]
+            operationId: createReport
+            summary: Report a user or content
+            description: |
+                Submits a report for abusive/spam content.
+
+                Coverage:
+                - chat message
+                - user profile
+                - tournament (name/description)
+                - creator page (if applicable)
+                - other content types
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateReportRequest"
+            responses:
+                "201":
+                    description: Report created.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical URL of the created report.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /me/trust/reports/rpt_01J8W0K7E2ZQZ6P0M4NQW2Y7HA
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Report"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/trust/reports/{reportId}:
+        get:
+            tags: [trustSafety.reporting]
+            operationId: getMyReport
+            summary: Get a report
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/ReportId"
+            responses:
+                "200":
+                    description: Report.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Report"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /me/trust/blocks:
+        get:
+            tags: [trustSafety.blocks]
+            operationId: listMyTrustBlocks
+            summary: List my blocked users (trust view)
+            description: |
+                Mirrors Social blocking but included here for Trust & Safety completeness.
+
+                If you already have /me/blocks in Social:
+                - Keep this endpoint as an alias or omit it.
+                - Prefer a single canonical endpoint to avoid duplication.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Blocks page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TrustBlockPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+components:
+    parameters:
+        TrustPolicyId:
+            name: policyId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/TrustPolicyId"
+
+        ReportId:
+            name: reportId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/ReportId"
+
+        AppealId:
+            name: appealId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/AppealId"
+
+    schemas:
+        TrustPolicyId:
+            type: string
+            example: pol_community_guidelines
+
+        TrustPolicyInclude:
+            type: string
+            enum: [content]
+            description: Include full content in list (default false).
+
+        TrustPolicy:
+            type: object
+            additionalProperties: false
+            required: [policyId, title, version, updatedAt, url]
+            properties:
+                policyId:
+                    $ref: "#/components/schemas/TrustPolicyId"
+                title:
+                    type: string
+                    description: Localized title.
+                version:
+                    type: string
+                    description: Policy version string.
+                    example: "2026-02-01"
+                updatedAt:
+                    type: string
+                    format: date-time
+                url:
+                    type: string
+                    format: uri
+                    description: Canonical URL to the policy (for legal pages).
+                content:
+                    type: string
+                    description: Localized full policy content (only if include=content).
+                summary:
+                    type: string
+                    description: Localized short summary.
+
+        TrustPolicyList:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/TrustPolicy"
+
+        EnforcementActionType:
+            type: string
+            enum:
+                - chatMuteGlobal
+                - chatMuteTournament
+                - contentRestriction
+                - profileRestriction
+                - rankedRestriction
+                - suspension
+                - ban
+
+        EnforcementScope:
+            type: object
+            additionalProperties: false
+            description: Scope for an enforcement action.
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                chatOnly:
+                    type: boolean
+                featureFlags:
+                    type: array
+                    items:
+                        type: string
+                        description: Feature/permission ids affected.
+
+        EnforcementAction:
+            type: object
+            additionalProperties: false
+            required: [actionId, type, createdAt]
+            properties:
+                actionId:
+                    type: string
+                    example: enf_01J8W0K7E2ZQZ6P0M4NQW2Y7IA
+                type:
+                    $ref: "#/components/schemas/EnforcementActionType"
+                scope:
+                    $ref: "#/components/schemas/EnforcementScope"
+                reasonCode:
+                    type: string
+                    description: Stable reason id (non-sensitive).
+                    examples:
+                        [
+                            spam,
+                            harassment,
+                            hateSpeech,
+                            profanity,
+                            underage,
+                            fraud,
+                            other,
+                        ]
+                reasonText:
+                    type: string
+                    description: Localized user-facing explanation.
+                createdAt:
+                    type: string
+                    format: date-time
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                appealable:
+                    type: boolean
+                policyId:
+                    $ref: "#/components/schemas/TrustPolicyId"
+
+        EnforcementStatus:
+            type: object
+            additionalProperties: false
+            required: [serverTime, isRestricted, actions]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                isRestricted:
+                    type: boolean
+                    description: True if any active enforcement action applies.
+                actions:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/EnforcementAction"
+
+        AppealId:
+            type: string
+            example: apl_01J8W0K7E2ZQZ6P0M4NQW2Y7GA
+
+        AppealStatus:
+            type: string
+            enum: [submitted, underReview, resolved, rejected, accepted]
+
+        CreateAppealRequest:
+            type: object
+            additionalProperties: false
+            required: [actionId, message]
+            properties:
+                actionId:
+                    type: string
+                    description: Enforcement action id being appealed.
+                message:
+                    type: string
+                    minLength: 10
+                    maxLength: 2000
+                attachments:
+                    type: array
+                    description: Optional evidence references (future; could be file IDs).
+                    items:
+                        type: string
+
+        Appeal:
+            type: object
+            additionalProperties: false
+            required: [appealId, actionId, status, createdAt]
+            properties:
+                appealId:
+                    $ref: "#/components/schemas/AppealId"
+                actionId:
+                    type: string
+                status:
+                    $ref: "#/components/schemas/AppealStatus"
+                message:
+                    type: string
+                responseMessage:
+                    type: string
+                    description: Localized response (if resolved).
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AppealPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Appeal"
+                nextCursor:
+                    type: string
+
+        ReportId:
+            type: string
+            example: rpt_01J8W0K7E2ZQZ6P0M4NQW2Y7HA
+
+        ReportType:
+            type: string
+            enum: [chatMessage, userProfile, tournament, creator, other]
+
+        ReportReason:
+            type: string
+            enum:
+                - spam
+                - harassment
+                - hate
+                - violence
+                - sexualContent
+                - childSafety
+                - selfHarm
+                - impersonation
+                - other
+
+        ReportStatus:
+            type: string
+            enum: [submitted, received, underReview, resolved]
+
+        ReportTarget:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+                type:
+                    $ref: "#/components/schemas/ReportType"
+                # Targets are optional per type; server validates combinations.
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                messageId:
+                    $ref: "#/components/schemas/ChatMessageId"
+                userId:
+                    type: string
+                creatorId:
+                    $ref: "#/components/schemas/CreatorId"
+                url:
+                    type: string
+                    format: uri
+                    description: Optional deep link / reference.
+
+        CreateReportRequest:
+            type: object
+            additionalProperties: false
+            required: [target, reason]
+            properties:
+                target:
+                    $ref: "#/components/schemas/ReportTarget"
+                reason:
+                    $ref: "#/components/schemas/ReportReason"
+                comment:
+                    type: string
+                    maxLength: 500
+                context:
+                    type: object
+                    additionalProperties: true
+
+        Report:
+            type: object
+            additionalProperties: false
+            required: [reportId, target, reason, status, createdAt]
+            properties:
+                reportId:
+                    $ref: "#/components/schemas/ReportId"
+                target:
+                    $ref: "#/components/schemas/ReportTarget"
+                reason:
+                    $ref: "#/components/schemas/ReportReason"
+                comment:
+                    type: string
+                status:
+                    $ref: "#/components/schemas/ReportStatus"
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        ReportPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Report"
+                nextCursor:
+                    type: string
+
+        TrustBlockEntry:
+            type: object
+            additionalProperties: false
+            required: [user, blockedAt]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                blockedAt:
+                    type: string
+                    format: date-time
+                reason:
+                    type: string
+                    description: Optional user-provided note.
+
+        TrustBlockPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/TrustBlockEntry"
+                nextCursor:
+                    type: string

@@ -1,0 +1,837 @@
+tags:
+    - name: creators
+      summary: Creadores
+      description: Creator discovery and catalog (influencers/brands/media) powering curated experiences.
+      kind: nav
+
+    - name: creators.directory
+      summary: Directorio
+      description: Creator discovery surfaces (curated + searchable).
+      parent: creators
+      kind: nav
+
+    - name: creators.catalog
+      summary: Catálogo
+      description: Creator catalog of events/tournaments/collections (pre-join safe).
+      parent: creators
+      kind: nav
+
+paths:
+    /creators:
+        get:
+            tags: [creators.directory]
+            operationId: listCreators
+            summary: List creators
+            description: |
+                Lists creators for discovery.
+
+                Design intent:
+                - Discovery must be attractive, not "spam search".
+                - Defaults should bias towards curated/featured creators.
+                - Search is optional and should be rate-limited.
+
+                Security:
+                - Public endpoint (optional auth). With auth, the API MAY return viewer-specific hints
+                  such as `isFollowedByMe` (if provided in include).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  description: Optional search (handle/display name). Server-controlled matching.
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 64
+                - name: featuredOnly
+                  in: query
+                  required: false
+                  description: If true, returns only featured creators (recommended default for hub-like screens).
+                  schema:
+                      type: boolean
+                      default: false
+                - name: type
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorType"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: locale
+                  in: query
+                  required: false
+                  description: Optional locale preference for creators that publish locale-targeted content.
+                  schema:
+                      type: string
+                      maxLength: 16
+                  example: es-ES
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for UI.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withStats:
+                          value: [stats]
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Creators page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Directory pages may be cached briefly (public content).
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /creators/{creatorId}:
+        get:
+            tags: [creators.directory]
+            operationId: getCreator
+            summary: Get creator profile
+            description: |
+                Returns a creator profile (branding + links + catalog summary).
+
+                Pre-join safe:
+                - This endpoint MUST NOT expose tournament gameplay data.
+                - It may include safe previews and join metadata (e.g., join window).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorInclude"
+                  examples:
+                      default:
+                          value: [stats, links]
+                      withCatalog:
+                          value: [stats, links, catalogSummary]
+            responses:
+                "200":
+                    description: Creator profile.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Creator profiles may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorProfile"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /creators/{creatorId}/hub:
+        get:
+            tags: [creators.catalog]
+            operationId: getCreatorHub
+            summary: Get creator hub surfaces
+            description: |
+                Returns curated surfaces for a creator:
+                - featured events/tournaments
+                - upcoming drops
+                - recommended entries
+
+                Intended UI:
+                - A creator "home page" that feels like a brand experience (not a raw list).
+
+                Pre-join safe:
+                - Only previews (no rankings/submissions/chat).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorHubInclude"
+                  examples:
+                      default:
+                          value: [sections]
+                      withPreviews:
+                          value: [sections, previews]
+            responses:
+                "200":
+                    description: Creator hub.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Hub may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorHub"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /creators/{creatorId}/events:
+        get:
+            tags: [creators.catalog]
+            operationId: listCreatorEvents
+            summary: List verified events for a creator
+            description: |
+                Lists verified events curated/hosted by this creator.
+
+                Pre-join safe:
+                - Event objects are safe.
+                - Do not include tournament gameplay.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventStatus"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedEventInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorCatalogSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Creator events page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Creator event lists may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorEventPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /creators/{creatorId}/tournaments:
+        get:
+            tags: [creators.catalog]
+            operationId: listCreatorTournaments
+            summary: List tournaments for a creator (pre-join safe)
+            description: |
+                Lists tournaments associated with this creator.
+
+                Recommended default:
+                - Only verified/curated tournaments should be exposed here (anti-spam).
+                - If non-verified tournaments are ever included (future "communities"),
+                  they MUST be safe previews and subject to strong policy.
+
+                Pre-join safe:
+                - No rankings/submissions/chat.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedTournamentStatus"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for previews.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorTournamentInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorCatalogSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Creator tournaments page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Creator tournament lists may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorTournamentPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /creators/{creatorId}/collections:
+        get:
+            tags: [creators.catalog]
+            operationId: listCreatorCollections
+            summary: List creator collections (playlists)
+            description: |
+                Returns curated collections to support a richer catalog UX than a plain list.
+
+                Examples:
+                - "Liga del finde"
+                - "Predicciones Champions"
+                - "Eventos oficiales"
+
+                Pre-join safe:
+                - Collections only reference previews.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorCollectionInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorCollectionSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Creator collections page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Collections may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorCollectionPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /creators/{creatorId}/collections/{collectionId}:
+        get:
+            tags: [creators.catalog]
+            operationId: getCreatorCollection
+            summary: Get a creator collection
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/CreatorId"
+                - $ref: "#/components/parameters/CreatorCollectionId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/CreatorCollectionInclude"
+            responses:
+                "200":
+                    description: Creator collection.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Collection may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorCollection"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        CreatorId:
+            name: creatorId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/CreatorId"
+
+        CreatorCollectionId:
+            name: collectionId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/CreatorCollectionId"
+
+    schemas:
+        CreatorId:
+            type: string
+            description: Stable creator identifier.
+            example: cr_01J8W0K7E2ZQZ6P0M4NQW2Y7CA
+
+        CreatorHandle:
+            type: string
+            description: Unique, URL-safe creator handle.
+            pattern: "^[a-z0-9_\\.]{3,32}$"
+            example: sky_sports_es
+
+        CreatorType:
+            type: string
+            description: Creator category (informational; used for filtering).
+            enum: [influencer, brand, media, club, league, community]
+
+        CreatorInclude:
+            type: string
+            enum: [stats, links, catalogSummary, branding]
+
+        CreatorSort:
+            type: string
+            enum: [featured, popular, newest, nameAsc]
+            default: featured
+
+        CreatorCatalogSort:
+            type: string
+            enum: [featured, newest, startTimeAsc, startTimeDesc, popular]
+            default: featured
+
+        CreatorTournamentInclude:
+            type: string
+            enum: [branding, eligibility, joinInfo]
+
+        CreatorHubInclude:
+            type: string
+            enum: [sections, previews]
+
+        CreatorLinkType:
+            type: string
+            enum: [youtube, twitch, tiktok, instagram, x, discord, website]
+
+        CreatorLink:
+            type: object
+            additionalProperties: false
+            required: [type, url]
+            properties:
+                type:
+                    $ref: "#/components/schemas/CreatorLinkType"
+                url:
+                    type: string
+                    format: uri
+                label:
+                    type: string
+                    description: Optional localized label.
+
+        CreatorStats:
+            type: object
+            additionalProperties: false
+            description: Lightweight public stats for discovery cards.
+            properties:
+                followerCount:
+                    type: integer
+                    minimum: 0
+                activeEventsCount:
+                    type: integer
+                    minimum: 0
+                activeTournamentsCount:
+                    type: integer
+                    minimum: 0
+                joinedLast24h:
+                    type: integer
+                    minimum: 0
+                    description: Optional popularity signal (approximate).
+
+        CreatorBranding:
+            type: object
+            additionalProperties: false
+            description: Brand assets for creator identity in-app.
+            properties:
+                displayName:
+                    type: string
+                avatarUrl:
+                    type: string
+                    format: uri
+                heroImageUrl:
+                    type: string
+                    format: uri
+                themeKey:
+                    type: string
+                    description: Optional theme identifier for client styling.
+                accentColor:
+                    type: string
+                    description: Optional hex color (client may ignore).
+                    example: "#FFCC00"
+
+        CreatorSummary:
+            type: object
+            additionalProperties: false
+            required: [creatorId, handle, branding, verified]
+            properties:
+                creatorId:
+                    $ref: "#/components/schemas/CreatorId"
+                handle:
+                    $ref: "#/components/schemas/CreatorHandle"
+                type:
+                    $ref: "#/components/schemas/CreatorType"
+                verified:
+                    type: boolean
+                    description: True when curated/verified by Rankup.
+                branding:
+                    $ref: "#/components/schemas/CreatorBranding"
+                shortDescription:
+                    type: string
+                    maxLength: 160
+                supportedSportIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/SportId"
+                supportedGameModeIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/GameModeId"
+                stats:
+                    $ref: "#/components/schemas/CreatorStats"
+
+        CreatorCatalogSummary:
+            type: object
+            additionalProperties: false
+            properties:
+                featuredEvent:
+                    $ref: "#/components/schemas/VerifiedEventSummary"
+                featuredTournament:
+                    $ref: "#/components/schemas/VerifiedTournamentPreview"
+                upcoming:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorCatalogItem"
+
+        CreatorProfile:
+            allOf:
+                - $ref: "#/components/schemas/CreatorSummary"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      longDescription:
+                          type: string
+                          maxLength: 5000
+                      links:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/CreatorLink"
+                      catalogSummary:
+                          $ref: "#/components/schemas/CreatorCatalogSummary"
+                      # If creators are represented by a user account for follow/chat mentions, expose it.
+                      # Clients can reuse /users/{userId}/followers/me for following.
+                      primaryUserId:
+                          type: string
+                          description: Optional userId representing the creator account.
+
+        CreatorPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorSummary"
+                nextCursor:
+                    type: string
+
+        CreatorCatalogItemType:
+            type: string
+            enum: [event, tournament]
+
+        CreatorCatalogItem:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+                type:
+                    $ref: "#/components/schemas/CreatorCatalogItemType"
+                event:
+                    $ref: "#/components/schemas/VerifiedEventSummary"
+                tournament:
+                    $ref: "#/components/schemas/VerifiedTournamentPreview"
+
+        CreatorHubSectionType:
+            type: string
+            enum:
+                - hero
+                - featured
+                - recommended
+                - upcoming
+                - collections
+
+        CreatorHubSection:
+            type: object
+            additionalProperties: false
+            required: [sectionId, type, title]
+            properties:
+                sectionId:
+                    type: string
+                    example: sec_featured
+                type:
+                    $ref: "#/components/schemas/CreatorHubSectionType"
+                title:
+                    type: string
+                subtitle:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorCatalogItem"
+                collections:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorCollectionSummary"
+
+        CreatorHub:
+            type: object
+            additionalProperties: false
+            required: [creator, serverTime, sections]
+            properties:
+                creator:
+                    $ref: "#/components/schemas/CreatorSummary"
+                serverTime:
+                    type: string
+                    format: date-time
+                sections:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorHubSection"
+
+        CreatorEventSummary:
+            type: object
+            additionalProperties: false
+            required: [event]
+            properties:
+                event:
+                    $ref: "#/components/schemas/VerifiedEventSummary"
+
+        CreatorEventPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedEventSummary"
+                nextCursor:
+                    type: string
+
+        CreatorTournamentPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedTournamentPreview"
+                nextCursor:
+                    type: string
+
+        CreatorCollectionId:
+            type: string
+            example: col_01J8W0K7E2ZQZ6P0M4NQW2Y7CB
+
+        CreatorCollectionInclude:
+            type: string
+            enum: [items]
+
+        CreatorCollectionSort:
+            type: string
+            enum: [featured, newest, nameAsc]
+            default: featured
+
+        CreatorCollectionSummary:
+            type: object
+            additionalProperties: false
+            required: [collectionId, title]
+            properties:
+                collectionId:
+                    $ref: "#/components/schemas/CreatorCollectionId"
+                title:
+                    type: string
+                    description: Localized title.
+                subtitle:
+                    type: string
+                heroImageUrl:
+                    type: string
+                    format: uri
+                itemCount:
+                    type: integer
+                    minimum: 0
+
+        CreatorCollection:
+            allOf:
+                - $ref: "#/components/schemas/CreatorCollectionSummary"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      description:
+                          type: string
+                      items:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/CreatorCatalogItem"
+
+        CreatorCollectionPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/CreatorCollectionSummary"
+                nextCursor:
+                    type: string

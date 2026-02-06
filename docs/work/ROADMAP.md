@@ -1,0 +1,11 @@
+# Work roadmap
+
+| Epic | Title                                        | Status                               |
+| ---- | -------------------------------------------- | ------------------------------------ |
+| 001  | Work tracking bootstrap                      | Done                                 |
+| 002  | Service layering + DI skeleton               | Done                                 |
+| 003  | Game mode + sport extensibility              | Blocked (awaiting API specification) |
+| 004  | Greenfield + canonical IDs + package imports | Done                                 |
+| 005  | TS-only compliance + toolchain unification   | Done                                 |
+| 006  | HTTP mock server (contract-first, stateful)  | Done                                 |
+| 007  | Workspace archetype alignment (Hadron/VS Code)| Done                                 |

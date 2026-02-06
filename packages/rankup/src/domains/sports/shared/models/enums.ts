@@ -1,0 +1,9 @@
+export type SportStatus = 'active' | 'planned' | 'deprecated';
+export type CompetitionType = 'domestic' | 'cup' | 'international';
+export type CompetitionStatus = 'upcoming' | 'live' | 'finished';
+export type SeasonStatus = 'upcoming' | 'live' | 'finished';
+export type MatchdayStatus = 'upcoming' | 'live' | 'finished';
+export type MatchStatus = string;
+export type MatchInclude = 'eventCounters';
+export type MatchEventType = string;
+export type MatchFinalOutcomeType = 'regular' | 'extra_time' | 'penalty_shootout';

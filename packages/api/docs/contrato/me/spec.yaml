@@ -1,0 +1,1009 @@
+tags:
+  - name: users
+    summary: Users
+    description: Profile, preferences, privacy and user settings.
+    kind: nav
+
+  - name: users.me
+    summary: Current user
+    description: Operations scoped to the authenticated user.
+    parent: users
+    kind: nav
+
+  - name: users.me.preferences
+    summary: Preferences
+    description: Locale, country, interests and other user preferences.
+    parent: users.me
+    kind: nav
+
+  - name: users.me.privacy
+    summary: Privacy
+    description: Profile visibility and social/privacy controls.
+    parent: users.me
+    kind: nav
+
+  - name: users.me.notifications
+    summary: Notification preferences
+    description: Notification channels, categories and quiet hours.
+    parent: users.me
+    kind: nav
+
+  - name: users.me.devices
+    summary: Devices
+    description: Registered devices for push notifications.
+    parent: users.me
+    kind: nav
+
+paths:
+  /me:
+    get:
+      tags: [users.me]
+      operationId: getMe
+      summary: Get current user account
+      description: |
+        Returns the authenticated user's account/profile information.
+
+        This endpoint is **not cacheable** (personal data) and returns an **ETag**
+        that MUST be used with `If-Match` on update endpoints to prevent lost updates.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          description: Current user account.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [users.me]
+      operationId: updateMe
+      summary: Update current user profile
+      description: |
+        Updates mutable profile fields (e.g., username, picture).
+
+        Concurrency:
+        - Clients MUST send `If-Match` with the ETag from the last `GET /me`.
+        - Server returns 412 if the ETag does not match.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMeRequest"
+      responses:
+        "200":
+          description: Updated user account.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    delete:
+      tags: [users.me]
+      operationId: deleteMe
+      summary: Request account deletion
+      description: |
+        Requests deletion of the current account.
+
+        High-safety behavior:
+        - May schedule deletion with a grace window (recommended).
+        - May require step-up verification (password re-entry or provider token) depending on risk policy.
+        - Must be idempotent when `X-Idempotency-Key` is provided.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteMeRequest"
+      responses:
+        "202":
+          description: Account deletion scheduled.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletion"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/password:
+    post:
+      tags: [users.me]
+      operationId: changeMyPassword
+      summary: Change password
+      description: |
+        Changes the current user's password.
+
+        Notes:
+        - If the account has no password (OAuth-only), the server MAY reject with 409
+          or MAY allow setting a password subject to policy (step-up).
+        - Always validate password policy server-side.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "204":
+          description: Password changed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/preferences:
+    get:
+      tags: [users.me.preferences]
+      operationId: getMyPreferences
+      summary: Get preferences
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          description: Current preferences.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [users.me.preferences]
+      operationId: updateMyPreferences
+      summary: Update preferences
+      description: |
+        Partially updates the current user's preferences.
+
+        Concurrency: requires If-Match.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserPreferencesRequest"
+      responses:
+        "200":
+          description: Updated preferences.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/privacy:
+    get:
+      tags: [users.me.privacy]
+      operationId: getMyPrivacy
+      summary: Get privacy settings
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          description: Current privacy settings.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacySettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [users.me.privacy]
+      operationId: updateMyPrivacy
+      summary: Update privacy settings
+      description: Concurrency requires If-Match.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacySettingsRequest"
+      responses:
+        "200":
+          description: Updated privacy settings.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacySettings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/notification-preferences:
+    get:
+      tags: [users.me.notifications]
+      operationId: getMyNotificationPreferences
+      summary: Get notification preferences
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          description: Current notification preferences.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [users.me.notifications]
+      operationId: updateMyNotificationPreferences
+      summary: Update notification preferences
+      description: Concurrency requires If-Match.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationPreferencesRequest"
+      responses:
+        "200":
+          description: Updated notification preferences.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/devices:
+    get:
+      tags: [users.me.devices]
+      operationId: listMyDevices
+      summary: List registered devices
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Registered devices.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [users.me.devices]
+      operationId: registerMyDevice
+      summary: Register or update a device for push notifications
+      description: |
+        Registers a device (or updates its push token/metadata).
+
+        Guidance:
+        - Mobile push tokens can be re-assigned when users log out/in.
+          Server SHOULD ensure a token is never associated to two users simultaneously.
+        - Provide X-Idempotency-Key for safe retries.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertDeviceRequest"
+      responses:
+        "200":
+          description: Device updated.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "201":
+          description: Device created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /me/devices/{deviceId}:
+    delete:
+      tags: [users.me.devices]
+      operationId: deleteMyDevice
+      summary: Delete a device registration
+      description: |
+        Removes a device registration (idempotent).
+
+        Returns 204 even if the deviceId does not exist, to allow safe cleanup.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      responses:
+        "204":
+          description: Device deleted (or not found).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: |
+        Optimistic concurrency control. Must be the ETag value returned by the latest GET of the resource.
+      schema:
+        type: string
+      example: '"me_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"'
+
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: dev_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+  responses:
+    PreconditionFailed:
+      description: Precondition failed (ETag mismatch).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            preconditionFailed:
+              value:
+                type: "https://errors.rankup.dev/precondition/failed"
+                title: "Precondition Failed"
+                status: 412
+                detail: "ETag does not match the current resource."
+                instance: "urn:problem:5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+
+  schemas:
+    Me:
+      type: object
+      additionalProperties: false
+      required: [userId, username, email, emailVerified, createdAt]
+      properties:
+        userId:
+          type: string
+          description: Stable user identifier.
+          example: usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1
+        username:
+          $ref: "#/components/schemas/Username"
+        pictureUrl:
+          type: string
+          format: uri
+          description: Optional avatar URL.
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateMeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        username:
+          $ref: "#/components/schemas/Username"
+        pictureUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+          maxLength: 280
+
+    ChangePasswordRequest:
+      type: object
+      additionalProperties: false
+      required: [newPassword]
+      properties:
+        currentPassword:
+          $ref: "#/components/schemas/Password"
+        newPassword:
+          $ref: "#/components/schemas/Password"
+
+    DeleteMeRequest:
+      type: object
+      additionalProperties: false
+      description: |
+        Optional step-up payload. Server policy decides whether it is required.
+      oneOf:
+        - $ref: "#/components/schemas/DeleteMePasswordChallenge"
+        - $ref: "#/components/schemas/DeleteMeOAuthChallenge"
+      discriminator:
+        propertyName: method
+        mapping:
+          password: "#/components/schemas/DeleteMePasswordChallenge"
+          oauth: "#/components/schemas/DeleteMeOAuthChallenge"
+
+    DeleteMePasswordChallenge:
+      type: object
+      additionalProperties: false
+      required: [method, password]
+      properties:
+        method:
+          type: string
+          enum: [password]
+        password:
+          $ref: "#/components/schemas/Password"
+
+    DeleteMeOAuthChallenge:
+      type: object
+      additionalProperties: false
+      required: [method, provider, idToken]
+      properties:
+        method:
+          type: string
+          enum: [oauth]
+        provider:
+          $ref: "#/components/schemas/OAuthProvider"
+        idToken:
+          type: string
+          description: Provider id_token acquired via native SDK for step-up.
+
+    AccountDeletionStatus:
+      type: string
+      enum: [scheduled, completed, cancelled]
+
+    AccountDeletion:
+      type: object
+      additionalProperties: false
+      required: [deletionId, status, requestedAt, scheduledFor]
+      properties:
+        deletionId:
+          type: string
+          example: del_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        status:
+          $ref: "#/components/schemas/AccountDeletionStatus"
+        requestedAt:
+          type: string
+          format: date-time
+        scheduledFor:
+          type: string
+          format: date-time
+          description: When deletion will be executed (may be immediate).
+
+    UserPreferences:
+      type: object
+      additionalProperties: false
+      required: [locale, interests]
+      properties:
+        locale:
+          type: string
+          description: Preferred locale (BCP 47).
+          example: es
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2.
+          example: ES
+        timezone:
+          type: string
+          description: IANA timezone (optional).
+          example: Europe/Madrid
+        interests:
+          type: object
+          additionalProperties: false
+          required: [sportIds]
+          properties:
+            sportIds:
+              type: array
+              items:
+                type: string
+              description: Preferred sports.
+              example: [football]
+        analyticsOptIn:
+          type: boolean
+          description: Optional consent flag (where legally required).
+
+    UpdateUserPreferencesRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        locale:
+          type: string
+        country:
+          type: string
+        timezone:
+          type: string
+        interests:
+          type: object
+          additionalProperties: false
+          properties:
+            sportIds:
+              type: array
+              items:
+                type: string
+        analyticsOptIn:
+          type: boolean
+
+    ProfileVisibility:
+      type: string
+      enum: [public, friends, private]
+
+    HistoryVisibility:
+      type: string
+      enum: [verifiedOnlyPublic, friends, private]
+
+    PrivacySettings:
+      type: object
+      additionalProperties: false
+      required: [profileVisibility, historyVisibility, allowFriendRequests, allowFollows]
+      properties:
+        profileVisibility:
+          $ref: "#/components/schemas/ProfileVisibility"
+        historyVisibility:
+          $ref: "#/components/schemas/HistoryVisibility"
+        allowFriendRequests:
+          type: boolean
+        allowFollows:
+          type: boolean
+
+    UpdatePrivacySettingsRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        profileVisibility:
+          $ref: "#/components/schemas/ProfileVisibility"
+        historyVisibility:
+          $ref: "#/components/schemas/HistoryVisibility"
+        allowFriendRequests:
+          type: boolean
+        allowFollows:
+          type: boolean
+
+    QuietHours:
+      type: object
+      additionalProperties: false
+      required: [enabled, startLocalTime, endLocalTime]
+      properties:
+        enabled:
+          type: boolean
+        startLocalTime:
+          type: string
+          description: HH:MM (local time).
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          example: "23:00"
+        endLocalTime:
+          type: string
+          description: HH:MM (local time).
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          example: "08:00"
+
+    NotificationPreferences:
+      type: object
+      additionalProperties: false
+      required: [pushEnabled, inAppEnabled, categories, quietHours]
+      properties:
+        pushEnabled:
+          type: boolean
+        inAppEnabled:
+          type: boolean
+        categories:
+          type: object
+          additionalProperties: false
+          required: [matchEvents, rankingChanges, chatMessages, invites, officialEvents]
+          properties:
+            matchEvents:
+              type: boolean
+              description: Goals, kickoff, full-time (where applicable).
+            rankingChanges:
+              type: boolean
+              description: Position/points changes in tournaments.
+            chatMessages:
+              type: boolean
+              description: Tournament chat messages/mentions (policy may differ).
+            invites:
+              type: boolean
+              description: Tournament invitations/friend requests (if applicable).
+            officialEvents:
+              type: boolean
+              description: Official/verified event announcements.
+            marketing:
+              type: boolean
+              description: Optional marketing notifications (default false; consent-based).
+        quietHours:
+          $ref: "#/components/schemas/QuietHours"
+
+    UpdateNotificationPreferencesRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        pushEnabled:
+          type: boolean
+        inAppEnabled:
+          type: boolean
+        categories:
+          type: object
+          additionalProperties: false
+          properties:
+            matchEvents:
+              type: boolean
+            rankingChanges:
+              type: boolean
+            chatMessages:
+              type: boolean
+            invites:
+              type: boolean
+            officialEvents:
+              type: boolean
+            marketing:
+              type: boolean
+        quietHours:
+          $ref: "#/components/schemas/QuietHours"
+
+    DevicePlatform:
+      type: string
+      enum: [ios, android, web]
+
+    PushProvider:
+      type: string
+      enum: [apns, fcm, webpush]
+
+    WebPushSubscription:
+      type: object
+      additionalProperties: false
+      required: [endpoint, keys]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+        keys:
+          type: object
+          additionalProperties: false
+          required: [p256dh, auth]
+          properties:
+            p256dh:
+              type: string
+            auth:
+              type: string
+
+    UpsertDeviceRequest:
+      type: object
+      additionalProperties: false
+      required: [platform, provider]
+      properties:
+        platform:
+          $ref: "#/components/schemas/DevicePlatform"
+        provider:
+          $ref: "#/components/schemas/PushProvider"
+        pushToken:
+          type: string
+          description: APNs/FCM token (required for ios/android).
+        webPushSubscription:
+          $ref: "#/components/schemas/WebPushSubscription"
+        appVersion:
+          type: string
+          description: Client app version.
+          example: "1.2.0"
+        deviceName:
+          type: string
+          maxLength: 128
+          description: Optional device label.
+        locale:
+          type: string
+          description: Optional locale hint.
+
+    Device:
+      type: object
+      additionalProperties: false
+      required: [deviceId, platform, provider, createdAt]
+      properties:
+        deviceId:
+          type: string
+          example: dev_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        platform:
+          $ref: "#/components/schemas/DevicePlatform"
+        provider:
+          $ref: "#/components/schemas/PushProvider"
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        appVersion:
+          type: string
+        deviceName:
+          type: string
+        tokenLast4:
+          type: string
+          description: Optional hint for debugging (never return full token).
+          example: "9F3A"
+
+    DeviceList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Device"

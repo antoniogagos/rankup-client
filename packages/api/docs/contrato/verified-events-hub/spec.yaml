@@ -1,0 +1,712 @@
+tags:
+    - name: verified
+      summary: Verified hub
+      description: Curated hub for verified/official events and tournaments (anti-spam discovery).
+      kind: nav
+
+    - name: verified.hub
+      summary: Hub
+      description: Curated discovery surfaces (no global free search by default).
+      parent: verified
+      kind: nav
+
+    - name: verified.events
+      summary: Events
+      description: Verified events (time-boxed challenges, seasons, leagues, promotions).
+      parent: verified
+      kind: nav
+
+    - name: verified.tournaments
+      summary: Tournaments
+      description: Verified tournaments listing/preview (join requires membership; no spectators).
+      parent: verified
+      kind: nav
+
+paths:
+    /verified/hub:
+        get:
+            tags: [verified.hub]
+            operationId: getVerifiedHub
+            summary: Get verified hub surfaces
+            description: |
+                Returns curated "home" surfaces for verified content.
+
+                Product intent:
+                - Discovery without spam: users don't browse strangers; they browse curated events.
+                - Ranking/progression validity: verified events are eligible for global progression/ELO.
+
+                Typical sections:
+                - hero event(s)
+                - recommended for you (based on sports/game modes)
+                - trending verified tournaments (by join velocity)
+                - seasonal calendars
+
+                Cacheability:
+                - This can be cached briefly (per locale), but personalization may vary.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for richer hub rendering.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedHubInclude"
+                  examples:
+                      default:
+                          value: [sections]
+                      withPreview:
+                          value: [sections, previews]
+            responses:
+                "200":
+                    description: Verified hub.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Hub may be cached briefly; server decides.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedHub"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /verified/events:
+        get:
+            tags: [verified.events]
+            operationId: listVerifiedEvents
+            summary: List verified events
+            description: |
+                Lists verified events (curated, time-boxed, seasonal, etc.).
+
+                Events are higher-level constructs that may:
+                - contain one or more verified tournaments
+                - define eligibility rules (e.g., ELO enabled, achievements enabled)
+                - define branding and theming
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventStatus"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: region
+                  in: query
+                  required: false
+                  description: Optional region key for regional promotions.
+                  schema:
+                      type: string
+                      maxLength: 32
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedEventInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Verified events page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Events list may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedEventPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /verified/events/{eventId}:
+        get:
+            tags: [verified.events]
+            operationId: getVerifiedEvent
+            summary: Get verified event
+            description: |
+                Returns details of a verified event, including branding and tournament lineup.
+
+                Note:
+                - This is still pre-join. It must not expose gameplay data (no rankings/submissions/chat).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedEventInclude"
+            responses:
+                "200":
+                    description: Verified event.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Event detail may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedEvent"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /verified/events/{eventId}/tournaments:
+        get:
+            tags: [verified.tournaments]
+            operationId: listVerifiedEventTournaments
+            summary: List verified tournaments within an event
+            description: |
+                Lists verified tournaments attached to a verified event.
+
+                Pre-join safe listing:
+                - Exposes tournament previews only.
+                - Does not expose rankings/submissions/chat.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedTournamentStatus"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedTournamentInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedTournamentSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Verified tournaments page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Verified tournament lists may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedTournamentPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /verified/tournaments:
+        get:
+            tags: [verified.tournaments]
+            operationId: listVerifiedTournaments
+            summary: List verified tournaments
+            description: |
+                Lists verified tournaments across all events.
+
+                This is the "curated discoverable tournaments" surface,
+                which replaces a global user-generated tournament search (spam risk).
+
+                Pre-join safe listing:
+                - Exposes tournament previews only.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedTournamentStatus"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: eventId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/VerifiedTournamentInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedTournamentSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Verified tournaments page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Verified tournament lists may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedTournamentPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /verified/tournaments/{tournamentId}:
+        get:
+            tags: [verified.tournaments]
+            operationId: getVerifiedTournamentPreview
+            summary: Get verified tournament preview
+            description: |
+                Returns a verified tournament preview.
+
+                Important:
+                - This endpoint is pre-join safe and must not expose gameplay data.
+                - Joining still happens through the tournament join endpoints (membership required afterwards).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+            responses:
+                "200":
+                    description: Verified tournament preview.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Preview may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifiedTournamentPreview"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        VerifiedEventId:
+            name: eventId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/VerifiedEventId"
+
+    schemas:
+        VerifiedEventId:
+            type: string
+            description: Verified event identifier.
+            example: vev_01J8W0K7E2ZQZ6P0M4NQW2Y7BA
+
+        VerifiedHubInclude:
+            type: string
+            enum: [sections, previews]
+
+        VerifiedEventInclude:
+            type: string
+            enum: [branding, tournaments, eligibility, schedule]
+
+        VerifiedTournamentInclude:
+            type: string
+            enum: [branding, eligibility, joinInfo]
+
+        VerifiedEventStatus:
+            type: string
+            enum: [upcoming, live, ended]
+            description: Event lifecycle state.
+
+        VerifiedTournamentStatus:
+            type: string
+            enum: [joinable, locked, ended]
+            description: Tournament availability within the verified hub.
+
+        VerifiedEventSort:
+            type: string
+            enum: [featured, startTimeAsc, startTimeDesc, newest]
+            default: featured
+
+        VerifiedTournamentSort:
+            type: string
+            enum: [featured, popular, startTimeAsc, startTimeDesc]
+            default: featured
+
+        VerifiedBranding:
+            type: object
+            additionalProperties: false
+            required: [title]
+            properties:
+                title:
+                    type: string
+                    description: Localized display title.
+                subtitle:
+                    type: string
+                    description: Localized subtitle.
+                heroImageUrl:
+                    type: string
+                    format: uri
+                themeKey:
+                    type: string
+                    description: Stable theme identifier for client theming (optional).
+                sponsorName:
+                    type: string
+                    description: Sponsor/creator name (if any).
+                sponsorLogoUrl:
+                    type: string
+                    format: uri
+                ctaLabel:
+                    type: string
+                    description: Localized call-to-action label (e.g., "Join now").
+                disclaimer:
+                    type: string
+                    description: Localized disclaimer (e.g., "No gambling. For entertainment only.").
+
+        VerifiedEligibility:
+            type: object
+            additionalProperties: false
+            description: Eligibility rules for verified events/tournaments.
+            properties:
+                verified:
+                    type: boolean
+                    description: Always true here; included for clarity.
+                eloEnabled:
+                    type: boolean
+                    description: Whether participation affects global rating/ELO.
+                achievementsEnabled:
+                    type: boolean
+                    description: Whether achievements can be earned.
+                minAccountAgeDays:
+                    type: integer
+                    minimum: 0
+                minLevel:
+                    type: integer
+                    minimum: 0
+                    description: Minimum global level/rank required (if any).
+                regionAllowList:
+                    type: array
+                    items:
+                        type: string
+                ageGate:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        minimumAge:
+                            type: integer
+                            minimum: 0
+                        required:
+                            type: boolean
+
+        VerifiedEventSchedule:
+            type: object
+            additionalProperties: false
+            properties:
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                joinOpensAt:
+                    type: string
+                    format: date-time
+                joinClosesAt:
+                    type: string
+                    format: date-time
+
+        VerifiedEvent:
+            type: object
+            additionalProperties: false
+            required: [eventId, status, branding]
+            properties:
+                eventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                status:
+                    $ref: "#/components/schemas/VerifiedEventStatus"
+                branding:
+                    $ref: "#/components/schemas/VerifiedBranding"
+                eligibility:
+                    $ref: "#/components/schemas/VerifiedEligibility"
+                schedule:
+                    $ref: "#/components/schemas/VerifiedEventSchedule"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                description:
+                    type: string
+                    description: Localized long description (safe, pre-join).
+                tournaments:
+                    type: array
+                    description: Optional embedded tournament previews.
+                    items:
+                        $ref: "#/components/schemas/VerifiedTournamentPreview"
+                tags:
+                    type: array
+                    items:
+                        type: string
+
+        VerifiedEventSummary:
+            type: object
+            additionalProperties: false
+            required: [eventId, status, branding]
+            properties:
+                eventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                status:
+                    $ref: "#/components/schemas/VerifiedEventStatus"
+                branding:
+                    $ref: "#/components/schemas/VerifiedBranding"
+                schedule:
+                    $ref: "#/components/schemas/VerifiedEventSchedule"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+
+        VerifiedEventPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedEventSummary"
+                nextCursor:
+                    type: string
+
+        VerifiedTournamentPreview:
+            allOf:
+                - $ref: "#/components/schemas/TournamentPreview"
+                - type: object
+                  additionalProperties: false
+                  required: [verified]
+                  properties:
+                      verified:
+                          type: boolean
+                          enum: [true]
+                      verifiedEventId:
+                          $ref: "#/components/schemas/VerifiedEventId"
+                      branding:
+                          $ref: "#/components/schemas/VerifiedBranding"
+                      eligibility:
+                          $ref: "#/components/schemas/VerifiedEligibility"
+                      joinInfo:
+                          $ref: "#/components/schemas/VerifiedJoinInfo"
+
+        VerifiedJoinInfo:
+            type: object
+            additionalProperties: false
+            properties:
+                joinOpensAt:
+                    type: string
+                    format: date-time
+                joinClosesAt:
+                    type: string
+                    format: date-time
+                capacity:
+                    type: integer
+                    minimum: 1
+                currentPlayers:
+                    type: integer
+                    minimum: 0
+                joinMethod:
+                    type: string
+                    description: Join mechanism (explicit; no spectator mode).
+                    enum: [oneTap, invitationCode, directInvite]
+                requiresAccount:
+                    type: boolean
+                    default: true
+                eligibilitySummary:
+                    type: string
+                    description: Localized short eligibility summary.
+
+        VerifiedTournamentSummary:
+            type: object
+            additionalProperties: false
+            required: [tournament, status]
+            properties:
+                tournament:
+                    $ref: "#/components/schemas/VerifiedTournamentPreview"
+                status:
+                    $ref: "#/components/schemas/VerifiedTournamentStatus"
+
+        VerifiedTournamentPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedTournamentSummary"
+                nextCursor:
+                    type: string
+
+        VerifiedHubSectionType:
+            type: string
+            enum:
+                - hero
+                - featuredEvents
+                - recommended
+                - trendingTournaments
+                - upcomingThisWeek
+                - seasonal
+
+        VerifiedHubSection:
+            type: object
+            additionalProperties: false
+            required: [sectionId, type, title]
+            properties:
+                sectionId:
+                    type: string
+                    example: sec_hero
+                type:
+                    $ref: "#/components/schemas/VerifiedHubSectionType"
+                title:
+                    type: string
+                    description: Localized title.
+                subtitle:
+                    type: string
+                items:
+                    type: array
+                    description: Items may reference events or tournaments.
+                    items:
+                        $ref: "#/components/schemas/VerifiedHubItem"
+
+        VerifiedHubItemType:
+            type: string
+            enum: [event, tournament]
+
+        VerifiedHubItem:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+                type:
+                    $ref: "#/components/schemas/VerifiedHubItemType"
+                event:
+                    $ref: "#/components/schemas/VerifiedEventSummary"
+                tournament:
+                    $ref: "#/components/schemas/VerifiedTournamentPreview"
+
+        VerifiedHub:
+            type: object
+            additionalProperties: false
+            required: [serverTime, sections]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                sections:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedHubSection"

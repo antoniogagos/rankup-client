@@ -1,0 +1,579 @@
+tags:
+  - name: game
+    summary: Game modes & rules
+    description: Registries for game modes and scoring rulesets (versioned, extensible).
+    kind: nav
+
+  - name: game.modes
+    summary: Game modes
+    description: Available game modes and their capabilities.
+    parent: game
+    kind: nav
+
+  - name: game.rulesets
+    summary: Rulesets
+    description: Versioned scoring/locking/tiebreak rules used by tournaments.
+    parent: game
+    kind: nav
+
+paths:
+  /game-modes:
+    get:
+      tags: [game.modes]
+      operationId: listGameModes
+      summary: List game modes
+      description: |
+        Returns the set of game modes supported by Rankup.
+
+        Intended uses:
+        - Create Tournament: show available modes by sport/modality
+        - Client capability gating (planned modes can be hidden client-side)
+        - Future-proof registry (new modes added without API redesign)
+
+        Caching:
+        - Safe to cache long (ETag + 304).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: status
+          in: query
+          required: false
+          description: Filter by lifecycle status.
+          schema:
+            $ref: "#/components/schemas/GameModeStatus"
+        - name: sportId
+          in: query
+          required: false
+          description: Return modes compatible with a given sport.
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: modality
+          in: query
+          required: false
+          description: Return modes compatible with the given tournament modality.
+          schema:
+            $ref: "#/components/schemas/TournamentModality"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Game modes.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameModeList"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /game-modes/{gameModeId}:
+    get:
+      tags: [game.modes]
+      operationId: getGameMode
+      summary: Get a game mode
+      description: |
+        Returns detailed information about a game mode, including supported sports/modalities
+        and the shape of configurable rules for tournaments that use it.
+
+        Caching:
+        - Safe to cache long (ETag + 304).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/GameModeId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Game mode.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameMode"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /rulesets:
+    get:
+      tags: [game.rulesets]
+      operationId: listRulesets
+      summary: List published rulesets
+      description: |
+        Lists published rulesets (scoring/locking/tiebreak rules) that tournaments can reference.
+
+        Design principles:
+        - **Rulesets are versioned**. Never mutate a ruleset's meaning in-place once tournaments depend on it.
+          Instead publish a new ruleset version and let tournaments opt-in.
+        - Rulesets are the foundation for "ranked eligibility" and verified achievements.
+
+        Caching:
+        - Safe to cache medium/long (ETag + 304). Client can revalidate cheaply.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: gameModeId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/GameModeId"
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/RulesetStatus"
+        - name: rankedEligible
+          in: query
+          required: false
+          description: If true, only returns rulesets usable for ranked/verified progression.
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Rulesets page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RulesetPage"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /rulesets/{rulesetId}:
+    get:
+      tags: [game.rulesets]
+      operationId: getRuleset
+      summary: Get ruleset
+      description: |
+        Returns a ruleset in detail, including:
+        - human-readable sections for the Rules UI tab
+        - the default config
+        - the config schema (for advanced tournament configuration UIs)
+
+        Caching:
+        - Safe to cache long; rulesets should be immutable once published.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/RulesetId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Ruleset.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ruleset"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Long"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    GameModeId:
+      name: gameModeId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/GameModeId"
+
+    RulesetId:
+      name: rulesetId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/RulesetId"
+
+  schemas:
+    GameModeStatus:
+      type: string
+      description: Game mode lifecycle status.
+      enum: [implemented, planned, deprecated]
+
+    GameMode:
+      type: object
+      additionalProperties: false
+      required: [gameModeId, name, status, supportedSportIds, supportedModalities, capabilities]
+      properties:
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        name:
+          type: string
+          description: Localized display name (Accept-Language).
+          example: ScorePrediction
+        shortName:
+          type: string
+          description: Optional short label.
+          example: Predictions
+        description:
+          type: string
+          description: Localized description for UI.
+        status:
+          $ref: "#/components/schemas/GameModeStatus"
+        supportedSportIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/SportId"
+          example: [football]
+        supportedModalities:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentModality"
+          example: [matchday, season]
+        defaultRulesetId:
+          $ref: "#/components/schemas/RulesetId"
+        capabilities:
+          $ref: "#/components/schemas/GameModeCapabilities"
+        # Advanced: allow clients to build dynamic rules editors for this mode.
+        tournamentRulesetConfigSchema:
+          $ref: "#/components/schemas/JsonSchemaObject"
+
+    GameModeCapabilities:
+      type: object
+      additionalProperties: false
+      required: [submissionModel, supportsLiveUpdates, supportsNegativePoints]
+      properties:
+        submissionModel:
+          type: string
+          description: |
+            High-level interaction model used by clients.
+            Prefer stable identifiers (do not localize).
+          examples: [perMatchPrediction, perMatchdayDraft]
+        supportsLiveUpdates:
+          type: boolean
+          description: Whether live match events can change outcomes/points during play.
+        supportsNegativePoints:
+          type: boolean
+          description: Whether scoring can be negative (penalties).
+        supportsEditsBeforeLock:
+          type: boolean
+          description: Whether submissions can be edited before lock.
+        lockGranularity:
+          type: string
+          description: What is locked (match, matchday, tournament).
+          examples: [match, matchday]
+
+    GameModeList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameMode"
+
+    RulesetStatus:
+      type: string
+      description: Ruleset lifecycle status.
+      enum: [active, deprecated, retired]
+
+    RulesetSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - rulesetId
+        - gameModeId
+        - sportId
+        - name
+        - status
+        - isRankedEligible
+        - version
+      properties:
+        rulesetId:
+          $ref: "#/components/schemas/RulesetId"
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        name:
+          type: string
+          description: Localized display name.
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/RulesetStatus"
+        isRankedEligible:
+          type: boolean
+          description: If true, tournaments using this ruleset may count for ranked/verified progression (subject to tournament verification).
+        version:
+          type: string
+          description: Semantic or monotonic version identifier.
+          example: "1.0.0"
+        publishedAt:
+          type: string
+          format: date-time
+
+    Ruleset:
+      allOf:
+        - $ref: "#/components/schemas/RulesetSummary"
+        - type: object
+          additionalProperties: false
+          required: [defaultConfig, configSchema, sections]
+          properties:
+            defaultConfig:
+              $ref: "#/components/schemas/RulesetConfig"
+            configSchema:
+              $ref: "#/components/schemas/JsonSchemaObject"
+            sections:
+              type: array
+              description: |
+                Localized rules text for UI ("Rules" tab). Keep it declarative and short.
+              items:
+                $ref: "#/components/schemas/RulesSection"
+            scoringModel:
+              type: string
+              description: Stable identifier for the scoring algorithm family.
+              examples: [scorePrediction_v1]
+            audit:
+              type: object
+              additionalProperties: false
+              properties:
+                createdAt:
+                  type: string
+                  format: date-time
+                createdBy:
+                  type: string
+                  description: Staff/system identifier (if applicable).
+
+    RulesetPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RulesetSummary"
+        nextCursor:
+          type: string
+
+    JsonSchemaObject:
+      type: object
+      description: |
+        JSON Schema object (draft 2020-12). Used to describe/validate advanced ruleset configuration.
+        This is metadata for clients; servers remain authoritative in validation.
+      additionalProperties: true
+
+    RulesetConfig:
+      description: |
+        Ruleset configuration payload. Shape depends on the underlying gameModeId/scoringModel.
+        For forward compatibility, Rankup supports:
+        - strongly-typed configs for known game modes
+        - a generic object for future modes
+      anyOf:
+        - $ref: "#/components/schemas/ScorePredictionRulesetConfig"
+        - $ref: "#/components/schemas/GenericRulesetConfig"
+
+    GenericRulesetConfig:
+      type: object
+      description: Generic config placeholder for future game modes (extensible).
+      additionalProperties: true
+
+    # ---------- ScorePrediction (typed) ----------
+    ScorePredictionRulesetConfig:
+      type: object
+      additionalProperties: false
+      required: [lockPolicy, scoring, tieBreakers]
+      properties:
+        lockPolicy:
+          $ref: "#/components/schemas/ScorePredictionLockPolicy"
+        scoring:
+          $ref: "#/components/schemas/ScorePredictionScoring"
+        tieBreakers:
+          type: array
+          description: Ordered tie-breakers applied when total points are equal.
+          items:
+            $ref: "#/components/schemas/RankingTieBreaker"
+        allowNegativePoints:
+          type: boolean
+          default: true
+        maxGoalsPerTeam:
+          type: integer
+          minimum: 0
+          default: 20
+          description: Optional validation cap for predicted scores (UX guardrail).
+
+    ScorePredictionLockPolicyType:
+      type: string
+      enum: [kickoff, kickoffWithGrace, manual]
+
+    ScorePredictionLockPolicy:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          $ref: "#/components/schemas/ScorePredictionLockPolicyType"
+        graceSeconds:
+          type: integer
+          minimum: 0
+          maximum: 900
+          description: |
+            Only valid when type=kickoffWithGrace.
+            Recommended to keep small (e.g., 30–120s) to reduce unfair advantage.
+        manualLockEnabled:
+          type: boolean
+          description: |
+            Only relevant when type=manual.
+            If true, admins can lock earlier (e.g., tournament rule).
+
+    ScorePredictionScoring:
+      type: object
+      additionalProperties: false
+      required: [correctOutcome, exactScore, exactGoalsOneTeam, wrongGoalsBothTeamsNonDrawPenalty]
+      properties:
+        correctOutcome:
+          type: integer
+          description: Points for correct 1X2 (winner/draw).
+          example: 8
+        exactScore:
+          type: integer
+          description: Points for exact scoreline.
+          example: 6
+        exactGoalsOneTeam:
+          type: integer
+          description: Points for predicting the exact goals of one team (home or away).
+          example: 2
+        wrongGoalsBothTeamsNonDrawPenalty:
+          type: integer
+          description: Penalty when both goal predictions are wrong in non-draw matches.
+          example: -2
+        # Future-proof extensions:
+        bonusRules:
+          type: array
+          description: Optional bonus/penalty rules (e.g., derby bonuses, featured match).
+          items:
+            $ref: "#/components/schemas/ScorePredictionBonusRule"
+
+    ScorePredictionBonusRule:
+      type: object
+      additionalProperties: true
+      description: |
+        Extensible bonus rule. Keep as an open object until product rules are finalized.
+        Examples: derbyBonus, featuredMatchMultiplier, streakBonus.
+      properties:
+        type:
+          type: string
+          examples: [derbyBonus, featuredMatchMultiplier]
+        value:
+          type: integer
+          description: Points or multiplier basis (interpretation depends on type).
+
+    RankingTieBreaker:
+      type: string
+      description: |
+        Tie-breaker strategy identifiers (ordered).
+        Avoid tying to UI labels; keep stable ids.
+      enum:
+        - mostExactScores
+        - mostCorrectOutcomes
+        - mostExactGoalsOneTeam
+        - earliestSubmission
+        - random

@@ -1,24 +1,24 @@
 name: Copilot Setup Steps
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
-  copilot-setup-steps:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    copilot-setup-steps:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
 
-      - name: Enable corepack
-        run: corepack enable
+            - name: Enable corepack
+              run: corepack enable
 
-      - name: Install dependencies
-        run: yarn install --immutable
+            - name: Install dependencies
+              run: yarn install --immutable

@@ -1,0 +1,465 @@
+tags:
+    - name: tournaments.matchdays
+      summary: Matchdays
+      description: Tournament matchday navigation (member-only).
+      parent: tournaments
+      kind: nav
+
+paths:
+    /tournaments/{tournamentId}/matchdays:
+        get:
+            tags: [tournaments.matchdays]
+            operationId: listTournamentMatchdays
+            summary: List tournament matchdays
+            description: |
+                Lists matchdays available within the tournament's configured window.
+
+                Authorization:
+                - Requires membership (no spectator access).
+
+                Performance:
+                - Designed for the "Matchday selector" UI (past/current/upcoming).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: status
+                  in: query
+                  required: false
+                  description: Filter by matchday status.
+                  schema:
+                      $ref: "#/components/schemas/MatchdayStatus"
+                - name: fromMatchday
+                  in: query
+                  required: false
+                  description: Lower bound matchday number (inclusive).
+                  schema:
+                      type: integer
+                      minimum: 1
+                - name: toMatchday
+                  in: query
+                  required: false
+                  description: Upper bound matchday number (inclusive).
+                  schema:
+                      type: integer
+                      minimum: 1
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (keep lightweight).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/TournamentMatchdayInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withAvailability:
+                          value: [availabilitySummary]
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+                - $ref: "#/components/parameters/If-None-Match"
+            responses:
+                "200":
+                    description: Matchdays page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentMatchdayPage"
+                "304":
+                    description: Not modified.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/TournamentNotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}:
+        get:
+            tags: [tournaments.matchdays]
+            operationId: getTournamentMatchday
+            summary: Get tournament matchday
+            description: |
+                Returns matchday information within a tournament context.
+
+                Authorization:
+                - Requires membership.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - $ref: "#/components/parameters/If-None-Match"
+            responses:
+                "200":
+                    description: Matchday.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentMatchday"
+                "304":
+                    description: Not modified.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/TournamentNotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/matches:
+        get:
+            tags: [tournaments.matchdays]
+            operationId: listTournamentMatchdayMatches
+            summary: List matches for a tournament matchday
+            description: |
+                Returns the fixture list for a matchday in the context of a tournament.
+
+                Important:
+                - Includes server-authoritative **lock state** fields to avoid client clock drift.
+                - Does NOT include user submissions (predictions/draft picks); those live under the submissions/draft blocks.
+
+                Authorization:
+                - Requires membership (no spectator access).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/MatchStatus"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (kept small).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MatchInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withCounters:
+                          value: [eventCounters]
+                - $ref: "#/components/parameters/If-None-Match"
+            responses:
+                "200":
+                    description: Tournament matchday matches.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentMatchPage"
+                "304":
+                    description: Not modified.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/TournamentNotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/availability:
+        get:
+            tags: [tournaments.matchdays]
+            operationId: getTournamentMatchdayAvailability
+            summary: Get matchday availability for gameplay
+            description: |
+                Returns whether the matchday is currently available for gameplay submissions,
+                with server-authoritative timestamps.
+
+                Use cases:
+                - Drive CTAs ("Submit now", "Locked", "Finished").
+                - Client countdowns using server time.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+            responses:
+                "200":
+                    description: Availability.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdayAvailability"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/TournamentNotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+    schemas:
+        TournamentMatchdayInclude:
+            type: string
+            enum: [availabilitySummary]
+
+        MatchdayAvailabilityState:
+            type: string
+            enum: [open, locked, finished, notStarted]
+            description: Server-derived availability status for gameplay.
+
+        MatchdayAvailabilityReason:
+            type: string
+            enum:
+                - open
+                - tournamentArchived
+                - tournamentCancelled
+                - tournamentLocked
+                - joinClosed
+                - matchdayNotInTournamentWindow
+                - matchdayNotStarted
+                - matchdayFinished
+
+        MatchdayAvailability:
+            type: object
+            additionalProperties: false
+            required: [tournamentId, matchday, serverTime, state, canSubmit]
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                serverTime:
+                    type: string
+                    format: date-time
+                state:
+                    $ref: "#/components/schemas/MatchdayAvailabilityState"
+                canSubmit:
+                    type: boolean
+                reason:
+                    $ref: "#/components/schemas/MatchdayAvailabilityReason"
+                opensAt:
+                    type: string
+                    format: date-time
+                    description: Optional (when known).
+                locksAt:
+                    type: string
+                    format: date-time
+                    description: |
+                        Server-authoritative lock time for the matchday's gameplay window.
+                        For per-match locking modes, this is typically the earliest match lock.
+                closesAt:
+                    type: string
+                    format: date-time
+                    description: Optional hard close time for submissions (if configured).
+                message:
+                    type: string
+                    description: Optional localized hint for UI ("Locked", "Finished", etc).
+
+        TournamentMatchdaySummary:
+            type: object
+            additionalProperties: false
+            required: [matchday, status, matchCount, startsAt, endsAt]
+            properties:
+                matchday:
+                    type: integer
+                    minimum: 1
+                label:
+                    type: string
+                    description: Optional localized label (e.g., "Jornada 23", "Round of 16").
+                status:
+                    $ref: "#/components/schemas/MatchdayStatus"
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                matchCount:
+                    type: integer
+                    minimum: 0
+                isCurrent:
+                    type: boolean
+                    description: Convenience flag set by the server.
+                availabilitySummary:
+                    $ref: "#/components/schemas/MatchdayAvailability"
+
+        TournamentMatchday:
+            allOf:
+                - $ref: "#/components/schemas/TournamentMatchdaySummary"
+                - type: object
+                  additionalProperties: false
+                  required: [tournamentId, serverTime]
+                  properties:
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      serverTime:
+                          type: string
+                          format: date-time
+                      previousMatchday:
+                          type: integer
+                          minimum: 1
+                          description: Optional convenience pointer.
+                      nextMatchday:
+                          type: integer
+                          minimum: 1
+                          description: Optional convenience pointer.
+
+        TournamentMatchdayPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/TournamentMatchdaySummary"
+                nextCursor:
+                    type: string
+
+        MatchLockState:
+            type: string
+            enum: [open, locked]
+            description: Lock state for the match within the tournament context.
+
+        TournamentMatch:
+            description: Match plus tournament-context lock metadata.
+            allOf:
+                - $ref: "#/components/schemas/Match"
+                - type: object
+                  additionalProperties: false
+                  required: [lockState]
+                  properties:
+                      lockState:
+                          $ref: "#/components/schemas/MatchLockState"
+                      lockAt:
+                          type: string
+                          format: date-time
+                          description: |
+                              Server-authoritative lock time for submissions related to this match.
+                              In matchday-locking game modes, this may equal the matchday lock time.
+                      lockReason:
+                          type: string
+                          description: Optional explanatory reason (server-defined, stable ids recommended).
+                          examples: [kickoff, kickoffWithGrace, manual]
+
+        TournamentMatchPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/TournamentMatch"
+                nextCursor:
+                    type: string

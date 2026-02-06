@@ -1,9 +1,9 @@
 {
-  "name": "samba",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "common": "1.0.0",
-    "lit": "^2.0.2"
-  }
+	"name": "@rankup/samba",
+	"version": "1.0.0",
+	"private": true,
+	"dependencies": {
+		"@rankup/common": "workspace:*",
+		"lit": "^3.3.1"
+	}
 }

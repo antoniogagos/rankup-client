@@ -1,0 +1,64 @@
+rules:
+    operation-id-required:
+        description: Every operation must define operationId.
+        given: '$.paths[*][*]'
+        severity: error
+        then:
+            field: operationId
+            function: truthy
+
+    success-response-json-schema:
+        description: JSON success responses must define a schema.
+        given: '$.paths[*][*].responses[?(@property.match(/^(200|201)$/))].content["application/json"]'
+        severity: error
+        then:
+            field: schema
+            function: truthy
+
+    success-response-event-stream-schema:
+        description: SSE success responses must define a text/event-stream schema.
+        given: '$.paths[*][*].responses[?(@property.match(/^(200|201)$/))].content["text/event-stream"]'
+        severity: error
+        then:
+            field: schema
+            function: truthy
+
+    error-response-problem-schema:
+        description: Error responses must define a Problem Details schema.
+        given: '$.paths[*][*].responses[?(@property.match(/^[45]\\d\\d$/))].content["application/problem+json"]'
+        severity: error
+        then:
+            field: schema
+            function: truthy
+
+    default-response-required:
+        description: Every operation must define a default response.
+        given: '$.paths[*][*].responses'
+        severity: error
+        then:
+            field: default
+            function: truthy
+
+    default-response-problem-schema:
+        description: Default responses must define a Problem Details schema.
+        given: '$.paths[*][*].responses.default.content["application/problem+json"]'
+        severity: error
+        then:
+            field: schema
+            function: truthy
+
+    error-response-component-problem-schema:
+        description: Error response components must define a Problem Details schema.
+        given: '$.components.responses[*].content["application/problem+json"]'
+        severity: error
+        then:
+            field: schema
+            function: truthy
+
+    request-body-has-content:
+        description: Request bodies must include explicit content definitions.
+        given: '$.paths[*][*].requestBody'
+        severity: error
+        then:
+            field: content
+            function: truthy

@@ -1,0 +1,618 @@
+tags:
+    - name: tournaments.submissions
+      summary: Submissions
+      description: Mode-agnostic gameplay submissions inside tournaments (member-only).
+      parent: tournaments
+      kind: nav
+
+paths:
+    /tournaments/{tournamentId}/matchdays/{matchday}/submissions:
+        get:
+            tags: [tournaments.submissions]
+            operationId: listMatchdaySubmissions
+            summary: List submission summaries for a tournament matchday (member-only)
+            description: |
+                Returns per-user submission summaries for the matchday (who submitted, completeness, last update).
+
+                Product: no spectator access
+                - Membership required.
+                - This endpoint returns **summaries** (not full submission content) to keep it lightweight and privacy-safe.
+
+                Full content (when allowed by the tournament/game rules) can be retrieved via:
+                - `GET /tournaments/{tournamentId}/matchdays/{matchday}/submissions/users/{userId}`
+                - `GET /tournaments/{tournamentId}/matchdays/{matchday}/submissions/me`
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: status
+                  in: query
+                  required: false
+                  description: Filter by submission status.
+                  schema:
+                      $ref: "#/components/schemas/SubmissionStatusFilter"
+                - name: q
+                  in: query
+                  required: false
+                  description: Optional username search (server-controlled matching).
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for UI.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MatchdaySubmissionsInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withCounts:
+                          value: [counts]
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Submission summary page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdaySubmissionSummaryPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/submissions/me:
+        get:
+            tags: [tournaments.submissions]
+            operationId: getMyMatchdaySubmission
+            summary: Get my submission for a matchday
+            description: |
+                Returns the current user's submission for the matchday.
+
+                Notes:
+                - Membership required.
+                - Includes server-authoritative times so clients can render countdowns and lock states correctly.
+                - Returns an ETag for optimistic concurrency on updates.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+            responses:
+                "200":
+                    description: Submission (may be empty if the user has not submitted anything yet).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdaySubmission"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+        put:
+            tags: [tournaments.submissions]
+            operationId: upsertMyMatchdaySubmission
+            summary: Upsert my submission for a matchday (mode-agnostic)
+            description: |
+                Upserts the current user's submission for the matchday.
+
+                Batch semantics (mobile-friendly):
+                - The request contains `upserts` (set/replace items) and optional `removes` (delete items).
+                - Server applies what it can; locked/invalid items are **rejected** and returned in the response.
+                - If the matchday/tournament is fully locked, the server returns 409.
+
+                Concurrency:
+                - If `If-Match` is provided, server enforces it (412 on mismatch).
+                - If `If-Match` is omitted, server applies last-write-wins.
+
+                Idempotency:
+                - Clients SHOULD pass `X-Idempotency-Key` for safe retries.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - $ref: "#/components/parameters/IdempotencyKey"
+                - $ref: "#/components/parameters/IfMatchOptional"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpsertMatchdaySubmissionRequest"
+            responses:
+                "200":
+                    description: Submission upsert processed (may include rejected items).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpsertMatchdaySubmissionResult"
+                "201":
+                    description: Submission created (optional; server may still return 200 for idempotency).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        ETag:
+                            $ref: "#/components/headers/ETag"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpsertMatchdaySubmissionResult"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/SubmissionLocked"
+                "412":
+                    $ref: "#/components/responses/PreconditionFailed"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+        delete:
+            tags: [tournaments.submissions]
+            operationId: clearMyMatchdaySubmission
+            summary: Clear my submission for a matchday
+            description: |
+                Deletes all submission items for the current user in the matchday (idempotent).
+
+                Server SHOULD reject if the matchday is locked/finished (409),
+                unless product decides "clear after lock" is allowed (not recommended).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Submission cleared (or was already empty).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/MatchdayClosed"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/submissions/users/{userId}:
+        get:
+            tags: [tournaments.submissions]
+            operationId: getUserMatchdaySubmission
+            summary: Get a user's submission for a matchday (member-only, visibility-aware)
+            description: |
+                Returns another member's submission for the matchday, subject to visibility rules.
+
+                Visibility policy (default recommendation for ScorePrediction):
+                - Before lock: show **redacted** submission items (i.e., that a pick exists, but not the values),
+                  to preserve suspense and avoid copying.
+                - After lock: reveal values.
+
+                The effective behavior is server-controlled (ruleset + tournament settings).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "200":
+                    description: Submission view (may contain redactions).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdaySubmission"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+    parameters:
+        IfMatchOptional:
+            name: If-Match
+            in: header
+            required: false
+            description: |
+                Optional optimistic concurrency control for submissions.
+                If provided, must match the latest ETag from `GET .../submissions/me`.
+            schema:
+                type: string
+            example: '"subm_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"'
+
+    schemas:
+        SubmissionStatusFilter:
+            type: string
+            enum: [any, missing, partial, complete]
+            description: Filter on user matchday submission completeness.
+
+        MatchdaySubmissionsInclude:
+            type: string
+            enum: [counts]
+
+        SubmissionVisibility:
+            type: string
+            enum: [visible, redacted]
+            description: |
+                Whether the submission values are visible to the current viewer.
+                `redacted` means items may exist but values are hidden.
+
+        SubmissionStatus:
+            type: string
+            enum: [missing, partial, complete]
+            description: Per-user completeness status for the matchday.
+
+        SubmissionScope:
+            type: string
+            enum: [me, other]
+            description: Indicates whether this submission is for the current user or another user.
+
+        SubmissionItemSubjectType:
+            type: string
+            description: Subject type for submission items (extensible for new game modes).
+            examples: [match]
+
+        SubmissionItemRejectionReason:
+            type: string
+            enum:
+                - locked
+                - invalid
+                - notInMatchday
+                - notInTournament
+                - tournamentLocked
+                - matchdayUnavailable
+                - notMember
+
+        SubmissionItemRejection:
+            type: object
+            additionalProperties: false
+            required: [subjectType, subjectId, reason]
+            properties:
+                subjectType:
+                    $ref: "#/components/schemas/SubmissionItemSubjectType"
+                subjectId:
+                    type: string
+                    description: Subject identifier (e.g., matchId).
+                reason:
+                    $ref: "#/components/schemas/SubmissionItemRejectionReason"
+                message:
+                    type: string
+                    description: Optional localized hint.
+
+        SubmissionCompletion:
+            type: object
+            additionalProperties: false
+            required: [submittedCount, expectedCount, status]
+            properties:
+                submittedCount:
+                    type: integer
+                    minimum: 0
+                expectedCount:
+                    type: integer
+                    minimum: 0
+                    description: Expected number of items for this matchday/game mode (server-derived).
+                status:
+                    $ref: "#/components/schemas/SubmissionStatus"
+
+        MatchdaySubmissionBase:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    submissionId,
+                    tournamentId,
+                    matchday,
+                    userId,
+                    gameModeId,
+                    serverTime,
+                    scope,
+                    visibility,
+                    completion,
+                ]
+            properties:
+                submissionId:
+                    type: string
+                    example: subm_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                userId:
+                    type: string
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                serverTime:
+                    type: string
+                    format: date-time
+                scope:
+                    $ref: "#/components/schemas/SubmissionScope"
+                visibility:
+                    $ref: "#/components/schemas/SubmissionVisibility"
+                completion:
+                    $ref: "#/components/schemas/SubmissionCompletion"
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        # -------------------------
+        # ScorePrediction (typed)
+        # -------------------------
+        ScorePredictionPredictionView:
+            type: object
+            additionalProperties: false
+            required: [matchId, visibility, isSubmitted, lockState]
+            properties:
+                matchId:
+                    $ref: "#/components/schemas/MatchId"
+                visibility:
+                    $ref: "#/components/schemas/SubmissionVisibility"
+                isSubmitted:
+                    type: boolean
+                homeScore:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                    description: Redacted (null) when visibility=redacted.
+                awayScore:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                    description: Redacted (null) when visibility=redacted.
+                lockState:
+                    $ref: "#/components/schemas/MatchLockState"
+                lockAt:
+                    type: string
+                    format: date-time
+                submittedAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        ScorePredictionMatchdaySubmission:
+            allOf:
+                - $ref: "#/components/schemas/MatchdaySubmissionBase"
+                - type: object
+                  additionalProperties: false
+                  required: [predictions]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      predictions:
+                          type: array
+                          description: |
+                              List of per-match predictions for the matchday.
+                              Matches not present here are treated as "not submitted".
+                          items:
+                              $ref: "#/components/schemas/ScorePredictionPredictionView"
+
+        # Placeholder for future modes to keep endpoints mode-agnostic without blocking evolution.
+        GenericMatchdaySubmission:
+            allOf:
+                - $ref: "#/components/schemas/MatchdaySubmissionBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      items:
+                          type: array
+                          description: Generic item list for future modes.
+                          items:
+                              type: object
+                              additionalProperties: true
+
+        MatchdaySubmission:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionMatchdaySubmission"
+                - $ref: "#/components/schemas/GenericMatchdaySubmission"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionMatchdaySubmission"
+
+        ScorePredictionPredictionInput:
+            type: object
+            additionalProperties: false
+            required: [matchId, homeScore, awayScore]
+            properties:
+                matchId:
+                    $ref: "#/components/schemas/MatchId"
+                homeScore:
+                    type: integer
+                    minimum: 0
+                awayScore:
+                    type: integer
+                    minimum: 0
+
+        UpsertScorePredictionMatchdaySubmissionRequest:
+            type: object
+            additionalProperties: false
+            required: [gameModeId]
+            properties:
+                gameModeId:
+                    type: string
+                    enum: [scorePrediction]
+                upserts:
+                    type: array
+                    description: Items to create/update (set scores for matches).
+                    items:
+                        $ref: "#/components/schemas/ScorePredictionPredictionInput"
+                removes:
+                    type: array
+                    description: Match ids to remove/clear from the submission.
+                    items:
+                        $ref: "#/components/schemas/MatchId"
+                clientSubmittedAt:
+                    type: string
+                    format: date-time
+                    description: Optional client timestamp (best-effort; server is authoritative).
+
+        UpsertGenericMatchdaySubmissionRequest:
+            type: object
+            additionalProperties: true
+            required: [gameModeId]
+            properties:
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+
+        UpsertMatchdaySubmissionRequest:
+            oneOf:
+                - $ref: "#/components/schemas/UpsertScorePredictionMatchdaySubmissionRequest"
+                - $ref: "#/components/schemas/UpsertGenericMatchdaySubmissionRequest"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/UpsertScorePredictionMatchdaySubmissionRequest"
+
+        UpsertMatchdaySubmissionResult:
+            type: object
+            additionalProperties: false
+            required: [submission, applied, rejected]
+            properties:
+                submission:
+                    $ref: "#/components/schemas/MatchdaySubmission"
+                applied:
+                    type: array
+                    description: List of applied subject ids (e.g., match ids) for this request.
+                    items:
+                        type: string
+                rejected:
+                    type: array
+                    description: List of rejected items and reasons.
+                    items:
+                        $ref: "#/components/schemas/SubmissionItemRejection"
+
+        MatchdaySubmissionSummary:
+            type: object
+            additionalProperties: false
+            required: [user, status, completion]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                status:
+                    $ref: "#/components/schemas/SubmissionStatus"
+                completion:
+                    $ref: "#/components/schemas/SubmissionCompletion"
+                lastUpdatedAt:
+                    type: string
+                    format: date-time
+
+        MatchdaySubmissionSummaryPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MatchdaySubmissionSummary"
+                nextCursor:
+                    type: string

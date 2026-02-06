@@ -1,0 +1,12 @@
+{
+	"name": "@rankup/rankup",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		"./*.js": "./src/*.ts",
+		"./package.json": "./package.json"
+	},
+	"dependencies": {
+		"@rankup/platform": "workspace:*"
+	}
+}

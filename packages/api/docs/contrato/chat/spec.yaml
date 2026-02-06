@@ -1,0 +1,1376 @@
+tags:
+  - name: tournaments.chat
+    summary: Chat
+    description: Tournament group chat (member-only; no spectators).
+    parent: tournaments
+    kind: nav
+
+  - name: tournaments.chatModeration
+    summary: Chat moderation
+    description: Role-based chat moderation (mute, delete, pin, settings).
+    parent: tournaments
+    kind: nav
+
+paths:
+  /tournaments/{tournamentId}/chat:
+    get:
+      tags: [tournaments.chat]
+      operationId: getTournamentChat
+      summary: Get tournament chat settings + my chat state
+      description: |
+        Returns chat settings for the tournament and the current user's effective chat state and permissions.
+
+        No spectators:
+        - Membership required.
+
+        This endpoint exists to avoid clients having to infer chat rules from multiple sources.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "200":
+          description: Tournament chat settings and state.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentChat"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [tournaments.chatModeration]
+      operationId: updateTournamentChatSettings
+      summary: Update tournament chat settings (admin/mod role)
+      description: |
+        Updates tournament chat settings.
+
+        Authorization:
+        - Requires a moderation capability (typically tournament admin).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTournamentChatSettingsRequest"
+      responses:
+        "200":
+          description: Updated chat settings/state.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentChat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/chat/messages:
+    get:
+      tags: [tournaments.chat]
+      operationId: listTournamentChatMessages
+      summary: List chat messages (member-only)
+      description: |
+        Lists chat messages for the tournament.
+
+        Pagination model:
+        - If `cursor` is omitted, server returns the most recent messages (latest page).
+        - `direction=backward` fetches older messages relative to cursor.
+        - `direction=forward` fetches newer messages relative to cursor (useful for incremental polling).
+
+        No spectators:
+        - Membership required.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: direction
+          in: query
+          required: false
+          description: Pagination direction relative to `cursor`.
+          schema:
+            $ref: "#/components/schemas/ChatPageDirection"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Chat message page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [tournaments.chat]
+      operationId: sendTournamentChatMessage
+      summary: Send a chat message
+      description: |
+        Sends a message to the tournament chat.
+
+        Server behavior (recommended):
+        - Enforce `slowModeSeconds` (rate limit per user).
+        - Enforce `maxMessageLength`.
+        - Optionally apply profanity/unsafe content filters (422 on rejection).
+        - If the user is muted, return 409.
+        - If chat is disabled, return 409.
+
+        Idempotency:
+        - Clients SHOULD pass `X-Idempotency-Key` to prevent duplicates on retries.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendChatMessageRequest"
+      responses:
+        "201":
+          description: Message created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Location:
+              description: Canonical URL of the created message.
+              schema:
+                type: string
+                format: uri-reference
+              example: /tournaments/tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C/chat/messages/msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/chat/messages/{messageId}:
+    get:
+      tags: [tournaments.chat]
+      operationId: getTournamentChatMessage
+      summary: Get a chat message
+      description: |
+        Returns a single chat message.
+
+        No spectators:
+        - Membership required.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/ChatMessageId"
+      responses:
+        "200":
+          description: Chat message.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    patch:
+      tags: [tournaments.chat]
+      operationId: editTournamentChatMessage
+      summary: Edit a chat message (owner or moderator)
+      description: |
+        Edits an existing message.
+
+        Recommended policy:
+        - The sender can edit within a short time window (e.g., 2–5 minutes) if not deleted.
+        - Moderators can edit or replace with a "moderated" tombstone if necessary.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/ChatMessageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditChatMessageRequest"
+      responses:
+        "200":
+          description: Updated message.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [tournaments.chatModeration]
+      operationId: deleteTournamentChatMessage
+      summary: Delete a chat message (owner or moderator)
+      description: |
+        Deletes a message.
+
+        Recommended server behavior:
+        - **Soft delete** by default (tombstone): keep messageId/timestamps, replace text with null and set `deletedAt`.
+        - Moderators can provide a reason (audit).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/ChatMessageId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteChatMessageRequest"
+      responses:
+        "204":
+          description: Deleted (or already deleted).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/unread-count:
+    get:
+      tags: [tournaments.chat]
+      operationId: getTournamentChatUnreadCount
+      summary: Get unread chat count (for me)
+      description: |
+        Returns unread chat messages count for the current user in this tournament.
+
+        Intended for badges and tournament list indicators.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "200":
+          description: Unread count.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnreadCount"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/read-cursor:
+    get:
+      tags: [tournaments.chat]
+      operationId: getTournamentChatReadCursor
+      summary: Get my chat read cursor
+      description: |
+        Returns the current user's read cursor for this tournament chat.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "200":
+          description: Read cursor.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatReadCursor"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [tournaments.chat]
+      operationId: updateTournamentChatReadCursor
+      summary: Update my chat read cursor
+      description: |
+        Updates the read cursor for this tournament.
+
+        Idempotent:
+        - Repeating with the same (or older) cursor is a no-op.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChatReadCursorRequest"
+      responses:
+        "200":
+          description: Updated read cursor.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatReadCursor"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/pins:
+    get:
+      tags: [tournaments.chat]
+      operationId: listTournamentChatPins
+      summary: List pinned messages
+      description: |
+        Returns pinned messages (if any).
+
+        No spectators:
+        - Membership required.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "200":
+          description: Pinned messages.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatPinnedMessages"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tournaments/{tournamentId}/chat/messages/{messageId}/pin:
+    put:
+      tags: [tournaments.chatModeration]
+      operationId: pinTournamentChatMessage
+      summary: Pin a message (moderator)
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/ChatMessageId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PinChatMessageRequest"
+      responses:
+        "200":
+          description: Pinned.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [tournaments.chatModeration]
+      operationId: unpinTournamentChatMessage
+      summary: Unpin a message (moderator)
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/ChatMessageId"
+      responses:
+        "204":
+          description: Unpinned (or no-op).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/mutes:
+    get:
+      tags: [tournaments.chatModeration]
+      operationId: listTournamentChatMutes
+      summary: List muted users (moderator)
+      description: |
+        Lists chat mutes currently in effect (and optionally recently expired, if server keeps history).
+
+        Authorization:
+        - Requires moderation capability.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ChatMuteStatus"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Mute page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMutePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tournaments/{tournamentId}/chat/mutes/{userId}:
+    put:
+      tags: [tournaments.chatModeration]
+      operationId: muteTournamentChatUser
+      summary: Mute a user in chat (moderator)
+      description: |
+        Mutes a user from sending chat messages.
+
+        Recommended policy:
+        - Moderators can set a duration or an absolute `mutedUntil`.
+        - Server should clamp max duration (e.g., 7 days) unless staff.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MuteChatUserRequest"
+      responses:
+        "200":
+          description: Muted.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMuteEntry"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [tournaments.chatModeration]
+      operationId: unmuteTournamentChatUser
+      summary: Unmute a user in chat (moderator)
+      description: Idempotent.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: Unmuted (or no-op).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/reports:
+    post:
+      tags: [tournaments.chat]
+      operationId: reportTournamentChatContent
+      summary: Report a message/user
+      description: |
+        Reports a message or user for abuse/spam.
+
+        Notes:
+        - This is user-side reporting; internal triage is out of scope for public API.
+        - Server should dedupe repeated reports from the same reporter.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatReportRequest"
+      responses:
+        "201":
+          description: Report created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatReport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/updates:
+    get:
+      tags: [tournaments.chat]
+      operationId: listTournamentChatUpdates
+      summary: Poll chat updates (fallback for real-time)
+      description: |
+        Returns ordered chat events since `sinceCursor`. Supports optional long-polling.
+
+        Intended as a fallback when SSE is unavailable.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: sinceCursor
+          in: query
+          required: false
+          description: Opaque cursor received from previous calls.
+          schema:
+            type: string
+        - name: waitSeconds
+          in: query
+          required: false
+          description: Optional long-poll wait (server may clamp).
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 30
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          description: Max events to return (server may clamp).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Chat updates page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatUpdatePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/chat/live:
+    get:
+      tags: [tournaments.chat]
+      operationId: streamTournamentChatLive
+      summary: Stream chat updates (SSE)
+      description: |
+        Server-Sent Events stream for chat events.
+
+        Client resume:
+        - Clients SHOULD send `Last-Event-ID` header to resume after reconnect.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/LastEventId"
+      responses:
+        "200":
+          description: SSE stream.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Content-Type:
+              description: Always text/event-stream.
+              schema:
+                type: string
+              example: text/event-stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              examples:
+                messageCreatedExample:
+                  summary: Message created SSE event
+                  value: |
+                    event: chat.message.created
+                    id: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AC
+                    data: {"type":"chat.message.created","serverTime":"2026-02-01T19:35:12Z","message":{"messageId":"msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA","tournamentId":"tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","type":"text","text":"GOOOOL!!!","sender":{"userId":"usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1","username":"alex"},"createdAt":"2026-02-01T19:35:12Z"}}
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+components:
+  parameters:
+    ChatMessageId:
+      name: messageId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ChatMessageId"
+
+  schemas:
+    ChatMessageId:
+      type: string
+      description: Chat message identifier.
+      example: msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA
+
+    ChatPageDirection:
+      type: string
+      enum: [backward, forward]
+      default: backward
+
+    TournamentChatPermission:
+      type: string
+      description: Effective capabilities for the current user in this tournament chat.
+      enum:
+        - chat.read
+        - chat.send
+        - chat.edit.own
+        - chat.delete.own
+        - chat.moderate.delete
+        - chat.moderate.mute
+        - chat.moderate.pin
+        - chat.moderate.settings
+
+    TournamentChatSettings:
+      type: object
+      additionalProperties: false
+      required: [enabled, slowModeSeconds, maxMessageLength]
+      properties:
+        enabled:
+          type: boolean
+          description: Whether chat is enabled for the tournament.
+        slowModeSeconds:
+          type: integer
+          minimum: 0
+          maximum: 3600
+          description: |
+            Minimum seconds between messages per user.
+            0 disables slow mode.
+        maxMessageLength:
+          type: integer
+          minimum: 1
+          maximum: 2000
+          description: Maximum allowed message length.
+        allowLinks:
+          type: boolean
+          default: true
+          description: If false, server rejects messages containing URLs.
+        allowImages:
+          type: boolean
+          default: false
+          description: Future. If true, messages may include attachments.
+        profanityFilterLevel:
+          type: string
+          description: Server-defined filter level (family-friendly posture).
+          enum: [off, low, medium, high]
+          default: medium
+
+    TournamentChatState:
+      type: object
+      additionalProperties: false
+      required: [isMuted, canSend]
+      properties:
+        isMuted:
+          type: boolean
+        mutedUntil:
+          type: string
+          format: date-time
+        canSend:
+          type: boolean
+        cannotSendReason:
+          type: string
+          description: Stable reason ids for UI.
+          examples: [chatDisabled, muted, tournamentArchived, notMember]
+        nextAllowedSendAt:
+          type: string
+          format: date-time
+          description: Helpful when slow mode is enabled.
+
+    TournamentChat:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, serverTime, settings, myState, myPermissions]
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        serverTime:
+          type: string
+          format: date-time
+        settings:
+          $ref: "#/components/schemas/TournamentChatSettings"
+        myState:
+          $ref: "#/components/schemas/TournamentChatState"
+        myPermissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentChatPermission"
+
+    UpdateTournamentChatSettingsRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        slowModeSeconds:
+          type: integer
+          minimum: 0
+          maximum: 3600
+        maxMessageLength:
+          type: integer
+          minimum: 1
+          maximum: 2000
+        allowLinks:
+          type: boolean
+        allowImages:
+          type: boolean
+        profanityFilterLevel:
+          type: string
+          enum: [off, low, medium, high]
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional audit reason.
+
+    ChatMessageType:
+      type: string
+      enum: [text, system]
+
+    ChatSystemEventType:
+      type: string
+      enum:
+        - memberJoined
+        - memberLeft
+        - tournamentLocked
+        - tournamentUnlocked
+        - matchdayStarted
+        - matchdayFinished
+
+    ChatSystemEvent:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          $ref: "#/components/schemas/ChatSystemEventType"
+        user:
+          $ref: "#/components/schemas/MeSummary"
+        matchday:
+          type: integer
+          minimum: 1
+        payload:
+          type: object
+          additionalProperties: true
+          description: Optional event payload.
+
+    ChatReactionId:
+      type: string
+      description: Canonical reaction id (URL-safe).
+      pattern: "^[a-z0-9_]{1,32}$"
+      example: thumbs_up
+
+    ChatReaction:
+      type: object
+      additionalProperties: false
+      required: [reactionId, count, meReacted]
+      properties:
+        reactionId:
+          $ref: "#/components/schemas/ChatReactionId"
+        count:
+          type: integer
+          minimum: 0
+        meReacted:
+          type: boolean
+
+    ChatMessage:
+      type: object
+      additionalProperties: false
+      required: [messageId, tournamentId, type, createdAt]
+      properties:
+        messageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        type:
+          $ref: "#/components/schemas/ChatMessageType"
+        sender:
+          $ref: "#/components/schemas/MeSummary"
+        text:
+          type: string
+          nullable: true
+          description: Null when deleted/tombstoned or for some system messages.
+        systemEvent:
+          $ref: "#/components/schemas/ChatSystemEvent"
+        replyToMessageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        mentions:
+          type: array
+          description: Mentioned user ids (optional; server may compute).
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        editedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+        deletedBy:
+          $ref: "#/components/schemas/MeSummary"
+        deleteReason:
+          type: string
+          description: Stable reason id (moderation/audit).
+          examples: [removedByModerator, retractedByAuthor, profanity]
+        pinnedAt:
+          type: string
+          format: date-time
+        pinnedBy:
+          $ref: "#/components/schemas/MeSummary"
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatReaction"
+        clientMessageId:
+          type: string
+          description: Optional client-side dedupe id.
+
+    ChatMessagePage:
+      type: object
+      additionalProperties: false
+      required: [serverTime, items]
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        nextCursor:
+          type: string
+
+    SendChatMessageRequest:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [text]
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        replyToMessageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        mentions:
+          type: array
+          items:
+            type: string
+        clientMessageId:
+          type: string
+          maxLength: 80
+          description: Optional client-generated id for offline/queue dedupe.
+        clientSentAt:
+          type: string
+          format: date-time
+
+    EditChatMessageRequest:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional audit reason (moderator edits).
+
+    DeleteChatMessageRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional moderation/audit reason.
+        hardDelete:
+          type: boolean
+          default: false
+          description: |
+            If true, server may perform hard delete (typically staff-only).
+            Recommended to ignore for regular tournament moderators.
+
+    ChatReadCursor:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, serverTime]
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        serverTime:
+          type: string
+          format: date-time
+        lastReadMessageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        lastReadAt:
+          type: string
+          format: date-time
+        unreadCount:
+          type: integer
+          minimum: 0
+
+    UpdateChatReadCursorRequest:
+      type: object
+      additionalProperties: false
+      required: [lastReadMessageId]
+      properties:
+        lastReadMessageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        readAt:
+          type: string
+          format: date-time
+          description: Optional client time (server authoritative).
+
+    ChatPinnedMessages:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+
+    PinChatMessageRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        note:
+          type: string
+          maxLength: 200
+          description: Optional pin note (future UX).
+
+    ChatMuteStatus:
+      type: string
+      enum: [active, expired]
+
+    ChatMuteEntry:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, user, mutedUntil, createdAt, createdBy]
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        user:
+          $ref: "#/components/schemas/MeSummary"
+        mutedUntil:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/ChatMuteStatus"
+        reason:
+          type: string
+          maxLength: 200
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          $ref: "#/components/schemas/MeSummary"
+
+    ChatMutePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMuteEntry"
+        nextCursor:
+          type: string
+
+    MuteChatUserRequest:
+      type: object
+      additionalProperties: false
+      required: [mutedUntil]
+      properties:
+        mutedUntil:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          maxLength: 200
+
+    ChatReportReason:
+      type: string
+      enum:
+        - spam
+        - harassment
+        - hate
+        - violence
+        - sexualContent
+        - childSafety
+        - selfHarm
+        - other
+
+    CreateChatReportRequest:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        messageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        reportedUserId:
+          type: string
+          description: Optional: report a user (if messageId not provided).
+        reason:
+          $ref: "#/components/schemas/ChatReportReason"
+        comment:
+          type: string
+          maxLength: 500
+        context:
+          type: object
+          additionalProperties: true
+          description: Optional client context.
+
+    ChatReport:
+      type: object
+      additionalProperties: false
+      required: [reportId, tournamentId, reporterUserId, reason, createdAt]
+      properties:
+        reportId:
+          type: string
+          example: rpt_01J8W0K7E2ZQZ6P0M4NQW2Y7AD
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        reporterUserId:
+          type: string
+        messageId:
+          $ref: "#/components/schemas/ChatMessageId"
+        reportedUserId:
+          type: string
+        reason:
+          $ref: "#/components/schemas/ChatReportReason"
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatEventType:
+      type: string
+      enum:
+        - chat.message.created
+        - chat.message.updated
+        - chat.message.deleted
+        - chat.message.pinned
+        - chat.message.unpinned
+        - chat.mute.created
+        - chat.mute.deleted
+        - chat.settings.updated
+
+    ChatEvent:
+      type: object
+      additionalProperties: false
+      required: [eventId, type, serverTime]
+      properties:
+        eventId:
+          type: string
+          example: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AC
+        type:
+          $ref: "#/components/schemas/ChatEventType"
+        serverTime:
+          type: string
+          format: date-time
+        message:
+          $ref: "#/components/schemas/ChatMessage"
+        mute:
+          $ref: "#/components/schemas/ChatMuteEntry"
+        settings:
+          $ref: "#/components/schemas/TournamentChatSettings"
+
+    ChatUpdatePage:
+      type: object
+      additionalProperties: false
+      required: [serverTime, events, nextCursor]
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatEvent"
+        nextCursor:
+          type: string

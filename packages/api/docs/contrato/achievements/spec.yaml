@@ -1,0 +1,784 @@
+tags:
+    - name: achievements
+      summary: Achievements
+      description: Verified achievements, titles, badges and other meaningful progression artifacts.
+      kind: nav
+
+    - name: achievements.meta
+      summary: Meta
+      description: Achievement definitions and catalogs.
+      parent: achievements
+      kind: nav
+
+    - name: achievements.me
+      summary: My achievements
+      description: My achievement progress and unlock history.
+      parent: achievements
+      kind: nav
+
+    - name: achievements.users
+      summary: User achievements
+      description: Public/permissioned achievement profile (privacy-aware).
+      parent: achievements
+      kind: nav
+
+paths:
+    /achievements/meta:
+        get:
+            tags: [achievements.meta]
+            operationId: getAchievementMeta
+            summary: Get achievements meta
+            description: |
+                Returns achievements catalogs and definitions.
+
+                Key product constraint:
+                - Only verified contexts should award achievements by default.
+                - "Verified" is implemented via eligibility rules on events/tournaments.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  description: Filter achievement definitions by game mode.
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  description: Filter achievement definitions by sport.
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (tiers, requirements, etc.).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/AchievementMetaInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      full:
+                          value: [requirements, rewards]
+            responses:
+                "200":
+                    description: Achievements meta.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Meta can be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=3600
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AchievementMeta"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /achievements:
+        get:
+            tags: [achievements.meta]
+            operationId: listAchievementDefinitions
+            summary: List achievement definitions
+            description: |
+                Lists all achievement definitions (catalog) with optional filtering.
+
+                Note:
+                - This is separate from /achievements/meta for clients that want just a list.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AchievementCategory"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: verifiedOnly
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                      default: true
+                - name: includeHidden
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/AchievementMetaInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AchievementSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Achievement definition page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Catalog can be cached.
+                            schema:
+                                type: string
+                            example: public, max-age=3600
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AchievementDefinitionPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /achievements/{achievementId}:
+        get:
+            tags: [achievements.meta]
+            operationId: getAchievementDefinition
+            summary: Get an achievement definition
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/AchievementId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/AchievementMetaInclude"
+            responses:
+                "200":
+                    description: Achievement definition.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Definition can be cached.
+                            schema:
+                                type: string
+                            example: public, max-age=3600
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AchievementDefinition"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/achievements:
+        get:
+            tags: [achievements.me]
+            operationId: listMyAchievements
+            summary: List my achievement progress
+            description: |
+                Returns my achievement status/progress.
+
+                Notes:
+                - By default, includes both unlocked and in-progress achievements.
+                - Progress should reflect only verified/eligible participation unless explicitly requested.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AchievementProgressStatusFilter"
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AchievementCategory"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyAchievementInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withHistory:
+                          value: [history]
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/MyAchievementSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: My achievement page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AchievementProgressPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/achievements/unlocked:
+        get:
+            tags: [achievements.me]
+            operationId: listMyUnlockedAchievements
+            summary: List my unlocked achievements (compact)
+            description: Useful for profile "trophy case" UI.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: limit
+                  in: query
+                  required: false
+                  description: Limit number of unlocked achievements returned (server clamp).
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 200
+                      default: 50
+            responses:
+                "200":
+                    description: Unlocked achievements list.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UnlockedAchievementList"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/achievements/{achievementId}:
+        get:
+            tags: [achievements.me]
+            operationId: getMyAchievement
+            summary: Get my achievement progress
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/AchievementId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyAchievementInclude"
+            responses:
+                "200":
+                    description: My achievement progress.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AchievementProgress"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /users/{userId}/achievements:
+        get:
+            tags: [achievements.users]
+            operationId: listUserAchievements
+            summary: List a user's achievements (public/permissioned)
+            description: |
+                Returns a user's achievements as allowed by their privacy settings.
+
+                Privacy posture:
+                - If achievements are not visible to viewer, return 404 (avoid leaking).
+                - If visible, you may return only unlocked achievements by default.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+                - name: includeProgress
+                  in: query
+                  required: false
+                  description: If true and permitted, includes progress for non-unlocked achievements.
+                  schema:
+                      type: boolean
+                      default: false
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AchievementCategory"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/UserAchievementSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: User achievements page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserAchievementPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        AchievementId:
+            name: achievementId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/AchievementId"
+
+    schemas:
+        AchievementId:
+            type: string
+            description: Stable achievement identifier.
+            example: ach_scorePrediction_exact10
+
+        AchievementCategory:
+            type: string
+            description: Category for discovery and UX grouping.
+            enum:
+                [
+                    ranked,
+                    verifiedEvents,
+                    mastery,
+                    social,
+                    streaks,
+                    seasonal,
+                    tournament,
+                    special,
+                ]
+
+        AchievementRarity:
+            type: string
+            description: Display-only rarity label.
+            enum: [common, rare, epic, legendary]
+
+        AchievementMetaInclude:
+            type: string
+            enum: [requirements, rewards]
+
+        AchievementSort:
+            type: string
+            enum: [featured, newest, nameAsc]
+            default: featured
+
+        AchievementProgressStatusFilter:
+            type: string
+            enum: [any, inProgress, unlocked, locked]
+            default: any
+
+        MyAchievementInclude:
+            type: string
+            enum: [history]
+
+        MyAchievementSort:
+            type: string
+            enum: [unlockedThenProgress, progressThenUnlocked, newestUnlocked]
+            default: unlockedThenProgress
+
+        UserAchievementSort:
+            type: string
+            enum: [newestUnlocked, rarityDesc, nameAsc]
+            default: newestUnlocked
+
+        AchievementRewardType:
+            type: string
+            description: Visual, justified rewards (no skins required).
+            enum: [badge, title, profileFrame, recapCard, emote]
+
+        AchievementReward:
+            type: object
+            additionalProperties: false
+            required: [type, rewardId, label]
+            properties:
+                type:
+                    $ref: "#/components/schemas/AchievementRewardType"
+                rewardId:
+                    type: string
+                    example: badge_exact_scorer_bronze
+                label:
+                    type: string
+                    description: Localized label.
+                imageUrl:
+                    type: string
+                    format: uri
+
+        AchievementRequirementKind:
+            type: string
+            description: Requirement kind for progress computation.
+            enum:
+                - counter
+                - milestone
+                - streak
+                - placement
+                - participation
+
+        AchievementEligibility:
+            type: object
+            additionalProperties: false
+            description: Defines where this achievement can be earned.
+            properties:
+                verifiedOnly:
+                    type: boolean
+                    default: true
+                rankedOnly:
+                    type: boolean
+                    default: false
+                gameModeIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/GameModeId"
+                sportIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/SportId"
+                verifiedEventIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/VerifiedEventId"
+                rankedTrackIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankedTrackId"
+                notes:
+                    type: string
+                    description: Localized explanation.
+
+        AchievementRequirement:
+            type: object
+            additionalProperties: false
+            required: [kind, metricId, target]
+            properties:
+                kind:
+                    $ref: "#/components/schemas/AchievementRequirementKind"
+                metricId:
+                    type: string
+                    description: Stable metric id (server-defined) used for progress.
+                    examples:
+                        - scorePrediction.exactScore.count
+                        - scorePrediction.correctOutcome.count
+                        - ranked.season.finishTopPercent
+                        - verified.events.participation.count
+                        - streak.dailyActive.days
+                target:
+                    type: number
+                    description: Target value for unlock.
+                window:
+                    type: string
+                    description: Optional time window id (server-defined), e.g. "season", "event", "allTime".
+                    examples: [allTime, season, event]
+                comparator:
+                    type: string
+                    enum: [gte, lte]
+                    default: gte
+
+        AchievementDefinition:
+            type: object
+            additionalProperties: false
+            required: [achievementId, name, category, rarity, eligibility]
+            properties:
+                achievementId:
+                    $ref: "#/components/schemas/AchievementId"
+                name:
+                    type: string
+                    description: Localized name.
+                description:
+                    type: string
+                    description: Localized description (avoid deception; explain precisely).
+                category:
+                    $ref: "#/components/schemas/AchievementCategory"
+                rarity:
+                    $ref: "#/components/schemas/AchievementRarity"
+                iconUrl:
+                    type: string
+                    format: uri
+                featured:
+                    type: boolean
+                hidden:
+                    type: boolean
+                    description: If true, definition is hidden until unlocked (for surprise achievements).
+                eligibility:
+                    $ref: "#/components/schemas/AchievementEligibility"
+                requirements:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementRequirement"
+                rewards:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementReward"
+
+        AchievementDefinitionPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementDefinition"
+                nextCursor:
+                    type: string
+
+        AchievementMeta:
+            type: object
+            additionalProperties: false
+            required: [serverTime, categories]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                categories:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementCategory"
+                featured:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementDefinition"
+
+        AchievementProgressStatus:
+            type: string
+            enum: [locked, inProgress, unlocked]
+
+        AchievementUnlockContext:
+            type: object
+            additionalProperties: false
+            description: Where/why this achievement was unlocked.
+            properties:
+                verifiedEventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                rankedSeasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                note:
+                    type: string
+                    description: Localized short "because" explanation.
+
+        AchievementProgress:
+            type: object
+            additionalProperties: false
+            required: [achievementId, status]
+            properties:
+                achievementId:
+                    $ref: "#/components/schemas/AchievementId"
+                definition:
+                    $ref: "#/components/schemas/AchievementDefinition"
+                status:
+                    $ref: "#/components/schemas/AchievementProgressStatus"
+                progress:
+                    type: number
+                    description: Normalized progress 0..1 for UI; server-defined (may represent max across requirements).
+                    minimum: 0
+                    maximum: 1
+                progressByRequirement:
+                    type: array
+                    description: Optional per-requirement progress for transparency.
+                    items:
+                        type: object
+                        additionalProperties: false
+                        required: [metricId, current, target]
+                        properties:
+                            metricId:
+                                type: string
+                            current:
+                                type: number
+                            target:
+                                type: number
+                            progress:
+                                type: number
+                                minimum: 0
+                                maximum: 1
+                unlockedAt:
+                    type: string
+                    format: date-time
+                unlockContext:
+                    $ref: "#/components/schemas/AchievementUnlockContext"
+                # Helpful for UX (e.g., "only counts in verified events").
+                eligibilitySummary:
+                    type: string
+
+        AchievementProgressPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementProgress"
+                nextCursor:
+                    type: string
+
+        AchievementUnlockEventId:
+            type: string
+            example: aue_01J8W0K7E2ZQZ6P0M4NQW2Y7EA
+
+        AchievementUnlockEvent:
+            type: object
+            additionalProperties: false
+            required: [eventId, achievementId, unlockedAt]
+            properties:
+                eventId:
+                    $ref: "#/components/schemas/AchievementUnlockEventId"
+                achievementId:
+                    $ref: "#/components/schemas/AchievementId"
+                unlockedAt:
+                    type: string
+                    format: date-time
+                context:
+                    $ref: "#/components/schemas/AchievementUnlockContext"
+
+        UnlockedAchievementList:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        type: object
+                        additionalProperties: false
+                        required: [achievementId, unlockedAt]
+                        properties:
+                            achievementId:
+                                $ref: "#/components/schemas/AchievementId"
+                            unlockedAt:
+                                type: string
+                                format: date-time
+                            rewardPreview:
+                                $ref: "#/components/schemas/AchievementReward"
+                            rarity:
+                                $ref: "#/components/schemas/AchievementRarity"
+
+        UserAchievementPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AchievementProgress"
+                nextCursor:
+                    type: string

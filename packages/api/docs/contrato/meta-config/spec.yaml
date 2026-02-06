@@ -1,0 +1,905 @@
+openapi: 3.1.2
+info:
+  title: Rankup API
+  version: 0.1.0
+  summary: Tournament-based social sports gaming platform (no betting).
+  description: |
+    Rankup is a tournament-centric social gaming platform built around real-world sports events.
+    This OpenAPI document is **design-first** and intended to evolve safely over time.
+
+servers:
+  - name: prod
+    url: https://api.rankup.example.com/v1
+    description: Production
+  - name: staging
+    url: https://staging-api.rankup.example.com/v1
+    description: Staging
+
+tags:
+  - name: meta
+    summary: Meta
+    description: Health checks and app configuration.
+    kind: nav
+
+  - name: meta.health
+    summary: Health
+    description: Liveness/readiness probes for load balancers and orchestration.
+    parent: meta
+    kind: nav
+
+  - name: meta.config
+    summary: Config
+    description: App configuration and bootstrap payloads.
+    parent: meta
+    kind: nav
+
+security:
+  - BearerAuth: []
+
+paths:
+  /healthz:
+    get:
+      tags: [meta.health]
+      operationId: getHealthz
+      summary: Liveness health check
+      description: |
+        Liveness probe. Use to determine whether the service process is running and able to respond.
+        This endpoint **must not** depend on external downstream services (DB, caches, providers),
+        otherwise it becomes flaky and unusable for orchestration.
+
+        Intended for load balancers / k8s liveness checks.
+      security: []
+      responses:
+        "200":
+          description: Service is alive.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                ok:
+                  value: ok
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    serverTime: "2026-01-31T12:00:00Z"
+                    uptimeSeconds: 12345
+                    build:
+                      service: rankup-api
+                      environment: prod
+                      version: "0.1.0"
+                      commitSha: "a1b2c3d4"
+                      builtAt: "2026-01-31T10:00:00Z"
+        "503":
+          description: Service is not alive (rare; typically only on fatal internal state).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                unavailable:
+                  value: unavailable
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+              examples:
+                unavailable:
+                  value:
+                    status: unavailable
+                    serverTime: "2026-01-31T12:00:00Z"
+                    uptimeSeconds: 12345
+                    build:
+                      service: rankup-api
+                      environment: prod
+                      version: "0.1.0"
+                      commitSha: "a1b2c3d4"
+                      builtAt: "2026-01-31T10:00:00Z"
+
+  /readyz:
+    get:
+      tags: [meta.health]
+      operationId: getReadyz
+      summary: Readiness health check
+      description: |
+        Readiness probe. Use to determine whether the service is ready to receive traffic.
+
+        This endpoint **may** validate critical dependencies (DB connectivity, cache, message bus,
+        sports-data provider availability, etc). If not ready, returns **503**.
+      security: []
+      parameters:
+        - name: verbose
+          in: query
+          description: |
+            If true, returns per-dependency check statuses.
+            Keep details non-sensitive; never expose secrets or internal topology.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Service is ready.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessCheck"
+              examples:
+                ready:
+                  value:
+                    status: ready
+                    serverTime: "2026-01-31T12:00:00Z"
+                    checks:
+                      - name: database
+                        status: ok
+                        observedAt: "2026-01-31T12:00:00Z"
+                      - name: sportsProvider
+                        status: ok
+                        observedAt: "2026-01-31T12:00:00Z"
+        "503":
+          description: Service is not ready (temporarily).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessCheck"
+              examples:
+                notReady:
+                  value:
+                    status: notReady
+                    serverTime: "2026-01-31T12:00:00Z"
+                    checks:
+                      - name: database
+                        status: fail
+                        observedAt: "2026-01-31T12:00:00Z"
+
+  /app/config:
+    get:
+      tags: [meta.config]
+      operationId: getAppConfig
+      summary: Get public app configuration
+      description: |
+        Public configuration used by clients (mobile/web) to bootstrap UI decisions:
+        - supported locales
+        - maintenance status
+        - client minimum/recommended versions
+        - feature flags (non-sensitive)
+        - legal/support URLs
+
+        This endpoint is designed to be safely cacheable and supports **ETag** + **304**.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Current public config.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfig"
+              examples:
+                example:
+                  value:
+                    apiVersion: "2026-01-31"
+                    serverTime: "2026-01-31T12:00:00Z"
+                    environment: prod
+                    locales:
+                      default: en
+                      supported: [en, es, pt-PT]
+                    clientPolicy:
+                      ios:
+                        minimum: "1.0.0"
+                        recommended: "1.2.0"
+                        updateUrl: "https://apps.apple.com/app/id000000000"
+                      android:
+                        minimum: "1.0.0"
+                        recommended: "1.2.0"
+                        updateUrl: "https://play.google.com/store/apps/details?id=com.rankup"
+                      web:
+                        minimum: "2026.01.01"
+                        recommended: "2026.01.31"
+                    maintenance:
+                      mode: none
+                    featureFlags:
+                      rankedEnabled: true
+                      chatEnabledByDefault: true
+                      exploreEnabled: true
+                    urls:
+                      statusPageUrl: "https://status.rankup.example.com"
+                      termsOfServiceUrl: "https://rankup.example.com/terms"
+                      privacyPolicyUrl: "https://rankup.example.com/privacy"
+                      supportUrl: "https://rankup.example.com/support"
+        "304":
+          description: Not modified. Use cached version.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /app/bootstrap:
+    get:
+      tags: [meta.config]
+      operationId: getAppBootstrap
+      summary: Get bootstrap payload for app startup
+      description: |
+        Aggregated payload to reduce startup round-trips for clients.
+
+        **Auth is optional**:
+        - Anonymous: returns only public sections.
+        - Authenticated: may include `me` and other personalized sections if requested via `include`.
+
+        Avoid turning this into a “god endpoint”.
+        Add sections only when they materially reduce latency and improve perceived app responsiveness.
+      security:
+        - {}
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: include
+          in: query
+          description: |
+            Optional sections to include. CSV recommended (explode=false).
+            Unknown values must be ignored for forward compatibility.
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/BootstrapInclude"
+          examples:
+            minimal:
+              value: []
+            common:
+              value: [me, unreadCounts]
+      responses:
+        "200":
+          description: Bootstrap payload (public + optional personalized sections).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppBootstrap"
+              examples:
+                anonymousMinimal:
+                  value:
+                    serverTime: "2026-01-31T12:00:00Z"
+                    config:
+                      apiVersion: "2026-01-31"
+                      serverTime: "2026-01-31T12:00:00Z"
+                      environment: prod
+                      locales:
+                        default: en
+                        supported: [en, es, pt-PT]
+                      clientPolicy:
+                        ios:
+                          minimum: "1.0.0"
+                          recommended: "1.2.0"
+                          updateUrl: "https://apps.apple.com/app/id000000000"
+                        android:
+                          minimum: "1.0.0"
+                          recommended: "1.2.0"
+                          updateUrl: "https://play.google.com/store/apps/details?id=com.rankup"
+                        web:
+                          minimum: "2026.01.01"
+                          recommended: "2026.01.31"
+                      maintenance:
+                        mode: none
+                      featureFlags:
+                        rankedEnabled: true
+                        exploreEnabled: true
+                      urls:
+                        statusPageUrl: "https://status.rankup.example.com"
+                        termsOfServiceUrl: "https://rankup.example.com/terms"
+                        privacyPolicyUrl: "https://rankup.example.com/privacy"
+                        supportUrl: "https://rankup.example.com/support"
+                authenticatedWithMe:
+                  value:
+                    serverTime: "2026-01-31T12:00:00Z"
+                    config:
+                      apiVersion: "2026-01-31"
+                      serverTime: "2026-01-31T12:00:00Z"
+                      environment: prod
+                      locales:
+                        default: en
+                        supported: [en, es]
+                      clientPolicy:
+                        ios:
+                          minimum: "1.0.0"
+                          recommended: "1.2.0"
+                          updateUrl: "https://apps.apple.com/app/id000000000"
+                        android:
+                          minimum: "1.0.0"
+                          recommended: "1.2.0"
+                          updateUrl: "https://play.google.com/store/apps/details?id=com.rankup"
+                        web:
+                          minimum: "2026.01.01"
+                          recommended: "2026.01.31"
+                      maintenance:
+                        mode: none
+                      featureFlags:
+                        rankedEnabled: true
+                        exploreEnabled: true
+                      urls:
+                        statusPageUrl: "https://status.rankup.example.com"
+                        termsOfServiceUrl: "https://rankup.example.com/terms"
+                        privacyPolicyUrl: "https://rankup.example.com/privacy"
+                        supportUrl: "https://rankup.example.com/support"
+                    me:
+                      userId: "usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1"
+                      username: "maria"
+                      pictureUrl: "https://cdn.rankup.example.com/u/usr_.../avatar.png"
+                    unreadCounts:
+                      notifications: 3
+                      tournamentInvites: 1
+                      chats: 5
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT bearer auth. Access tokens issued by the Rankup auth system (e.g., Cognito).
+
+  parameters:
+    Accept-Language:
+      name: Accept-Language
+      in: header
+      description: Preferred locale for human-readable text (errors/messages/labels).
+      required: false
+      schema:
+        type: string
+        examples:
+          - en
+          - es
+          - pt-PT
+
+    If-None-Match:
+      name: If-None-Match
+      in: header
+      description: Standard ETag cache validator.
+      required: false
+      schema:
+        type: string
+      example: '"cfg_20260131_abcdef"'
+
+  headers:
+    X-Request-Id:
+      description: Correlation identifier for tracing/debugging.
+      schema:
+        type: string
+      example: req_01J4D3H8C9N0P1Q2R3S4T5U6V7
+
+    ETag:
+      description: Strong ETag for cache validation.
+      schema:
+        type: string
+        pattern: '^"'
+      example: '"cfg_20260131_abcdef"'
+
+    Cache-Control-Public-Short:
+      description: Cache policy for public short-lived resources.
+      schema:
+        type: string
+      example: public, max-age=60
+
+    Cache-Control-NoStore:
+      description: Cache policy for user/personalized resources.
+      schema:
+        type: string
+      example: no-store
+
+    Content-Language:
+      description: Language of the response payload when localized strings are present.
+      schema:
+        type: string
+      example: en
+
+    Vary-Authorization-AcceptLanguage:
+      description: Indicates the response varies based on Authorization and Accept-Language.
+      schema:
+        type: string
+      example: Authorization, Accept-Language
+
+    Retry-After:
+      description: Seconds to wait before retrying (best-effort).
+      schema:
+        type: integer
+        minimum: 0
+      example: 5
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            unauthorized:
+              value:
+                type: "https://errors.rankup.dev/auth/unauthorized"
+                title: "Unauthorized"
+                status: 401
+                detail: "Missing or invalid access token."
+                instance: "urn:problem:2c4c5d34-2b18-4d9b-9f6b-6b77f4ddc3ae"
+
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+        Retry-After:
+          $ref: "#/components/headers/Retry-After"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            rateLimited:
+              value:
+                type: "https://errors.rankup.dev/rate-limit/too-many-requests"
+                title: "Too Many Requests"
+                status: 429
+                detail: "Rate limit exceeded. Try again in 5 seconds."
+                instance: "urn:problem:5f5d3e1c-6c1b-4ce8-8b5c-9ce4a5f0c1c1"
+
+    InternalServerError:
+      description: Unexpected server error.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            internalError:
+              value:
+                type: "about:blank"
+                title: "Internal Server Error"
+                status: 500
+                detail: "Unexpected error."
+                instance: "urn:problem:1c2d3e4f-7a8b-4c9d-9e0f-1a2b3c4d5e6f"
+
+    ServiceUnavailable:
+      description: Service temporarily unavailable.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+        Retry-After:
+          $ref: "#/components/headers/Retry-After"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            unavailable:
+              value:
+                type: "about:blank"
+                title: "Service Unavailable"
+                status: 503
+                detail: "Service temporarily unavailable."
+                instance: "urn:problem:0e2f3a1b-4c5d-6e7f-8a9b-0c1d2e3f4a5b"
+
+    TournamentNotFound:
+      description: Tournament not found.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            tournamentNotFound:
+              value:
+                type: "https://errors.rankup.dev/tournaments/not-found"
+                title: "Tournament not found"
+                status: 404
+                detail: "Tournament does not exist or is not visible."
+                instance: "urn:problem:0f1e2d3c-4b5a-6978-8c9d-0e1f2a3b4c5d"
+
+    SubmissionLocked:
+      description: Submissions are locked for this matchday.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            submissionsLocked:
+              value:
+                type: "https://errors.rankup.dev/submissions/locked"
+                title: "Submissions locked"
+                status: 409
+                detail: "Submissions are locked for this matchday."
+                instance: "urn:problem:1f2e3d4c-5b6a-7980-9a0b-1c2d3e4f5a6b"
+
+    MatchdayClosed:
+      description: Matchday is closed for gameplay submissions.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            matchdayClosed:
+              value:
+                type: "https://errors.rankup.dev/matchdays/closed"
+                title: "Matchday closed"
+                status: 409
+                detail: "Matchday is closed for submissions."
+                instance: "urn:problem:2a3b4c5d-6e7f-8091-0a1b-2c3d4e5f6a7b"
+
+  schemas:
+    HealthStatus:
+      type: string
+      enum: [ok, unavailable]
+
+    HealthCheck:
+      type: object
+      additionalProperties: false
+      required: [status, serverTime, uptimeSeconds, build]
+      properties:
+        status:
+          $ref: "#/components/schemas/HealthStatus"
+        serverTime:
+          type: string
+          format: date-time
+        uptimeSeconds:
+          type: integer
+          minimum: 0
+        build:
+          $ref: "#/components/schemas/BuildInfo"
+
+    ReadinessStatus:
+      type: string
+      enum: [ready, notReady]
+
+    CheckStatus:
+      type: string
+      enum: [ok, fail, warn]
+
+    ReadinessCheck:
+      type: object
+      additionalProperties: false
+      required: [status, serverTime, checks]
+      properties:
+        status:
+          $ref: "#/components/schemas/ReadinessStatus"
+        serverTime:
+          type: string
+          format: date-time
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DependencyCheck"
+
+    DependencyCheck:
+      type: object
+      additionalProperties: false
+      required: [name, status, observedAt]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          examples: [database, cache, sportsProvider]
+        status:
+          $ref: "#/components/schemas/CheckStatus"
+        observedAt:
+          type: string
+          format: date-time
+        details:
+          description: Optional non-sensitive extra info (omit by default).
+          type: object
+          additionalProperties:
+            type: string
+
+    BuildInfo:
+      type: object
+      additionalProperties: false
+      required: [service, environment, version, commitSha, builtAt]
+      properties:
+        service:
+          type: string
+          example: rankup-api
+        environment:
+          type: string
+          enum: [local, dev, staging, prod]
+        version:
+          type: string
+          description: Server release version (SemVer recommended).
+          example: "0.1.0"
+        commitSha:
+          type: string
+          description: Git commit SHA (short or full).
+          example: a1b2c3d4
+        builtAt:
+          type: string
+          format: date-time
+          example: "2026-01-31T10:00:00Z"
+
+    AppConfig:
+      type: object
+      additionalProperties: false
+      required: [apiVersion, serverTime, environment, locales, clientPolicy, maintenance, featureFlags, urls]
+      properties:
+        apiVersion:
+          type: string
+          description: |
+            API configuration version identifier (used for debugging and client cache busting).
+            This is not the OpenAPI spec version.
+          example: "2026-01-31"
+        serverTime:
+          type: string
+          format: date-time
+        environment:
+          type: string
+          enum: [local, dev, staging, prod]
+        locales:
+          $ref: "#/components/schemas/LocaleConfig"
+        clientPolicy:
+          $ref: "#/components/schemas/ClientPolicy"
+        maintenance:
+          $ref: "#/components/schemas/MaintenanceStatus"
+        featureFlags:
+          type: object
+          description: Feature flags safe to expose to clients (no secrets).
+          additionalProperties:
+            type: boolean
+        urls:
+          $ref: "#/components/schemas/PublicUrls"
+
+    LocaleConfig:
+      type: object
+      additionalProperties: false
+      required: [default, supported]
+      properties:
+        default:
+          type: string
+          description: Default locale if none specified.
+          example: en
+        supported:
+          type: array
+          items:
+            type: string
+          example: [en, es, pt-PT]
+
+    ClientPolicy:
+      type: object
+      additionalProperties: false
+      required: [ios, android, web]
+      properties:
+        ios:
+          $ref: "#/components/schemas/ClientVersionPolicy"
+        android:
+          $ref: "#/components/schemas/ClientVersionPolicy"
+        web:
+          $ref: "#/components/schemas/ClientVersionPolicy"
+
+    ClientVersionPolicy:
+      type: object
+      additionalProperties: false
+      required: [minimum, recommended]
+      properties:
+        minimum:
+          type: string
+          description: Minimum supported client build/version.
+          example: "1.0.0"
+        recommended:
+          type: string
+          description: Recommended client build/version.
+          example: "1.2.0"
+        updateUrl:
+          type: string
+          format: uri
+          description: Store/app update URL (optional per platform).
+          example: "https://apps.apple.com/app/id000000000"
+
+    MaintenanceMode:
+      type: string
+      enum: [none, readOnly, down]
+
+    MaintenanceStatus:
+      type: object
+      additionalProperties: false
+      required: [mode]
+      properties:
+        mode:
+          $ref: "#/components/schemas/MaintenanceMode"
+        message:
+          type: string
+          description: Optional human-readable maintenance message.
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+
+    PublicUrls:
+      type: object
+      additionalProperties: false
+      required: [statusPageUrl, termsOfServiceUrl, privacyPolicyUrl, supportUrl]
+      properties:
+        statusPageUrl:
+          type: string
+          format: uri
+        termsOfServiceUrl:
+          type: string
+          format: uri
+        privacyPolicyUrl:
+          type: string
+          format: uri
+        supportUrl:
+          type: string
+          format: uri
+
+    BootstrapInclude:
+      type: string
+      enum: [me, unreadCounts]
+
+    AppBootstrap:
+      type: object
+      additionalProperties: false
+      required: [serverTime, config]
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        config:
+          $ref: "#/components/schemas/AppConfig"
+        me:
+          $ref: "#/components/schemas/MeSummary"
+        unreadCounts:
+          $ref: "#/components/schemas/UnreadCounts"
+
+    MeSummary:
+      type: object
+      additionalProperties: false
+      required: [userId, username]
+      properties:
+        userId:
+          type: string
+          description: Stable user identifier.
+          example: usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1
+        username:
+          type: string
+          example: maria
+        pictureUrl:
+          type: string
+          format: uri
+          description: Optional avatar URL.
+
+    UnreadCounts:
+      type: object
+      additionalProperties: false
+      required: [notifications, tournamentInvites, chats]
+      properties:
+        notifications:
+          type: integer
+          minimum: 0
+        tournamentInvites:
+          type: integer
+          minimum: 0
+        chats:
+          type: integer
+          minimum: 0
+
+    Problem:
+      type: object
+      description: |
+        Problem Details as per RFC 9457 (compatible with RFC 7807).
+        Use `application/problem+json`.
+      required: [type, title]
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: A URI reference that identifies the problem type.
+          default: about:blank
+        title:
+          type: string
+          description: Short, human-readable summary of the problem type.
+        status:
+          type: integer
+          format: int32
+          minimum: 100
+          maximum: 599
+          description: HTTP status code.
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          format: uri-reference
+          description: A URI reference that identifies the specific occurrence.
+        code:
+          type: string
+          description: Application-specific stable error code.
+          example: AUTH_INVALID_TOKEN
+        requestId:
+          type: string
+          description: Correlation id (same as X-Request-Id when available).
+        errors:
+          type: array
+          description: Optional list of field-level errors (validation).
+          items:
+            $ref: "#/components/schemas/FieldError"
+
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [path, message]
+      properties:
+        path:
+          type: string
+          description: JSON pointer-like or dotted path to the failing field.
+          example: $.include[0]
+        message:
+          type: string
+          example: invalid value

@@ -1,0 +1,1270 @@
+tags:
+    - name: promotions
+      summary: Promotions & rewards
+      description: Official promotions and reward fulfillment (no betting / no gambling).
+      kind: nav
+
+    - name: promotions.catalog
+      summary: Catalog
+      description: Public promotion catalog and details (pre-join safe).
+      parent: promotions
+      kind: nav
+
+    - name: promotions.participation
+      summary: Participation
+      description: Eligibility checks and opt-in/out (legal + transparency).
+      parent: promotions
+      kind: nav
+
+    - name: promotions.rewards
+      summary: Rewards
+      description: My official rewards and claim/fulfillment workflow.
+      parent: promotions
+      kind: nav
+
+paths:
+    /promotions:
+        get:
+            tags: [promotions.catalog]
+            operationId: listPromotions
+            summary: List promotions
+            description: |
+                Lists official promotions (campaigns) that may award real-world rewards (gift cards, hardware, etc.).
+                This is NOT betting: no wagering, no cashouts, no odds.
+
+                Pre-join safe:
+                - Does not expose tournament gameplay data (rankings/submissions/chat).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/PromotionStatus"
+                - name: type
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/PromotionType"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: verifiedEventId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventId"
+                - name: creatorId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorId"
+                - name: region
+                  in: query
+                  required: false
+                  description: Optional region key (server-defined) for regional promos.
+                  schema:
+                      type: string
+                      maxLength: 32
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for richer promo cards.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/PromotionInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withRewards:
+                          value: [rewards, mechanics]
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/PromotionSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Promotions page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Promotions can be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PromotionSummaryPage"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /promotions/{promotionId}:
+        get:
+            tags: [promotions.catalog]
+            operationId: getPromotion
+            summary: Get promotion details
+            description: |
+                Returns promotion details including mechanics, rewards, and legal/eligibility summary.
+
+                Pre-join safe:
+                - Does not expose tournament gameplay data (rankings/submissions/chat).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/PromotionId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/PromotionInclude"
+                  examples:
+                      default:
+                          value: [rewards, mechanics, legal]
+                      withMyStatus:
+                          value: [rewards, mechanics, legal, myStatus]
+            responses:
+                "200":
+                    description: Promotion.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Promotion detail can be cached briefly; `myStatus` makes it personalized.
+                            schema:
+                                type: string
+                            example: public, max-age=60
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Promotion"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /promotions/{promotionId}/me:
+        get:
+            tags: [promotions.participation]
+            operationId: getMyPromotionStatus
+            summary: Get my eligibility/participation for a promotion
+            description: |
+                Returns the current user's eligibility and participation state for a promotion.
+
+                This endpoint exists to:
+                - prevent "desengaño" by being explicit about why a user can/cannot participate
+                - make legal opt-in requirements explicit
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/PromotionId"
+            responses:
+                "200":
+                    description: My promotion state.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PromotionMeState"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /promotions/{promotionId}/opt-in:
+        put:
+            tags: [promotions.participation]
+            operationId: optInToPromotion
+            summary: Opt-in to a promotion (accept terms)
+            description: |
+                Opts the current user into a promotion and records acceptance of the promotion terms.
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/PromotionId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/PromotionOptInRequest"
+            responses:
+                "200":
+                    description: Opt-in applied (or already opted-in).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PromotionMeState"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [promotions.participation]
+            operationId: optOutFromPromotion
+            summary: Opt-out from a promotion
+            description: |
+                Opts the current user out (if allowed).
+
+                Notes:
+                - Some promotions may disallow opt-out after a certain point (e.g., after prizes are allocated).
+                - Server may return 409 in those cases.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/PromotionId"
+            responses:
+                "204":
+                    description: Opted out (or no-op).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /promotions/{promotionId}/winners:
+        get:
+            tags: [promotions.catalog]
+            operationId: listPromotionWinners
+            summary: List promotion winners (public summary)
+            description: |
+                Public winner list for transparency.
+
+                Privacy posture:
+                - Only includes winners who consent to public display, OR is anonymized per policy.
+                - This is not a "spectator" view into tournaments; it is a promo transparency list.
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/PromotionId"
+                - name: include
+                  in: query
+                  required: false
+                  schema:
+                      type: array
+                      style: form
+                      explode: false
+                      items:
+                          $ref: "#/components/schemas/PromotionWinnerInclude"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Winners page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: Winners page may be cached briefly.
+                            schema:
+                                type: string
+                            example: public, max-age=300
+                        Vary:
+                            $ref: "#/components/headers/Vary-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PromotionWinnerPage"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/promotions:
+        get:
+            tags: [promotions.participation]
+            operationId: listMyPromotions
+            summary: List my promotions (participation + wins)
+            description: |
+                Lists promotions relevant to the current user:
+                - opted-in
+                - participating (via eligible verified events)
+                - won/claimed
+
+                Personalized; not cacheable.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/MyPromotionStatusFilter"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyPromotionInclude"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: My promotions page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyPromotionPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/rewards:
+        get:
+            tags: [promotions.rewards]
+            operationId: listMyRewards
+            summary: List my official rewards
+            description: |
+                Lists reward grants assigned to the current user (from promotions / verified events).
+
+                Notes:
+                - Rewards are never tied to betting.
+                - Rewards can be physical or digital.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RewardGrantStatus"
+                - name: promotionId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/PromotionId"
+                - name: verifiedEventId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/VerifiedEventId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RewardInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withDelivery:
+                          value: [delivery]
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RewardSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: My rewards page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RewardGrantPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/rewards/{rewardGrantId}:
+        get:
+            tags: [promotions.rewards]
+            operationId: getMyReward
+            summary: Get my reward grant
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RewardGrantId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RewardInclude"
+            responses:
+                "200":
+                    description: Reward grant.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RewardGrant"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/rewards/{rewardGrantId}/claim:
+        post:
+            tags: [promotions.rewards]
+            operationId: claimMyReward
+            summary: Claim a reward
+            description: |
+                Claims a reward grant and provides fulfillment details as needed.
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+
+                Typical flow:
+                1) user gets a grant (status=claimable)
+                2) user accepts terms + provides email/shipping
+                3) server transitions to claimed/delivering
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RewardGrantId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ClaimRewardRequest"
+            responses:
+                "200":
+                    description: Reward claimed (or idempotent re-claim).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RewardGrant"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/rewards/fulfillment-profile:
+        get:
+            tags: [promotions.rewards]
+            operationId: getMyRewardFulfillmentProfile
+            summary: Get my default reward fulfillment profile
+            description: |
+                Returns default fulfillment info (email/shipping) used to claim rewards faster.
+
+                This is optional. Some products prefer to collect this only at claim time.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Fulfillment profile.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RewardFulfillmentProfile"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+        patch:
+            tags: [promotions.rewards]
+            operationId: updateMyRewardFulfillmentProfile
+            summary: Update my default reward fulfillment profile
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateRewardFulfillmentProfileRequest"
+            responses:
+                "200":
+                    description: Updated fulfillment profile.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RewardFulfillmentProfile"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+
+components:
+    parameters:
+        PromotionId:
+            name: promotionId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/PromotionId"
+
+        RewardGrantId:
+            name: rewardGrantId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/RewardGrantId"
+
+    schemas:
+        PromotionId:
+            type: string
+            description: Stable promotion identifier.
+            example: pr_01J8W0K7E2ZQZ6P0M4NQW2Y7FA
+
+        PromotionStatus:
+            type: string
+            enum: [upcoming, live, ended, paused]
+            description: Promotion lifecycle state.
+
+        PromotionType:
+            type: string
+            description: High-level mechanic type (no betting).
+            enum:
+                - leaderboardPlacement
+                - participation
+                - randomDraw
+                - streak
+                - special
+
+        PromotionSort:
+            type: string
+            enum: [featured, startTimeAsc, startTimeDesc, newest]
+            default: featured
+
+        PromotionInclude:
+            type: string
+            enum:
+                [
+                    rewards,
+                    mechanics,
+                    eligibility,
+                    legal,
+                    winnersPreview,
+                    myStatus,
+                ]
+
+        PromotionScopeKind:
+            type: string
+            enum: [verifiedEvent, verifiedTournament, rankedSeason, creator]
+            description: How participation is anchored.
+
+        PromotionSchedule:
+            type: object
+            additionalProperties: false
+            properties:
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                joinOpensAt:
+                    type: string
+                    format: date-time
+                joinClosesAt:
+                    type: string
+                    format: date-time
+
+        PromotionEligibility:
+            type: object
+            additionalProperties: false
+            description: Eligibility rules for a promotion.
+            properties:
+                verifiedOnly:
+                    type: boolean
+                    default: true
+                    description: If true, only verified contexts count.
+                minAccountAgeDays:
+                    type: integer
+                    minimum: 0
+                minLevel:
+                    type: integer
+                    minimum: 0
+                    description: Optional minimum global level/rank.
+                regionAllowList:
+                    type: array
+                    items:
+                        type: string
+                ageGate:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        required:
+                            type: boolean
+                        minimumAge:
+                            type: integer
+                            minimum: 0
+                notes:
+                    type: string
+                    description: Localized short eligibility summary.
+
+        PromotionLegal:
+            type: object
+            additionalProperties: false
+            required: [termsVersion, termsUrl]
+            properties:
+                termsVersion:
+                    type: string
+                    description: Version string for legal terms acceptance.
+                    example: "2026-02-01"
+                termsUrl:
+                    type: string
+                    format: uri
+                    description: URL for full terms and conditions.
+                disclaimer:
+                    type: string
+                    description: Localized disclaimer (no betting, no purchase necessary, etc.).
+                privacyNotes:
+                    type: string
+                    description: Localized privacy note about winner announcements and fulfillment.
+
+        PromotionMechanicKind:
+            type: string
+            enum:
+                [
+                    joinAndPlay,
+                    finishTopN,
+                    finishTopPercent,
+                    randomDrawAmongParticipants,
+                    streak,
+                    other,
+                ]
+
+        PromotionMechanic:
+            type: object
+            additionalProperties: false
+            required: [kind, summary]
+            properties:
+                kind:
+                    $ref: "#/components/schemas/PromotionMechanicKind"
+                summary:
+                    type: string
+                    description: Localized 1-liner for the user ("Queda Top 100 para ganar...").
+                details:
+                    type: string
+                    description: Localized detail explanation (transparent to reduce confusion).
+                parameters:
+                    type: object
+                    additionalProperties: true
+                    description: Mechanic-specific parameters (e.g., topN=100).
+
+        PromotionRewardType:
+            type: string
+            enum: [giftCard, physicalItem, digitalItem, other]
+            description: Reward category (no cash wagering).
+
+        PromotionRewardDefinition:
+            type: object
+            additionalProperties: false
+            required: [rewardId, type, title, quantity]
+            properties:
+                rewardId:
+                    type: string
+                    example: rw_ps5_2026
+                type:
+                    $ref: "#/components/schemas/PromotionRewardType"
+                title:
+                    type: string
+                    description: Localized reward title.
+                description:
+                    type: string
+                imageUrl:
+                    type: string
+                    format: uri
+                quantity:
+                    type: integer
+                    minimum: 1
+                estimatedValueText:
+                    type: string
+                    description: Optional display-only value text (avoid implying monetary betting).
+                    example: "Valor estimado: 499€"
+                fulfillmentMethod:
+                    $ref: "#/components/schemas/RewardFulfillmentMethod"
+
+        PromotionScope:
+            type: object
+            additionalProperties: false
+            required: [scopeKind]
+            properties:
+                scopeKind:
+                    $ref: "#/components/schemas/PromotionScopeKind"
+                verifiedEventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                rankedSeasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+                creatorId:
+                    $ref: "#/components/schemas/CreatorId"
+
+        PromotionSummary:
+            type: object
+            additionalProperties: false
+            required: [promotionId, status, type, title, schedule, scope]
+            properties:
+                promotionId:
+                    $ref: "#/components/schemas/PromotionId"
+                status:
+                    $ref: "#/components/schemas/PromotionStatus"
+                type:
+                    $ref: "#/components/schemas/PromotionType"
+                title:
+                    type: string
+                    description: Localized title.
+                subtitle:
+                    type: string
+                heroImageUrl:
+                    type: string
+                    format: uri
+                schedule:
+                    $ref: "#/components/schemas/PromotionSchedule"
+                scope:
+                    $ref: "#/components/schemas/PromotionScope"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                featured:
+                    type: boolean
+                rewardsPreview:
+                    type: array
+                    description: Optional small preview list for cards.
+                    items:
+                        $ref: "#/components/schemas/PromotionRewardDefinition"
+
+        Promotion:
+            allOf:
+                - $ref: "#/components/schemas/PromotionSummary"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      description:
+                          type: string
+                          description: Localized long description.
+                      mechanics:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/PromotionMechanic"
+                      rewards:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/PromotionRewardDefinition"
+                      eligibility:
+                          $ref: "#/components/schemas/PromotionEligibility"
+                      legal:
+                          $ref: "#/components/schemas/PromotionLegal"
+                      myStatus:
+                          $ref: "#/components/schemas/PromotionMeState"
+                      winnersPreview:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              published:
+                                  type: boolean
+                              winnerCount:
+                                  type: integer
+                                  minimum: 0
+
+        PromotionSummaryPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PromotionSummary"
+                nextCursor:
+                    type: string
+
+        PromotionMeEligibilityStatus:
+            type: string
+            enum: [eligible, ineligible, requiresAction]
+            description: Eligibility evaluation status.
+
+        PromotionMeParticipationStatus:
+            type: string
+            enum:
+                [
+                    notOptedIn,
+                    optedIn,
+                    participating,
+                    completed,
+                    winner,
+                    disqualified,
+                ]
+            description: Participation state from the user's perspective.
+
+        PromotionMeBlockReason:
+            type: string
+            enum:
+                - notVerifiedEligible
+                - regionNotEligible
+                - ageNotEligible
+                - accountTooNew
+                - levelTooLow
+                - promoNotStarted
+                - promoEnded
+                - joinClosed
+                - termsNotAccepted
+                - other
+
+        PromotionRequiredAction:
+            type: string
+            enum: [provideDateOfBirth, verifyEmail, acceptTerms, updateCountry]
+            description: Required user action to become eligible (server-defined).
+
+        PromotionMeState:
+            type: object
+            additionalProperties: false
+            required:
+                [promotionId, eligibilityStatus, participationStatus, canOptIn]
+            properties:
+                promotionId:
+                    $ref: "#/components/schemas/PromotionId"
+                eligibilityStatus:
+                    $ref: "#/components/schemas/PromotionMeEligibilityStatus"
+                participationStatus:
+                    $ref: "#/components/schemas/PromotionMeParticipationStatus"
+                canOptIn:
+                    type: boolean
+                optedInAt:
+                    type: string
+                    format: date-time
+                acceptedTermsVersion:
+                    type: string
+                blockedReasons:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PromotionMeBlockReason"
+                requiredActions:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PromotionRequiredAction"
+                nextSteps:
+                    type: string
+                    description: Localized guidance for UX ("Únete al evento verificado para participar...").
+
+        PromotionOptInRequest:
+            type: object
+            additionalProperties: false
+            required: [termsVersion]
+            properties:
+                termsVersion:
+                    type: string
+                    description: Must match `promotion.legal.termsVersion`.
+                consentToPublicWinnerDisplay:
+                    type: boolean
+                    description: Whether the user consents to show their username in the public winners list.
+                    default: false
+
+        PromotionWinnerInclude:
+            type: string
+            enum: [reward]
+            description: Optional expansions.
+
+        PromotionWinnerEntry:
+            type: object
+            additionalProperties: false
+            required: [position, displayName]
+            properties:
+                position:
+                    type: integer
+                    minimum: 1
+                displayName:
+                    type: string
+                    description: Public winner display name (may be anonymized).
+                userId:
+                    type: string
+                    description: Present only when policy allows (generally avoid).
+                reward:
+                    $ref: "#/components/schemas/PromotionRewardDefinition"
+                announcedAt:
+                    type: string
+                    format: date-time
+
+        PromotionWinnerPage:
+            type: object
+            additionalProperties: false
+            required: [items, published]
+            properties:
+                published:
+                    type: boolean
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PromotionWinnerEntry"
+                nextCursor:
+                    type: string
+
+        MyPromotionStatusFilter:
+            type: string
+            enum: [any, optedIn, participating, winner, ended]
+            default: any
+
+        MyPromotionInclude:
+            type: string
+            enum: [myStatus, rewardsPreview]
+
+        MyPromotionEntry:
+            type: object
+            additionalProperties: false
+            required: [promotion, myStatus]
+            properties:
+                promotion:
+                    $ref: "#/components/schemas/PromotionSummary"
+                myStatus:
+                    $ref: "#/components/schemas/PromotionMeState"
+
+        MyPromotionPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MyPromotionEntry"
+                nextCursor:
+                    type: string
+
+        RewardGrantId:
+            type: string
+            description: Stable reward grant identifier.
+            example: rgr_01J8W0K7E2ZQZ6P0M4NQW2Y7FB
+
+        RewardGrantStatus:
+            type: string
+            enum:
+                [
+                    pending,
+                    claimable,
+                    claimed,
+                    delivering,
+                    delivered,
+                    expired,
+                    canceled,
+                ]
+            description: Reward grant lifecycle.
+
+        RewardInclude:
+            type: string
+            enum: [delivery, source]
+            description: Optional expansions.
+
+        RewardSort:
+            type: string
+            enum: [newest, oldest, status]
+            default: newest
+
+        RewardFulfillmentMethod:
+            type: string
+            enum: [email, shipping, inApp]
+            description: How Rankup fulfills the reward.
+
+        RewardDeliveryStatus:
+            type: string
+            enum: [notStarted, pending, sent, shipped, delivered, failed]
+            description: Delivery tracking status.
+
+        RewardSource:
+            type: object
+            additionalProperties: false
+            properties:
+                promotionId:
+                    $ref: "#/components/schemas/PromotionId"
+                verifiedEventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                rankedSeasonId:
+                    $ref: "#/components/schemas/RankedSeasonId"
+
+        RewardDelivery:
+            type: object
+            additionalProperties: false
+            required: [method, status]
+            properties:
+                method:
+                    $ref: "#/components/schemas/RewardFulfillmentMethod"
+                status:
+                    $ref: "#/components/schemas/RewardDeliveryStatus"
+                emailSentTo:
+                    type: string
+                    format: email
+                    description: For email-based fulfillment (masked by server policy if needed).
+                shippedToCountry:
+                    type: string
+                    description: ISO 3166-1 alpha-2 (optional).
+                    example: ES
+                carrier:
+                    type: string
+                trackingUrl:
+                    type: string
+                    format: uri
+                lastUpdatedAt:
+                    type: string
+                    format: date-time
+                failureReason:
+                    type: string
+                    description: Localized failure reason (if status=failed).
+
+        RewardGrant:
+            type: object
+            additionalProperties: false
+            required: [rewardGrantId, status, reward, createdAt]
+            properties:
+                rewardGrantId:
+                    $ref: "#/components/schemas/RewardGrantId"
+                status:
+                    $ref: "#/components/schemas/RewardGrantStatus"
+                reward:
+                    $ref: "#/components/schemas/PromotionRewardDefinition"
+                source:
+                    $ref: "#/components/schemas/RewardSource"
+                claimDeadlineAt:
+                    type: string
+                    format: date-time
+                claimedAt:
+                    type: string
+                    format: date-time
+                deliveredAt:
+                    type: string
+                    format: date-time
+                legal:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        termsVersion:
+                            type: string
+                        termsUrl:
+                            type: string
+                            format: uri
+                delivery:
+                    $ref: "#/components/schemas/RewardDelivery"
+
+        RewardGrantPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RewardGrant"
+                nextCursor:
+                    type: string
+
+        RewardFulfillmentProfile:
+            type: object
+            additionalProperties: false
+            properties:
+                defaultEmail:
+                    type: string
+                    format: email
+                shippingAddress:
+                    $ref: "#/components/schemas/ShippingAddress"
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        UpdateRewardFulfillmentProfileRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                defaultEmail:
+                    type: string
+                    format: email
+                shippingAddress:
+                    $ref: "#/components/schemas/ShippingAddress"
+
+        ShippingAddress:
+            type: object
+            additionalProperties: false
+            required: [fullName, line1, city, postalCode, country]
+            properties:
+                fullName:
+                    type: string
+                    maxLength: 100
+                line1:
+                    type: string
+                    maxLength: 120
+                line2:
+                    type: string
+                    maxLength: 120
+                city:
+                    type: string
+                    maxLength: 80
+                region:
+                    type: string
+                    maxLength: 80
+                    description: State/province/region (optional depending on country).
+                postalCode:
+                    type: string
+                    maxLength: 20
+                country:
+                    type: string
+                    description: ISO 3166-1 alpha-2.
+                    example: ES
+                phone:
+                    type: string
+                    maxLength: 32
+                    description: Optional phone for shipping carriers.
+
+        ClaimRewardRequest:
+            type: object
+            additionalProperties: false
+            required: [termsVersion]
+            properties:
+                termsVersion:
+                    type: string
+                    description: Must match `rewardGrant.legal.termsVersion` (if present).
+                fulfillment:
+                    type: object
+                    additionalProperties: false
+                    description: Fulfillment details. Required fields depend on reward.fulfillmentMethod.
+                    properties:
+                        email:
+                            type: string
+                            format: email
+                        shippingAddress:
+                            $ref: "#/components/schemas/ShippingAddress"
+                saveToProfile:
+                    type: boolean
+                    default: false
+                    description: If true, saves provided fulfillment fields to /me/rewards/fulfillment-profile.

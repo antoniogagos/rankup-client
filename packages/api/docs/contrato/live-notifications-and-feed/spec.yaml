@@ -1,0 +1,1091 @@
+tags:
+    - name: live
+      summary: Live
+      description: Notifications and in-app feed for real-time, retention-driven experiences.
+      kind: nav
+
+    - name: live.notifications
+      summary: Notifications
+      description: In-app notification inbox (push delivery happens via external providers; API exposes state + content).
+      parent: live
+      kind: nav
+
+    - name: live.feed
+      summary: Feed
+      description: Personal activity feed (no global spam feed).
+      parent: live
+      kind: nav
+
+    - name: live.stream
+      summary: Streams
+      description: SSE/polling for web clients (mobile push is external).
+      parent: live
+      kind: nav
+
+paths:
+    /me/notifications:
+        get:
+            tags: [live.notifications]
+            operationId: listMyNotifications
+            summary: List my notifications
+            description: |
+                Returns the current user's in-app notifications.
+
+                Design goals:
+                - "App viva": fast, frequently refreshed surface.
+                - No spectator concept: notifications are strictly personalized to the authenticated user.
+                - Supports multi-language via `Accept-Language` + `Content-Language`.
+
+                Notes:
+                - Prefer cursor pagination.
+                - Use `include=payload` only when needed (heavier).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/NotificationStatusFilter"
+                - name: topics
+                  in: query
+                  required: false
+                  description: Filter by notification topics.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/NotificationTopic"
+                - name: types
+                  in: query
+                  required: false
+                  description: Filter by notification types.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/NotificationType"
+                - name: tournamentId
+                  in: query
+                  required: false
+                  description: Filter notifications by tournament context.
+                  schema:
+                      $ref: "#/components/schemas/TournamentId"
+                - name: since
+                  in: query
+                  required: false
+                  description: Return notifications created at/after this time.
+                  schema:
+                      type: string
+                      format: date-time
+                - name: until
+                  in: query
+                  required: false
+                  description: Return notifications created before this time.
+                  schema:
+                      type: string
+                      format: date-time
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (keep payload light by default).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/NotificationInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withPayload:
+                          value: [payload]
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/NotificationSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Notification page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/notifications/unread-count:
+        get:
+            tags: [live.notifications]
+            operationId: getMyNotificationUnreadCount
+            summary: Get unread notification counts
+            description: |
+                Returns unread notification counts for badges.
+
+                Server should define whether "unread" means `readAt` missing (recommended),
+                separate from `seenAt`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: topics
+                  in: query
+                  required: false
+                  description: If provided, returns counts scoped to these topics.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/NotificationTopic"
+            responses:
+                "200":
+                    description: Unread counts.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationUnreadCounts"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/notifications/{notificationId}:
+        get:
+            tags: [live.notifications]
+            operationId: getMyNotification
+            summary: Get a notification
+            description: Only the notification owner can access it.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/NotificationId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/NotificationInclude"
+            responses:
+                "200":
+                    description: Notification.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Notification"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/notifications/{notificationId}/seen:
+        put:
+            tags: [live.notifications]
+            operationId: markMyNotificationSeen
+            summary: Mark a notification as seen
+            description: |
+                Idempotent. Useful for UX where opening the list marks items as seen
+                but not necessarily read.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/NotificationId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Marked as seen.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/notifications/{notificationId}/read:
+        put:
+            tags: [live.notifications]
+            operationId: markMyNotificationRead
+            summary: Mark a notification as read
+            description: |
+                Idempotent. Recommended definition of unread badges.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/NotificationId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Marked as read.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/notifications/{notificationId}/dismiss:
+        put:
+            tags: [live.notifications]
+            operationId: dismissMyNotification
+            summary: Dismiss a notification
+            description: |
+                Hides a notification from the default inbox view (non-destructive).
+
+                Idempotent.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/NotificationId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Dismissed (or already dismissed).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/notifications/batch:
+        post:
+            tags: [live.notifications]
+            operationId: batchUpdateMyNotifications
+            summary: Batch update notifications (seen/read/dismiss)
+            description: |
+                Applies an action to multiple notifications in one request (mobile-friendly).
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NotificationBatchActionRequest"
+            responses:
+                "200":
+                    description: Batch processed (may include notFound/skipped ids).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationBatchActionResult"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/feed:
+        get:
+            tags: [live.feed]
+            operationId: listMyFeed
+            summary: List my activity feed
+            description: |
+                Returns the current user's personal activity feed.
+
+                Critical product constraint:
+                - This is NOT a global stranger feed. It is a **personal** feed derived from:
+                  - tournaments you are in
+                  - friends/following (optional)
+                  - Rankup official events you joined/follow
+                  - system milestones (recaps, achievements)
+
+                The feed is designed to make the app feel "alive" during live matches without being spammy.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: topics
+                  in: query
+                  required: false
+                  description: Filter feed items by topic.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/FeedTopic"
+                - name: tournamentId
+                  in: query
+                  required: false
+                  description: Filter feed items by tournament context.
+                  schema:
+                      $ref: "#/components/schemas/TournamentId"
+                - name: sinceCursor
+                  in: query
+                  required: false
+                  description: Opaque cursor for incremental loading (newer items).
+                  schema:
+                      type: string
+                - name: untilCursor
+                  in: query
+                  required: false
+                  description: Opaque cursor for pagination (older items).
+                  schema:
+                      type: string
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (keep light by default).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/FeedInclude"
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/FeedSort"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Feed page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FeedPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/feed/{feedItemId}:
+        get:
+            tags: [live.feed]
+            operationId: getMyFeedItem
+            summary: Get a feed item
+            description: Only the owner can access this feed item.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FeedItemId"
+            responses:
+                "200":
+                    description: Feed item.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FeedItem"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/feed/read-cursor:
+        get:
+            tags: [live.feed]
+            operationId: getMyFeedReadCursor
+            summary: Get my feed read cursor
+            description: |
+                Returns the user's feed read cursor, used for unread badge counts.
+
+                Recommended semantics:
+                - Items after `lastSeenAt` are considered unread.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Feed read cursor.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FeedReadCursor"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        put:
+            tags: [live.feed]
+            operationId: updateMyFeedReadCursor
+            summary: Update my feed read cursor
+            description: |
+                Updates the feed read cursor.
+
+                Idempotent:
+                - Repeating with the same (or older) cursor is a no-op.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateFeedReadCursorRequest"
+            responses:
+                "200":
+                    description: Updated feed cursor.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FeedReadCursor"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/updates:
+        get:
+            tags: [live.stream]
+            operationId: listMyUpdates
+            summary: Poll my live updates (notifications + feed)
+            description: |
+                Returns ordered update events since a cursor. This is the polling/long-polling fallback to SSE.
+
+                Intended usage:
+                - Web clients that can't maintain SSE continuously
+                - Background refresh loops during live match windows
+
+                Notes:
+                - `waitSeconds` enables long-poll.
+                - Always returns `nextCursor`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: topics
+                  in: query
+                  required: false
+                  description: Filter which update streams to include.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MeUpdatesTopic"
+                  examples:
+                      default:
+                          value: [notifications, feed]
+                - name: sinceCursor
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: waitSeconds
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 0
+                      maximum: 30
+                      default: 0
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 500
+                      default: 100
+            responses:
+                "200":
+                    description: Updates page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MeUpdatePage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/live:
+        get:
+            tags: [live.stream]
+            operationId: streamMyLiveUpdates
+            summary: Stream my live updates (SSE)
+            description: |
+                Server-Sent Events stream for personal updates (notifications + feed).
+
+                Client resume:
+                - Clients SHOULD send `Last-Event-ID` to resume after reconnects.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/LastEventId"
+                - name: topics
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MeUpdatesTopic"
+            responses:
+                "200":
+                    description: SSE stream.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Content-Type:
+                            description: Always text/event-stream.
+                            schema:
+                                type: string
+                            example: text/event-stream
+                    content:
+                        text/event-stream:
+                            schema:
+                                type: string
+                            examples:
+                                notificationExample:
+                                    summary: Notification created event
+                                    value: |
+                                        event: notification.created
+                                        id: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AE
+                                        data: {"type":"notification.created","serverTime":"2026-02-01T19:35:12Z","notification":{"notificationId":"ntf_01J8W0K7E2ZQZ6P0M4NQW2Y7AF","topic":"match","notificationType":"match.goal","priority":"high","title":"¡GOOOL!","body":"Gol de Real Madrid. Mira cómo cambia la clasificación.","deepLinkUrl":"rankup://tournaments/tourn_.../matchdays/23","createdAt":"2026-02-01T19:35:12Z","context":{"tournamentId":"tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","matchId":"m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","matchday":23}}}
+
+                                        event: feed.item.created
+                                        id: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AG
+                                        data: {"type":"feed.item.created","serverTime":"2026-02-01T19:35:12Z","item":{"feedItemId":"fed_01J8W0K7E2ZQZ6P0M4NQW2Y7AH","topic":"match","feedItemType":"match.goal","title":"Gol en tu torneo","body":"Real Madrid marca. Ranking provisional actualizado.","deepLinkUrl":"rankup://tournaments/tourn_.../rankings","createdAt":"2026-02-01T19:35:12Z","context":{"tournamentId":"tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","matchId":"m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","matchday":23}}}
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        NotificationId:
+            name: notificationId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/NotificationId"
+        FeedItemId:
+            name: feedItemId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/FeedItemId"
+
+    schemas:
+        NotificationId:
+            type: string
+            description: Notification identifier.
+            example: ntf_01J8W0K7E2ZQZ6P0M4NQW2Y7AF
+
+        FeedItemId:
+            type: string
+            description: Feed item identifier.
+            example: fed_01J8W0K7E2ZQZ6P0M4NQW2Y7AH
+
+        NotificationTopic:
+            type: string
+            description: High-level notification category (for filtering + preferences).
+            enum:
+                [
+                    match,
+                    ranking,
+                    tournament,
+                    social,
+                    chat,
+                    recap,
+                    achievement,
+                    system,
+                ]
+
+        FeedTopic:
+            type: string
+            description: High-level feed category.
+            enum:
+                [match, ranking, tournament, social, recap, achievement, system]
+
+        NotificationType:
+            type: string
+            description: |
+                Stable notification type id (open set). New types can be introduced without breaking clients.
+            examples:
+                - match.goal
+                - match.statusChanged
+                - ranking.changed
+                - tournament.inviteReceived
+                - tournament.ended
+                - recap.available
+                - achievement.unlocked
+                - social.friendRequestReceived
+                - chat.mention
+
+        FeedItemType:
+            type: string
+            description: Stable feed item type id (open set).
+            examples:
+                - match.goal
+                - ranking.delta
+                - tournament.joined
+                - tournament.ended
+                - recap.available
+                - achievement.unlocked
+                - social.friendJoined
+
+        NotificationPriority:
+            type: string
+            description: Used to decide push eligibility and UI prominence.
+            enum: [low, normal, high, critical]
+            default: normal
+
+        NotificationStatusFilter:
+            type: string
+            enum: [any, unread, read, dismissed]
+            description: Filter for notification inbox.
+
+        NotificationInclude:
+            type: string
+            enum: [payload]
+
+        NotificationSort:
+            type: string
+            enum: [newest, oldest]
+            default: newest
+
+        FeedInclude:
+            type: string
+            enum: [payload]
+
+        FeedSort:
+            type: string
+            enum: [newest, oldest]
+            default: newest
+
+        NotificationAction:
+            type: object
+            additionalProperties: false
+            required: [actionId, label]
+            properties:
+                actionId:
+                    type: string
+                    description: Stable action id (client uses it for UI ordering/analytics).
+                    examples: [open, viewRanking, viewMatchday, acceptInvite]
+                label:
+                    type: string
+                    description: Localized label to display.
+                deepLinkUrl:
+                    type: string
+                    format: uri
+                    description: Deep link to open in app.
+                http:
+                    type: object
+                    additionalProperties: false
+                    description: Optional HTTP action (rare; only if you want "one-tap actions" via API).
+                    properties:
+                        method:
+                            type: string
+                            enum: [POST, PUT, PATCH, DELETE]
+                        path:
+                            type: string
+                            description: Relative API path.
+                        body:
+                            type: object
+                            additionalProperties: true
+
+        NotificationContext:
+            type: object
+            additionalProperties: false
+            description: Context references for deep linking and analytics.
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                matchId:
+                    $ref: "#/components/schemas/MatchId"
+                competitionId:
+                    type: string
+                recapId:
+                    $ref: "#/components/schemas/RecapId"
+                inviteId:
+                    type: string
+                friendRequestId:
+                    type: string
+                actorUserId:
+                    type: string
+
+        Notification:
+            type: object
+            additionalProperties: false
+            required: [notificationId, topic, notificationType, createdAt]
+            properties:
+                notificationId:
+                    $ref: "#/components/schemas/NotificationId"
+                topic:
+                    $ref: "#/components/schemas/NotificationTopic"
+                notificationType:
+                    $ref: "#/components/schemas/NotificationType"
+                priority:
+                    $ref: "#/components/schemas/NotificationPriority"
+                title:
+                    type: string
+                    description: Localized title.
+                body:
+                    type: string
+                    description: Localized body.
+                deepLinkUrl:
+                    type: string
+                    format: uri
+                actions:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/NotificationAction"
+                actor:
+                    $ref: "#/components/schemas/MeSummary"
+                context:
+                    $ref: "#/components/schemas/NotificationContext"
+                payload:
+                    type: object
+                    additionalProperties: true
+                    description: Optional type-specific payload (only when include=payload).
+                createdAt:
+                    type: string
+                    format: date-time
+                seenAt:
+                    type: string
+                    format: date-time
+                readAt:
+                    type: string
+                    format: date-time
+                dismissedAt:
+                    type: string
+                    format: date-time
+
+        NotificationPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Notification"
+                nextCursor:
+                    type: string
+
+        NotificationUnreadCounts:
+            type: object
+            additionalProperties: false
+            required: [total]
+            properties:
+                total:
+                    type: integer
+                    minimum: 0
+                byTopic:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                    description: Optional breakdown by topic key.
+
+        NotificationBatchAction:
+            type: string
+            enum: [markSeen, markRead, dismiss]
+
+        NotificationBatchActionRequest:
+            type: object
+            additionalProperties: false
+            required: [action]
+            properties:
+                action:
+                    $ref: "#/components/schemas/NotificationBatchAction"
+                notificationIds:
+                    type: array
+                    minItems: 1
+                    maxItems: 500
+                    items:
+                        $ref: "#/components/schemas/NotificationId"
+                    description: Target notification ids.
+                # Optional bulk mode: useful for "mark all read up to this point" without enumerating ids.
+                untilCreatedAt:
+                    type: string
+                    format: date-time
+                    description: Optional bulk scope (server-defined behavior).
+
+        NotificationBatchActionResult:
+            type: object
+            additionalProperties: false
+            required: [appliedIds, notFoundIds, serverTime]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                appliedIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/NotificationId"
+                notFoundIds:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/NotificationId"
+                unreadCounts:
+                    $ref: "#/components/schemas/NotificationUnreadCounts"
+
+        FeedContext:
+            type: object
+            additionalProperties: false
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                matchId:
+                    $ref: "#/components/schemas/MatchId"
+                recapId:
+                    $ref: "#/components/schemas/RecapId"
+                actorUserId:
+                    type: string
+
+        FeedItem:
+            type: object
+            additionalProperties: false
+            required: [feedItemId, topic, feedItemType, createdAt]
+            properties:
+                feedItemId:
+                    $ref: "#/components/schemas/FeedItemId"
+                topic:
+                    $ref: "#/components/schemas/FeedTopic"
+                feedItemType:
+                    $ref: "#/components/schemas/FeedItemType"
+                title:
+                    type: string
+                    description: Localized title.
+                body:
+                    type: string
+                    description: Localized body.
+                deepLinkUrl:
+                    type: string
+                    format: uri
+                actor:
+                    $ref: "#/components/schemas/MeSummary"
+                context:
+                    $ref: "#/components/schemas/FeedContext"
+                payload:
+                    type: object
+                    additionalProperties: true
+                createdAt:
+                    type: string
+                    format: date-time
+
+        FeedPage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, items]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/FeedItem"
+                nextCursor:
+                    type: string
+                prevCursor:
+                    type: string
+
+        FeedReadCursor:
+            type: object
+            additionalProperties: false
+            required: [serverTime, lastSeenAt, unreadCount]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                lastSeenAt:
+                    type: string
+                    format: date-time
+                lastSeenFeedItemId:
+                    $ref: "#/components/schemas/FeedItemId"
+                unreadCount:
+                    type: integer
+                    minimum: 0
+
+        UpdateFeedReadCursorRequest:
+            type: object
+            additionalProperties: false
+            required: [lastSeenAt]
+            properties:
+                lastSeenAt:
+                    type: string
+                    format: date-time
+                    description: Server uses this as a cursor; server time is authoritative.
+                lastSeenFeedItemId:
+                    $ref: "#/components/schemas/FeedItemId"
+
+        MeUpdatesTopic:
+            type: string
+            enum: [notifications, feed]
+
+        MeUpdateEvent:
+            oneOf:
+                - $ref: "#/components/schemas/NotificationCreatedEvent"
+                - $ref: "#/components/schemas/FeedItemCreatedEvent"
+            discriminator:
+                propertyName: type
+                mapping:
+                    notification.created: "#/components/schemas/NotificationCreatedEvent"
+                    feed.item.created: "#/components/schemas/FeedItemCreatedEvent"
+
+        NotificationCreatedEvent:
+            type: object
+            additionalProperties: false
+            required: [type, serverTime, notification]
+            properties:
+                type:
+                    type: string
+                    enum: [notification.created]
+                serverTime:
+                    type: string
+                    format: date-time
+                notification:
+                    $ref: "#/components/schemas/Notification"
+
+        FeedItemCreatedEvent:
+            type: object
+            additionalProperties: false
+            required: [type, serverTime, item]
+            properties:
+                type:
+                    type: string
+                    enum: [feed.item.created]
+                serverTime:
+                    type: string
+                    format: date-time
+                item:
+                    $ref: "#/components/schemas/FeedItem"
+
+        MeUpdatePage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, events, nextCursor]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                events:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MeUpdateEvent"
+                nextCursor:
+                    type: string

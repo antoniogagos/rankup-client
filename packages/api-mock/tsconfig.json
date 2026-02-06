@@ -1,0 +1,6 @@
+{
+	"extends": "../../tsconfig-base.json",
+	"references": [{ "path": "../api" }],
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,1273 @@
+tags:
+  - name: tournaments
+    summary: Tournaments
+    description: Tournament creation, discovery, preview, and lifecycle controls.
+    kind: nav
+
+  - name: tournaments.core
+    summary: Core
+    description: Create, list, and read tournament resources.
+    parent: tournaments
+    kind: nav
+
+  - name: tournaments.preview
+    summary: Preview
+    description: Minimal pre-join preview (no spectator gameplay).
+    parent: tournaments
+    kind: nav
+
+  - name: tournaments.lifecycle
+    summary: Lifecycle
+    description: Locking, archiving, ownership transfer, deletion.
+    parent: tournaments
+    kind: nav
+
+paths:
+  /me/tournaments:
+    get:
+      tags: [tournaments.core]
+      operationId: listMyTournaments
+      summary: List tournaments the current user is a member of
+      description: |
+        Returns tournaments the current user belongs to (member relation).
+
+        This is the primary "Home" screen payload for logged-in users.
+        The representation includes both tournament summary and **membership summary**
+        (role + membership status) to avoid additional round-trips.
+
+        Not cacheable (personalized).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: status
+          in: query
+          required: false
+          description: Filter by tournament status (server may map/normalize statuses).
+          schema:
+            $ref: "#/components/schemas/TournamentStatus"
+        - name: verificationStatus
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/VerificationStatus"
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: gameModeId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/GameModeId"
+        - name: includeArchived
+          in: query
+          required: false
+          description: If true, include tournaments archived by the user (if supported).
+          schema:
+            type: boolean
+            default: false
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Member tournaments page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyTournamentPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments:
+    get:
+      tags: [tournaments.core]
+      operationId: listDiscoverableTournaments
+      summary: List discoverable tournaments
+      description: |
+        Lists tournaments that the server deems discoverable.
+
+        **Important product rule**:
+        Rankup does NOT want a spammy "global feed" of random leagues. Therefore, this endpoint
+        MUST be treated as a **curated discovery surface**:
+        - may default to verified/official/creator/sponsored items
+        - may exclude community tournaments unless explicitly enabled server-side
+        - must be rate-limited and anti-scraping protected
+
+        This endpoint is public but can be tuned by the server to return limited results for anonymous clients.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: q
+          in: query
+          required: false
+          description: Optional search query (name/organizer). Server decides matching behavior.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 64
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SportId"
+        - name: gameModeId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/GameModeId"
+        - name: competitionId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CompetitionId"
+        - name: seasonId
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SeasonId"
+        - name: modality
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TournamentModality"
+        - name: verificationStatus
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/VerificationStatus"
+        - name: joinableOnly
+          in: query
+          required: false
+          description: If true, return only tournaments currently accepting new members.
+          schema:
+            type: boolean
+            default: true
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TournamentDiscoverSort"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Discoverable tournaments page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentDiscoverPage"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [tournaments.core]
+      operationId: createTournament
+      summary: Create a tournament
+      description: |
+        Creates a tournament owned by the authenticated user.
+
+        Idempotency:
+        - Clients SHOULD send `X-Idempotency-Key` to avoid duplicate tournament creation on retries.
+
+        Notes:
+        - Verified/official tournaments are created via backoffice/admin flows, not this endpoint.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTournamentRequest"
+      responses:
+        "201":
+          description: Tournament created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Location:
+              description: Canonical URL of the created tournament.
+              schema:
+                type: string
+                format: uri-reference
+              example: /tournaments/tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/preview:
+    get:
+      tags: [tournaments.preview]
+      operationId: getTournamentPreview
+      summary: Get minimal pre-join preview
+      description: |
+        Returns a minimal preview of a tournament before joining.
+
+        Product rule: "No spectators"
+        - This endpoint MUST NOT expose ranking, chat, matchday submissions, or other gameplay internals.
+        - It exists only to support "Should I join?" flows.
+
+        Private tournaments:
+        - The server MAY require a valid `invitationCode` to reveal additional preview fields.
+        - If the tournament is not visible to the viewer, return 404.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: invitationCode
+          in: query
+          required: false
+          description: Optional invitation code to unlock preview for private tournaments.
+          schema:
+            type: string
+            minLength: 4
+            maxLength: 32
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Tournament preview.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentPreview"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Short"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}:
+    get:
+      tags: [tournaments.core]
+      operationId: getTournament
+      summary: Get tournament details (member-only)
+      description: |
+        Returns the tournament resource.
+
+        Authorization:
+        - Requires membership to prevent "spectator" access to tournament internals.
+
+        Caching:
+        - Not cacheable by shared caches.
+        - Returns ETag for concurrency on PATCH.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/If-None-Match"
+        - name: include
+          in: query
+          required: false
+          description: Optional expansions for the tournament shell.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/TournamentInclude"
+          examples:
+            minimal:
+              value: []
+            common:
+              value: [myMembership]
+      responses:
+        "200":
+          description: Tournament.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [tournaments.core]
+      operationId: updateTournament
+      summary: Update tournament settings (admin-only)
+      description: |
+        Updates mutable tournament settings.
+
+        Concurrency:
+        - Clients MUST send `If-Match` from the latest `GET /tournaments/{tournamentId}`.
+        - On mismatch: 412.
+
+        Authorization:
+        - Admin/owner only (exact role policy is server-defined).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTournamentRequest"
+      responses:
+        "200":
+          description: Tournament updated.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    delete:
+      tags: [tournaments.lifecycle]
+      operationId: deleteTournament
+      summary: Delete a tournament (admin-only)
+      description: |
+        Deletes a tournament. Server MAY soft-delete and/or schedule deletion.
+
+        Safety:
+        - A tournament with history may require soft-delete (retain for audit/abuse).
+        - Idempotency is recommended for mobile retry behavior.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteTournamentRequest"
+      responses:
+        "202":
+          description: Deletion scheduled (or accepted).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentDeletion"
+        "204":
+          description: Deleted immediately (optional behavior).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/lock:
+    put:
+      tags: [tournaments.lifecycle]
+      operationId: lockTournament
+      summary: Lock a tournament (admin-only)
+      description: |
+        Locks the tournament join state (prevents new members from joining).
+
+        Idempotent:
+        - PUT is idempotent; repeated calls keep it locked.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LockTournamentRequest"
+      responses:
+        "204":
+          description: Tournament locked.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [tournaments.lifecycle]
+      operationId: unlockTournament
+      summary: Unlock a tournament (admin-only)
+      description: |
+        Unlocks the tournament join state (allows new members if joinPolicy allows).
+
+        Idempotent:
+        - DELETE is idempotent; repeated calls keep it unlocked.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "204":
+          description: Tournament unlocked.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/archive:
+    put:
+      tags: [tournaments.lifecycle]
+      operationId: archiveTournament
+      summary: Archive a tournament (admin-only)
+      description: |
+        Archives a tournament (typically after completion).
+        Archived tournaments are read-only and excluded from most discovery surfaces.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "204":
+          description: Tournament archived.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [tournaments.lifecycle]
+      operationId: unarchiveTournament
+      summary: Unarchive a tournament (admin-only)
+      description: Restores a tournament from archived state (rare; admin-only).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "204":
+          description: Tournament unarchived.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/owner:
+    put:
+      tags: [tournaments.lifecycle]
+      operationId: transferTournamentOwnership
+      summary: Transfer tournament ownership (owner/admin-only)
+      description: |
+        Transfers the owner role to another existing member.
+
+        Concurrency:
+        - Requires If-Match to prevent accidental transfers from stale UI.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferTournamentOwnerRequest"
+      responses:
+        "200":
+          description: Ownership transferred; updated tournament returned.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /tournaments/{tournamentId}/rules:
+    get:
+      tags: [tournaments.core]
+      operationId: getTournamentRules
+      summary: Get tournament rules (scoring + eligibility)
+      description: |
+        Returns the rules/scoring used by the tournament.
+
+        This endpoint is safe to show pre-join because it does not disclose gameplay state.
+        It exists to power the "Rules" tab and reduce hardcoded UI text.
+      security:
+        - {}
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Tournament rules.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentRules"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Public-Medium"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+components:
+  parameters:
+    TournamentId:
+      name: tournamentId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/TournamentId"
+
+  schemas:
+    TournamentId:
+      type: string
+      description: Stable tournament identifier.
+      example: tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+    GameModeId:
+      type: string
+      description: Stable game mode identifier.
+      examples: [scorePrediction, draft]
+
+    RulesetId:
+      type: string
+      description: Stable ruleset identifier.
+      example: ruleset_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+    TournamentVisibility:
+      type: string
+      enum: [private, public]
+
+    TournamentDiscoverability:
+      type: string
+      description: |
+        Whether a tournament is listed in discovery surfaces.
+        - listed: can appear in /tournaments (server-curated)
+        - unlisted: joinable only via link/code
+      enum: [listed, unlisted]
+
+    TournamentModality:
+      type: string
+      description: |
+        Tournament time-span mode:
+        - matchday: typically a single jornada (or small range)
+        - season: persists across a season (many matchdays)
+      enum: [matchday, season]
+
+    TournamentStatus:
+      type: string
+      description: High-level lifecycle state.
+      enum: [upcoming, live, finished, archived, cancelled]
+
+    TournamentJoinMode:
+      type: string
+      description: How players can join.
+      enum: [open, code, closed]
+
+    TournamentJoinPolicy:
+      type: object
+      additionalProperties: false
+      required: [joinMode, joinMidSeasonAllowed, locked]
+      properties:
+        joinMode:
+          $ref: "#/components/schemas/TournamentJoinMode"
+        joinMidSeasonAllowed:
+          type: boolean
+          description: If true, users can join after the tournament has started.
+        maxPlayers:
+          type: integer
+          minimum: 2
+          description: Optional cap for players.
+        locked:
+          type: boolean
+          description: |
+            If true, joining is locked regardless of joinMode. Controlled by /lock endpoints.
+        joinClosesAt:
+          type: string
+          format: date-time
+          description: Optional cutoff time for joining (useful for matchday tournaments).
+
+    TournamentTiming:
+      type: object
+      additionalProperties: false
+      description: Tournament time window within a competition season.
+      required: [seasonId]
+      properties:
+        competitionId:
+          $ref: "#/components/schemas/CompetitionId"
+        seasonId:
+          $ref: "#/components/schemas/SeasonId"
+        startMatchday:
+          type: integer
+          minimum: 1
+          description: Optional; if omitted, server derives from season.
+        endMatchday:
+          type: integer
+          minimum: 1
+          description: Optional; if omitted, server derives from season.
+        startsAt:
+          type: string
+          format: date-time
+          description: Optional computed start time (server-provided).
+        endsAt:
+          type: string
+          format: date-time
+          description: Optional computed end time (server-provided).
+
+    TournamentOrganizer:
+      oneOf:
+        - $ref: "#/components/schemas/TournamentOrganizerRankup"
+        - $ref: "#/components/schemas/TournamentOrganizerUser"
+        - $ref: "#/components/schemas/TournamentOrganizerCreator"
+      discriminator:
+        propertyName: type
+        mapping:
+          rankup: "#/components/schemas/TournamentOrganizerRankup"
+          user: "#/components/schemas/TournamentOrganizerUser"
+          creator: "#/components/schemas/TournamentOrganizerCreator"
+
+    TournamentOrganizerRankup:
+      type: object
+      additionalProperties: false
+      required: [type, displayName]
+      properties:
+        type:
+          type: string
+          enum: [rankup]
+        displayName:
+          type: string
+          example: Rankup
+
+    TournamentOrganizerUser:
+      type: object
+      additionalProperties: false
+      required: [type, userId, displayName]
+      properties:
+        type:
+          type: string
+          enum: [user]
+        userId:
+          type: string
+        displayName:
+          type: string
+          description: User display name (may be username).
+        pictureUrl:
+          type: string
+          format: uri
+
+    TournamentOrganizerCreator:
+      type: object
+      additionalProperties: false
+      required: [type, creatorId, displayName]
+      properties:
+        type:
+          type: string
+          enum: [creator]
+        creatorId:
+          type: string
+          example: creator_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        displayName:
+          type: string
+        logoUrl:
+          type: string
+          format: uri
+
+    TournamentInclude:
+      type: string
+      enum: [myMembership]
+
+    TournamentMemberRole:
+      type: string
+      enum: [owner, admin, player, moderator]
+
+    MyMembershipSummary:
+      type: object
+      additionalProperties: false
+      required: [role, joinedAt]
+      properties:
+        role:
+          $ref: "#/components/schemas/TournamentMemberRole"
+        joinedAt:
+          type: string
+          format: date-time
+        archivedAt:
+          type: string
+          format: date-time
+          description: Optional: user archived this tournament from their home list.
+
+    TournamentSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - tournamentId
+        - name
+        - visibility
+        - discoverability
+        - verificationStatus
+        - sportId
+        - gameModeId
+        - modality
+        - status
+        - joinPolicy
+        - memberCount
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        name:
+          type: string
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 2000
+        heroImageUrl:
+          type: string
+          format: uri
+        organizer:
+          $ref: "#/components/schemas/TournamentOrganizer"
+        visibility:
+          $ref: "#/components/schemas/TournamentVisibility"
+        discoverability:
+          $ref: "#/components/schemas/TournamentDiscoverability"
+        verificationStatus:
+          $ref: "#/components/schemas/VerificationStatus"
+        isRankedEligible:
+          type: boolean
+          description: True when the tournament counts for ranked progression/achievements.
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        modality:
+          $ref: "#/components/schemas/TournamentModality"
+        status:
+          $ref: "#/components/schemas/TournamentStatus"
+        timing:
+          $ref: "#/components/schemas/TournamentTiming"
+        joinPolicy:
+          $ref: "#/components/schemas/TournamentJoinPolicy"
+        memberCount:
+          type: integer
+          minimum: 0
+        eventId:
+          type: string
+          description: Optional: linked official/verified event id (if applicable).
+        rewardSummary:
+          type: string
+          description: Optional non-betting reward summary (e.g., “PS5 + Gift Cards”).
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Tournament:
+      allOf:
+        - $ref: "#/components/schemas/TournamentSummary"
+        - type: object
+          additionalProperties: false
+          properties:
+            rulesetId:
+              $ref: "#/components/schemas/RulesetId"
+            myMembership:
+              $ref: "#/components/schemas/MyMembershipSummary"
+
+    TournamentPreview:
+      type: object
+      additionalProperties: false
+      required:
+        - tournamentId
+        - name
+        - visibility
+        - verificationStatus
+        - sportId
+        - gameModeId
+        - modality
+        - status
+        - joinPolicy
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        name:
+          type: string
+        description:
+          type: string
+        heroImageUrl:
+          type: string
+          format: uri
+        organizer:
+          $ref: "#/components/schemas/TournamentOrganizer"
+        visibility:
+          $ref: "#/components/schemas/TournamentVisibility"
+        verificationStatus:
+          $ref: "#/components/schemas/VerificationStatus"
+        isRankedEligible:
+          type: boolean
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        modality:
+          $ref: "#/components/schemas/TournamentModality"
+        status:
+          $ref: "#/components/schemas/TournamentStatus"
+        timing:
+          $ref: "#/components/schemas/TournamentTiming"
+        joinPolicy:
+          $ref: "#/components/schemas/TournamentJoinPolicy"
+        memberCount:
+          type: integer
+          minimum: 0
+        rewardSummary:
+          type: string
+
+    TournamentDiscoverSort:
+      type: string
+      description: Sorting mode for discovery.
+      enum: [popular, startingSoon, newest, endingSoon]
+
+    TournamentDiscoverCard:
+      allOf:
+        - $ref: "#/components/schemas/TournamentPreview"
+        - type: object
+          additionalProperties: false
+          properties:
+            cta:
+              type: string
+              description: Optional server-computed CTA label.
+              examples: ["Join", "Enter code", "Closed"]
+
+    TournamentDiscoverPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentDiscoverCard"
+        nextCursor:
+          type: string
+
+    MyTournamentItem:
+      type: object
+      additionalProperties: false
+      required: [tournament, membership]
+      properties:
+        tournament:
+          $ref: "#/components/schemas/TournamentSummary"
+        membership:
+          $ref: "#/components/schemas/MyMembershipSummary"
+        lastActivityAt:
+          type: string
+          format: date-time
+          description: Optional server-computed “last activity” time for ordering.
+
+    MyTournamentPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MyTournamentItem"
+        nextCursor:
+          type: string
+
+    CreateTournamentRequest:
+      type: object
+      additionalProperties: false
+      required: [name, visibility, modality, sportId, gameModeId, joinPolicy, timing]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 2000
+        visibility:
+          $ref: "#/components/schemas/TournamentVisibility"
+        discoverability:
+          $ref: "#/components/schemas/TournamentDiscoverability"
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        modality:
+          $ref: "#/components/schemas/TournamentModality"
+        timing:
+          $ref: "#/components/schemas/TournamentTiming"
+        joinPolicy:
+          $ref: "#/components/schemas/TournamentJoinPolicy"
+        chatEnabled:
+          type: boolean
+          default: true
+        rulesetId:
+          $ref: "#/components/schemas/RulesetId"
+        # Optional: allow lightweight inline config without forcing a separate ruleset creation step.
+        rulesetConfig:
+          type: object
+          additionalProperties: true
+          description: |
+            GameMode-specific rules configuration (advanced). Shape depends on `gameModeId`.
+            For strict schemas, see /rulesets in the Rules block.
+
+    UpdateTournamentRequest:
+      type: object
+      additionalProperties: false
+      description: |
+        Partial update. Server determines which fields are mutable based on tournament status.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 2000
+        discoverability:
+          $ref: "#/components/schemas/TournamentDiscoverability"
+        joinPolicy:
+          $ref: "#/components/schemas/TournamentJoinPolicy"
+        chatEnabled:
+          type: boolean
+        rulesetId:
+          $ref: "#/components/schemas/RulesetId"
+        rulesetConfig:
+          type: object
+          additionalProperties: true
+          description: GameMode-specific (advanced).
+
+    LockTournamentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional admin reason for audit logs.
+
+    TransferTournamentOwnerRequest:
+      type: object
+      additionalProperties: false
+      required: [newOwnerUserId]
+      properties:
+        newOwnerUserId:
+          type: string
+          description: User id of an existing member who will become owner.
+
+    DeleteTournamentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          maxLength: 200
+        hardDelete:
+          type: boolean
+          description: |
+            If true, requests hard-delete. Server may ignore for safety/compliance.
+
+    TournamentDeletion:
+      type: object
+      additionalProperties: false
+      required: [deletionId, tournamentId, status, requestedAt]
+      properties:
+        deletionId:
+          type: string
+          example: tdel_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        status:
+          type: string
+          enum: [accepted, scheduled, completed]
+        requestedAt:
+          type: string
+          format: date-time
+        scheduledFor:
+          type: string
+          format: date-time
+
+    TournamentRules:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, gameModeId, sportId, isRankedEligible]
+      properties:
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        gameModeId:
+          $ref: "#/components/schemas/GameModeId"
+        sportId:
+          $ref: "#/components/schemas/SportId"
+        isRankedEligible:
+          type: boolean
+        rulesetId:
+          $ref: "#/components/schemas/RulesetId"
+        # Human-friendly rendering payload (localized)
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/RulesSection"
+
+    RulesSection:
+      type: object
+      additionalProperties: false
+      required: [title, items]
+      properties:
+        title:
+          type: string
+        items:
+          type: array
+          items:
+            type: string

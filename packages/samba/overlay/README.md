@@ -19,7 +19,7 @@ This is the preferred method because it separates overlays from its content
 ```js
 // Creating a dialog from a custom-element
 
-import {openOverlay} from 'samba/overlay/open-overlay.js';
+import {openOverlay} from '@rankup/samba/overlay/open-overlay';
 import {MyCustomElement} from '...';
 import type { MyCustomElement, Parameters } from '../../elements/my-element/my-element.js';
 // Import types & element separeted, so that import isn't ignored at runtime
@@ -62,7 +62,7 @@ Ideally we should have a single container, and the OverlayController has a way t
 
 Changing the container for overlays:
 
-- OverlayController will dispatch a 'find-overlay-container' CustomEvent from the Window object everytime before next overlay insertion.
-- Capture that event and change `evt.detail.container`
+-   OverlayController will dispatch a 'find-overlay-container' CustomEvent from the Window object everytime before next overlay insertion.
+-   Capture that event and change `evt.detail.container`
 
 That and some other useful functionality can be found by just using the `<overlay-container>` element

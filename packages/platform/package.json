@@ -1,0 +1,13 @@
+{
+	"name": "@rankup/platform",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		"./*.js": "./src/*.ts",
+		"./package.json": "./package.json"
+	},
+	"dependencies": {
+		"amazon-cognito-identity-js": "^5.2.3",
+		"lit": "^3.3.1"
+	}
+}

@@ -1,0 +1,17 @@
+export type RankedMetaInclude = 'tracks';
+export type RankedTrackInclude = 'tiers' | 'activeSeason' | 'eligibility';
+export type RankedSeasonInclude = 'eligibility';
+export type RankedLeaderboardInclude = 'myEntry' | 'tiers';
+export type MyRankedInclude = 'tiers';
+export type UserRankedInclude = 'tracks';
+export type RankedTrackStatus = 'active' | 'disabled' | 'upcoming';
+export type RankedSeasonStatus = 'upcoming' | 'live' | 'ended';
+export type RankedTrackSort = 'featured' | 'nameAsc' | 'popular';
+export type RankedSeasonSort = 'newest' | 'oldest' | 'startTimeDesc';
+export type RankedTrackScopeKind = 'allGamesAllSports' | 'gameModeAllSports' | 'gameModeSport' | 'custom';
+export type RankedRatingModel = 'elo' | 'ladderPoints' | 'mmr';
+export type RankedVisibility = 'public' | 'friends' | 'private';
+export type RankedSeasonCadence = 'monthly' | 'seasonal' | 'yearly' | 'none';
+export type RankedLeaderboardView = 'top' | 'aroundMe' | 'friends';
+export type RankedHistorySourceType = 'tournament' | 'matchday' | 'correction' | 'seasonReset';
+export type RankedTierRewardType = 'badge' | 'title' | 'profileFrame' | 'emote' | 'recapCard';

@@ -1,88 +1,88 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: 24px 0;
+	display: flex;
+	flex-direction: column;
+	gap: 24px 0;
 }
 
 .header {
-  position: relative;
-  align-items: flex-start;
-  display: flex;
-  box-sizing: border-box;
-  /* justify-content: center; */
+	position: relative;
+	align-items: flex-start;
+	display: flex;
+	box-sizing: border-box;
+	/* justify-content: center; */
 }
 .header--border {
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-color-low);
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--border-color-low);
 }
 
 .header-title {
-  font-size: 2.1rem;
-  font-weight: 750;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  line-height: 100%;
-  user-select: none;
+	font-size: 2.1rem;
+	font-weight: 750;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	line-height: 100%;
+	user-select: none;
 }
 
 .header--sm .header-title {
-  font-weight: 600;
-  font-size: 1.4rem;
+	font-weight: 600;
+	font-size: 1.4rem;
 }
 
 .header-buttons {
-  display: flex;
-  gap: 0 4px;
-  align-items: baseline;
-  margin-left: auto;
+	display: flex;
+	gap: 0 4px;
+	align-items: baseline;
+	margin-left: auto;
 }
 
 .header-buttons > button {
-  display: flex;
-  align-items: baseline;
+	display: flex;
+	align-items: baseline;
 }
 
 .main {
-  display: block;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
+	display: block;
+	overflow-y: auto;
+	overflow-x: hidden;
+	flex: 1;
 }
 .main:first-child {
-  margin-top: 0;
+	margin-top: 0;
 }
 .main:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 .main > :first-child {
-  margin-top: 0;
+	margin-top: 0;
 }
 
 .footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0 4px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 0 4px;
 }
 
 .header + .footer {
-  margin-top: 12px;
+	margin-top: 12px;
 }
 
 /**
   * Small overlay size
   */
 :host([sm]) {
-  padding: 0;
+	padding: 0;
 }
 :host([sm]) .header,
 :host([sm]) .footer {
-  padding: 10px 12px;
+	padding: 10px 12px;
 }
 :host([sm]) .main {
-  padding: 0 12px;
+	padding: 0 12px;
 }
 :host([sm]) .header-title {
-  font-size: 1.3rem;
-  font-weight: 500;
+	font-size: 1.3rem;
+	font-weight: 500;
 }

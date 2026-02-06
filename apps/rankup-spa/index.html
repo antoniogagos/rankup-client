@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Rankup</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<meta name="Description" content="Put your description here." />
+		<link rel="stylesheet" href="/node_modules/@rankup/samba/styles/root.css" />
+		<link rel="stylesheet" href="/node_modules/@rankup/samba/styles/theme.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+	</head>
+
+	<body>
+		<rk-auth-wall>
+			<rk-app id="rkApp" slot="authenticated"></rk-app>
+			<rk-unauthenticated-app id="rkPublicApp" slot="unauthenticated"></rk-unauthenticated-app>
+		</rk-auth-wall>
+
+		<overlay-container></overlay-container>
+		<script type="module" src="./main.ts"></script>
+	</body>
+</html>

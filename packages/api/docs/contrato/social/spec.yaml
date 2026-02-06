@@ -1,0 +1,989 @@
+tags:
+    - name: social
+      summary: Social
+      description: Social graph primitives (friends, follows, blocks).
+      kind: nav
+
+    - name: social.friends
+      summary: Friends
+      description: Mutual relationships (friends) and friend list.
+      parent: social
+      kind: nav
+
+    - name: social.friendRequests
+      summary: Friend requests
+      description: Friend request inbox/outbox (spam-controlled).
+      parent: social
+      kind: nav
+
+    - name: social.follow
+      summary: Follow
+      description: One-way follows (followers/following).
+      parent: social
+      kind: nav
+
+    - name: social.blocks
+      summary: Blocks
+      description: Blocking controls to prevent abuse and unwanted interactions.
+      parent: social
+      kind: nav
+
+paths:
+    /me/relationships/{userId}:
+        get:
+            tags: [social]
+            operationId: getMyRelationshipWithUser
+            summary: Get my relationship status with a user
+            description: |
+                Returns relationship flags used by UI button states.
+
+                Privacy posture:
+                - If the target is not visible due to privacy or blocking, return 404 (do not leak).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "200":
+                    description: Relationship status.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RelationshipStatus"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/friends:
+        get:
+            tags: [social.friends]
+            operationId: listMyFriends
+            summary: List my friends
+            description: |
+                Lists mutual friends for the current user.
+
+                Anti-scraping:
+                - Auth required.
+                - Rate-limited.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  description: Optional search by username (server-controlled matching).
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Friends page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FriendPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/friends/{userId}:
+        delete:
+            tags: [social.friends]
+            operationId: removeFriend
+            summary: Remove a friend (unfriend)
+            description: |
+                Removes the friendship between the current user and `userId`.
+
+                Idempotent:
+                - Returns 204 even if they are not currently friends.
+
+                Privacy:
+                - If the target user is not visible due to privacy/blocking, server SHOULD still return 204
+                  (do not leak existence).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "204":
+                    description: Friend removed (or no-op).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/friend-requests:
+        get:
+            tags: [social.friendRequests]
+            operationId: listMyFriendRequests
+            summary: List my friend requests (incoming/outgoing)
+            description: |
+                Lists friend requests involving the current user.
+
+                Notes:
+                - Auth required.
+                - Returns both incoming and outgoing with `direction`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: direction
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/FriendRequestDirection"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/FriendRequestStatus"
+                - name: includeHidden
+                  in: query
+                  required: false
+                  description: If true, includes requests hidden/archived by the user (if supported).
+                  schema:
+                      type: boolean
+                      default: false
+                - name: q
+                  in: query
+                  required: false
+                  description: Optional search by username.
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/FriendRequestSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Friend request page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FriendRequestPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        post:
+            tags: [social.friendRequests]
+            operationId: createFriendRequest
+            summary: Send a friend request
+            description: |
+                Sends a friend request to `toUserId`.
+
+                Anti-spam posture (recommended server rules):
+                - Rate-limit by sender.
+                - Optional policy: only allow requests to discoverable users, or to users you follow/friends-of-friends.
+                - Respect recipient settings (e.g., "allow friend requests").
+
+                Idempotency:
+                - Clients SHOULD send `X-Idempotency-Key`.
+                - Server SHOULD dedupe if an identical pending request already exists.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateFriendRequestRequest"
+            responses:
+                "201":
+                    description: Friend request created.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical URL of the friend request.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /me/friend-requests/frq_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FriendRequest"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/friend-requests/unread-count:
+        get:
+            tags: [social.friendRequests]
+            operationId: getMyFriendRequestUnreadCount
+            summary: Get unread friend request count
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Unread count.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UnreadCount"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/friend-requests/{friendRequestId}:
+        get:
+            tags: [social.friendRequests]
+            operationId: getMyFriendRequest
+            summary: Get a friend request
+            description: |
+                Returns a friend request involving the current user.
+
+                Privacy:
+                - Only participants can access it.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FriendRequestId"
+            responses:
+                "200":
+                    description: Friend request.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FriendRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [social.friendRequests]
+            operationId: cancelMyFriendRequest
+            summary: Cancel an outgoing friend request
+            description: |
+                Cancels a pending outgoing friend request.
+
+                Idempotent:
+                - Returns 204 even if already cancelled/not found.
+
+                Authorization:
+                - Only the sender can cancel.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FriendRequestId"
+            responses:
+                "204":
+                    description: Cancelled (or no-op).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/friend-requests/{friendRequestId}/seen:
+        put:
+            tags: [social.friendRequests]
+            operationId: markMyFriendRequestSeen
+            summary: Mark a friend request as seen
+            description: Idempotent.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FriendRequestId"
+            responses:
+                "204":
+                    description: Marked as seen.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/friend-requests/{friendRequestId}/accept:
+        put:
+            tags: [social.friendRequests]
+            operationId: acceptFriendRequest
+            summary: Accept a friend request
+            description: |
+                Accepts an incoming friend request and creates a friendship.
+
+                Idempotent:
+                - If already accepted, server SHOULD return 200 with the current state.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FriendRequestId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AcceptFriendRequestRequest"
+            responses:
+                "200":
+                    description: Accepted.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AcceptFriendRequestResult"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/friend-requests/{friendRequestId}/decline:
+        put:
+            tags: [social.friendRequests]
+            operationId: declineFriendRequest
+            summary: Decline a friend request
+            description: Idempotent.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/FriendRequestId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DeclineFriendRequestRequest"
+            responses:
+                "200":
+                    description: Declined.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FriendRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/following:
+        get:
+            tags: [social.follow]
+            operationId: listMyFollowing
+            summary: List users I follow
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Following page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FollowPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/followers:
+        get:
+            tags: [social.follow]
+            operationId: listMyFollowers
+            summary: List users who follow me
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Followers page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FollowPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /users/{userId}/followers/me:
+        put:
+            tags: [social.follow]
+            operationId: followUser
+            summary: Follow a user
+            description: |
+                Starts following `userId`.
+
+                Idempotent:
+                - Repeating the call keeps the follow active.
+
+                Privacy posture:
+                - If the user is not visible due to privacy/blocking, return 404.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "200":
+                    description: Followed (or already following).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RelationshipStatus"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [social.follow]
+            operationId: unfollowUser
+            summary: Unfollow a user
+            description: |
+                Stops following `userId`.
+
+                Idempotent:
+                - Returns 204 even if not currently following.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "204":
+                    description: Unfollowed (or no-op).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/blocks:
+        get:
+            tags: [social.blocks]
+            operationId: listMyBlockedUsers
+            summary: List users I have blocked
+            description: |
+                Returns the current user's block list.
+
+                Side effects of blocking (recommended server behavior):
+                - remove friendship
+                - cancel pending friend requests in both directions
+                - unfollow in both directions (where relevant)
+                - prevent future invites/interactions
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 32
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Block list page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BlockPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/blocks/{userId}:
+        put:
+            tags: [social.blocks]
+            operationId: blockUser
+            summary: Block a user
+            description: |
+                Blocks `userId`.
+
+                Idempotent:
+                - Repeating the call keeps the block in place.
+
+                Privacy posture:
+                - Server MAY return 204 even if the user doesn't exist / isn't visible to avoid leaking.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BlockUserRequest"
+            responses:
+                "204":
+                    description: Blocked (or already blocked).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [social.blocks]
+            operationId: unblockUser
+            summary: Unblock a user
+            description: Idempotent.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+            responses:
+                "204":
+                    description: Unblocked (or was not blocked).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        FriendRequestId:
+            name: friendRequestId
+            in: path
+            required: true
+            schema:
+                type: string
+            example: frq_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+    schemas:
+        RelationshipStatus:
+            type: object
+            additionalProperties: false
+            required: [userId, isFriend, youFollow, followsYou, youBlocked]
+            properties:
+                userId:
+                    type: string
+                isFriend:
+                    type: boolean
+                youFollow:
+                    type: boolean
+                followsYou:
+                    type: boolean
+                youBlocked:
+                    type: boolean
+
+        FriendRequestDirection:
+            type: string
+            enum: [incoming, outgoing]
+
+        FriendRequestStatus:
+            type: string
+            enum: [pending, accepted, declined, cancelled, expired]
+
+        FriendRequestSort:
+            type: string
+            enum: [newest, oldest, statusThenNewest]
+
+        FriendRequest:
+            type: object
+            additionalProperties: false
+            required:
+                - friendRequestId
+                - status
+                - direction
+                - fromUser
+                - toUser
+                - createdAt
+            properties:
+                friendRequestId:
+                    type: string
+                status:
+                    $ref: "#/components/schemas/FriendRequestStatus"
+                direction:
+                    $ref: "#/components/schemas/FriendRequestDirection"
+                fromUser:
+                    $ref: "#/components/schemas/MeSummary"
+                toUser:
+                    $ref: "#/components/schemas/MeSummary"
+                message:
+                    type: string
+                    maxLength: 240
+                createdAt:
+                    type: string
+                    format: date-time
+                expiresAt:
+                    type: string
+                    format: date-time
+                seenAt:
+                    type: string
+                    format: date-time
+                    description: When the recipient saw it (only meaningful for incoming).
+                respondedAt:
+                    type: string
+                    format: date-time
+                hiddenAt:
+                    type: string
+                    format: date-time
+                    description: Optional inbox archival flag (if supported).
+
+        FriendRequestPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/FriendRequest"
+                nextCursor:
+                    type: string
+
+        CreateFriendRequestRequest:
+            type: object
+            additionalProperties: false
+            required: [toUserId]
+            properties:
+                toUserId:
+                    type: string
+                message:
+                    type: string
+                    maxLength: 240
+                sendNotification:
+                    type: boolean
+                    default: true
+                clientContext:
+                    type: object
+                    additionalProperties: true
+
+        AcceptFriendRequestRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                clientContext:
+                    type: object
+                    additionalProperties: true
+
+        DeclineFriendRequestRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                reason:
+                    type: string
+                    maxLength: 200
+                clientContext:
+                    type: object
+                    additionalProperties: true
+
+        Friend:
+            type: object
+            additionalProperties: false
+            required: [user, friendedAt]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                friendedAt:
+                    type: string
+                    format: date-time
+
+        FriendPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Friend"
+                nextCursor:
+                    type: string
+
+        AcceptFriendRequestResult:
+            type: object
+            additionalProperties: false
+            required: [friendRequest, friendship, relationship]
+            properties:
+                friendRequest:
+                    $ref: "#/components/schemas/FriendRequest"
+                friendship:
+                    $ref: "#/components/schemas/Friend"
+                relationship:
+                    $ref: "#/components/schemas/RelationshipStatus"
+
+        FollowEdge:
+            type: object
+            additionalProperties: false
+            required: [user, followedAt]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                followedAt:
+                    type: string
+                    format: date-time
+
+        FollowPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/FollowEdge"
+                nextCursor:
+                    type: string
+
+        BlockEntry:
+            type: object
+            additionalProperties: false
+            required: [user, blockedAt]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                blockedAt:
+                    type: string
+                    format: date-time
+                reason:
+                    type: string
+                    maxLength: 200
+                    description: Optional user-provided reason (not shown to the blocked user).
+                context:
+                    type: object
+                    additionalProperties: true
+                    description: Optional context (e.g., tournamentId/chatMessageId) for internal abuse review.
+
+        BlockPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockEntry"
+                nextCursor:
+                    type: string
+
+        BlockUserRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                reason:
+                    type: string
+                    maxLength: 200
+                context:
+                    type: object
+                    additionalProperties: true

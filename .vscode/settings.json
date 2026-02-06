@@ -1,6 +1,12 @@
 {
 	"editor.rulers": [100],
+	"editor.detectIndentation": false,
 	"editor.formatOnSave": true,
+	"editor.insertSpaces": false,
+	"editor.tabSize": 4,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
 	"files.insertFinalNewline": true,
 	"files.trimTrailingWhitespace": true,
 	"files.exclude": {

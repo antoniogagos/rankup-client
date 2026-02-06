@@ -1,0 +1,809 @@
+tags:
+    - name: uploads
+      summary: Uploads & Media
+      description: Upload flows and media asset registry (avatars, branding, assets).
+      kind: nav
+
+    - name: uploads.uploads
+      summary: Upload sessions
+      description: Pre-signed upload sessions (direct-to-storage) and completion.
+      parent: uploads
+      kind: nav
+
+    - name: uploads.media
+      summary: Media assets
+      description: Media metadata and variant URLs (CDN/signed).
+      parent: uploads
+      kind: nav
+
+paths:
+    /uploads:
+        post:
+            tags: [uploads.uploads]
+            operationId: createUpload
+            summary: Create an upload session
+            description: |
+                Creates an upload session and returns a direct-to-storage upload destination (pre-signed URL).
+
+                Flow:
+                1) POST /uploads -> get pre-signed destination
+                2) Client uploads bytes directly to storage
+                3) POST /uploads/{uploadId}/complete -> finalize -> returns Media asset (mediaId)
+
+                Notes:
+                - This endpoint is the gatekeeper for file type/size constraints and authorization for the intended purpose.
+                - Server MUST enforce purpose + scope authorization (e.g., tournament cover requires tournament admin).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateUploadRequest"
+            responses:
+                "201":
+                    description: Upload session created.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical URL of the upload session.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /uploads/upl_01J8W0K7E2ZQZ6P0M4NQW2Y7JA
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UploadSession"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
+                "415":
+                    $ref: "#/components/responses/UnsupportedMediaType"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /uploads/{uploadId}:
+        get:
+            tags: [uploads.uploads]
+            operationId: getUpload
+            summary: Get upload session status
+            description: |
+                Returns upload session status for client polling/debug UX.
+
+                Typical states:
+                - created -> client has not uploaded yet
+                - uploaded -> storage received bytes (may be inferred)
+                - completing/processing -> server validating/scanning/transcoding
+                - completed -> mediaId available
+                - failed/expired
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UploadId"
+            responses:
+                "200":
+                    description: Upload session.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UploadSession"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [uploads.uploads]
+            operationId: abortUpload
+            summary: Abort an upload session
+            description: |
+                Aborts an upload session. Best-effort cleanup of storage object (if any).
+
+                Idempotent:
+                - Deleting an already-aborted or expired upload returns 204.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UploadId"
+            responses:
+                "204":
+                    description: Upload aborted (or no-op).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /uploads/{uploadId}/complete:
+        post:
+            tags: [uploads.uploads]
+            operationId: completeUpload
+            summary: Complete an upload and create the media asset
+            description: |
+                Finalizes the upload, validates the stored object, and creates a Media asset.
+
+                Notes:
+                - Server MAY perform async processing (scan, resize, generate variants).
+                - If processing is async, return 202 with UploadSession in processing state and a mediaId;
+                  clients then poll GET /media/{mediaId} or GET /uploads/{uploadId}.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UploadId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CompleteUploadRequest"
+            responses:
+                "201":
+                    description: Upload completed; media asset created and ready (or ready enough for immediate use).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical URL of the created media.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /media/med_01J8W0K7E2ZQZ6P0M4NQW2Y7JB
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Media"
+                "202":
+                    description: Upload accepted; media created but still processing.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Retry-After:
+                            description: Suggested seconds to wait before polling again.
+                            schema:
+                                type: integer
+                            example: 2
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UploadSession"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
+                "415":
+                    $ref: "#/components/responses/UnsupportedMediaType"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /media/{mediaId}:
+        get:
+            tags: [uploads.media]
+            operationId: getMedia
+            summary: Get media metadata and URLs
+            description: |
+                Returns media metadata and variant URLs.
+
+                Security:
+                - If media is public, it MAY be accessible without auth (server policy).
+                - If private/unlisted, requires auth and authorization.
+
+                URL strategy:
+                - public assets may return stable CDN URLs (cacheable)
+                - private assets return signed URLs (short TTL) -> response should be no-store
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/MediaId"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (e.g., include original variant).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MediaInclude"
+                  examples:
+                      default:
+                          value: [variants]
+                      withOriginal:
+                          value: [variants, original]
+            responses:
+                "200":
+                    description: Media asset.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            description: |
+                                If signed URLs are included, server SHOULD set no-store.
+                                If only stable public CDN URLs are included, server MAY set a short cache.
+                            schema:
+                                type: string
+                            example: no-store
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Media"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [uploads.media]
+            operationId: deleteMedia
+            summary: Delete a media asset
+            description: |
+                Deletes a media asset (best-effort). Typically allowed only for:
+                - the owner (user who uploaded it) and/or
+                - tournament admin for tournament branding assets
+
+                Server MUST prevent breaking references:
+                - either soft-delete (keep for existing references), or
+                - reject deletion if currently referenced, or
+                - replace references with defaults (product policy).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/MediaId"
+            responses:
+                "204":
+                    description: Deleted (or no-op if already deleted).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        UploadId:
+            name: uploadId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/UploadId"
+
+        MediaId:
+            name: mediaId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/MediaId"
+
+    schemas:
+        UploadId:
+            type: string
+            description: Upload session identifier.
+            example: upl_01J8W0K7E2ZQZ6P0M4NQW2Y7JA
+
+        MediaId:
+            type: string
+            description: Media asset identifier.
+            example: med_01J8W0K7E2ZQZ6P0M4NQW2Y7JB
+
+        MediaPurpose:
+            type: string
+            description: |
+                Intended purpose slot for the upload. Server enforces allowed purposes and required scope.
+
+                Use dot-separated identifiers. This is an open set; server may introduce new purposes.
+            pattern: "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+            examples:
+                - user.avatar
+                - tournament.cover
+                - tournament.avatar
+                - creator.avatar
+                - creator.hero
+                - verified.event.hero
+                - verified.event.sponsorLogo
+                - promotion.hero
+                - report.attachment
+
+        MediaVisibility:
+            type: string
+            description: Visibility for access control.
+            enum: [public, unlisted, private]
+            default: public
+
+        MediaKind:
+            type: string
+            description: Media kind. Start with images; expand later if needed.
+            enum: [image]
+            default: image
+
+        UploadStatus:
+            type: string
+            enum:
+                [
+                    created,
+                    uploaded,
+                    completing,
+                    processing,
+                    completed,
+                    failed,
+                    expired,
+                    aborted,
+                ]
+
+        MediaStatus:
+            type: string
+            enum: [processing, ready, rejected, failed, deleted]
+
+        ChecksumAlgorithm:
+            type: string
+            enum: [sha256]
+
+        Checksum:
+            type: object
+            additionalProperties: false
+            required: [algorithm, value]
+            properties:
+                algorithm:
+                    $ref: "#/components/schemas/ChecksumAlgorithm"
+                value:
+                    type: string
+                    description: Hex-encoded checksum.
+                    pattern: "^[a-f0-9]{64}$"
+                    example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        MediaScope:
+            type: object
+            additionalProperties: false
+            description: |
+                Optional scope references. Certain purposes require a scope.
+
+                Examples:
+                - tournament.cover requires tournamentId (and tournament admin permission)
+                - creator.hero requires creatorId (and creator manager permission)
+            properties:
+                userId:
+                    type: string
+                    description: Optional explicit userId (usually implied by /me).
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                creatorId:
+                    $ref: "#/components/schemas/CreatorId"
+                verifiedEventId:
+                    $ref: "#/components/schemas/VerifiedEventId"
+                promotionId:
+                    $ref: "#/components/schemas/PromotionId"
+                reportId:
+                    $ref: "#/components/schemas/ReportId"
+
+        ImageHints:
+            type: object
+            additionalProperties: false
+            properties:
+                width:
+                    type: integer
+                    minimum: 1
+                height:
+                    type: integer
+                    minimum: 1
+
+        UploadConstraints:
+            type: object
+            additionalProperties: false
+            description: Server-enforced constraints for this upload session.
+            required: [maxSizeBytes, allowedContentTypes]
+            properties:
+                maxSizeBytes:
+                    type: integer
+                    minimum: 1
+                    example: 5242880
+                allowedContentTypes:
+                    type: array
+                    items:
+                        type: string
+                    example: ["image/jpeg", "image/png", "image/webp"]
+                recommendedAspectRatio:
+                    type: string
+                    description: Display hint (e.g., "1:1", "16:9").
+                    example: "1:1"
+                minWidth:
+                    type: integer
+                    minimum: 1
+                minHeight:
+                    type: integer
+                    minimum: 1
+                maxWidth:
+                    type: integer
+                    minimum: 1
+                maxHeight:
+                    type: integer
+                    minimum: 1
+
+        UploadDestinationStrategy:
+            type: string
+            enum: [singlePut, multipartFormPost]
+            description: Strategy for direct-to-storage upload.
+
+        UploadDestination:
+            oneOf:
+                - $ref: "#/components/schemas/UploadDestinationSinglePut"
+                - $ref: "#/components/schemas/UploadDestinationMultipartFormPost"
+            discriminator:
+                propertyName: strategy
+                mapping:
+                    singlePut: "#/components/schemas/UploadDestinationSinglePut"
+                    multipartFormPost: "#/components/schemas/UploadDestinationMultipartFormPost"
+
+        UploadDestinationSinglePut:
+            type: object
+            additionalProperties: false
+            required: [strategy, method, url, expiresAt]
+            properties:
+                strategy:
+                    $ref: "#/components/schemas/UploadDestinationStrategy"
+                method:
+                    type: string
+                    enum: [PUT]
+                url:
+                    type: string
+                    format: uri
+                    description: Pre-signed PUT URL.
+                requiredHeaders:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Headers the client MUST include when uploading (e.g., Content-Type).
+                expiresAt:
+                    type: string
+                    format: date-time
+
+        UploadDestinationMultipartFormPost:
+            type: object
+            additionalProperties: false
+            required: [strategy, method, url, formFields, expiresAt]
+            properties:
+                strategy:
+                    $ref: "#/components/schemas/UploadDestinationStrategy"
+                method:
+                    type: string
+                    enum: [POST]
+                url:
+                    type: string
+                    format: uri
+                    description: Storage form POST endpoint.
+                formFields:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Form fields the client MUST send in multipart/form-data to upload.
+                expiresAt:
+                    type: string
+                    format: date-time
+
+        CreateUploadRequest:
+            type: object
+            additionalProperties: false
+            required: [purpose, contentType]
+            properties:
+                purpose:
+                    $ref: "#/components/schemas/MediaPurpose"
+                scope:
+                    $ref: "#/components/schemas/MediaScope"
+                visibility:
+                    $ref: "#/components/schemas/MediaVisibility"
+                kind:
+                    $ref: "#/components/schemas/MediaKind"
+                fileName:
+                    type: string
+                    maxLength: 255
+                contentType:
+                    type: string
+                    description: MIME type (server validates).
+                    example: image/jpeg
+                sizeBytes:
+                    type: integer
+                    minimum: 1
+                    description: Optional but recommended for server-side validation and policy.
+                checksum:
+                    $ref: "#/components/schemas/Checksum"
+                imageHints:
+                    $ref: "#/components/schemas/ImageHints"
+                clientContext:
+                    type: object
+                    additionalProperties: true
+                    description: Optional analytics/debug context (server may ignore).
+
+        UploadSession:
+            type: object
+            additionalProperties: false
+            required: [uploadId, status, purpose, createdAt, constraints]
+            properties:
+                uploadId:
+                    $ref: "#/components/schemas/UploadId"
+                status:
+                    $ref: "#/components/schemas/UploadStatus"
+                purpose:
+                    $ref: "#/components/schemas/MediaPurpose"
+                scope:
+                    $ref: "#/components/schemas/MediaScope"
+                visibility:
+                    $ref: "#/components/schemas/MediaVisibility"
+                kind:
+                    $ref: "#/components/schemas/MediaKind"
+                constraints:
+                    $ref: "#/components/schemas/UploadConstraints"
+                destination:
+                    $ref: "#/components/schemas/UploadDestination"
+                createdAt:
+                    type: string
+                    format: date-time
+                expiresAt:
+                    type: string
+                    format: date-time
+                failureReason:
+                    type: string
+                    description: Localized explanation when status=failed/expired.
+                mediaId:
+                    $ref: "#/components/schemas/MediaId"
+
+        ImageCrop:
+            type: object
+            additionalProperties: false
+            description: |
+                Normalized crop rectangle for server-side variant generation.
+                Values are 0..1 relative to the original image.
+            required: [x, y, width, height]
+            properties:
+                x:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                y:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                width:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                height:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+
+        CompleteUploadRequest:
+            type: object
+            additionalProperties: false
+            description: |
+                Information required to finalize an upload.
+
+                The server MUST validate that:
+                - the object exists at the expected storage key
+                - size/contentType constraints are met
+                - checksum matches if provided
+            properties:
+                storage:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        etag:
+                            type: string
+                            description: Storage ETag (if applicable).
+                        sizeBytes:
+                            type: integer
+                            minimum: 1
+                        contentType:
+                            type: string
+                        checksum:
+                            $ref: "#/components/schemas/Checksum"
+                imageCrop:
+                    $ref: "#/components/schemas/ImageCrop"
+                makePrimary:
+                    type: boolean
+                    default: false
+                    description: |
+                        Optional hint: if this upload is intended to become the "active" asset (e.g., user avatar),
+                        client may set this to true, but the actual association happens in the owning resource endpoint
+                        (e.g., PATCH /me).
+                notes:
+                    type: string
+                    maxLength: 500
+
+        MediaInclude:
+            type: string
+            enum: [variants, original]
+            description: Optional expansions.
+
+        MediaModerationStatus:
+            type: string
+            enum: [notRequired, pending, approved, rejected]
+
+        MediaModeration:
+            type: object
+            additionalProperties: false
+            required: [status]
+            properties:
+                status:
+                    $ref: "#/components/schemas/MediaModerationStatus"
+                reasonCode:
+                    type: string
+                    description: Stable reason id (non-sensitive).
+                    examples: [adult, violence, hate, spam, unsafe, other]
+                message:
+                    type: string
+                    description: Localized user-facing message (when rejected).
+
+        MediaVariantId:
+            type: string
+            description: Variant identifier (server-defined).
+            examples:
+                - avatar_64
+                - avatar_256
+                - cover_640x360
+                - cover_1280x720
+                - original
+
+        MediaUrl:
+            type: object
+            additionalProperties: false
+            required: [url]
+            properties:
+                url:
+                    type: string
+                    format: uri
+                expiresAt:
+                    type: string
+                    format: date-time
+                    description: Present for signed URLs.
+
+        MediaVariant:
+            type: object
+            additionalProperties: false
+            required: [variantId, contentType, url]
+            properties:
+                variantId:
+                    $ref: "#/components/schemas/MediaVariantId"
+                contentType:
+                    type: string
+                width:
+                    type: integer
+                    minimum: 1
+                height:
+                    type: integer
+                    minimum: 1
+                bytes:
+                    type: integer
+                    minimum: 1
+                url:
+                    $ref: "#/components/schemas/MediaUrl"
+
+        Media:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    mediaId,
+                    status,
+                    kind,
+                    purpose,
+                    visibility,
+                    contentType,
+                    createdAt,
+                ]
+            properties:
+                mediaId:
+                    $ref: "#/components/schemas/MediaId"
+                status:
+                    $ref: "#/components/schemas/MediaStatus"
+                kind:
+                    $ref: "#/components/schemas/MediaKind"
+                purpose:
+                    $ref: "#/components/schemas/MediaPurpose"
+                scope:
+                    $ref: "#/components/schemas/MediaScope"
+                visibility:
+                    $ref: "#/components/schemas/MediaVisibility"
+                contentType:
+                    type: string
+                bytes:
+                    type: integer
+                    minimum: 1
+                checksum:
+                    $ref: "#/components/schemas/Checksum"
+                width:
+                    type: integer
+                    minimum: 1
+                height:
+                    type: integer
+                    minimum: 1
+                moderation:
+                    $ref: "#/components/schemas/MediaModeration"
+                variants:
+                    type: array
+                    description: Variant URLs (may be signed).
+                    items:
+                        $ref: "#/components/schemas/MediaVariant"
+                createdAt:
+                    type: string
+                    format: date-time
+                deletedAt:
+                    type: string
+                    format: date-time

@@ -1,4 +1,4 @@
-import { svg, TemplateResult } from 'lit';
+import { svg, type TemplateResult } from 'lit';
 
 type Icon = keyof typeof ICONS;
 
@@ -50,30 +50,30 @@ const ICONS = {
 const CACHE = new WeakMap();
 
 export function Icons(icon: Icon, size = 24, tagfn = svg): string | TemplateResult | null {
-  if (tagfn == null) {
-    return getIcon(icon, size);
-  }
-  if (!CACHE.has(tagfn)) {
-    CACHE.set(tagfn, new Map());
-  }
-  const st = CACHE.get(tagfn);
-  const key = icon + '__' + size;
-  const cached = st.get(key);
-  if (cached) {
-    return cached;
-  }
-  const str = getIcon(icon, size);
-  if (str) {
-    const value = tagfn([str] as any);
-    // @ts-ignore
-    if (value.strings) value.strings.raw = [str];
-    st.set(key, value);
-    return value;
-  }
-  return null;
+	if (tagfn == null) {
+		return getIcon(icon, size);
+	}
+	if (!CACHE.has(tagfn)) {
+		CACHE.set(tagfn, new Map());
+	}
+	const st = CACHE.get(tagfn);
+	const key = icon + '__' + size;
+	const cached = st.get(key);
+	if (cached) {
+		return cached;
+	}
+	const str = getIcon(icon, size);
+	if (str) {
+		const value = tagfn([str] as any);
+		// @ts-ignore
+		if (value.strings) value.strings.raw = [str];
+		st.set(key, value);
+		return value;
+	}
+	return null;
 }
 
 function getIcon(icon: Icon, size: number): string {
-  // @ts-ignore
-  return ICONS[size]?.[icon] ?? '';
+	// @ts-ignore
+	return ICONS[size]?.[icon] ?? '';
 }

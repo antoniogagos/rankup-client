@@ -1,14 +1,11 @@
 /* eslint-disable max-classes-per-file */
 // import { observeProperties } from 'common/object-property-observer/object-property-observer.js';
 import type { ReactiveController, ReactiveElement } from 'lit';
-import { css, html, LitElement, PropertyValues } from 'lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 class PropertiesObserver implements ReactiveController {
-	constructor(
-		public host: ReactiveElement,
-		private callbacks: { [k: string]: (value: any, old: any) => void },
-	) {
+	constructor(public host: ReactiveElement, private callbacks: { [k: string]: (value: any, old: any) => void }) {
 		if (host.nodeType !== Node.ELEMENT_NODE) throw new Error('InvalidHost');
 		this.propertyNames = Object.keys(callbacks);
 		console.log('created-', { callbacks });
@@ -24,21 +21,23 @@ class PropertiesObserver implements ReactiveController {
 	update(changedProperties: PropertyValues) {
 		for (const propName of this.propertyNames) {
 			if (changedProperties.has(propName)) {
-				const value = changedProperties.get(propName);
-				const old = this[propName as keyof this];
-				this.callbacks[propName](value, old);
+				const oldValue = changedProperties.get(propName);
+				const value = (this.host as unknown as Record<string, unknown>)[propName];
+				this.callbacks[propName](value, oldValue);
 			}
 		}
 	}
 }
 
+/**
+ * @element load-spinner
+ */
 @customElement('load-spinner')
 export class LoadSpinner extends LitElement {
-	@property({ type: Boolean, reflect: true })
-	active = false;
+	@property({ type: Boolean, reflect: true }) active = false;
 
 	private _propertiesObs = new PropertiesObserver(this, {
-		active: this.#activeChanged,
+		active: this.#activeChanged.bind(this),
 	});
 
 	// constructor() {
@@ -48,12 +47,12 @@ export class LoadSpinner extends LitElement {
 
 	#coolingDown = false;
 
-	connectedCallback() {
+	override connectedCallback() {
 		super.connectedCallback?.();
 		console.log('connected!!');
 	}
 
-	update(changedProperties: PropertyValues) {
+	override update(changedProperties: PropertyValues) {
 		this._propertiesObs.update(changedProperties);
 		super.update(changedProperties);
 	}
@@ -73,17 +72,11 @@ export class LoadSpinner extends LitElement {
 		this.requestUpdate();
 	}
 
-	render() {
-		const classNames = [
-			this.active || this.#coolingDown ? 'active' : '',
-			this.#coolingDown ? 'cooldown' : '',
-		].join(' ');
+	// #region Render
+	override render() {
+		const classNames = [this.active || this.#coolingDown ? 'active' : '', this.#coolingDown ? 'cooldown' : ''].join(' ');
 		return html`
-			<div
-				id="spinnerContainer"
-				class=${classNames}
-				@animationend=${this.#reset}
-				@webkit-animation-end=${this.#reset}>
+			<div id="spinnerContainer" class=${classNames} @animationend=${this.#reset} @webkit-animation-end=${this.#reset}>
 				<div class="spinner-layer">
 					<div class="circle-clipper left">
 						<div class="circle"></div>
@@ -95,10 +88,12 @@ export class LoadSpinner extends LitElement {
 			</div>
 		`;
 	}
+	// #endregion
 
-	static styles = [
+	// #region Styles
+	static override styles = [
 		css`
-			/*
+		/*
        * Constants:
        *      ARCSIZE     = 270 degrees (amount of circle the arc takes up)
        *      ARCTIME     = 1333ms (time it takes to expand and contract arc)
@@ -110,55 +105,55 @@ export class LoadSpinner extends LitElement {
        *      SHRINK_TIME = 400ms
        */
 
-			:host {
-				display: inline-block;
-				position: relative;
-				width: 28px;
-				height: 28px;
-				color: var(--primary-color, rgb(30, 136, 229));
-			}
+		:host {
+			display: inline-block;
+			position: relative;
+			width: 28px;
+			height: 28px;
+			color: var(--primary-color, rgb(30, 136, 229));
+		}
 
-			:host(:not([visible])) {
-				display: none;
-			}
+		:host(:not([visible])) {
+			display: none;
+		}
 
-			#spinnerContainer {
-				width: 100%;
-				height: 100%;
+		#spinnerContainer {
+			width: 100%;
+			height: 100%;
 
-				/* The spinner does not have any contents that would have to be
+			/* The spinner does not have any contents that would have to be
          * flipped if the direction changes. Always use ltr so that the
          * style works out correctly in both cases. */
-				direction: ltr;
-			}
+			direction: ltr;
+		}
 
-			#spinnerContainer.active {
-				-webkit-animation: container-rotate 1568ms linear infinite;
-				animation: container-rotate 1568ms linear infinite;
-			}
+		#spinnerContainer.active {
+			-webkit-animation: container-rotate 1568ms linear infinite;
+			animation: container-rotate 1568ms linear infinite;
+		}
 
-			@-webkit-keyframes container-rotate {
-				to {
-					-webkit-transform: rotate(360deg);
-				}
+		@-webkit-keyframes container-rotate {
+			to {
+				-webkit-transform: rotate(360deg);
 			}
+		}
 
-			@keyframes container-rotate {
-				to {
-					transform: rotate(360deg);
-				}
+		@keyframes container-rotate {
+			to {
+				transform: rotate(360deg);
 			}
+		}
 
-			.spinner-layer {
-				display: flex;
-				height: 100%;
-				opacity: 0;
-				position: absolute;
-				white-space: nowrap;
-				width: 100%;
-			}
+		.spinner-layer {
+			display: flex;
+			height: 100%;
+			opacity: 0;
+			position: absolute;
+			white-space: nowrap;
+			width: 100%;
+		}
 
-			/**
+		/**
        * IMPORTANT NOTE ABOUT CSS ANIMATION PROPERTIES (keanulee):
        *
        * iOS Safari (tested on iOS 8.1) does not handle animation-delay very well - it doesn't
@@ -166,215 +161,213 @@ export class LoadSpinner extends LitElement {
        * animation-delay and instead set custom keyframes for each color (as layer-2undant as it
        * seems).
        */
-			.active .spinner-layer {
-				-webkit-animation-name: fill-unfill-rotate;
-				-webkit-animation-duration: 5332ms;
-				-webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-				-webkit-animation-iteration-count: infinite;
-				animation-name: fill-unfill-rotate;
-				animation-duration: 5332ms;
-				animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-				animation-iteration-count: infinite;
-				opacity: 1;
-			}
+		.active .spinner-layer {
+			-webkit-animation-name: fill-unfill-rotate;
+			-webkit-animation-duration: 5332ms;
+			-webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			-webkit-animation-iteration-count: infinite;
+			animation-name: fill-unfill-rotate;
+			animation-duration: 5332ms;
+			animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			animation-iteration-count: infinite;
+			opacity: 1;
+		}
 
-			@-webkit-keyframes fill-unfill-rotate {
-				12.5% {
-					-webkit-transform: rotate(135deg);
-				} /* 0.5 * ARCSIZE */
-				25% {
-					-webkit-transform: rotate(270deg);
-				} /* 1   * ARCSIZE */
-				37.5% {
-					-webkit-transform: rotate(405deg);
-				} /* 1.5 * ARCSIZE */
-				50% {
-					-webkit-transform: rotate(540deg);
-				} /* 2   * ARCSIZE */
-				62.5% {
-					-webkit-transform: rotate(675deg);
-				} /* 2.5 * ARCSIZE */
-				75% {
-					-webkit-transform: rotate(810deg);
-				} /* 3   * ARCSIZE */
-				87.5% {
-					-webkit-transform: rotate(945deg);
-				} /* 3.5 * ARCSIZE */
-				to {
-					-webkit-transform: rotate(1080deg);
-				} /* 4   * ARCSIZE */
-			}
+		@-webkit-keyframes fill-unfill-rotate {
+			12.5% {
+				-webkit-transform: rotate(135deg);
+			} /* 0.5 * ARCSIZE */
+			25% {
+				-webkit-transform: rotate(270deg);
+			} /* 1   * ARCSIZE */
+			37.5% {
+				-webkit-transform: rotate(405deg);
+			} /* 1.5 * ARCSIZE */
+			50% {
+				-webkit-transform: rotate(540deg);
+			} /* 2   * ARCSIZE */
+			62.5% {
+				-webkit-transform: rotate(675deg);
+			} /* 2.5 * ARCSIZE */
+			75% {
+				-webkit-transform: rotate(810deg);
+			} /* 3   * ARCSIZE */
+			87.5% {
+				-webkit-transform: rotate(945deg);
+			} /* 3.5 * ARCSIZE */
+			to {
+				-webkit-transform: rotate(1080deg);
+			} /* 4   * ARCSIZE */
+		}
 
-			@keyframes fill-unfill-rotate {
-				12.5% {
-					transform: rotate(135deg);
-				} /* 0.5 * ARCSIZE */
-				25% {
-					transform: rotate(270deg);
-				} /* 1   * ARCSIZE */
-				37.5% {
-					transform: rotate(405deg);
-				} /* 1.5 * ARCSIZE */
-				50% {
-					transform: rotate(540deg);
-				} /* 2   * ARCSIZE */
-				62.5% {
-					transform: rotate(675deg);
-				} /* 2.5 * ARCSIZE */
-				75% {
-					transform: rotate(810deg);
-				} /* 3   * ARCSIZE */
-				87.5% {
-					transform: rotate(945deg);
-				} /* 3.5 * ARCSIZE */
-				to {
-					transform: rotate(1080deg);
-				} /* 4   * ARCSIZE */
-			}
+		@keyframes fill-unfill-rotate {
+			12.5% {
+				transform: rotate(135deg);
+			} /* 0.5 * ARCSIZE */
+			25% {
+				transform: rotate(270deg);
+			} /* 1   * ARCSIZE */
+			37.5% {
+				transform: rotate(405deg);
+			} /* 1.5 * ARCSIZE */
+			50% {
+				transform: rotate(540deg);
+			} /* 2   * ARCSIZE */
+			62.5% {
+				transform: rotate(675deg);
+			} /* 2.5 * ARCSIZE */
+			75% {
+				transform: rotate(810deg);
+			} /* 3   * ARCSIZE */
+			87.5% {
+				transform: rotate(945deg);
+			} /* 3.5 * ARCSIZE */
+			to {
+				transform: rotate(1080deg);
+			} /* 4   * ARCSIZE */
+		}
 
-			.circle-clipper {
-				display: inline-block;
-				position: relative;
-				width: 50%;
-				height: 100%;
-				overflow: hidden;
-			}
+		.circle-clipper {
+			display: inline-block;
+			position: relative;
+			width: 50%;
+			height: 100%;
+			overflow: hidden;
+		}
 
-			/**
+		/**
        * Patch the gap that appear between the two adjacent div.circle-clipper while the
        * spinner is rotating (appears on Chrome 50, Safari 9.1.1, and Edge).
        */
-			.spinner-layer::after {
-				content: '';
-				left: 45%;
-				width: 10%;
-				border-top-style: solid;
-			}
+		.spinner-layer::after {
+			content: '';
+			left: 45%;
+			width: 10%;
+			border-top-style: solid;
+		}
 
-			.spinner-layer::after,
-			.circle-clipper .circle {
-				box-sizing: border-box;
-				position: absolute;
-				top: 0;
-				border-width: 3px;
-				border-radius: 50%;
-			}
+		.spinner-layer::after,
+		.circle-clipper .circle {
+			box-sizing: border-box;
+			position: absolute;
+			top: 0;
+			border-width: 3px;
+			border-radius: 50%;
+		}
 
-			.circle-clipper .circle {
-				bottom: 0;
-				width: 200%;
-				border-style: solid;
-				border-bottom-color: transparent !important;
-			}
+		.circle-clipper .circle {
+			bottom: 0;
+			width: 200%;
+			border-style: solid;
+			border-bottom-color: transparent !important;
+		}
 
-			.circle-clipper.left .circle {
-				left: 0;
-				border-right-color: transparent !important;
-				-webkit-transform: rotate(129deg);
-				transform: rotate(129deg);
-			}
+		.circle-clipper.left .circle {
+			left: 0;
+			border-right-color: transparent !important;
+			-webkit-transform: rotate(129deg);
+			transform: rotate(129deg);
+		}
 
-			.circle-clipper.right .circle {
-				left: -100%;
-				border-left-color: transparent !important;
-				-webkit-transform: rotate(-129deg);
-				transform: rotate(-129deg);
-			}
+		.circle-clipper.right .circle {
+			left: -100%;
+			border-left-color: transparent !important;
+			-webkit-transform: rotate(-129deg);
+			transform: rotate(-129deg);
+		}
 
-			.active .gap-patch::after,
-			.active .circle-clipper .circle {
-				-webkit-animation-duration: 1333ms;
-				-webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-				-webkit-animation-iteration-count: infinite;
-				animation-duration: 1333ms;
-				animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-				animation-iteration-count: infinite;
-			}
+		.active .gap-patch::after,
+		.active .circle-clipper .circle {
+			-webkit-animation-duration: 1333ms;
+			-webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			-webkit-animation-iteration-count: infinite;
+			animation-duration: 1333ms;
+			animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			animation-iteration-count: infinite;
+		}
 
-			.active .circle-clipper.left .circle {
-				-webkit-animation-name: left-spin;
-				animation-name: left-spin;
-			}
+		.active .circle-clipper.left .circle {
+			-webkit-animation-name: left-spin;
+			animation-name: left-spin;
+		}
 
-			.active .circle-clipper.right .circle {
-				-webkit-animation-name: right-spin;
-				animation-name: right-spin;
-			}
+		.active .circle-clipper.right .circle {
+			-webkit-animation-name: right-spin;
+			animation-name: right-spin;
+		}
 
-			@-webkit-keyframes left-spin {
-				0% {
-					-webkit-transform: rotate(130deg);
-				}
-				50% {
-					-webkit-transform: rotate(-5deg);
-				}
-				to {
-					-webkit-transform: rotate(130deg);
-				}
+		@-webkit-keyframes left-spin {
+			0% {
+				-webkit-transform: rotate(130deg);
 			}
+			50% {
+				-webkit-transform: rotate(-5deg);
+			}
+			to {
+				-webkit-transform: rotate(130deg);
+			}
+		}
 
-			@keyframes left-spin {
-				0% {
-					transform: rotate(130deg);
-				}
-				50% {
-					transform: rotate(-5deg);
-				}
-				to {
-					transform: rotate(130deg);
-				}
+		@keyframes left-spin {
+			0% {
+				transform: rotate(130deg);
 			}
+			50% {
+				transform: rotate(-5deg);
+			}
+			to {
+				transform: rotate(130deg);
+			}
+		}
 
-			@-webkit-keyframes right-spin {
-				0% {
-					-webkit-transform: rotate(-130deg);
-				}
-				50% {
-					-webkit-transform: rotate(5deg);
-				}
-				to {
-					-webkit-transform: rotate(-130deg);
-				}
+		@-webkit-keyframes right-spin {
+			0% {
+				-webkit-transform: rotate(-130deg);
 			}
+			50% {
+				-webkit-transform: rotate(5deg);
+			}
+			to {
+				-webkit-transform: rotate(-130deg);
+			}
+		}
 
-			@keyframes right-spin {
-				0% {
-					transform: rotate(-130deg);
-				}
-				50% {
-					transform: rotate(5deg);
-				}
-				to {
-					transform: rotate(-130deg);
-				}
+		@keyframes right-spin {
+			0% {
+				transform: rotate(-130deg);
 			}
+			50% {
+				transform: rotate(5deg);
+			}
+			to {
+				transform: rotate(-130deg);
+			}
+		}
 
-			#spinnerContainer.cooldown {
-				-webkit-animation: container-rotate 1568ms linear infinite,
-					fade-out 400ms cubic-bezier(0.4, 0, 0.2, 1);
-				animation: container-rotate 1568ms linear infinite,
-					fade-out 400ms cubic-bezier(0.4, 0, 0.2, 1);
-			}
+		#spinnerContainer.cooldown {
+			-webkit-animation: container-rotate 1568ms linear infinite, fade-out 400ms cubic-bezier(0.4, 0, 0.2, 1);
+			animation: container-rotate 1568ms linear infinite, fade-out 400ms cubic-bezier(0.4, 0, 0.2, 1);
+		}
 
-			@-webkit-keyframes fade-out {
-				0% {
-					opacity: 1;
-				}
-				to {
-					opacity: 0;
-				}
+		@-webkit-keyframes fade-out {
+			0% {
+				opacity: 1;
 			}
+			to {
+				opacity: 0;
+			}
+		}
 
-			@keyframes fade-out {
-				0% {
-					opacity: 1;
-				}
-				to {
-					opacity: 0;
-				}
+		@keyframes fade-out {
+			0% {
+				opacity: 1;
 			}
-		`,
-	];
+			to {
+				opacity: 0;
+			}
+		}
+		`];
+	// #endregion
 }
 
 declare global {

@@ -1,0 +1,2234 @@
+{
+	"operations": [
+		{
+			"operationId": "abortUpload",
+			"method": "delete",
+			"path": "/uploads/{uploadId}",
+			"tags": [
+				"uploads.uploads"
+			]
+		},
+		{
+			"operationId": "acceptFriendRequest",
+			"method": "put",
+			"path": "/me/friend-requests/{friendRequestId}/accept",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "acceptMyTournamentInvite",
+			"method": "put",
+			"path": "/me/tournament-invites/{inviteId}/accept",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "adminApproveMedia",
+			"method": "post",
+			"path": "/admin/moderation/media/{mediaId}/approve",
+			"tags": [
+				"admin.media"
+			]
+		},
+		{
+			"operationId": "adminAttachTournamentToVerifiedEvent",
+			"method": "post",
+			"path": "/admin/verified/events/{eventId}/tournaments",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminCreateAchievement",
+			"method": "post",
+			"path": "/admin/achievements",
+			"tags": [
+				"admin.achievements"
+			]
+		},
+		{
+			"operationId": "adminCreateCreator",
+			"method": "post",
+			"path": "/admin/creators",
+			"tags": [
+				"admin.creators"
+			]
+		},
+		{
+			"operationId": "adminCreateEnforcementAction",
+			"method": "post",
+			"path": "/admin/users/{userId}/enforcement-actions",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminCreatePromotion",
+			"method": "post",
+			"path": "/admin/promotions",
+			"tags": [
+				"admin.promotions"
+			]
+		},
+		{
+			"operationId": "adminCreateRankedTrack",
+			"method": "post",
+			"path": "/admin/ranked/tracks",
+			"tags": [
+				"admin.ranked"
+			]
+		},
+		{
+			"operationId": "adminCreateVerifiedEvent",
+			"method": "post",
+			"path": "/admin/verified/events",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminDeleteChatMessage",
+			"method": "post",
+			"path": "/admin/moderation/chat/messages/{messageId}/delete",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminDetachTournamentFromVerifiedEvent",
+			"method": "delete",
+			"path": "/admin/verified/events/{eventId}/tournaments/{tournamentId}",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminGetAppeal",
+			"method": "get",
+			"path": "/admin/appeals/{appealId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminGetCreator",
+			"method": "get",
+			"path": "/admin/creators/{creatorId}",
+			"tags": [
+				"admin.creators"
+			]
+		},
+		{
+			"operationId": "adminGetEnforcementAction",
+			"method": "get",
+			"path": "/admin/enforcement-actions/{actionId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminGetPromotion",
+			"method": "get",
+			"path": "/admin/promotions/{promotionId}",
+			"tags": [
+				"admin.promotions"
+			]
+		},
+		{
+			"operationId": "adminGetReport",
+			"method": "get",
+			"path": "/admin/reports/{reportId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminGetTournament",
+			"method": "get",
+			"path": "/admin/tournaments/{tournamentId}",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminGetUser",
+			"method": "get",
+			"path": "/admin/users/{userId}",
+			"tags": [
+				"admin.users"
+			]
+		},
+		{
+			"operationId": "adminGetVerifiedEvent",
+			"method": "get",
+			"path": "/admin/verified/events/{eventId}",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminGetVerifiedHubConfig",
+			"method": "get",
+			"path": "/admin/verified/hub",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminListAppeals",
+			"method": "get",
+			"path": "/admin/appeals",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminListChatModerationQueue",
+			"method": "get",
+			"path": "/admin/moderation/chat/messages",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminListCreators",
+			"method": "get",
+			"path": "/admin/creators",
+			"tags": [
+				"admin.creators"
+			]
+		},
+		{
+			"operationId": "adminListMediaModerationQueue",
+			"method": "get",
+			"path": "/admin/moderation/media",
+			"tags": [
+				"admin.media"
+			]
+		},
+		{
+			"operationId": "adminListPromotions",
+			"method": "get",
+			"path": "/admin/promotions",
+			"tags": [
+				"admin.promotions"
+			]
+		},
+		{
+			"operationId": "adminListRankedTracks",
+			"method": "get",
+			"path": "/admin/ranked/tracks",
+			"tags": [
+				"admin.ranked"
+			]
+		},
+		{
+			"operationId": "adminListReports",
+			"method": "get",
+			"path": "/admin/reports",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminListTournamentMembers",
+			"method": "get",
+			"path": "/admin/tournaments/{tournamentId}/members",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminListTournaments",
+			"method": "get",
+			"path": "/admin/tournaments",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminListUserEnforcementActions",
+			"method": "get",
+			"path": "/admin/users/{userId}/enforcement-actions",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminListUsers",
+			"method": "get",
+			"path": "/admin/users",
+			"tags": [
+				"admin.users"
+			]
+		},
+		{
+			"operationId": "adminListVerifiedEvents",
+			"method": "get",
+			"path": "/admin/verified/events",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminOverrideMatch",
+			"method": "patch",
+			"path": "/admin/sports/matches/{matchId}",
+			"tags": [
+				"admin.sports"
+			]
+		},
+		{
+			"operationId": "adminPublishVerifiedEvent",
+			"method": "post",
+			"path": "/admin/verified/events/{eventId}/publish",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminRecomputeTournament",
+			"method": "post",
+			"path": "/admin/tournaments/{tournamentId}/recompute",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminRejectMedia",
+			"method": "post",
+			"path": "/admin/moderation/media/{mediaId}/reject",
+			"tags": [
+				"admin.media"
+			]
+		},
+		{
+			"operationId": "adminRemoveTournamentMember",
+			"method": "delete",
+			"path": "/admin/tournaments/{tournamentId}/members/{userId}",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminUnpublishVerifiedEvent",
+			"method": "post",
+			"path": "/admin/verified/events/{eventId}/unpublish",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminUpdateAchievement",
+			"method": "patch",
+			"path": "/admin/achievements/{achievementId}",
+			"tags": [
+				"admin.achievements"
+			]
+		},
+		{
+			"operationId": "adminUpdateAppeal",
+			"method": "patch",
+			"path": "/admin/appeals/{appealId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminUpdateCreator",
+			"method": "patch",
+			"path": "/admin/creators/{creatorId}",
+			"tags": [
+				"admin.creators"
+			]
+		},
+		{
+			"operationId": "adminUpdateEnforcementAction",
+			"method": "patch",
+			"path": "/admin/enforcement-actions/{actionId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminUpdatePromotion",
+			"method": "patch",
+			"path": "/admin/promotions/{promotionId}",
+			"tags": [
+				"admin.promotions"
+			]
+		},
+		{
+			"operationId": "adminUpdateRankedTrack",
+			"method": "patch",
+			"path": "/admin/ranked/tracks/{rankedTrackId}",
+			"tags": [
+				"admin.ranked"
+			]
+		},
+		{
+			"operationId": "adminUpdateReport",
+			"method": "patch",
+			"path": "/admin/reports/{reportId}",
+			"tags": [
+				"admin.trustSafety"
+			]
+		},
+		{
+			"operationId": "adminUpdateTournament",
+			"method": "patch",
+			"path": "/admin/tournaments/{tournamentId}",
+			"tags": [
+				"admin.tournaments"
+			]
+		},
+		{
+			"operationId": "adminUpdateUser",
+			"method": "patch",
+			"path": "/admin/users/{userId}",
+			"tags": [
+				"admin.users"
+			]
+		},
+		{
+			"operationId": "adminUpdateVerifiedEvent",
+			"method": "patch",
+			"path": "/admin/verified/events/{eventId}",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "adminUpdateVerifiedHubConfig",
+			"method": "put",
+			"path": "/admin/verified/hub",
+			"tags": [
+				"admin.verified"
+			]
+		},
+		{
+			"operationId": "archiveTournament",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/archive",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "batchUpdateMyNotifications",
+			"method": "post",
+			"path": "/me/notifications/batch",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "blockUser",
+			"method": "put",
+			"path": "/me/blocks/{userId}",
+			"tags": [
+				"social.blocks"
+			]
+		},
+		{
+			"operationId": "cancelMyFriendRequest",
+			"method": "delete",
+			"path": "/me/friend-requests/{friendRequestId}",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "cancelTournamentInvite",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/invites/{inviteId}",
+			"tags": [
+				"tournaments.invites"
+			]
+		},
+		{
+			"operationId": "changeMyPassword",
+			"method": "post",
+			"path": "/me/password",
+			"tags": [
+				"users.me"
+			]
+		},
+		{
+			"operationId": "claimMyReward",
+			"method": "post",
+			"path": "/me/rewards/{rewardGrantId}/claim",
+			"tags": [
+				"promotions.rewards"
+			]
+		},
+		{
+			"operationId": "clearMyMatchdaySubmission",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me",
+			"tags": [
+				"tournaments.submissions"
+			]
+		},
+		{
+			"operationId": "completeUpload",
+			"method": "post",
+			"path": "/uploads/{uploadId}/complete",
+			"tags": [
+				"uploads.uploads"
+			]
+		},
+		{
+			"operationId": "confirmPasswordReset",
+			"method": "post",
+			"path": "/auth/password-resets/confirm",
+			"tags": [
+				"auth.passwordResets"
+			]
+		},
+		{
+			"operationId": "confirmRegistration",
+			"method": "post",
+			"path": "/auth/registrations/confirm",
+			"tags": [
+				"auth.registrations"
+			]
+		},
+		{
+			"operationId": "createDuel",
+			"method": "post",
+			"path": "/me/duels",
+			"tags": [
+				"tournaments.duels"
+			]
+		},
+		{
+			"operationId": "createDuelRematch",
+			"method": "post",
+			"path": "/tournaments/{tournamentId}/rematch",
+			"tags": [
+				"tournaments.duels"
+			]
+		},
+		{
+			"operationId": "createFriendRequest",
+			"method": "post",
+			"path": "/me/friend-requests",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "createMyAppeal",
+			"method": "post",
+			"path": "/me/trust/appeals",
+			"tags": [
+				"trustSafety.enforcement"
+			]
+		},
+		{
+			"operationId": "createOauthLink",
+			"method": "post",
+			"path": "/auth/oauth/links",
+			"tags": [
+				"auth.oauth"
+			]
+		},
+		{
+			"operationId": "createReport",
+			"method": "post",
+			"path": "/me/trust/reports",
+			"tags": [
+				"trustSafety.reporting"
+			]
+		},
+		{
+			"operationId": "createSession",
+			"method": "post",
+			"path": "/auth/sessions",
+			"tags": [
+				"auth.sessions"
+			]
+		},
+		{
+			"operationId": "createTournament",
+			"method": "post",
+			"path": "/tournaments",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "createTournamentInvitationCode",
+			"method": "post",
+			"path": "/tournaments/{tournamentId}/invitation-codes",
+			"tags": [
+				"tournaments.invitationCodes"
+			]
+		},
+		{
+			"operationId": "createTournamentInvites",
+			"method": "post",
+			"path": "/tournaments/{tournamentId}/invites",
+			"tags": [
+				"tournaments.invites"
+			]
+		},
+		{
+			"operationId": "createUpload",
+			"method": "post",
+			"path": "/uploads",
+			"tags": [
+				"uploads.uploads"
+			]
+		},
+		{
+			"operationId": "declineFriendRequest",
+			"method": "put",
+			"path": "/me/friend-requests/{friendRequestId}/decline",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "declineMyTournamentInvite",
+			"method": "put",
+			"path": "/me/tournament-invites/{inviteId}/decline",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "deleteMe",
+			"method": "delete",
+			"path": "/me",
+			"tags": [
+				"users.me"
+			]
+		},
+		{
+			"operationId": "deleteMedia",
+			"method": "delete",
+			"path": "/media/{mediaId}",
+			"tags": [
+				"uploads.media"
+			]
+		},
+		{
+			"operationId": "deleteMyDevice",
+			"method": "delete",
+			"path": "/me/devices/{deviceId}",
+			"tags": [
+				"users.me.devices"
+			]
+		},
+		{
+			"operationId": "deleteOauthLink",
+			"method": "delete",
+			"path": "/auth/oauth/links/{provider}",
+			"tags": [
+				"auth.oauth"
+			]
+		},
+		{
+			"operationId": "deleteTournament",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "deleteTournamentChatMessage",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/chat/messages/{messageId}",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "dismissMyNotification",
+			"method": "put",
+			"path": "/me/notifications/{notificationId}/dismiss",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "editTournamentChatMessage",
+			"method": "patch",
+			"path": "/tournaments/{tournamentId}/chat/messages/{messageId}",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "followUser",
+			"method": "put",
+			"path": "/users/{userId}/followers/me",
+			"tags": [
+				"social.follow"
+			]
+		},
+		{
+			"operationId": "getAchievementDefinition",
+			"method": "get",
+			"path": "/achievements/{achievementId}",
+			"tags": [
+				"achievements.meta"
+			]
+		},
+		{
+			"operationId": "getAchievementMeta",
+			"method": "get",
+			"path": "/achievements/meta",
+			"tags": [
+				"achievements.meta"
+			]
+		},
+		{
+			"operationId": "getAdminMe",
+			"method": "get",
+			"path": "/admin/me",
+			"tags": [
+				"admin.meta"
+			]
+		},
+		{
+			"operationId": "getAdminMeta",
+			"method": "get",
+			"path": "/admin/meta",
+			"tags": [
+				"admin.meta"
+			]
+		},
+		{
+			"operationId": "getAppBootstrap",
+			"method": "get",
+			"path": "/app/bootstrap",
+			"tags": [
+				"meta.config"
+			]
+		},
+		{
+			"operationId": "getAppConfig",
+			"method": "get",
+			"path": "/app/config",
+			"tags": [
+				"meta.config"
+			]
+		},
+		{
+			"operationId": "getAuditEvent",
+			"method": "get",
+			"path": "/admin/audit/{auditEventId}",
+			"tags": [
+				"admin.audit"
+			]
+		},
+		{
+			"operationId": "getCompetition",
+			"method": "get",
+			"path": "/competitions/{competitionId}",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "getCompetitionSeason",
+			"method": "get",
+			"path": "/competitions/{competitionId}/seasons/{seasonId}",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "getCreator",
+			"method": "get",
+			"path": "/creators/{creatorId}",
+			"tags": [
+				"creators.directory"
+			]
+		},
+		{
+			"operationId": "getCreatorCollection",
+			"method": "get",
+			"path": "/creators/{creatorId}/collections/{collectionId}",
+			"tags": [
+				"creators.catalog"
+			]
+		},
+		{
+			"operationId": "getCreatorHub",
+			"method": "get",
+			"path": "/creators/{creatorId}/hub",
+			"tags": [
+				"creators.catalog"
+			]
+		},
+		{
+			"operationId": "getGameMode",
+			"method": "get",
+			"path": "/game-modes/{gameModeId}",
+			"tags": [
+				"game.modes"
+			]
+		},
+		{
+			"operationId": "getHealthz",
+			"method": "get",
+			"path": "/healthz",
+			"tags": [
+				"meta.health"
+			]
+		},
+		{
+			"operationId": "getMatch",
+			"method": "get",
+			"path": "/matches/{matchId}",
+			"tags": [
+				"sports.schedule"
+			]
+		},
+		{
+			"operationId": "getMatchdayResultsSummary",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/results",
+			"tags": [
+				"tournaments.results"
+			]
+		},
+		{
+			"operationId": "getMe",
+			"method": "get",
+			"path": "/me",
+			"tags": [
+				"users.me"
+			]
+		},
+		{
+			"operationId": "getMedia",
+			"method": "get",
+			"path": "/media/{mediaId}",
+			"tags": [
+				"uploads.media"
+			]
+		},
+		{
+			"operationId": "getMyAchievement",
+			"method": "get",
+			"path": "/me/achievements/{achievementId}",
+			"tags": [
+				"achievements.me"
+			]
+		},
+		{
+			"operationId": "getMyAppeal",
+			"method": "get",
+			"path": "/me/trust/appeals/{appealId}",
+			"tags": [
+				"trustSafety.enforcement"
+			]
+		},
+		{
+			"operationId": "getMyEnforcementStatus",
+			"method": "get",
+			"path": "/me/trust/enforcement",
+			"tags": [
+				"trustSafety.enforcement"
+			]
+		},
+		{
+			"operationId": "getMyFeedItem",
+			"method": "get",
+			"path": "/me/feed/{feedItemId}",
+			"tags": [
+				"live.feed"
+			]
+		},
+		{
+			"operationId": "getMyFeedReadCursor",
+			"method": "get",
+			"path": "/me/feed/read-cursor",
+			"tags": [
+				"live.feed"
+			]
+		},
+		{
+			"operationId": "getMyFriendRequest",
+			"method": "get",
+			"path": "/me/friend-requests/{friendRequestId}",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "getMyFriendRequestUnreadCount",
+			"method": "get",
+			"path": "/me/friend-requests/unread-count",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "getMyMatchdayResults",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/results/me",
+			"tags": [
+				"tournaments.results"
+			]
+		},
+		{
+			"operationId": "getMyMatchdaySubmission",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me",
+			"tags": [
+				"tournaments.submissions"
+			]
+		},
+		{
+			"operationId": "getMyNotification",
+			"method": "get",
+			"path": "/me/notifications/{notificationId}",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "getMyNotificationPreferences",
+			"method": "get",
+			"path": "/me/notification-preferences",
+			"tags": [
+				"users.me.notifications"
+			]
+		},
+		{
+			"operationId": "getMyNotificationUnreadCount",
+			"method": "get",
+			"path": "/me/notifications/unread-count",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "getMyPreferences",
+			"method": "get",
+			"path": "/me/preferences",
+			"tags": [
+				"users.me.preferences"
+			]
+		},
+		{
+			"operationId": "getMyPrivacy",
+			"method": "get",
+			"path": "/me/privacy",
+			"tags": [
+				"users.me.privacy"
+			]
+		},
+		{
+			"operationId": "getMyPromotionStatus",
+			"method": "get",
+			"path": "/promotions/{promotionId}/me",
+			"tags": [
+				"promotions.participation"
+			]
+		},
+		{
+			"operationId": "getMyRankedProfile",
+			"method": "get",
+			"path": "/me/ranked",
+			"tags": [
+				"ranked.me"
+			]
+		},
+		{
+			"operationId": "getMyRankedSettings",
+			"method": "get",
+			"path": "/me/ranked/settings",
+			"tags": [
+				"ranked.me"
+			]
+		},
+		{
+			"operationId": "getMyRankedTrack",
+			"method": "get",
+			"path": "/me/ranked/tracks/{rankedTrackId}",
+			"tags": [
+				"ranked.me"
+			]
+		},
+		{
+			"operationId": "getMyRecap",
+			"method": "get",
+			"path": "/me/recaps/{recapId}",
+			"tags": [
+				"stats.me",
+				"stats.recaps"
+			]
+		},
+		{
+			"operationId": "getMyRelationshipWithUser",
+			"method": "get",
+			"path": "/me/relationships/{userId}",
+			"tags": [
+				"social"
+			]
+		},
+		{
+			"operationId": "getMyReport",
+			"method": "get",
+			"path": "/me/trust/reports/{reportId}",
+			"tags": [
+				"trustSafety.reporting"
+			]
+		},
+		{
+			"operationId": "getMyReward",
+			"method": "get",
+			"path": "/me/rewards/{rewardGrantId}",
+			"tags": [
+				"promotions.rewards"
+			]
+		},
+		{
+			"operationId": "getMyRewardFulfillmentProfile",
+			"method": "get",
+			"path": "/me/rewards/fulfillment-profile",
+			"tags": [
+				"promotions.rewards"
+			]
+		},
+		{
+			"operationId": "getMyStats",
+			"method": "get",
+			"path": "/me/stats",
+			"tags": [
+				"stats.me"
+			]
+		},
+		{
+			"operationId": "getMyTournamentInvite",
+			"method": "get",
+			"path": "/me/tournament-invites/{inviteId}",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "getMyTournamentInviteUnreadCount",
+			"method": "get",
+			"path": "/me/tournament-invites/unread-count",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "getMyTournamentMatchdayRankingWindow",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/rankings/me",
+			"tags": [
+				"tournaments.rankings"
+			]
+		},
+		{
+			"operationId": "getMyTournamentMatchdayStats",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/stats/me",
+			"tags": [
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "getMyTournamentSeasonRankingWindow",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/rankings/me",
+			"tags": [
+				"tournaments.rankings"
+			]
+		},
+		{
+			"operationId": "getMyTournamentStats",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/stats/me",
+			"tags": [
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "getPromotion",
+			"method": "get",
+			"path": "/promotions/{promotionId}",
+			"tags": [
+				"promotions.catalog"
+			]
+		},
+		{
+			"operationId": "getRankedLeaderboard",
+			"method": "get",
+			"path": "/ranked/tracks/{rankedTrackId}/leaderboard",
+			"tags": [
+				"ranked.leaderboards"
+			]
+		},
+		{
+			"operationId": "getRankedMeta",
+			"method": "get",
+			"path": "/ranked/meta",
+			"tags": [
+				"ranked.meta"
+			]
+		},
+		{
+			"operationId": "getRankedSeason",
+			"method": "get",
+			"path": "/ranked/tracks/{rankedTrackId}/seasons/{rankedSeasonId}",
+			"tags": [
+				"ranked.seasons"
+			]
+		},
+		{
+			"operationId": "getRankedSeasonLeaderboard",
+			"method": "get",
+			"path": "/ranked/tracks/{rankedTrackId}/seasons/{rankedSeasonId}/leaderboard",
+			"tags": [
+				"ranked.leaderboards"
+			]
+		},
+		{
+			"operationId": "getRankedTrack",
+			"method": "get",
+			"path": "/ranked/tracks/{rankedTrackId}",
+			"tags": [
+				"ranked.tracks"
+			]
+		},
+		{
+			"operationId": "getReadyz",
+			"method": "get",
+			"path": "/readyz",
+			"tags": [
+				"meta.health"
+			]
+		},
+		{
+			"operationId": "getRuleset",
+			"method": "get",
+			"path": "/rulesets/{rulesetId}",
+			"tags": [
+				"game.rulesets"
+			]
+		},
+		{
+			"operationId": "getTeam",
+			"method": "get",
+			"path": "/teams/{teamId}",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "getTournament",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "getTournamentChat",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "getTournamentChatMessage",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/messages/{messageId}",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "getTournamentChatReadCursor",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/read-cursor",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "getTournamentChatUnreadCount",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/unread-count",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "getTournamentMatchday",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}",
+			"tags": [
+				"tournaments.matchdays"
+			]
+		},
+		{
+			"operationId": "getTournamentMatchdayAvailability",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/availability",
+			"tags": [
+				"tournaments.matchdays"
+			]
+		},
+		{
+			"operationId": "getTournamentMatchdayStats",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/stats",
+			"tags": [
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "getTournamentPreview",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/preview",
+			"tags": [
+				"tournaments.preview"
+			]
+		},
+		{
+			"operationId": "getTournamentRecap",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/recaps/{recapId}",
+			"tags": [
+				"stats.recaps",
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "getTournamentRules",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/rules",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "getTournamentStats",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/stats",
+			"tags": [
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "getTrustPolicy",
+			"method": "get",
+			"path": "/trust/policies/{policyId}",
+			"tags": [
+				"trustSafety.policies"
+			]
+		},
+		{
+			"operationId": "getUpload",
+			"method": "get",
+			"path": "/uploads/{uploadId}",
+			"tags": [
+				"uploads.uploads"
+			]
+		},
+		{
+			"operationId": "getUserMatchdayResults",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/results/users/{userId}",
+			"tags": [
+				"tournaments.results"
+			]
+		},
+		{
+			"operationId": "getUserMatchdaySubmission",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/submissions/users/{userId}",
+			"tags": [
+				"tournaments.submissions"
+			]
+		},
+		{
+			"operationId": "getUserPublicHistory",
+			"method": "get",
+			"path": "/users/{userId}/history",
+			"tags": [
+				"users.history"
+			]
+		},
+		{
+			"operationId": "getUserPublicProfile",
+			"method": "get",
+			"path": "/users/{userId}",
+			"tags": [
+				"users.directory"
+			]
+		},
+		{
+			"operationId": "getUserRankedProfile",
+			"method": "get",
+			"path": "/users/{userId}/ranked",
+			"tags": [
+				"ranked.users"
+			]
+		},
+		{
+			"operationId": "getUserRankedTrack",
+			"method": "get",
+			"path": "/users/{userId}/ranked/tracks/{rankedTrackId}",
+			"tags": [
+				"ranked.users"
+			]
+		},
+		{
+			"operationId": "getUserStats",
+			"method": "get",
+			"path": "/users/{userId}/stats",
+			"tags": [
+				"stats.users"
+			]
+		},
+		{
+			"operationId": "getVerifiedEvent",
+			"method": "get",
+			"path": "/verified/events/{eventId}",
+			"tags": [
+				"verified.events"
+			]
+		},
+		{
+			"operationId": "getVerifiedHub",
+			"method": "get",
+			"path": "/verified/hub",
+			"tags": [
+				"verified.hub"
+			]
+		},
+		{
+			"operationId": "getVerifiedTournamentPreview",
+			"method": "get",
+			"path": "/verified/tournaments/{tournamentId}",
+			"tags": [
+				"verified.tournaments"
+			]
+		},
+		{
+			"operationId": "hideMyRecap",
+			"method": "delete",
+			"path": "/me/recaps/{recapId}",
+			"tags": [
+				"stats.me",
+				"stats.recaps"
+			]
+		},
+		{
+			"operationId": "hideMyTournamentInvite",
+			"method": "delete",
+			"path": "/me/tournament-invites/{inviteId}",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "joinTournament",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/members/me",
+			"tags": [
+				"tournaments.members"
+			]
+		},
+		{
+			"operationId": "joinTournamentByInvitationCode",
+			"method": "put",
+			"path": "/invitation-codes/{code}/members/me",
+			"tags": [
+				"tournaments.invitationCodes"
+			]
+		},
+		{
+			"operationId": "leaveTournament",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/members/me",
+			"tags": [
+				"tournaments.members"
+			]
+		},
+		{
+			"operationId": "listAchievementDefinitions",
+			"method": "get",
+			"path": "/achievements",
+			"tags": [
+				"achievements.meta"
+			]
+		},
+		{
+			"operationId": "listAuditEvents",
+			"method": "get",
+			"path": "/admin/audit",
+			"tags": [
+				"admin.audit"
+			]
+		},
+		{
+			"operationId": "listCompetitions",
+			"method": "get",
+			"path": "/competitions",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "listCompetitionSeasons",
+			"method": "get",
+			"path": "/competitions/{competitionId}/seasons",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "listCreatorCollections",
+			"method": "get",
+			"path": "/creators/{creatorId}/collections",
+			"tags": [
+				"creators.catalog"
+			]
+		},
+		{
+			"operationId": "listCreatorEvents",
+			"method": "get",
+			"path": "/creators/{creatorId}/events",
+			"tags": [
+				"creators.catalog"
+			]
+		},
+		{
+			"operationId": "listCreators",
+			"method": "get",
+			"path": "/creators",
+			"tags": [
+				"creators.directory"
+			]
+		},
+		{
+			"operationId": "listCreatorTournaments",
+			"method": "get",
+			"path": "/creators/{creatorId}/tournaments",
+			"tags": [
+				"creators.catalog"
+			]
+		},
+		{
+			"operationId": "listDiscoverableTournaments",
+			"method": "get",
+			"path": "/tournaments",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "listGameModes",
+			"method": "get",
+			"path": "/game-modes",
+			"tags": [
+				"game.modes"
+			]
+		},
+		{
+			"operationId": "listMatchdayMatches",
+			"method": "get",
+			"path": "/competitions/{competitionId}/seasons/{seasonId}/matchdays/{matchday}/matches",
+			"tags": [
+				"sports.schedule"
+			]
+		},
+		{
+			"operationId": "listMatchdays",
+			"method": "get",
+			"path": "/competitions/{competitionId}/seasons/{seasonId}/matchdays",
+			"tags": [
+				"sports.schedule"
+			]
+		},
+		{
+			"operationId": "listMatchdaySubmissions",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/submissions",
+			"tags": [
+				"tournaments.submissions"
+			]
+		},
+		{
+			"operationId": "listMatchEvents",
+			"method": "get",
+			"path": "/matches/{matchId}/events",
+			"tags": [
+				"sports.schedule"
+			]
+		},
+		{
+			"operationId": "listMyAchievements",
+			"method": "get",
+			"path": "/me/achievements",
+			"tags": [
+				"achievements.me"
+			]
+		},
+		{
+			"operationId": "listMyAppeals",
+			"method": "get",
+			"path": "/me/trust/appeals",
+			"tags": [
+				"trustSafety.enforcement"
+			]
+		},
+		{
+			"operationId": "listMyBlockedUsers",
+			"method": "get",
+			"path": "/me/blocks",
+			"tags": [
+				"social.blocks"
+			]
+		},
+		{
+			"operationId": "listMyDevices",
+			"method": "get",
+			"path": "/me/devices",
+			"tags": [
+				"users.me.devices"
+			]
+		},
+		{
+			"operationId": "listMyDuels",
+			"method": "get",
+			"path": "/me/duels",
+			"tags": [
+				"tournaments.duels"
+			]
+		},
+		{
+			"operationId": "listMyFeed",
+			"method": "get",
+			"path": "/me/feed",
+			"tags": [
+				"live.feed"
+			]
+		},
+		{
+			"operationId": "listMyFollowers",
+			"method": "get",
+			"path": "/me/followers",
+			"tags": [
+				"social.follow"
+			]
+		},
+		{
+			"operationId": "listMyFollowing",
+			"method": "get",
+			"path": "/me/following",
+			"tags": [
+				"social.follow"
+			]
+		},
+		{
+			"operationId": "listMyFriendRequests",
+			"method": "get",
+			"path": "/me/friend-requests",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "listMyFriends",
+			"method": "get",
+			"path": "/me/friends",
+			"tags": [
+				"social.friends"
+			]
+		},
+		{
+			"operationId": "listMyNotifications",
+			"method": "get",
+			"path": "/me/notifications",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "listMyPromotions",
+			"method": "get",
+			"path": "/me/promotions",
+			"tags": [
+				"promotions.participation"
+			]
+		},
+		{
+			"operationId": "listMyRankedHistory",
+			"method": "get",
+			"path": "/me/ranked/tracks/{rankedTrackId}/history",
+			"tags": [
+				"ranked.me"
+			]
+		},
+		{
+			"operationId": "listMyRecaps",
+			"method": "get",
+			"path": "/me/recaps",
+			"tags": [
+				"stats.me",
+				"stats.recaps"
+			]
+		},
+		{
+			"operationId": "listMyReports",
+			"method": "get",
+			"path": "/me/trust/reports",
+			"tags": [
+				"trustSafety.reporting"
+			]
+		},
+		{
+			"operationId": "listMyRewards",
+			"method": "get",
+			"path": "/me/rewards",
+			"tags": [
+				"promotions.rewards"
+			]
+		},
+		{
+			"operationId": "listMyTournamentInvites",
+			"method": "get",
+			"path": "/me/tournament-invites",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "listMyTournaments",
+			"method": "get",
+			"path": "/me/tournaments",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "listMyTrustBlocks",
+			"method": "get",
+			"path": "/me/trust/blocks",
+			"tags": [
+				"trustSafety.blocks"
+			]
+		},
+		{
+			"operationId": "listMyUnlockedAchievements",
+			"method": "get",
+			"path": "/me/achievements/unlocked",
+			"tags": [
+				"achievements.me"
+			]
+		},
+		{
+			"operationId": "listMyUpdates",
+			"method": "get",
+			"path": "/me/updates",
+			"tags": [
+				"live.stream"
+			]
+		},
+		{
+			"operationId": "listOauthLinks",
+			"method": "get",
+			"path": "/auth/oauth/links",
+			"tags": [
+				"auth.oauth"
+			]
+		},
+		{
+			"operationId": "listPromotions",
+			"method": "get",
+			"path": "/promotions",
+			"tags": [
+				"promotions.catalog"
+			]
+		},
+		{
+			"operationId": "listPromotionWinners",
+			"method": "get",
+			"path": "/promotions/{promotionId}/winners",
+			"tags": [
+				"promotions.catalog"
+			]
+		},
+		{
+			"operationId": "listRankedSeasons",
+			"method": "get",
+			"path": "/ranked/tracks/{rankedTrackId}/seasons",
+			"tags": [
+				"ranked.seasons"
+			]
+		},
+		{
+			"operationId": "listRankedTracks",
+			"method": "get",
+			"path": "/ranked/tracks",
+			"tags": [
+				"ranked.tracks"
+			]
+		},
+		{
+			"operationId": "listRulesets",
+			"method": "get",
+			"path": "/rulesets",
+			"tags": [
+				"game.rulesets"
+			]
+		},
+		{
+			"operationId": "listSports",
+			"method": "get",
+			"path": "/sports",
+			"tags": [
+				"sports.catalog"
+			]
+		},
+		{
+			"operationId": "listTournamentChatMessages",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/messages",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "listTournamentChatMutes",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/mutes",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "listTournamentChatPins",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/pins",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "listTournamentChatUpdates",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/updates",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "listTournamentInvitationCodes",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/invitation-codes",
+			"tags": [
+				"tournaments.invitationCodes"
+			]
+		},
+		{
+			"operationId": "listTournamentInvites",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/invites",
+			"tags": [
+				"tournaments.invites"
+			]
+		},
+		{
+			"operationId": "listTournamentMatchdayMatches",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/matches",
+			"tags": [
+				"tournaments.matchdays"
+			]
+		},
+		{
+			"operationId": "listTournamentMatchdayRanking",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/rankings",
+			"tags": [
+				"tournaments.rankings"
+			]
+		},
+		{
+			"operationId": "listTournamentMatchdays",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/matchdays",
+			"tags": [
+				"tournaments.matchdays"
+			]
+		},
+		{
+			"operationId": "listTournamentMembers",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/members",
+			"tags": [
+				"tournaments.members"
+			]
+		},
+		{
+			"operationId": "listTournamentRecaps",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/recaps",
+			"tags": [
+				"stats.recaps",
+				"stats.tournaments"
+			]
+		},
+		{
+			"operationId": "listTournamentSeasonRanking",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/rankings",
+			"tags": [
+				"tournaments.rankings"
+			]
+		},
+		{
+			"operationId": "listTournamentUpdates",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/updates",
+			"tags": [
+				"tournaments.live"
+			]
+		},
+		{
+			"operationId": "listTrustPolicies",
+			"method": "get",
+			"path": "/trust/policies",
+			"tags": [
+				"trustSafety.policies"
+			]
+		},
+		{
+			"operationId": "listUserAchievements",
+			"method": "get",
+			"path": "/users/{userId}/achievements",
+			"tags": [
+				"achievements.users"
+			]
+		},
+		{
+			"operationId": "listVerifiedEvents",
+			"method": "get",
+			"path": "/verified/events",
+			"tags": [
+				"verified.events"
+			]
+		},
+		{
+			"operationId": "listVerifiedEventTournaments",
+			"method": "get",
+			"path": "/verified/events/{eventId}/tournaments",
+			"tags": [
+				"verified.tournaments"
+			]
+		},
+		{
+			"operationId": "listVerifiedTournaments",
+			"method": "get",
+			"path": "/verified/tournaments",
+			"tags": [
+				"verified.tournaments"
+			]
+		},
+		{
+			"operationId": "lockTournament",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/lock",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "logout",
+			"method": "delete",
+			"path": "/auth/sessions/me",
+			"tags": [
+				"auth.sessions"
+			]
+		},
+		{
+			"operationId": "markMyFriendRequestSeen",
+			"method": "put",
+			"path": "/me/friend-requests/{friendRequestId}/seen",
+			"tags": [
+				"social.friendRequests"
+			]
+		},
+		{
+			"operationId": "markMyNotificationRead",
+			"method": "put",
+			"path": "/me/notifications/{notificationId}/read",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "markMyNotificationSeen",
+			"method": "put",
+			"path": "/me/notifications/{notificationId}/seen",
+			"tags": [
+				"live.notifications"
+			]
+		},
+		{
+			"operationId": "markMyTournamentInviteSeen",
+			"method": "put",
+			"path": "/me/tournament-invites/{inviteId}/seen",
+			"tags": [
+				"me.tournamentInvites"
+			]
+		},
+		{
+			"operationId": "muteTournamentChatUser",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/chat/mutes/{userId}",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "oauthAuthorize",
+			"method": "get",
+			"path": "/auth/oauth/authorize",
+			"tags": [
+				"auth.oauth"
+			]
+		},
+		{
+			"operationId": "oauthTokenExchange",
+			"method": "post",
+			"path": "/auth/oauth/token",
+			"tags": [
+				"auth.oauth"
+			]
+		},
+		{
+			"operationId": "optInToPromotion",
+			"method": "put",
+			"path": "/promotions/{promotionId}/opt-in",
+			"tags": [
+				"promotions.participation"
+			]
+		},
+		{
+			"operationId": "optOutFromPromotion",
+			"method": "delete",
+			"path": "/promotions/{promotionId}/opt-in",
+			"tags": [
+				"promotions.participation"
+			]
+		},
+		{
+			"operationId": "pinTournamentChatMessage",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/chat/messages/{messageId}/pin",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "refreshSession",
+			"method": "post",
+			"path": "/auth/sessions/refresh",
+			"tags": [
+				"auth.sessions"
+			]
+		},
+		{
+			"operationId": "registerMyDevice",
+			"method": "post",
+			"path": "/me/devices",
+			"tags": [
+				"users.me.devices"
+			]
+		},
+		{
+			"operationId": "registerUser",
+			"method": "post",
+			"path": "/auth/registrations",
+			"tags": [
+				"auth.registrations"
+			]
+		},
+		{
+			"operationId": "removeFriend",
+			"method": "delete",
+			"path": "/me/friends/{userId}",
+			"tags": [
+				"social.friends"
+			]
+		},
+		{
+			"operationId": "removeTournamentMember",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/members/{userId}",
+			"tags": [
+				"tournaments.members"
+			]
+		},
+		{
+			"operationId": "reportTournamentChatContent",
+			"method": "post",
+			"path": "/tournaments/{tournamentId}/chat/reports",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "requestMyRecap",
+			"method": "post",
+			"path": "/me/recaps",
+			"tags": [
+				"stats.me",
+				"stats.recaps"
+			]
+		},
+		{
+			"operationId": "requestPasswordReset",
+			"method": "post",
+			"path": "/auth/password-resets",
+			"tags": [
+				"auth.passwordResets"
+			]
+		},
+		{
+			"operationId": "resendRegistrationConfirmation",
+			"method": "post",
+			"path": "/auth/registrations/resend-confirmation",
+			"tags": [
+				"auth.registrations"
+			]
+		},
+		{
+			"operationId": "resolveInvitationCode",
+			"method": "get",
+			"path": "/invitation-codes/{code}",
+			"tags": [
+				"tournaments.invitationCodes"
+			]
+		},
+		{
+			"operationId": "resolveUserByUsername",
+			"method": "get",
+			"path": "/usernames/{username}",
+			"tags": [
+				"users.directory"
+			]
+		},
+		{
+			"operationId": "searchMatches",
+			"method": "get",
+			"path": "/matches",
+			"tags": [
+				"sports.schedule"
+			]
+		},
+		{
+			"operationId": "searchUsers",
+			"method": "get",
+			"path": "/users",
+			"tags": [
+				"users.directory"
+			]
+		},
+		{
+			"operationId": "sendTournamentChatMessage",
+			"method": "post",
+			"path": "/tournaments/{tournamentId}/chat/messages",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "streamMyLiveUpdates",
+			"method": "get",
+			"path": "/me/live",
+			"tags": [
+				"live.stream"
+			]
+		},
+		{
+			"operationId": "streamTournamentChatLive",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/chat/live",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "streamTournamentLive",
+			"method": "get",
+			"path": "/tournaments/{tournamentId}/live",
+			"tags": [
+				"tournaments.live"
+			]
+		},
+		{
+			"operationId": "transferTournamentOwnership",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/owner",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "unarchiveTournament",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/archive",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "unblockUser",
+			"method": "delete",
+			"path": "/me/blocks/{userId}",
+			"tags": [
+				"social.blocks"
+			]
+		},
+		{
+			"operationId": "unfollowUser",
+			"method": "delete",
+			"path": "/users/{userId}/followers/me",
+			"tags": [
+				"social.follow"
+			]
+		},
+		{
+			"operationId": "unlockTournament",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/lock",
+			"tags": [
+				"tournaments.lifecycle"
+			]
+		},
+		{
+			"operationId": "unmuteTournamentChatUser",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/chat/mutes/{userId}",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "unpinTournamentChatMessage",
+			"method": "delete",
+			"path": "/tournaments/{tournamentId}/chat/messages/{messageId}/pin",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "updateMe",
+			"method": "patch",
+			"path": "/me",
+			"tags": [
+				"users.me"
+			]
+		},
+		{
+			"operationId": "updateMyFeedReadCursor",
+			"method": "put",
+			"path": "/me/feed/read-cursor",
+			"tags": [
+				"live.feed"
+			]
+		},
+		{
+			"operationId": "updateMyNotificationPreferences",
+			"method": "patch",
+			"path": "/me/notification-preferences",
+			"tags": [
+				"users.me.notifications"
+			]
+		},
+		{
+			"operationId": "updateMyPreferences",
+			"method": "patch",
+			"path": "/me/preferences",
+			"tags": [
+				"users.me.preferences"
+			]
+		},
+		{
+			"operationId": "updateMyPrivacy",
+			"method": "patch",
+			"path": "/me/privacy",
+			"tags": [
+				"users.me.privacy"
+			]
+		},
+		{
+			"operationId": "updateMyRankedSettings",
+			"method": "patch",
+			"path": "/me/ranked/settings",
+			"tags": [
+				"ranked.me"
+			]
+		},
+		{
+			"operationId": "updateMyRewardFulfillmentProfile",
+			"method": "patch",
+			"path": "/me/rewards/fulfillment-profile",
+			"tags": [
+				"promotions.rewards"
+			]
+		},
+		{
+			"operationId": "updateTournament",
+			"method": "patch",
+			"path": "/tournaments/{tournamentId}",
+			"tags": [
+				"tournaments.core"
+			]
+		},
+		{
+			"operationId": "updateTournamentChatReadCursor",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/chat/read-cursor",
+			"tags": [
+				"tournaments.chat"
+			]
+		},
+		{
+			"operationId": "updateTournamentChatSettings",
+			"method": "patch",
+			"path": "/tournaments/{tournamentId}/chat",
+			"tags": [
+				"tournaments.chatModeration"
+			]
+		},
+		{
+			"operationId": "updateTournamentMember",
+			"method": "patch",
+			"path": "/tournaments/{tournamentId}/members/{userId}",
+			"tags": [
+				"tournaments.members"
+			]
+		},
+		{
+			"operationId": "upsertMyMatchdaySubmission",
+			"method": "put",
+			"path": "/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me",
+			"tags": [
+				"tournaments.submissions"
+			]
+		}
+	]
+}

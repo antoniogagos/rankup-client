@@ -1,0 +1,64 @@
+# Current work
+
+-   Active epic: `docs/work/epics/008-domain-tourney-boundaries.md`
+-   Status: In Progress (domain umbrella + heads-up tournament format alignment)
+-   Last updated: 2026-02-05
+
+## Summary
+
+Epic 002 is closed (DI skeleton/service layering complete). Epic 007 is closed: `yarn validate` now builds composite workspace deps (`@rankup/base`, `@rankup/platform`, `@rankup/common`, `@rankup/samba`, `@rankup/api`, `@rankup/api-mock`) before the app typecheck (ADR 0030), UI tourney pages consume `ITourneyCoreService`/`ITourneyMatchdaysService`/`ITourneyRankingService` instead of injecting `IRankupApiClient`, the legacy `packages/app/lib/data-service/*` path was retired (ADR 0031), the API facade/network request service decision was deferred (ADR 0032), guardrails now forbid UI SDK injection, UI `fetch()` calls, UI `@rankup/api-mock` imports, and any `@rankup/api` usage outside app `services/api/**` or in domain packages (ADR 0033, ADR 0034, ADR 0035, ADR 0036, ADR 0048). Mock selection now lives in the app composition root with `@rankup/api-mock` allowlisted there and HTTP-only client factories kept in `services/api/**`. Package exports now map `.js` subpaths to TS sources (no dist runtime), and the shared WDS config resolves workspace packages via node-resolve/commonjs/json with outside-root handling for `/assets`, `/docs`, and `/node_modules` plus `__APP_ENV__` injection (optional `--compile-css`). Platform env now reads only `__APP_ENV__` (no json.example imports) with defaults for missing values. The base + platform extraction and API request flow standardization remain complete (ADR 0025, ADR 0027, ADR 0028). ESLint uses flat config with a lint wrapper that runs Prettier on non-TS files during `--fix` (ADR 0026). Epic 006 (HTTP mock server) remains complete: fallback stack validated, server wired to core handlers, stateful CRUD in core store, scenario engine implemented, and smoke script added (`smoke:scenario`). openapi-backend remains removed (runtime incompatibility under Node v24.13.0).
+
+Epic 008 in progress: adopt an Apibase-style app-level domain layout under `packages/rankup/src/domains/*` (ADR 0049), move composition root + AppServices into `apps/rankup-spa`, enforce platform/domain/UI boundaries (ADR 0049 + ADR 0048), add domain DTOs + gateways to prevent SDK leakage (ADR 0048), remove legacy platform/tourney folders, document the internal game-mode registry + ruleset versioning decision (ADR 0044), and migrate the canonical OpenAPI spec to `packages/api/openapi.yaml` with legacy specs removed. OpenAPI is pinned to 3.1.2 for toolchain compatibility (ADR 0045). Follow-up: Problem Details 413/415 responses + `Vary-AcceptLanguage` header were added and spectral rules aligned to `application/problem+json` + `text/event-stream`. The Problem Details error catalog now lives in `packages/api/docs/errors/README.md` with uploads-domain types verified; repo tree snapshots were refreshed. ScorePrediction rules now define the result scope (default final score after extra time, penalties excluded) and match outcomes expose penalty shootout context in the spec, with CreateTournament rulesetConfig examples added for UI/mocks. InstantiationService now tolerates SyncDescriptor across module copies to avoid dev-server service resolution mismatches. Platform is now infra-only: API client wiring moved into app services with product SDK imports removed from `@rankup/platform` (ADR 0046). The build pipeline now follows Apibase: root `tsc -b` + Rollup bundle + clean, with a shared WDS/esbuild config serving TS directly in dev (ADR 0047); Rollup HTML inputs now use `apps/**/*.html`, the rollup tsconfig excludes server/scripts/config with DOM-only types, and the @rankup/api guardrail no longer matches @rankup/api-mock. SPA bootstrap now lives in `apps/rankup-spa/main.ts`, keeping `rk-app`/`rk-unauthenticated-app` view-only and injecting `appServices`/`sessionManager` from the host with listener disposal in the bootstrap; public app context was removed so public pages now consume `ISessionManager` via provider + redirect helper. The tourney domain now uses a Hadron-style capability split (`shared`, `core`, `matchdays`, `members`, `codes`, `invites`) with per-capability `models/`, `contracts/`, `services/`, `validation/`, plus root `analysis/` and `fixtures/`, and updated agent skills; rankings now live in `packages/rankup/src/domains/scoring/ranking`. Engine scaffolding now includes `shared/`, `algorithms/`, `registry/`, `runtime`, plus placeholder domains for accounts/sports/rules/submissions/engagement/verified/ranked/achievements/media/trustSafety/promotions/creators/admin. Tourney contracts now cover previews, matchday navigation, membership, invitation codes, and direct invites aligned to OpenAPI, with gateway + mocks updated. OpenAPI change protocol is now documented and gateways use shared mapping helpers for aligned DTOs. Gateway guardrails now forbid `...api*` spreads and `as Domain.*` assertions.
+
+Heads-Up is now modeled as a tournament format (`formatId=headsUp`) with format-specific config and duel convenience endpoints, keeping game modes focused on scoring rules and enabling ranking payloads to include heads-up scoreboards.
+
+Epic 003 remains blocked until the API architecture spec is delivered.
+
+Maintenance note (2026-02-03): Updated `yarn validate` ordering to preserve project reference outputs through the app typecheck (clean runs after app validate), set app validate to run `tsc -b` + clean for standalone runs, and aligned TS override/type-only import usage in UI/Samba.
+Maintenance note (2026-02-03): WDS dev-server configs are now `.mjs` (TS-only exception) so WDS auto-loads them; start scripts are back to `wds --watch`; wireit is listed in app devDependencies; app configs call `createWebDevServerConfig(appRoot)` to avoid cwd-dependent 404s; WDS uses an outside-root depth prefix plus `.ts`/`.json` MIME overrides to prevent module/asset MIME failures; WDS repo-root discovery now uses the workspace package name with `preserveSymlinks=false` plus `nodeResolve.rootDir`/`nodeResolve.jail` and an outside-root depth guard to keep node_modules resolution inside the repo; tourney domain barrels now export types only to avoid duplicate identifier errors under composite builds.
+Maintenance note (2026-02-03): Removed the legacy empty `packages/app` folder; the app lives in `apps/rankup-spa`.
+Maintenance note (2026-02-03): Added a Rankup Engine domain partitioning proposal under `docs/architecture/rankup-engine-domain-partitioning.md`.
+Maintenance note (2026-02-03): Renamed `packages/rankup/src/domains/tourney` to `packages/rankup/src/domains/tournaments` (ADR 0052).
+Maintenance note (2026-02-03): Moved rankings into `packages/rankup/src/domains/scoring` (ADR 0053).
+Maintenance note (2026-02-03): Scaffolded Rankup Engine layers + domain placeholders (ADR 0054).
+Maintenance note (2026-02-03): Implemented accounts domain (auth/me/users/social contracts + gateways + AppServices).
+Maintenance note (2026-02-03): Implemented sports domain (catalog/schedule contracts + gateways + AppServices).
+Maintenance note (2026-02-03): Implemented rules domain (game modes + rulesets contracts + gateways + AppServices).
+Maintenance note (2026-02-03): Implemented submissions domain (scorePrediction contracts + gateways + AppServices).
+Maintenance note (2026-02-03): Implemented engagement domain (chat/live/stats contracts + gateways + AppServices) with api-mock parity.
+Maintenance note (2026-02-04): Removed placeholder tourney capabilities now owned by engagement/submissions/scoring/algorithms (chat/stats/recaps/updates/submissions/results/analysis).
+Maintenance note (2026-02-04): Removed empty root-level tourney folders not in the partitioning proposal (`common/`, `contracts/`, `models/`, `services/`, `mock/`, `tests/`, `validation/`).
+Maintenance note (2026-02-04): Split engagement recaps/updates into dedicated capabilities with shared models and updated app wiring.
+Maintenance note (2026-02-04): Implemented verified domain (hub/events) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-04): Implemented ranked domain (seasons/leaderboards) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-04): Implemented achievements domain (catalog/grants) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-04): Implemented media domain (uploads/assets) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-04): Implemented promotions domain (campaigns/rewards) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-04): Implemented creators domain (directory/catalog) with contracts, gateways, services, and api-mock parity.
+Maintenance note (2026-02-05): Prepared ADR 0056 operation coverage gate prerequisites (default Problem response policy, operations manifest generation, allowlist spec alignment).
+Maintenance note (2026-02-05): Implemented ADR 0056 operation coverage gates (mock coverage, gateway ownership, schema validation, HTTP fidelity) with waivers seeding and validate wiring.
+
+Maintenance note (2026-02-01): Added optional VS Code multi-root workspace file (`rankup-client.code-workspace`) to mirror repo folders and editor settings (ADR 0041).
+
+Maintenance note (2026-01-30): Updated dev-server dependencies, app module resolution, URL rewrites, app-local TypeScript/tsc invocation, WDS config export, TS-to-dist workspace rewrite (including @rankup node_modules symlinks), node_modules/@rankup -> /packages JS fallback, Lit class-field mitigation, api-mock module metadata, and `/src/*` export rewrites to `dist/*` for packages using `rootDir: src` to restore buildless dev and prevent TS MIME errors. See `docs/work/log/2026-01-30.md`.
+
+Planning note (2026-01-30): Epic 006 drafted (HTTP mock server) with ADR 0018, architecture doc, and initial skill; WP-006-01 completed (api-mock TS-only exports + dev:server script); WP-006-02 completed (mock core registry extraction); WP-006-07 completed (anti-leakage guardrail); WP-006-03 completed with fallback stack; WP-006-04 completed (server skeleton wired to core); WP-006-05 completed (stateful CRUD in core store); WP-006-06 completed (scenario engine); WP-006-08 completed (docs + skill final + evidence).
+
+## Invariants
+
+-   Greenfield mode: breaking changes are allowed until production readiness is declared.
+-   No legacy/compatibility shims: remove or replace old paths instead of keeping transitional code.
+-   Work tracking is inviolable: structural changes require CURRENT + epic + daily log updates.
+
+## Verification
+
+-   `yarn validate`
+
+## Next actions
+
+1.
+	- 1.1 Reduce ADR-0056 waivers by adding fixtures + operationOwners for core operations (start with tournaments/submissions).
+	- 1.2 Add explicit operationOwners to core gateways to shrink missingOwner waivers.
+	- 1.3 Lower WAIVERS_MAX_TOTAL once fixture coverage ramps up.
+2. Phase 2: Define the next Phase 2 WP (admin overlay or remaining scope) now that creators are complete.
+3. Decide when to split tournaments/preview into a real capability once OpenAPI/negocio clarify preview fields.

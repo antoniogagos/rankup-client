@@ -1,0 +1,662 @@
+tags:
+  - name: tournaments.invites
+    summary: Invites
+    description: Direct invitations to specific users (spam-controlled).
+    parent: tournaments
+    kind: nav
+
+  - name: tournaments.members
+    summary: Members
+    description: Membership (join/leave), member listing, and admin moderation.
+    parent: tournaments
+    kind: nav
+
+paths:
+  /tournaments/{tournamentId}/invites:
+    get:
+      tags: [tournaments.invites]
+      operationId: listTournamentInvites
+      summary: List tournament invites (admin-only)
+      description: |
+        Lists direct invites created for the tournament.
+
+        Anti-spam posture:
+        - Admin/owner-only by default.
+        - If Rankup later allows "any member can invite", enforce per-user rate limits and recipient controls.
+
+        Privacy:
+        - Membership is required; do not expose invites for non-members.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TournamentInviteStatus"
+        - name: invitedUserId
+          in: query
+          required: false
+          description: Filter invites by invited user id.
+          schema:
+            type: string
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Invite page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentInvitePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [tournaments.invites]
+      operationId: createTournamentInvites
+      summary: Create direct invites (admin-only)
+      description: |
+        Creates one or more direct invites to this tournament.
+
+        Rationale:
+        - Invitation codes handle "invite anyone" / off-platform invites.
+        - Direct invites handle on-platform social flows (friends/following).
+
+        Suggested server rules (anti-spam):
+        - Only allow inviting users who are friends/following OR who allow invites.
+        - Rate-limit by inviter and by tournament.
+        - Coalesce duplicates (idempotent behavior): if an active invite already exists, return it instead of creating a new one.
+
+        Idempotency:
+        - Clients SHOULD send `X-Idempotency-Key`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTournamentInvitesRequest"
+      responses:
+        "201":
+          description: Invites created (may include partial failures).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTournamentInvitesResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/invites/{inviteId}:
+    delete:
+      tags: [tournaments.invites]
+      operationId: cancelTournamentInvite
+      summary: Cancel an invite (admin-only)
+      description: |
+        Cancels (revokes) an invite.
+
+        Idempotent:
+        - Returns 204 even if the invite does not exist (or is already cancelled),
+          to support safe retries and cleanup UX.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/InviteId"
+      responses:
+        "204":
+          description: Invite cancelled (or not found).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/members/me:
+    put:
+      tags: [tournaments.members]
+      operationId: joinTournament
+      summary: Join a tournament (member resource)
+      description: |
+        Joins the tournament as the current user.
+
+        Semantics:
+        - For `joinMode=open`: no code required.
+        - For `joinMode=code`: `invitationCode` is required OR the user must have a valid pending direct invite.
+        - For `joinMode=closed`: only allowed if the user has a valid pending direct invite (or server policy allows admin-added membership in future).
+
+        Idempotent:
+        - If the user is already a member, server SHOULD return 200 with `joined=false`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinTournamentRequest"
+      responses:
+        "200":
+          description: Already a member OR joined (server chooses 200 for idempotency).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinTournamentResult"
+        "201":
+          description: Joined successfully (membership created).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinTournamentResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    delete:
+      tags: [tournaments.members]
+      operationId: leaveTournament
+      summary: Leave a tournament
+      description: |
+        Leaves the tournament.
+
+        Idempotent:
+        - Returns 204 even if the user is not a member (safe cleanup).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+      responses:
+        "204":
+          description: Left tournament (or was not a member).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/members:
+    get:
+      tags: [tournaments.members]
+      operationId: listTournamentMembers
+      summary: List tournament members (member-only)
+      description: |
+        Lists members of the tournament.
+
+        Privacy / no-spectator:
+        - Membership required.
+
+        Performance:
+        - For very large tournaments, server MAY return a compact view and require pagination.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - name: role
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TournamentMemberRole"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TournamentMemberStatus"
+        - name: q
+          in: query
+          required: false
+          description: Optional search by username (server-controlled matching).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 32
+        - name: view
+          in: query
+          required: false
+          description: Controls the density of returned data for large tournaments.
+          schema:
+            $ref: "#/components/schemas/TournamentMemberView"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Member page.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentMemberPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /tournaments/{tournamentId}/members/{userId}:
+    patch:
+      tags: [tournaments.members]
+      operationId: updateTournamentMember
+      summary: Update a member (admin-only)
+      description: |
+        Admin operations on a member:
+        - change role (promote/demote)
+        - optionally set member-level notes (audit only)
+
+        For chat moderation (mute/pin/delete message), use the Chat endpoints.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTournamentMemberRequest"
+      responses:
+        "200":
+          description: Member updated.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentMember"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    delete:
+      tags: [tournaments.members]
+      operationId: removeTournamentMember
+      summary: Remove (kick) a member (admin-only)
+      description: |
+        Removes a member from the tournament.
+
+        Idempotent:
+        - Returns 204 even if the target user is not a member.
+
+        Constraints:
+        - Cannot remove the owner (must transfer ownership first).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/TournamentId"
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveTournamentMemberRequest"
+      responses:
+        "204":
+          description: Member removed (or not found).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TournamentNotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    InviteId:
+      name: inviteId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: inv_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+  schemas:
+    # ----- Invites -----
+    TournamentInviteStatus:
+      type: string
+      enum: [pending, accepted, declined, revoked, expired]
+
+    TournamentInvite:
+      type: object
+      additionalProperties: false
+      required: [inviteId, tournamentId, status, invitedUser, invitedBy, createdAt]
+      properties:
+        inviteId:
+          type: string
+          example: inv_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        tournamentId:
+          $ref: "#/components/schemas/TournamentId"
+        status:
+          $ref: "#/components/schemas/TournamentInviteStatus"
+        invitedUser:
+          $ref: "#/components/schemas/MeSummary"
+        invitedBy:
+          $ref: "#/components/schemas/MeSummary"
+        message:
+          type: string
+          maxLength: 240
+          description: Optional invite message shown to recipient.
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        respondedAt:
+          type: string
+          format: date-time
+
+    TournamentInvitePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentInvite"
+        nextCursor:
+          type: string
+
+    CreateTournamentInvitesRequest:
+      type: object
+      additionalProperties: false
+      required: [recipientUserIds]
+      properties:
+        recipientUserIds:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: string
+          description: Target user ids to invite.
+        message:
+          type: string
+          maxLength: 240
+        expiresAt:
+          type: string
+          format: date-time
+          description: Optional expiry for invites (default policy server-side).
+        sendNotification:
+          type: boolean
+          default: true
+          description: If true, send in-app notification (and push where allowed).
+        clientContext:
+          type: object
+          additionalProperties: true
+          description: Optional attribution/deep-link context.
+
+    CreateTournamentInviteFailureReason:
+      type: string
+      enum:
+        - alreadyMember
+        - alreadyInvited
+        - cannotInviteSelf
+        - blockedByRecipient
+        - recipientNotDiscoverable
+        - recipientDoesNotAllowInvites
+        - tournamentLocked
+        - tournamentFull
+        - joinClosed
+        - invalidRecipient
+        - rateLimited
+
+    CreateTournamentInviteFailure:
+      type: object
+      additionalProperties: false
+      required: [recipientUserId, reason]
+      properties:
+        recipientUserId:
+          type: string
+        reason:
+          $ref: "#/components/schemas/CreateTournamentInviteFailureReason"
+
+    CreateTournamentInvitesResult:
+      type: object
+      additionalProperties: false
+      required: [created, failures]
+      properties:
+        created:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentInvite"
+        failures:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTournamentInviteFailure"
+
+    # ----- Membership -----
+    TournamentMemberStatus:
+      type: string
+      description: Member relation state.
+      enum: [active, left, removed]
+
+    TournamentMemberView:
+      type: string
+      enum: [compact, full]
+      description: Compact minimizes payload for very large tournaments.
+
+    TournamentMember:
+      type: object
+      additionalProperties: false
+      required: [user, role, status, joinedAt]
+      properties:
+        user:
+          $ref: "#/components/schemas/MeSummary"
+        role:
+          $ref: "#/components/schemas/TournamentMemberRole"
+        status:
+          $ref: "#/components/schemas/TournamentMemberStatus"
+        joinedAt:
+          type: string
+          format: date-time
+        leftAt:
+          type: string
+          format: date-time
+        removedAt:
+          type: string
+          format: date-time
+
+    TournamentMemberPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentMember"
+        nextCursor:
+          type: string
+
+    JoinTournamentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        invitationCode:
+          type: string
+          minLength: 6
+          maxLength: 32
+          description: |
+            Required when tournament joinMode=code, unless the user has a pending direct invite.
+            Prefer using `/invitation-codes/{code}` flows when joining via deep links.
+        acceptTournamentRules:
+          type: boolean
+          description: Optional explicit acceptance flag (server policy dependent).
+        clientContext:
+          type: object
+          additionalProperties: true
+          description: Optional attribution/deep-link context.
+
+    JoinTournamentResult:
+      $ref: "#/components/schemas/JoinByInvitationCodeResult"
+
+    RemoveTournamentMemberRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          maxLength: 200
+          description: Optional audit reason for removal (not shown to the user by default).
+
+    UpdateTournamentMemberRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        role:
+          $ref: "#/components/schemas/TournamentMemberRole"
+        note:
+          type: string
+          maxLength: 200
+          description: Optional internal/admin note (audit only).

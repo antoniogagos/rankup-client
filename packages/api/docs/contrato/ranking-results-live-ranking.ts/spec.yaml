@@ -1,0 +1,1012 @@
+tags:
+    - name: tournaments.rankings
+      summary: Rankings
+      description: Tournament leaderboards (season + matchday) and ranking windows (around me).
+      parent: tournaments
+      kind: nav
+
+    - name: tournaments.results
+      summary: Results
+      description: Points and outcomes per match/matchday (supports provisional live scoring).
+      parent: tournaments
+      kind: nav
+
+    - name: tournaments.live
+      summary: Live
+      description: Streaming/polling endpoints for live match + ranking updates (no spectator access).
+      parent: tournaments
+      kind: nav
+
+paths:
+    /tournaments/{tournamentId}/rankings:
+        get:
+            tags: [tournaments.rankings]
+            operationId: listTournamentSeasonRanking
+            summary: Get season ranking (member-only)
+            description: |
+                Returns the tournament's season (cumulative) ranking.
+
+                Notes for scalability:
+                - Paginated for large tournaments.
+                - Use `/rankings/me` for "around me" windows without scanning.
+
+                Live feel:
+                - Ranking can be **provisional** while matches are live (points may change).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankingView"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankingInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withMyEntry:
+                          value: [myEntry]
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Season ranking page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentRankingPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/rankings/me:
+        get:
+            tags: [tournaments.rankings]
+            operationId: getMyTournamentSeasonRankingWindow
+            summary: Get my season ranking position + neighbors (member-only)
+            description: |
+                Returns the current user's ranking entry plus a window of neighbors
+                (e.g., 5 above and 5 below).
+
+                This is the primary endpoint to render "my position" for very large tournaments.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: window
+                  in: query
+                  required: false
+                  description: Number of neighbors above/below (server may clamp).
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 50
+                      default: 10
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankingView"
+            responses:
+                "200":
+                    description: Ranking window.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentRankingWindow"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/rankings:
+        get:
+            tags: [tournaments.rankings]
+            operationId: listTournamentMatchdayRanking
+            summary: Get matchday ranking (member-only)
+            description: |
+                Returns the matchday-specific ranking (points for this jornada only).
+
+                Live feel:
+                - Can be provisional while matches are live.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankingView"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/RankingInclude"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Matchday ranking page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentRankingPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/rankings/me:
+        get:
+            tags: [tournaments.rankings]
+            operationId: getMyTournamentMatchdayRankingWindow
+            summary: Get my matchday ranking position + neighbors (member-only)
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: window
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 50
+                      default: 10
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RankingView"
+            responses:
+                "200":
+                    description: Ranking window.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentRankingWindow"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/results/me:
+        get:
+            tags: [tournaments.results]
+            operationId: getMyMatchdayResults
+            summary: Get my matchday results (points per match)
+            description: |
+                Returns the current user's results for the matchday:
+                - per-match points (provisional or final)
+                - total points
+                - optional scoring breakdown (mode-dependent)
+
+                This is the main endpoint for the "Results" UX.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions (can be heavy).
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/ResultInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withBreakdown:
+                          value: [breakdown]
+            responses:
+                "200":
+                    description: Matchday results (my view).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdayResults"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/results/users/{userId}:
+        get:
+            tags: [tournaments.results]
+            operationId: getUserMatchdayResults
+            summary: Get a user's matchday results (visibility-aware)
+            description: |
+                Returns another member's results for the matchday.
+
+                Visibility policy is server-controlled (ruleset + tournament settings). Recommended default:
+                - show full results once relevant matches are locked/finished
+                - optionally redact values earlier to preserve suspense
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - $ref: "#/components/parameters/UserId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/ResultInclude"
+            responses:
+                "200":
+                    description: Matchday results (user view).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdayResults"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/results:
+        get:
+            tags: [tournaments.results]
+            operationId: getMatchdayResultsSummary
+            summary: Get matchday results summary (top performers)
+            description: |
+                Returns a lightweight matchday results summary for UI:
+                - top performers
+                - distribution snapshots (optional)
+                - server time + state
+
+                This endpoint avoids returning full per-user, per-match matrices (too heavy at scale).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: top
+                  in: query
+                  required: false
+                  description: Number of top performers to return.
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+                      default: 10
+            responses:
+                "200":
+                    description: Results summary.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdayResultsSummary"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /tournaments/{tournamentId}/updates:
+        get:
+            tags: [tournaments.live]
+            operationId: listTournamentUpdates
+            summary: Poll tournament updates (fallback for live ranking)
+            description: |
+                Returns an ordered list of update events (match events, ranking deltas, etc.)
+                since a cursor. This is a polling/long-polling fallback to SSE.
+
+                Recommended usage:
+                - Clients keep `nextCursor`
+                - Poll frequently during live matches (or use SSE via `/live`)
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: matchday
+                  in: query
+                  required: false
+                  description: Optional matchday focus; if omitted, server may choose current matchday.
+                  schema:
+                      type: integer
+                      minimum: 1
+                - name: topics
+                  in: query
+                  required: false
+                  description: Filter which updates to include.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/LiveTopic"
+                  examples:
+                      default:
+                          value: [ranking, matchEvents]
+                - name: sinceCursor
+                  in: query
+                  required: false
+                  description: Opaque cursor received from previous calls.
+                  schema:
+                      type: string
+                - name: waitSeconds
+                  in: query
+                  required: false
+                  description: Optional long-poll wait (server may clamp).
+                  schema:
+                      type: integer
+                      minimum: 0
+                      maximum: 30
+                      default: 0
+            responses:
+                "200":
+                    description: Tournament updates page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentUpdatePage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /tournaments/{tournamentId}/live:
+        get:
+            tags: [tournaments.live]
+            operationId: streamTournamentLive
+            summary: Stream live tournament updates (SSE)
+            description: |
+                Server-Sent Events (SSE) stream with live updates for the tournament.
+
+                Use cases:
+                - "App feels alive": goals/events -> ranking deltas -> results changes
+                - Live ranking UI without aggressive polling
+
+                Event payloads:
+                - Each SSE `data:` line is a JSON object matching `TournamentUpdateEvent`.
+                - `event:` is the event type (e.g., `ranking.delta`, `match.event`).
+
+                Client resume:
+                - Clients SHOULD send `Last-Event-ID` header to resume after reconnects.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: matchday
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                - name: topics
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/LiveTopic"
+                  examples:
+                      default:
+                          value: [ranking, matchEvents]
+                - $ref: "#/components/parameters/LastEventId"
+            responses:
+                "200":
+                    description: SSE stream.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Content-Type:
+                            description: Always text/event-stream.
+                            schema:
+                                type: string
+                            example: text/event-stream
+                    content:
+                        text/event-stream:
+                            schema:
+                                type: string
+                            examples:
+                                rankingDeltaExample:
+                                    summary: Ranking delta SSE event
+                                    value: |
+                                        event: ranking.delta
+                                        id: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AA
+                                        data: {"type":"ranking.delta","tournamentId":"tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","scope":"matchday","matchday":23,"serverTime":"2026-02-01T19:35:12Z","deltas":[{"userId":"usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1","oldPosition":12,"newPosition":9,"pointsDelta":2,"totalPoints":34}]}
+
+                                        event: match.event
+                                        id: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AB
+                                        data: {"type":"match.event","matchEvent":{"eventId":"evt_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","matchId":"m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C","type":"goal","occurredAt":"2026-02-01T19:35:10Z"}}
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    parameters:
+        LastEventId:
+            name: Last-Event-ID
+            in: header
+            required: false
+            description: SSE resume token (previous event id).
+            schema:
+                type: string
+            example: evt_01J8W0K7E2ZQZ6P0M4NQW2Y7AA
+
+    schemas:
+        # --- Ensure this exists once for all blocks that reference it ---
+        MeSummary:
+            type: object
+            additionalProperties: false
+            required: [userId, username]
+            properties:
+                userId:
+                    type: string
+                    description: Stable user identifier.
+                    example: usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1
+                username:
+                    type: string
+                    example: maria
+                pictureUrl:
+                    type: string
+                    format: uri
+                    description: Optional avatar URL.
+
+        RankingScope:
+            type: string
+            enum: [season, matchday]
+
+        RankingState:
+            type: string
+            description: |
+                Indicates whether the leaderboard is final or can still change due to live matches.
+            enum: [provisional, final]
+
+        RankingView:
+            type: string
+            description: Controls returned fields density.
+            enum: [compact, full]
+            default: compact
+
+        RankingInclude:
+            type: string
+            enum: [myEntry]
+
+        RankingEntry:
+            type: object
+            additionalProperties: false
+            required: [position, user, points]
+            properties:
+                position:
+                    type: integer
+                    minimum: 1
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                points:
+                    type: integer
+                    description: Total points for the scope (season or matchday).
+                pointsState:
+                    $ref: "#/components/schemas/RankingState"
+                # tie-break / additional metrics (mode-specific)
+                metrics:
+                    type: object
+                    additionalProperties:
+                        type: number
+                    description: |
+                        Extra tie-break / stats metrics for sorting and UI (mode-specific).
+                        Example keys for ScorePrediction: exactScores, correctOutcomes, exactGoalsOneTeam.
+                lastUpdatedAt:
+                    type: string
+                    format: date-time
+
+        TournamentRankingMeta:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    tournamentId,
+                    scope,
+                    state,
+                    serverTime,
+                    computedAt,
+                    totalPlayers,
+                ]
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                scope:
+                    $ref: "#/components/schemas/RankingScope"
+                matchday:
+                    type: integer
+                    minimum: 1
+                    description: Present when scope=matchday.
+                state:
+                    $ref: "#/components/schemas/RankingState"
+                serverTime:
+                    type: string
+                    format: date-time
+                computedAt:
+                    type: string
+                    format: date-time
+                totalPlayers:
+                    type: integer
+                    minimum: 0
+                rulesetId:
+                    $ref: "#/components/schemas/RulesetId"
+                tieBreakers:
+                    type: array
+                    description: Ordered tie-breakers (from ruleset config).
+                    items:
+                        $ref: "#/components/schemas/RankingTieBreaker"
+
+        TournamentRankingPage:
+            type: object
+            additionalProperties: false
+            required: [meta, items]
+            properties:
+                meta:
+                    $ref: "#/components/schemas/TournamentRankingMeta"
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankingEntry"
+                myEntry:
+                    $ref: "#/components/schemas/RankingEntry"
+                nextCursor:
+                    type: string
+
+        TournamentRankingWindow:
+            type: object
+            additionalProperties: false
+            required: [meta, center, items]
+            properties:
+                meta:
+                    $ref: "#/components/schemas/TournamentRankingMeta"
+                center:
+                    $ref: "#/components/schemas/RankingEntry"
+                items:
+                    type: array
+                    description: |
+                        Window of entries around the center user (sorted by position).
+                    items:
+                        $ref: "#/components/schemas/RankingEntry"
+
+        ResultInclude:
+            type: string
+            enum: [breakdown]
+
+        ResultState:
+            type: string
+            description: State of a per-match points computation.
+            enum: [pending, provisional, final, void]
+
+        ScorePredictionResultBreakdown:
+            type: object
+            additionalProperties: false
+            properties:
+                correctOutcome:
+                    type: integer
+                exactScore:
+                    type: integer
+                exactGoalsOneTeam:
+                    type: integer
+                penalties:
+                    type: integer
+                bonuses:
+                    type: integer
+
+        ScorePredictionMatchResultLine:
+            type: object
+            additionalProperties: false
+            required: [matchId, state]
+            properties:
+                matchId:
+                    $ref: "#/components/schemas/MatchId"
+                match:
+                    $ref: "#/components/schemas/Match"
+                prediction:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        homeScore:
+                            type: integer
+                            minimum: 0
+                            nullable: true
+                        awayScore:
+                            type: integer
+                            minimum: 0
+                            nullable: true
+                        visibility:
+                            $ref: "#/components/schemas/SubmissionVisibility"
+                actualScore:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        home:
+                            type: integer
+                            minimum: 0
+                            nullable: true
+                        away:
+                            type: integer
+                            minimum: 0
+                            nullable: true
+                points:
+                    type: integer
+                    nullable: true
+                    description: Null when state=pending/void and points are not applicable.
+                state:
+                    $ref: "#/components/schemas/ResultState"
+                breakdown:
+                    $ref: "#/components/schemas/ScorePredictionResultBreakdown"
+
+        ScorePredictionMatchdayResults:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    tournamentId,
+                    matchday,
+                    gameModeId,
+                    user,
+                    serverTime,
+                    state,
+                    totalPoints,
+                    lines,
+                ]
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                gameModeId:
+                    type: string
+                    enum: [scorePrediction]
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                serverTime:
+                    type: string
+                    format: date-time
+                state:
+                    $ref: "#/components/schemas/RankingState"
+                totalPoints:
+                    type: integer
+                pointsState:
+                    $ref: "#/components/schemas/RankingState"
+                lines:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/ScorePredictionMatchResultLine"
+
+        GenericMatchdayResults:
+            type: object
+            additionalProperties: true
+            required: [tournamentId, matchday, gameModeId, user, serverTime]
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                serverTime:
+                    type: string
+                    format: date-time
+
+        MatchdayResults:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionMatchdayResults"
+                - $ref: "#/components/schemas/GenericMatchdayResults"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionMatchdayResults"
+
+        MatchdayTopPerformer:
+            type: object
+            additionalProperties: false
+            required: [user, points, position]
+            properties:
+                position:
+                    type: integer
+                    minimum: 1
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                points:
+                    type: integer
+
+        MatchdayResultsSummary:
+            type: object
+            additionalProperties: false
+            required: [tournamentId, matchday, serverTime, state, topPerformers]
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                serverTime:
+                    type: string
+                    format: date-time
+                state:
+                    $ref: "#/components/schemas/RankingState"
+                topPerformers:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MatchdayTopPerformer"
+
+        LiveTopic:
+            type: string
+            enum: [matchEvents, ranking, results, tournament]
+
+        RankingDelta:
+            type: object
+            additionalProperties: false
+            required:
+                [userId, oldPosition, newPosition, pointsDelta, totalPoints]
+            properties:
+                userId:
+                    type: string
+                oldPosition:
+                    type: integer
+                    minimum: 1
+                    nullable: true
+                newPosition:
+                    type: integer
+                    minimum: 1
+                pointsDelta:
+                    type: integer
+                totalPoints:
+                    type: integer
+
+        TournamentUpdateEvent:
+            oneOf:
+                - $ref: "#/components/schemas/RankingDeltaEvent"
+                - $ref: "#/components/schemas/MatchEventUpdate"
+                - $ref: "#/components/schemas/MatchUpdatedEvent"
+                - $ref: "#/components/schemas/ResultsUpdatedEvent"
+            discriminator:
+                propertyName: type
+                mapping:
+                    ranking.delta: "#/components/schemas/RankingDeltaEvent"
+                    match.event: "#/components/schemas/MatchEventUpdate"
+                    match.updated: "#/components/schemas/MatchUpdatedEvent"
+                    results.updated: "#/components/schemas/ResultsUpdatedEvent"
+
+        RankingDeltaEvent:
+            type: object
+            additionalProperties: false
+            required: [type, tournamentId, scope, serverTime, deltas]
+            properties:
+                type:
+                    type: string
+                    enum: [ranking.delta]
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                scope:
+                    $ref: "#/components/schemas/RankingScope"
+                matchday:
+                    type: integer
+                    minimum: 1
+                serverTime:
+                    type: string
+                    format: date-time
+                deltas:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RankingDelta"
+
+        MatchEventUpdate:
+            type: object
+            additionalProperties: false
+            required: [type, matchEvent]
+            properties:
+                type:
+                    type: string
+                    enum: [match.event]
+                matchEvent:
+                    $ref: "#/components/schemas/MatchEvent"
+
+        MatchUpdatedEvent:
+            type: object
+            additionalProperties: false
+            required: [type, match]
+            properties:
+                type:
+                    type: string
+                    enum: [match.updated]
+                match:
+                    $ref: "#/components/schemas/Match"
+
+        ResultsUpdatedEvent:
+            type: object
+            additionalProperties: false
+            required: [type, tournamentId, scope, serverTime]
+            properties:
+                type:
+                    type: string
+                    enum: [results.updated]
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                scope:
+                    $ref: "#/components/schemas/RankingScope"
+                matchday:
+                    type: integer
+                    minimum: 1
+                serverTime:
+                    type: string
+                    format: date-time
+
+        TournamentUpdatePage:
+            type: object
+            additionalProperties: false
+            required: [serverTime, events, nextCursor]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                events:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/TournamentUpdateEvent"
+                nextCursor:
+                    type: string

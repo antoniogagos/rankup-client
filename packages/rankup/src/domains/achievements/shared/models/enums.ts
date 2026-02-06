@@ -1,0 +1,11 @@
+export type AchievementCategory = 'ranked' | 'verifiedEvents' | 'mastery' | 'social' | 'streaks' | 'seasonal' | 'tournament' | 'special';
+export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
+export type AchievementMetaInclude = 'requirements' | 'rewards';
+export type AchievementSort = 'featured' | 'newest' | 'nameAsc';
+export type AchievementProgressStatusFilter = 'any' | 'inProgress' | 'unlocked' | 'locked';
+export type MyAchievementInclude = 'history';
+export type MyAchievementSort = 'unlockedThenProgress' | 'progressThenUnlocked' | 'newestUnlocked';
+export type UserAchievementSort = 'newestUnlocked' | 'rarityDesc' | 'nameAsc';
+export type AchievementRewardType = 'badge' | 'title' | 'profileFrame' | 'recapCard' | 'emote';
+export type AchievementRequirementKind = 'counter' | 'milestone' | 'streak' | 'placement' | 'participation';
+export type AchievementProgressStatus = 'locked' | 'inProgress' | 'unlocked';

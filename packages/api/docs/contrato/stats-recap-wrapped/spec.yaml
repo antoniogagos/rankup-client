@@ -1,0 +1,1415 @@
+tags:
+    - name: stats
+      summary: Stats & recaps
+      description: Player-facing stats, tournament history recaps, and "wrapped" experiences.
+      kind: nav
+
+    - name: stats.me
+      summary: My stats
+      description: Personal stats and recap library (retention surfaces).
+      parent: stats
+      kind: nav
+
+    - name: stats.users
+      summary: User stats
+      description: Public/permissioned stats for user profiles (privacy-aware).
+      parent: stats
+      kind: nav
+
+    - name: stats.tournaments
+      summary: Tournament stats
+      description: Tournament and matchday stats/recaps (member-only; no spectators).
+      parent: stats
+      kind: nav
+
+    - name: stats.recaps
+      summary: Recaps
+      description: Wrapped/recap resources and cards (shareable assets optional).
+      parent: stats
+      kind: nav
+
+paths:
+    /me/stats:
+        get:
+            tags: [stats.me]
+            operationId: getMyStats
+            summary: Get my global stats snapshot
+            description: |
+                Returns a global stats snapshot for the current user.
+
+                Defaults & philosophy:
+                - By default, server SHOULD prioritize **verified/ranked-eligible** tournaments for global stats (signal > noise).
+                - Clients can request inclusion of unverified/private tournaments via query param.
+
+                Not cacheable (personalized).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: verifiedOnly
+                  in: query
+                  required: false
+                  description: If true, only include verified/ranked-eligible tournaments.
+                  schema:
+                      type: boolean
+                      default: true
+                - name: timeframe
+                  in: query
+                  required: false
+                  description: Predefined timeframe selector (server-defined boundaries).
+                  schema:
+                      $ref: "#/components/schemas/StatsTimeframe"
+                - name: from
+                  in: query
+                  required: false
+                  description: Custom window start (overrides timeframe when provided).
+                  schema:
+                      type: string
+                      format: date-time
+                - name: to
+                  in: query
+                  required: false
+                  description: Custom window end (overrides timeframe when provided).
+                  schema:
+                      type: string
+                      format: date-time
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for UI.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyStatsInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withHighlights:
+                          value: [highlights, distributions]
+            responses:
+                "200":
+                    description: My stats snapshot.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyStatsSnapshot"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /users/{userId}/stats:
+        get:
+            tags: [stats.users]
+            operationId: getUserStats
+            summary: Get a user's public stats snapshot
+            description: |
+                Returns a user's stats snapshot as allowed by their privacy settings.
+
+                Privacy behavior (recommended):
+                - If stats are private to the viewer, return 404 (avoid leaking).
+                - If partially visible (e.g., friends-only), the server may return a limited snapshot.
+
+                Defaults:
+                - `verifiedOnly=true` should be the default for public stats (so they're meaningful).
+            security:
+                - {}
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/UserId"
+                - name: gameModeId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/GameModeId"
+                - name: sportId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/SportId"
+                - name: verifiedOnly
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                      default: true
+                - name: timeframe
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/StatsTimeframe"
+            responses:
+                "200":
+                    description: User stats snapshot (as visible to viewer).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PublicUserStatsSnapshot"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/recaps:
+        get:
+            tags: [stats.recaps, stats.me]
+            operationId: listMyRecaps
+            summary: List my recaps (wrapped library)
+            description: |
+                Lists recap artifacts available to the current user.
+
+                Recaps can be:
+                - tournament final wrapped
+                - periodic recaps (every X matchdays)
+                - matchday recaps
+                - global monthly/seasonal recaps (future)
+
+                Not cacheable (personalized).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: type
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapType"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapStatus"
+                - name: tournamentId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/TournamentId"
+                - name: includeHidden
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                - name: sort
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: My recap page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RecapSummaryPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        post:
+            tags: [stats.recaps, stats.me]
+            operationId: requestMyRecap
+            summary: Request/generate a recap (optional)
+            description: |
+                Requests generation of a recap artifact for the current user.
+
+                This endpoint is optional but recommended for robustness:
+                - Allows server to generate heavy recaps asynchronously
+                - Enables "Regenerate" after rule changes or bug fixes (server-controlled)
+
+                Idempotency:
+                - Clients SHOULD provide `X-Idempotency-Key`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateRecapRequest"
+            responses:
+                "202":
+                    description: Recap generation accepted.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Location:
+                            description: Canonical recap URL.
+                            schema:
+                                type: string
+                                format: uri-reference
+                            example: /me/recaps/rcp_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RecapSummary"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/recaps/{recapId}:
+        get:
+            tags: [stats.recaps, stats.me]
+            operationId: getMyRecap
+            summary: Get a recap (my view)
+            description: |
+                Returns a recap artifact for the current user.
+
+                If recap is not yet available:
+                - returns 200 with `status=generating` and optional `retryAfterSeconds`.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RecapId"
+            responses:
+                "200":
+                    description: Recap.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Recap"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [stats.recaps, stats.me]
+            operationId: hideMyRecap
+            summary: Hide a recap from my library
+            description: |
+                Hides a recap from the user's recap library (non-destructive).
+
+                Idempotent:
+                - Repeated calls keep it hidden.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/RecapId"
+            responses:
+                "204":
+                    description: Hidden (or already hidden).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /tournaments/{tournamentId}/recaps:
+        get:
+            tags: [stats.recaps, stats.tournaments]
+            operationId: listTournamentRecaps
+            summary: List recaps for a tournament (member-only)
+            description: |
+                Lists recap artifacts for a tournament:
+                - matchday recaps (optional)
+                - periodic recaps (optional)
+                - final recap (when tournament ends)
+
+                No spectators:
+                - Requires membership.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: type
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapType"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapStatus"
+                - name: matchday
+                  in: query
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Tournament recap page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RecapSummaryPage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /tournaments/{tournamentId}/recaps/{recapId}:
+        get:
+            tags: [stats.recaps, stats.tournaments]
+            operationId: getTournamentRecap
+            summary: Get a tournament recap (member-only)
+            description: |
+                Returns a recap artifact within a tournament.
+
+                `view`:
+                - `global`: shared view for all members (winner, highlights, leader stats)
+                - `me`: personalized view (your performance, comparisons, share assets)
+
+                No spectators:
+                - Requires membership.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/RecapId"
+                - name: view
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/RecapView"
+            responses:
+                "200":
+                    description: Recap.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Recap"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /tournaments/{tournamentId}/stats:
+        get:
+            tags: [stats.tournaments]
+            operationId: getTournamentStats
+            summary: Get tournament stats snapshot (member-only)
+            description: |
+                Returns aggregated tournament stats used for retention surfaces:
+                - "fun facts" (team leaders, exact score kings, streaks)
+                - distributions
+                - best/worst predictions by match (optional)
+
+                No spectators:
+                - Requires membership.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: verifiedOnly
+                  in: query
+                  required: false
+                  description: If true, only compute stats from verified/ranked-eligible windows (server-defined).
+                  schema:
+                      type: boolean
+                      default: false
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/TournamentStatsInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      heavy:
+                          value: [distributions, topByTeam]
+            responses:
+                "200":
+                    description: Tournament stats snapshot.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TournamentStatsSnapshot"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /tournaments/{tournamentId}/stats/me:
+        get:
+            tags: [stats.tournaments]
+            operationId: getMyTournamentStats
+            summary: Get my stats within a tournament (member-only)
+            description: |
+                Personalized tournament stats for the current user.
+
+                Use cases:
+                - end-of-tournament wrapped
+                - trophy + progression messaging
+                - "how you did vs friends"
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/UserTournamentStatsInclude"
+            responses:
+                "200":
+                    description: My tournament stats snapshot.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserTournamentStatsSnapshot"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/stats:
+        get:
+            tags: [stats.tournaments]
+            operationId: getTournamentMatchdayStats
+            summary: Get matchday stats snapshot (member-only)
+            description: |
+                Returns matchday stats for retention + recap surfaces.
+
+                No spectators:
+                - Requires membership.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MatchdayStatsInclude"
+            responses:
+                "200":
+                    description: Matchday stats snapshot.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MatchdayStatsSnapshot"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /tournaments/{tournamentId}/matchdays/{matchday}/stats/me:
+        get:
+            tags: [stats.tournaments]
+            operationId: getMyTournamentMatchdayStats
+            summary: Get my matchday stats (member-only)
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Matchday"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/UserMatchdayStatsInclude"
+            responses:
+                "200":
+                    description: My matchday stats snapshot.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserMatchdayStatsSnapshot"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+components:
+    parameters:
+        RecapId:
+            name: recapId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/RecapId"
+
+    schemas:
+        StatsTimeframe:
+            type: string
+            description: Predefined timeframes for stats queries.
+            enum: [allTime, last7d, last30d, seasonToDate]
+
+        MyStatsInclude:
+            type: string
+            enum: [highlights, distributions, topTournaments]
+
+        TournamentStatsInclude:
+            type: string
+            enum: [distributions, topByTeam, topByMetric]
+
+        UserTournamentStatsInclude:
+            type: string
+            enum: [comparisons, bestWorstMatches]
+
+        MatchdayStatsInclude:
+            type: string
+            enum: [distributions, topByMetric]
+
+        UserMatchdayStatsInclude:
+            type: string
+            enum: [breakdown, comparisons]
+
+        RecapId:
+            type: string
+            description: Stable recap identifier.
+            example: rcp_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+
+        RecapType:
+            type: string
+            description: Recap type (wrapped variants).
+            enum:
+                - tournamentFinal
+                - tournamentPeriodic
+                - matchday
+                - monthly
+                - seasonal
+
+        RecapStatus:
+            type: string
+            enum: [available, generating, failed]
+
+        RecapView:
+            type: string
+            enum: [me, global]
+            default: me
+
+        RecapSort:
+            type: string
+            enum: [newest, oldest, typeThenNewest]
+
+        RecapScope:
+            type: string
+            enum: [me, tournament]
+
+        RecapContext:
+            type: object
+            additionalProperties: false
+            properties:
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                matchday:
+                    type: integer
+                    minimum: 1
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                # Optional lightweight info for UI; avoid duplicating full tournament objects everywhere.
+                tournamentName:
+                    type: string
+
+        RecapShare:
+            type: object
+            additionalProperties: false
+            properties:
+                deepLinkUrl:
+                    type: string
+                    format: uri
+                    description: Deep link to open this recap inside the app.
+                shareText:
+                    type: string
+                    description: Localized suggested share text.
+                shareImageUrl:
+                    type: string
+                    format: uri
+                    description: Optional generated image for sharing (server-hosted).
+                shareVideoUrl:
+                    type: string
+                    format: uri
+                    description: Optional generated video for sharing (future).
+                expiresAt:
+                    type: string
+                    format: date-time
+                    description: Optional share asset expiry.
+
+        RecapCard:
+            type: object
+            additionalProperties: false
+            required: [cardId, type, title]
+            properties:
+                cardId:
+                    type: string
+                    example: card_01J8W0K7E2ZQZ6P0M4NQW2Y7AA
+                type:
+                    type: string
+                    description: Stable card type identifier (client can render templates).
+                    examples:
+                        - winner
+                        - myFinish
+                        - exactScoreKing
+                        - bestTeam
+                        - pointsTimeline
+                        - funFact
+                title:
+                    type: string
+                    description: Localized title.
+                subtitle:
+                    type: string
+                    description: Localized subtitle.
+                value:
+                    oneOf:
+                        - type: string
+                        - type: number
+                        - type: integer
+                valueLabel:
+                    type: string
+                    description: Localized label for value (e.g., "points", "exact scores").
+                imageUrl:
+                    type: string
+                    format: uri
+                    description: Optional illustration image URL.
+                payload:
+                    type: object
+                    additionalProperties: true
+                    description: Card-specific payload for rich rendering (charts, lists, etc.).
+
+        RecapSummary:
+            type: object
+            additionalProperties: false
+            required: [recapId, type, status, scope, context, createdAt]
+            properties:
+                recapId:
+                    $ref: "#/components/schemas/RecapId"
+                type:
+                    $ref: "#/components/schemas/RecapType"
+                status:
+                    $ref: "#/components/schemas/RecapStatus"
+                scope:
+                    $ref: "#/components/schemas/RecapScope"
+                title:
+                    type: string
+                    description: Localized display title (e.g., "Jornada 23 Recap", "Season Wrapped").
+                context:
+                    $ref: "#/components/schemas/RecapContext"
+                createdAt:
+                    type: string
+                    format: date-time
+                availableAt:
+                    type: string
+                    format: date-time
+                retryAfterSeconds:
+                    type: integer
+                    minimum: 0
+                    description: Optional hint when status=generating.
+                hiddenAt:
+                    type: string
+                    format: date-time
+                    description: Present when the user hid this recap.
+
+        Recap:
+            allOf:
+                - $ref: "#/components/schemas/RecapSummary"
+                - type: object
+                  additionalProperties: false
+                  required: [cards]
+                  properties:
+                      view:
+                          $ref: "#/components/schemas/RecapView"
+                      cards:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/RecapCard"
+                      share:
+                          $ref: "#/components/schemas/RecapShare"
+
+        RecapSummaryPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RecapSummary"
+                nextCursor:
+                    type: string
+
+        CreateRecapRequest:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+                type:
+                    $ref: "#/components/schemas/RecapType"
+                context:
+                    $ref: "#/components/schemas/RecapContext"
+                view:
+                    $ref: "#/components/schemas/RecapView"
+                # Server should ignore/validate; kept for attribution/experiments.
+                clientContext:
+                    type: object
+                    additionalProperties: true
+
+        # -------------------------
+        # Stats snapshots (mode-aware)
+        # -------------------------
+        StatsWindow:
+            type: object
+            additionalProperties: false
+            properties:
+                from:
+                    type: string
+                    format: date-time
+                to:
+                    type: string
+                    format: date-time
+                timeframe:
+                    $ref: "#/components/schemas/StatsTimeframe"
+
+        ScorePredictionAggregateCounters:
+            type: object
+            additionalProperties: false
+            required:
+                [
+                    matchesInScope,
+                    predictionsSubmitted,
+                    exactScores,
+                    correctOutcomes,
+                ]
+            properties:
+                matchesInScope:
+                    type: integer
+                    minimum: 0
+                predictionsSubmitted:
+                    type: integer
+                    minimum: 0
+                exactScores:
+                    type: integer
+                    minimum: 0
+                correctOutcomes:
+                    type: integer
+                    minimum: 0
+                exactGoalsOneTeam:
+                    type: integer
+                    minimum: 0
+                penalties:
+                    type: integer
+                    description: Total penalties (can be negative).
+                bonuses:
+                    type: integer
+                    minimum: 0
+
+        ScorePredictionAggregateRates:
+            type: object
+            additionalProperties: false
+            properties:
+                predictionCompletionRate:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                exactScoreRate:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                correctOutcomeRate:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+
+        IntegerHistogramBucket:
+            type: object
+            additionalProperties: false
+            required: [from, to, count]
+            properties:
+                from:
+                    type: integer
+                to:
+                    type: integer
+                count:
+                    type: integer
+                    minimum: 0
+
+        IntegerHistogram:
+            type: object
+            additionalProperties: false
+            required: [buckets]
+            properties:
+                buckets:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/IntegerHistogramBucket"
+
+        TeamStatLine:
+            type: object
+            additionalProperties: false
+            required: [team, value]
+            properties:
+                team:
+                    $ref: "#/components/schemas/TeamRef"
+                value:
+                    type: number
+                valueLabel:
+                    type: string
+
+        UserMetricLine:
+            type: object
+            additionalProperties: false
+            required: [user, value]
+            properties:
+                user:
+                    $ref: "#/components/schemas/MeSummary"
+                value:
+                    type: number
+                valueLabel:
+                    type: string
+
+        StatsSnapshotBase:
+            type: object
+            additionalProperties: false
+            required: [gameModeId, sportId, serverTime, computedAt]
+            properties:
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                serverTime:
+                    type: string
+                    format: date-time
+                computedAt:
+                    type: string
+                    format: date-time
+                window:
+                    $ref: "#/components/schemas/StatsWindow"
+                state:
+                    $ref: "#/components/schemas/RankingState"
+                verifiedOnly:
+                    type: boolean
+
+        MyStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionMyStatsSnapshot"
+                - $ref: "#/components/schemas/GenericMyStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionMyStatsSnapshot"
+
+        PublicUserStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionPublicUserStatsSnapshot"
+                - $ref: "#/components/schemas/GenericPublicUserStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionPublicUserStatsSnapshot"
+
+        TournamentStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionTournamentStatsSnapshot"
+                - $ref: "#/components/schemas/GenericTournamentStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionTournamentStatsSnapshot"
+
+        UserTournamentStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionUserTournamentStatsSnapshot"
+                - $ref: "#/components/schemas/GenericUserTournamentStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionUserTournamentStatsSnapshot"
+
+        MatchdayStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionMatchdayStatsSnapshot"
+                - $ref: "#/components/schemas/GenericMatchdayStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionMatchdayStatsSnapshot"
+
+        UserMatchdayStatsSnapshot:
+            oneOf:
+                - $ref: "#/components/schemas/ScorePredictionUserMatchdayStatsSnapshot"
+                - $ref: "#/components/schemas/GenericUserMatchdayStatsSnapshot"
+            discriminator:
+                propertyName: gameModeId
+                mapping:
+                    scorePrediction: "#/components/schemas/ScorePredictionUserMatchdayStatsSnapshot"
+
+        # ----- ScorePrediction: My global stats -----
+        ScorePredictionMyStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [user, totals, rates]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      rates:
+                          $ref: "#/components/schemas/ScorePredictionAggregateRates"
+                      highlights:
+                          type: array
+                          description: Server-curated stat highlights (for retention).
+                          items:
+                              $ref: "#/components/schemas/RecapCard"
+                      distributions:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              pointsPerMatchHistogram:
+                                  $ref: "#/components/schemas/IntegerHistogram"
+                              pointsPerMatchdayHistogram:
+                                  $ref: "#/components/schemas/IntegerHistogram"
+                      topTournaments:
+                          type: array
+                          description: Optional best tournaments in this window.
+                          items:
+                              type: object
+                              additionalProperties: false
+                              required: [tournamentId, tournamentName, points]
+                              properties:
+                                  tournamentId:
+                                      $ref: "#/components/schemas/TournamentId"
+                                  tournamentName:
+                                      type: string
+                                  points:
+                                      type: integer
+
+        ScorePredictionPublicUserStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [user, totals, rates]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      rates:
+                          $ref: "#/components/schemas/ScorePredictionAggregateRates"
+                      highlights:
+                          type: array
+                          items:
+                              $ref: "#/components/schemas/RecapCard"
+
+        # ----- ScorePrediction: Tournament stats -----
+        ScorePredictionTournamentStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [tournamentId, totals]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      topByMetric:
+                          type: object
+                          additionalProperties: false
+                          description: Leaderboards for key metrics (server-selected).
+                          properties:
+                              byExactScores:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/UserMetricLine"
+                              byCorrectOutcomes:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/UserMetricLine"
+                              byPoints:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/UserMetricLine"
+                      topByTeam:
+                          type: array
+                          description: |
+                              “Who got the most points predicting Team X” style stats.
+                              Interpretation is server-defined (points earned in matches involving that team).
+                          items:
+                              type: object
+                              additionalProperties: false
+                              required: [team, leader, value]
+                              properties:
+                                  team:
+                                      $ref: "#/components/schemas/TeamRef"
+                                  leader:
+                                      $ref: "#/components/schemas/MeSummary"
+                                  value:
+                                      type: number
+                                  valueLabel:
+                                      type: string
+                                      example: points
+                      distributions:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              totalPointsHistogram:
+                                  $ref: "#/components/schemas/IntegerHistogram"
+                              exactScoresHistogram:
+                                  $ref: "#/components/schemas/IntegerHistogram"
+
+        ScorePredictionUserTournamentStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [tournamentId, user, totals, rates]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      rates:
+                          $ref: "#/components/schemas/ScorePredictionAggregateRates"
+                      comparisons:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              percentilePoints:
+                                  type: number
+                                  format: float
+                                  minimum: 0
+                                  maximum: 1
+                              percentileExactScores:
+                                  type: number
+                                  format: float
+                                  minimum: 0
+                                  maximum: 1
+                      bestWorstMatches:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              best:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/ScorePredictionMatchResultLine"
+                              worst:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/ScorePredictionMatchResultLine"
+
+        # ----- ScorePrediction: Matchday stats -----
+        ScorePredictionMatchdayStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [tournamentId, matchday, totals]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      matchday:
+                          type: integer
+                          minimum: 1
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      topByMetric:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              byPoints:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/UserMetricLine"
+                              byExactScores:
+                                  type: array
+                                  items:
+                                      $ref: "#/components/schemas/UserMetricLine"
+                      distributions:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              pointsHistogram:
+                                  $ref: "#/components/schemas/IntegerHistogram"
+
+        ScorePredictionUserMatchdayStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: false
+                  required: [tournamentId, matchday, user, totals, rates]
+                  properties:
+                      gameModeId:
+                          type: string
+                          enum: [scorePrediction]
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      matchday:
+                          type: integer
+                          minimum: 1
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+                      totals:
+                          $ref: "#/components/schemas/ScorePredictionAggregateCounters"
+                      rates:
+                          $ref: "#/components/schemas/ScorePredictionAggregateRates"
+                      breakdown:
+                          type: array
+                          description: Per-match lines (same as results, but can include extra metrics if desired).
+                          items:
+                              $ref: "#/components/schemas/ScorePredictionMatchResultLine"
+                      comparisons:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              rankPosition:
+                                  type: integer
+                                  minimum: 1
+                              percentilePoints:
+                                  type: number
+                                  format: float
+                                  minimum: 0
+                                  maximum: 1
+
+        # ----- Generic placeholders for future modes -----
+        GenericMyStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+
+        GenericPublicUserStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+
+        GenericTournamentStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+
+        GenericUserTournamentStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      user:
+                          $ref: "#/components/schemas/MeSummary"
+
+        GenericMatchdayStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      matchday:
+                          type: integer
+                          minimum: 1
+
+        GenericUserMatchdayStatsSnapshot:
+            allOf:
+                - $ref: "#/components/schemas/StatsSnapshotBase"
+                - type: object
+                  additionalProperties: true
+                  properties:
+                      tournamentId:
+                          $ref: "#/components/schemas/TournamentId"
+                      matchday:
+                          type: integer
+                          minimum: 1
+                      user:
+                          $ref: "#/components/schemas/MeSummary"

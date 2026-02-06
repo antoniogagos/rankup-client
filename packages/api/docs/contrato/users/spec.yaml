@@ -1,0 +1,527 @@
+tags:
+  - name: users.directory
+    summary: Directory
+    description: Search and resolve other users (anti-scraping, privacy-aware).
+    parent: users
+    kind: nav
+
+  - name: users.history
+    summary: Public history
+    description: Verified/public highlights from a user's play history (privacy-aware).
+    parent: users
+    kind: nav
+
+paths:
+  /users:
+    get:
+      tags: [users.directory]
+      operationId: searchUsers
+      summary: Search users
+      description: |
+        Searches the user directory by username/display-name.
+
+        Anti-scraping posture:
+        - Requires authentication.
+        - Requires `q` (min length).
+        - Rate limited.
+        - Results include only **discoverable** users as per privacy settings and blocks.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: q
+          in: query
+          required: true
+          description: Search query (username/display name).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 32
+        - name: match
+          in: query
+          required: false
+          description: Matching strategy.
+          schema:
+            type: string
+            enum: [prefix, contains, exact]
+            default: prefix
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Search results.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-NoStore"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDirectoryPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/{userId}:
+    get:
+      tags: [users.directory]
+      operationId: getUserPublicProfile
+      summary: Get a user's public profile (privacy-aware)
+      description: |
+        Returns the user's profile information visible to the current viewer.
+
+        Privacy enforcement:
+        - If the viewer is blocked or the profile is not visible, the server SHOULD return 404
+          (to avoid leaking existence/visibility state).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/If-None-Match"
+        - name: include
+          in: query
+          required: false
+          description: Optional extra sections for richer profile screens.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/UserProfileInclude"
+          examples:
+            minimal:
+              value: []
+            withRelationship:
+              value: [relationship]
+      responses:
+        "200":
+          description: Public user profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Private-Short"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserProfile"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Private-Short"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /usernames/{username}:
+    get:
+      tags: [users.directory]
+      operationId: resolveUserByUsername
+      summary: Resolve a user profile by username (privacy-aware)
+      description: |
+        Resolves a user by their username/handle.
+
+        Notes:
+        - Requires auth to reduce scraping risk.
+        - If not visible, return 404.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/UsernamePath"
+        - $ref: "#/components/parameters/If-None-Match"
+      responses:
+        "200":
+          description: Public user profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Private-Short"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserProfile"
+        "304":
+          description: Not modified.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Private-Short"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/{userId}/history:
+    get:
+      tags: [users.history]
+      operationId: getUserPublicHistory
+      summary: Get a user's public/visible history highlights
+      description: |
+        Returns the viewer-visible history highlights for a user.
+
+        Designed for Rankup’s philosophy:
+        - **No spectator gameplay** (you can't browse other people's private tournaments),
+          therefore this endpoint returns **highlights** only (primarily verified/official participation),
+          not full tournament internals.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/UserId"
+        - name: verifiedOnly
+          in: query
+          required: false
+          description: |
+            If true (default), returns only verified participation/highlights.
+            If false, server may return additional items based on the target user's privacy settings.
+          schema:
+            type: boolean
+            default: true
+        - name: gameModeId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sportId
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Public history highlights.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Cache-Control:
+              $ref: "#/components/headers/Cache-Control-Private-Short"
+            Vary:
+              $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+            Content-Language:
+              $ref: "#/components/headers/Content-Language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserHistoryPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor for pagination.
+      schema:
+        type: string
+
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Page size for pagination.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1
+
+    UsernamePath:
+      name: username
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 32
+        pattern: '^[a-zA-Z0-9_.]{3,32}$'
+      example: maria
+
+  headers:
+    Cache-Control-Private-Short:
+      description: Cache policy for private, short-lived resources.
+      schema:
+        type: string
+      example: private, max-age=60
+
+  responses:
+    NotFound:
+      description: Not Found (or not visible due to privacy/blocking policy).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            notFound:
+              value:
+                type: "about:blank"
+                title: "Not Found"
+                status: 404
+                detail: "User not found."
+                instance: "urn:problem:6b7c8d9e-0f1a-2b3c-4d5e-6f7a8b9c0d1e"
+
+  schemas:
+    UserProfileInclude:
+      type: string
+      enum: [relationship]
+
+    PublicProfileScope:
+      type: string
+      enum: [limited, full]
+      description: Indicates how much profile data is visible to the viewer.
+
+    RelationshipSummary:
+      type: object
+      additionalProperties: false
+      required: [isFriend, youFollow, followsYou]
+      properties:
+        isFriend:
+          type: boolean
+        youFollow:
+          type: boolean
+        followsYou:
+          type: boolean
+
+    PublicUserProfile:
+      type: object
+      additionalProperties: false
+      required: [userId, username, scope]
+      properties:
+        userId:
+          type: string
+        username:
+          $ref: "#/components/schemas/Username"
+        pictureUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+          maxLength: 280
+        scope:
+          $ref: "#/components/schemas/PublicProfileScope"
+        relationship:
+          $ref: "#/components/schemas/RelationshipSummary"
+        badges:
+          type: array
+          description: Optional public badges (e.g., creator verified) when applicable.
+          items:
+            type: string
+
+    UserDirectoryEntry:
+      type: object
+      additionalProperties: false
+      required: [userId, username]
+      properties:
+        userId:
+          type: string
+        username:
+          $ref: "#/components/schemas/Username"
+        pictureUrl:
+          type: string
+          format: uri
+        relationship:
+          $ref: "#/components/schemas/RelationshipSummary"
+
+    UserDirectoryPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDirectoryEntry"
+        nextCursor:
+          type: string
+
+    VerificationStatus:
+      type: string
+      enum: [private, community, verified_official, verified_creator, verified_sponsored]
+
+    GameModeRef:
+      type: object
+      additionalProperties: false
+      required: [gameModeId]
+      properties:
+        gameModeId:
+          type: string
+
+    SportRef:
+      type: object
+      additionalProperties: false
+      required: [sportId]
+      properties:
+        sportId:
+          type: string
+
+    PublicTournamentHighlight:
+      type: object
+      additionalProperties: false
+      required: [tournamentId, name, verificationStatus, gameMode, sport]
+      properties:
+        tournamentId:
+          type: string
+        name:
+          type: string
+        verificationStatus:
+          $ref: "#/components/schemas/VerificationStatus"
+        gameMode:
+          $ref: "#/components/schemas/GameModeRef"
+        sport:
+          $ref: "#/components/schemas/SportRef"
+        seasonId:
+          type: string
+        endedAt:
+          type: string
+          format: date-time
+        result:
+          $ref: "#/components/schemas/PublicTournamentResult"
+
+    PublicTournamentResult:
+      type: object
+      additionalProperties: false
+      properties:
+        position:
+          type: integer
+          minimum: 1
+        totalPlayers:
+          type: integer
+          minimum: 1
+        points:
+          type: integer
+
+    UserHistoryItem:
+      type: object
+      additionalProperties: false
+      required: [kind, tournament]
+      properties:
+        kind:
+          type: string
+          enum: [tournamentParticipation]
+        tournament:
+          $ref: "#/components/schemas/PublicTournamentHighlight"
+
+    UserHistoryPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserHistoryItem"
+        nextCursor:
+          type: string
+
+    PublicAchievement:
+      type: object
+      additionalProperties: false
+      required: [achievementId, title, unlockedAt]
+      properties:
+        achievementId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        iconUrl:
+          type: string
+          format: uri
+        unlockedAt:
+          type: string
+          format: date-time
+        evidence:
+          type: object
+          additionalProperties: false
+          description: Optional verified evidence reference.
+          properties:
+            tournamentId:
+              type: string
+            verificationStatus:
+              $ref: "#/components/schemas/VerificationStatus"
+
+    PublicAchievementPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicAchievement"
+        nextCursor:
+          type: string

@@ -1,0 +1,55 @@
+{
+	"name": "@rankup/app",
+	"version": "0.0.0",
+	"packageManager": "yarn@4.12.0",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"start": "wireit",
+		"start-compile-css": "wireit",
+		"build": "wireit",
+		"clean": "wireit",
+		"validate": "tsc -b && tsc -b --clean"
+	},
+	"wireit": {
+		"start": {
+			"command": "wds --watch",
+			"service": true
+		},
+		"start-compile-css": {
+			"command": "wds --watch --compile-css",
+			"service": true
+		},
+		"build": {
+			"command": "tsc -b"
+		},
+		"clean": {
+			"command": "tsc -b --clean"
+		}
+	},
+	"dependencies": {
+		"@lit-labs/motion": "^1.0.3",
+		"@lit-labs/observers": "^1.0.2",
+		"@lit/localize": "^0.11.0",
+		"@lit/task": "^1.0.0",
+		"@rankup/api": "workspace:*",
+		"@rankup/api-mock": "workspace:*",
+		"@rankup/base": "workspace:*",
+		"@rankup/common": "workspace:*",
+		"@rankup/platform": "workspace:*",
+		"@rankup/rankup": "workspace:*",
+		"@rankup/samba": "workspace:*",
+		"lit": "^3.3.1",
+		"page": "^1.11.6",
+		"tslib": "^2.3.1",
+		"urlpattern-polyfill": "^5.0.9"
+	},
+	"devDependencies": {
+		"@open-wc/testing": "^3.0.0",
+		"@types/page": "^1.11.4",
+		"@web/dev-server": "^0.4.6",
+		"@web/dev-server-core": "^0.7.5",
+		"typescript": "5.9.3",
+		"wireit": "^0.14.12"
+	}
+}

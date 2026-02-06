@@ -17,6 +17,7 @@
 
 # build
 **/dist/
+**/*.tsbuildinfo
 
 storybook-static
 custom-elements.json

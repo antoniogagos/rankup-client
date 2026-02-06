@@ -1,0 +1,10 @@
+{
+	"name": "@rankup/api",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts",
+		"./*.js": "./src/*.ts",
+		"./package.json": "./package.json"
+	}
+}

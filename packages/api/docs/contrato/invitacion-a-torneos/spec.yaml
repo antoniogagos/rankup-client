@@ -1,0 +1,412 @@
+tags:
+    - name: me.tournamentInvites
+      summary: Tournament invites
+      description: View and respond to direct tournament invitations (recipient-side).
+      parent: me
+      kind: nav
+
+paths:
+    /me/tournament-invites:
+        get:
+            tags: [me.tournamentInvites]
+            operationId: listMyTournamentInvites
+            summary: List my tournament invites
+            description: |
+                Recipient-side inbox for direct tournament invites.
+
+                Notes:
+                - Authentication required.
+                - Not cacheable (personalized).
+                - Designed to power an "Invites" screen with a **safe tournament preview** (no spectator gameplay).
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: status
+                  in: query
+                  required: false
+                  description: Filter by invite status.
+                  schema:
+                      $ref: "#/components/schemas/TournamentInviteStatus"
+                - name: includeHidden
+                  in: query
+                  required: false
+                  description: If true, includes invites the user has hidden/archived.
+                  schema:
+                      type: boolean
+                      default: false
+                - name: include
+                  in: query
+                  required: false
+                  description: Optional expansions for the inbox UI.
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyTournamentInviteInclude"
+                  examples:
+                      minimal:
+                          value: []
+                      withTournamentPreview:
+                          value: [tournamentPreview]
+                - name: sort
+                  in: query
+                  required: false
+                  description: Sort mode for inbox ordering.
+                  schema:
+                      $ref: "#/components/schemas/MyTournamentInviteSort"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: My tournament invites page.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyTournamentInvitePage"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+                "500":
+                    $ref: "#/components/responses/InternalServerError"
+                "503":
+                    $ref: "#/components/responses/ServiceUnavailable"
+
+    /me/tournament-invites/unread-count:
+        get:
+            tags: [me.tournamentInvites]
+            operationId: getMyTournamentInviteUnreadCount
+            summary: Get unread invite count
+            description: |
+                Returns how many invites are unread/unseen for the current user.
+
+                Useful for badges without pulling the full invite inbox list.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Unread count.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UnreadCount"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/tournament-invites/{inviteId}:
+        get:
+            tags: [me.tournamentInvites]
+            operationId: getMyTournamentInvite
+            summary: Get an invite
+            description: |
+                Returns a single invite targeted to the current user.
+
+                Privacy:
+                - Only the invited recipient can access this resource.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/InviteId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          $ref: "#/components/schemas/MyTournamentInviteInclude"
+                  examples:
+                      withTournamentPreview:
+                          value: [tournamentPreview]
+            responses:
+                "200":
+                    description: Invite.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyTournamentInvite"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+        delete:
+            tags: [me.tournamentInvites]
+            operationId: hideMyTournamentInvite
+            summary: Hide (archive) an invite in my inbox
+            description: |
+                Hides the invite from the user's inbox.
+
+                Rationale:
+                - Keeps UX clean without changing the canonical invite status (pending/accepted/declined).
+                - Server SHOULD implement this as a per-recipient flag (e.g., `hiddenAt`), not a destructive delete.
+
+                Idempotent:
+                - Repeated calls keep it hidden.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/InviteId"
+            responses:
+                "204":
+                    description: Invite hidden (or already hidden).
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/tournament-invites/{inviteId}/seen:
+        put:
+            tags: [me.tournamentInvites]
+            operationId: markMyTournamentInviteSeen
+            summary: Mark an invite as seen
+            description: |
+                Marks the invite as seen/read for the current user.
+
+                Idempotent:
+                - PUT is idempotent; repeated calls keep it seen.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/InviteId"
+            responses:
+                "204":
+                    description: Marked as seen.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/tournament-invites/{inviteId}/accept:
+        put:
+            tags: [me.tournamentInvites]
+            operationId: acceptMyTournamentInvite
+            summary: Accept an invite (joins tournament)
+            description: |
+                Accepts the invite and joins the tournament.
+
+                Behavior:
+                - If the user is already a member, server SHOULD still mark invite as accepted and return `joined=false`.
+                - If the tournament is locked/full/closed, server returns 409 and invite remains pending.
+
+                Idempotency:
+                - PUT is idempotent. Clients SHOULD send `X-Idempotency-Key` to protect against mobile retries.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/InviteId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AcceptTournamentInviteRequest"
+            responses:
+                "200":
+                    description: Invite accepted; join processed.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AcceptTournamentInviteResult"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+    /me/tournament-invites/{inviteId}/decline:
+        put:
+            tags: [me.tournamentInvites]
+            operationId: declineMyTournamentInvite
+            summary: Decline an invite
+            description: |
+                Declines the invite (does not join tournament).
+
+                Idempotent:
+                - PUT is idempotent; repeated calls keep it declined.
+            security:
+                - BearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - $ref: "#/components/parameters/InviteId"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DeclineTournamentInviteRequest"
+            responses:
+                "200":
+                    description: Invite declined.
+                    headers:
+                        X-Request-Id:
+                            $ref: "#/components/headers/X-Request-Id"
+                        Cache-Control:
+                            $ref: "#/components/headers/Cache-Control-NoStore"
+                        Vary:
+                            $ref: "#/components/headers/Vary-Authorization-AcceptLanguage"
+                        Content-Language:
+                            $ref: "#/components/headers/Content-Language"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MyTournamentInvite"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/Conflict"
+                "422":
+                    $ref: "#/components/responses/UnprocessableEntity"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
+
+components:
+    schemas:
+        UnreadCount:
+            type: object
+            additionalProperties: false
+            required: [count]
+            properties:
+                count:
+                    type: integer
+                    minimum: 0
+
+        MyTournamentInviteInclude:
+            type: string
+            enum: [tournamentPreview]
+
+        MyTournamentInviteSort:
+            type: string
+            enum: [newest, oldest, statusThenNewest]
+
+        MyTournamentInvite:
+            description: Recipient-side invite view, optionally with tournament preview.
+            allOf:
+                - $ref: "#/components/schemas/TournamentInvite"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      # recipient-side metadata (inbox UX)
+                      seenAt:
+                          type: string
+                          format: date-time
+                      hiddenAt:
+                          type: string
+                          format: date-time
+                      # safe pre-join content; NEVER include ranking/chat/submissions.
+                      tournamentPreview:
+                          $ref: "#/components/schemas/TournamentPreview"
+
+        MyTournamentInvitePage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/MyTournamentInvite"
+                nextCursor:
+                    type: string
+
+        AcceptTournamentInviteRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                acceptTournamentRules:
+                    type: boolean
+                    description: Optional explicit acceptance flag (server policy dependent).
+                clientContext:
+                    type: object
+                    additionalProperties: true
+                    description: Optional attribution/deep-link context.
+
+        AcceptTournamentInviteResult:
+            type: object
+            additionalProperties: false
+            required: [invite, join]
+            properties:
+                invite:
+                    $ref: "#/components/schemas/MyTournamentInvite"
+                join:
+                    $ref: "#/components/schemas/JoinByInvitationCodeResult"
+
+        DeclineTournamentInviteRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                reason:
+                    type: string
+                    maxLength: 200
+                    description: Optional user-provided reason (not shown to inviter by default).
+                clientContext:
+                    type: object
+                    additionalProperties: true

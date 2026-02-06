@@ -1,0 +1,10 @@
+export type TournamentId = string;
+export type CompetitionId = string;
+export type SeasonId = string;
+export type SportId = string;
+export type GameModeId = string;
+export type RulesetId = string;
+export type MatchId = string;
+export type TeamId = string;
+export type UserId = string;
+export type TournamentInviteId = string;

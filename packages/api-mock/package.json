@@ -1,0 +1,23 @@
+{
+	"name": "@rankup/api-mock",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts",
+		"./core": "./src/core/index.ts",
+		"./server": "./src/server/index.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"dev:server": "node --import tsx src/server/cli.ts",
+		"spike:openapi-contract": "node --import tsx src/server/spike-openapi-contract.ts",
+		"smoke:scenario": "node --import tsx scripts/smoke-scenario.ts"
+	},
+	"dependencies": {
+		"@apidevtools/swagger-parser": "^12.1.0",
+		"@rankup/api": "workspace:*",
+		"ajv": "^8.17.1",
+		"openapi-sampler": "^1.6.2",
+		"openapi-types": "^12.1.3"
+	}
+}

@@ -1,0 +1,839 @@
+tags:
+  - name: auth
+    summary: Authentication & sessions
+    description: Registration, login sessions, OAuth, and password resets.
+    kind: nav
+
+  - name: auth.registrations
+    summary: Registrations
+    description: Email/password sign-up and email confirmation.
+    parent: auth
+    kind: nav
+
+  - name: auth.sessions
+    summary: Sessions
+    description: Login, refresh, and logout.
+    parent: auth
+    kind: nav
+
+  - name: auth.passwordResets
+    summary: Password resets
+    description: Request and confirm password resets.
+    parent: auth
+    kind: nav
+
+  - name: auth.oauth
+    summary: OAuth
+    description: OAuth authorization, token exchange, and provider linking.
+    parent: auth
+    kind: nav
+
+paths:
+  /auth/registrations:
+    post:
+      tags: [auth.registrations]
+      operationId: registerUser
+      summary: Register a new user (email/password)
+      description: |
+        Creates a new user registration.
+
+        Security note: returning 409 for already-registered emails can enable account enumeration.
+        Rankup can choose between:
+        - strict UX: return 409 (recommended for product clarity), or
+        - privacy: always return 201/202 and email the user (anti-enumeration).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+      responses:
+        "201":
+          description: Registration created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Registration"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/registrations/confirm:
+    post:
+      tags: [auth.registrations]
+      operationId: confirmRegistration
+      summary: Confirm email registration
+      description: |
+        Confirms a registration using the code delivered to the user's email.
+
+        On success, returns a session (tokens) to minimize onboarding friction.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmRegistrationRequest"
+      responses:
+        "200":
+          description: Registration confirmed; session issued.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/registrations/resend-confirmation:
+    post:
+      tags: [auth.registrations]
+      operationId: resendRegistrationConfirmation
+      summary: Resend confirmation code email
+      description: |
+        Requests a new confirmation code.
+
+        Security: SHOULD respond 202 even if the email is unknown (avoid enumeration).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendConfirmationRequest"
+      responses:
+        "202":
+          description: Confirmation resend requested.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/sessions:
+    post:
+      tags: [auth.sessions]
+      operationId: createSession
+      summary: Create a session (login)
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Session created.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/sessions/refresh:
+    post:
+      tags: [auth.sessions]
+      operationId: refreshSession
+      summary: Refresh a session
+      description: Exchanges a refresh token for a new access token (and optionally a rotated refresh token).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshSessionRequest"
+      responses:
+        "200":
+          description: Session refreshed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/sessions/me:
+    delete:
+      tags: [auth.sessions]
+      operationId: logout
+      summary: Revoke the current session (logout)
+      description: |
+        Logs out the current user. Best-effort revocation.
+        For JWT access tokens, servers typically revoke refresh tokens and invalidate the session server-side.
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Logged out.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/password-resets:
+    post:
+      tags: [auth.passwordResets]
+      operationId: requestPasswordReset
+      summary: Request a password reset email
+      description: |
+        Always responds 202 to avoid leaking whether the email is registered.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestPasswordResetRequest"
+      responses:
+        "202":
+          description: Password reset requested (if the account exists).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/password-resets/confirm:
+    post:
+      tags: [auth.passwordResets]
+      operationId: confirmPasswordReset
+      summary: Confirm password reset
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmPasswordResetRequest"
+      responses:
+        "204":
+          description: Password reset completed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/oauth/authorize:
+    get:
+      tags: [auth.oauth]
+      operationId: oauthAuthorize
+      summary: Start OAuth authorization (redirect)
+      description: |
+        Starts an OAuth authorization flow (typically with PKCE).
+
+        Implementation detail: many mobile clients use provider SDKs instead.
+        This endpoint is optional but useful for web and for consistent flows.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: provider
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/OAuthProvider"
+        - name: redirectUri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 256
+        - name: codeChallenge
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: codeChallengeMethod
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [S256]
+      responses:
+        "302":
+          description: Redirect to provider authorization URL.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+            Location:
+              description: Redirect URL.
+              schema:
+                type: string
+                format: uri
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/oauth/token:
+    post:
+      tags: [auth.oauth]
+      operationId: oauthTokenExchange
+      summary: Exchange OAuth credentials for a Rankup session
+      description: |
+        Exchanges provider credentials for a Rankup session.
+        Supports multiple grant shapes via discriminator `grantType`.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuthTokenRequest"
+      responses:
+        "200":
+          description: Session issued.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/oauth/links:
+    get:
+      tags: [auth.oauth]
+      operationId: listOauthLinks
+      summary: List linked OAuth providers for the current user
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Linked providers.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthLinkList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    post:
+      tags: [auth.oauth]
+      operationId: createOauthLink
+      summary: Link an OAuth provider to the current user
+      description: |
+        Links a provider identity to the authenticated Rankup account.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuthLinkRequest"
+      responses:
+        "201":
+          description: Provider linked.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthLink"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /auth/oauth/links/{provider}:
+    delete:
+      tags: [auth.oauth]
+      operationId: deleteOauthLink
+      summary: Unlink an OAuth provider from the current user
+      description: |
+        Idempotent unlink. Returns 204 even if the provider was not linked.
+        Server may reject unlinking if it would leave the account without any login method.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Accept-Language"
+        - name: provider
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/OAuthProvider"
+      responses:
+        "204":
+          description: Provider unlinked (or was not linked).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Optional idempotency key for safe retries. When provided, the server MUST
+        guarantee idempotent semantics for the operation for a bounded time window.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+
+  responses:
+    BadRequest:
+      description: Bad Request (validation or malformed JSON).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            invalidRequest:
+              value:
+                type: "https://errors.rankup.dev/validation/invalid-request"
+                title: "Invalid request"
+                status: 400
+                detail: "email must be a valid address."
+                instance: "urn:problem:7a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d"
+
+    Forbidden:
+      description: Forbidden (authenticated but not allowed).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            forbidden:
+              value:
+                type: "https://errors.rankup.dev/auth/forbidden"
+                title: "Forbidden"
+                status: 403
+                detail: "You do not have permission to perform this action."
+                instance: "urn:problem:3b4c5d6e-7f8a-9b0c-1d2e-3f4a5b6c7d8e"
+
+    Conflict:
+      description: Conflict (state conflict).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            conflict:
+              value:
+                type: "https://errors.rankup.dev/conflict/state"
+                title: "Conflict"
+                status: 409
+                detail: "Registration already confirmed."
+                instance: "urn:problem:9f8e7d6c-5b4a-3c2d-1e0f-9a8b7c6d5e4f"
+
+    UnprocessableEntity:
+      description: Unprocessable Entity (semantic validation failed; e.g., invalid/expired code).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            validationFailed:
+              value:
+                type: "https://errors.rankup.dev/validation/failed"
+                title: "Unprocessable entity"
+                status: 422
+                detail: "Confirmation code expired."
+                instance: "urn:problem:4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a"
+
+  schemas:
+    EmailAddress:
+      type: string
+      format: email
+      maxLength: 320
+      example: user@example.com
+
+    Password:
+      type: string
+      format: password
+      minLength: 8
+      maxLength: 256
+      description: |
+        Password policy may evolve (e.g., Cognito policy). The server enforces the authoritative policy.
+
+    Username:
+      type: string
+      minLength: 3
+      maxLength: 32
+      description: Display name/username (exact rules enforced server-side).
+      example: maria
+
+    RegisterUserRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        password:
+          $ref: "#/components/schemas/Password"
+        username:
+          $ref: "#/components/schemas/Username"
+        locale:
+          type: string
+          description: Optional client locale hint (preferred is Accept-Language).
+          example: es
+
+    RegistrationStatus:
+      type: string
+      enum: [pendingConfirmation, complete]
+
+    Registration:
+      type: object
+      additionalProperties: false
+      required: [registrationId, email, status, createdAt]
+      properties:
+        registrationId:
+          type: string
+          example: reg_01J8VZQ7QJ1Y6T4R3E2W1A0B9C
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        status:
+          $ref: "#/components/schemas/RegistrationStatus"
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          description: Optional expiration for the confirmation step.
+
+    ConfirmRegistrationRequest:
+      type: object
+      additionalProperties: false
+      required: [email, code]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        code:
+          type: string
+          minLength: 4
+          maxLength: 64
+          description: Confirmation code sent via email.
+
+    ResendConfirmationRequest:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+
+    CreateSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        password:
+          $ref: "#/components/schemas/Password"
+
+    RefreshSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 16
+
+    RequestPasswordResetRequest:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+
+    ConfirmPasswordResetRequest:
+      type: object
+      additionalProperties: false
+      required: [email, code, newPassword]
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailAddress"
+        code:
+          type: string
+          minLength: 4
+          maxLength: 64
+          description: Reset code/token delivered via email.
+        newPassword:
+          $ref: "#/components/schemas/Password"
+
+    AuthSession:
+      type: object
+      additionalProperties: false
+      required: [accessToken, expiresAt, tokenType, user]
+      properties:
+        accessToken:
+          type: string
+          minLength: 16
+        refreshToken:
+          type: string
+          minLength: 16
+          description: Optional if the server chooses not to issue refresh tokens in some flows.
+        idToken:
+          type: string
+          description: Optional OIDC id_token (if issued).
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/MeSummary"
+
+    OAuthProvider:
+      type: string
+      description: OAuth provider identifier (extensible).
+      examples: [google, apple]
+
+    OAuthGrantType:
+      type: string
+      enum: [authorization_code, id_token]
+
+    OAuthTokenRequest:
+      oneOf:
+        - $ref: "#/components/schemas/OAuthAuthorizationCodeGrant"
+        - $ref: "#/components/schemas/OAuthIdTokenGrant"
+      discriminator:
+        propertyName: grantType
+        mapping:
+          authorization_code: "#/components/schemas/OAuthAuthorizationCodeGrant"
+          id_token: "#/components/schemas/OAuthIdTokenGrant"
+
+    OAuthAuthorizationCodeGrant:
+      type: object
+      additionalProperties: false
+      required: [grantType, provider, code, redirectUri]
+      properties:
+        grantType:
+          $ref: "#/components/schemas/OAuthGrantType"
+        provider:
+          $ref: "#/components/schemas/OAuthProvider"
+        code:
+          type: string
+          description: Authorization code from provider.
+        redirectUri:
+          type: string
+          format: uri
+        codeVerifier:
+          type: string
+          description: PKCE code verifier (required when codeChallenge was used).
+
+    OAuthIdTokenGrant:
+      type: object
+      additionalProperties: false
+      required: [grantType, provider, idToken]
+      properties:
+        grantType:
+          $ref: "#/components/schemas/OAuthGrantType"
+        provider:
+          $ref: "#/components/schemas/OAuthProvider"
+        idToken:
+          type: string
+          description: Provider id_token acquired via native SDK.
+        nonce:
+          type: string
+          description: Optional nonce for additional validation.
+
+    OAuthLinkRequest:
+      description: |
+        Same shapes as token exchange, but links the provider to the current account.
+      oneOf:
+        - $ref: "#/components/schemas/OAuthAuthorizationCodeGrant"
+        - $ref: "#/components/schemas/OAuthIdTokenGrant"
+      discriminator:
+        propertyName: grantType
+        mapping:
+          authorization_code: "#/components/schemas/OAuthAuthorizationCodeGrant"
+          id_token: "#/components/schemas/OAuthIdTokenGrant"
+
+    OAuthLink:
+      type: object
+      additionalProperties: false
+      required: [provider, linkedAt]
+      properties:
+        provider:
+          $ref: "#/components/schemas/OAuthProvider"
+        linkedAt:
+          type: string
+          format: date-time
+
+    OAuthLinkList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OAuthLink"

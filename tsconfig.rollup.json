@@ -1,0 +1,31 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["DOM", "ESNext", "DOM.Iterable"],
+		"types": [],
+		"experimentalDecorators": true,
+		"useDefineForClassFields": false,
+		"resolveJsonModule": true,
+		"paths": {
+			"@rankup/api": ["./packages/api/src/index.ts"],
+			"@rankup/api-mock": ["./packages/api-mock/src/index.ts"],
+			"@rankup/base/*": ["./packages/base/*"],
+			"@rankup/platform/*": ["./packages/platform/src/*"],
+			"@rankup/rankup/*": ["./packages/rankup/src/*"],
+			"@rankup/samba/*": ["./packages/samba/*"],
+			"@rankup/common/*": ["./packages/common/*"]
+		}
+	},
+	"include": ["apps/**/*.ts", "packages/**/*.ts", "packages/**/*.d.ts"],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"**/*.config.ts",
+		"packages/**/scripts/**",
+		"packages/**/test/**",
+		"packages/**/tests/**",
+		"packages/**/server/**"
+	]
+}

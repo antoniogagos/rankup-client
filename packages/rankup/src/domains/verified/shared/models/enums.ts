@@ -1,0 +1,9 @@
+export type VerifiedHubInclude = 'sections' | 'previews';
+export type VerifiedEventInclude = 'branding' | 'tournaments' | 'eligibility' | 'schedule';
+export type VerifiedTournamentInclude = 'branding' | 'eligibility' | 'joinInfo';
+export type VerifiedEventStatus = 'upcoming' | 'live' | 'ended';
+export type VerifiedTournamentStatus = 'joinable' | 'locked' | 'ended';
+export type VerifiedEventSort = 'featured' | 'startTimeAsc' | 'startTimeDesc' | 'newest';
+export type VerifiedTournamentSort = 'featured' | 'popular' | 'startTimeAsc' | 'startTimeDesc';
+export type VerifiedHubSectionType = 'hero' | 'featuredEvents' | 'recommended' | 'trendingTournaments' | 'upcomingThisWeek' | 'seasonal';
+export type VerifiedHubItemType = 'event' | 'tournament';

@@ -1,0 +1,2610 @@
+tags:
+    - name: admin
+      summary: Admin / Backoffice
+      description: Staff-only backoffice APIs (highly privileged).
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.meta
+      summary: Meta
+      description: Admin meta and staff identity.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.audit
+      summary: Audit
+      description: Immutable audit log for privileged actions.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.users
+      summary: Users
+      description: User lookup, flags, and enforcement actions.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.trustSafety
+      summary: Trust & Safety
+      description: Reports, appeals, and moderation queues.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.media
+      summary: Media moderation
+      description: Media review/approval and takedowns.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.tournaments
+      summary: Tournaments
+      description: Tournament inspection, lifecycle overrides, recomputation.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.verified
+      summary: Verified hub
+      description: Manage verified events/tournaments and hub curation.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.creators
+      summary: Creators
+      description: Manage creator profiles, collections, and featuring.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.promotions
+      summary: Promotions & rewards
+      description: Manage official promotions, winners, and reward grants (no betting).
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.ranked
+      summary: Ranked
+      description: Manage ranked tracks/seasons and recomputation.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.achievements
+      summary: Achievements
+      description: Manage achievement definitions and grants.
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+    - name: admin.sports
+      summary: Sports operations
+      description: Overrides and recomputation for sports data (staff-only).
+      parent: admin
+      kind: nav
+      x-rankup-internal: true
+
+paths:
+    /admin/meta:
+        get:
+            tags: [admin.meta]
+            operationId: getAdminMeta
+            summary: Get admin meta
+            description: Admin-only meta and capabilities.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Admin meta.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminMeta"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "429": { $ref: "#/components/responses/TooManyRequests" }
+
+    /admin/me:
+        get:
+            tags: [admin.meta]
+            operationId: getAdminMe
+            summary: Get staff identity
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+            responses:
+                "200":
+                    description: Staff profile.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/StaffProfile"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/audit:
+        get:
+            tags: [admin.audit]
+            operationId: listAuditEvents
+            summary: List audit events
+            description: |
+                Immutable audit log. Every privileged write MUST create an audit event.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: actorStaffId
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: targetUserId
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: targetTournamentId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/TournamentId"
+                - name: actionType
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AuditActionType"
+                - name: since
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      format: date-time
+                - name: until
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      format: date-time
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Audit events page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuditEventPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/audit/{auditEventId}:
+        get:
+            tags: [admin.audit]
+            operationId: getAuditEvent
+            summary: Get an audit event
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AuditEventId"
+            responses:
+                "200":
+                    description: Audit event.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuditEvent"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/users:
+        get:
+            tags: [admin.users]
+            operationId: adminListUsers
+            summary: List users
+            description: |
+                Staff directory for support/moderation. Strictly rate-limited.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/Accept-Language"
+                - name: q
+                  in: query
+                  required: false
+                  description: Search by userId/username/email (server-defined).
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 128
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AdminUserStatus"
+                - name: country
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      maxLength: 2
+                  example: ES
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items: { $ref: "#/components/schemas/AdminUserInclude" }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Users page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminUserPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/users/{userId}:
+        get:
+            tags: [admin.users]
+            operationId: adminGetUser
+            summary: Get user (staff view)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/UserId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items: { $ref: "#/components/schemas/AdminUserInclude" }
+            responses:
+                "200":
+                    description: User.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminUser"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.users]
+            operationId: adminUpdateUser
+            summary: Update user flags (staff-only)
+            description: |
+                Updates staff-only flags (e.g., mark as verified creator account, force username review, etc.).
+                MUST be audited and require a justification header.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/UserId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminUpdateUserRequest"
+            responses:
+                "200":
+                    description: Updated user.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminUser"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/users/{userId}/enforcement-actions:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminListUserEnforcementActions
+            summary: List enforcement actions for a user
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/UserId"
+                - name: activeOnly
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+            responses:
+                "200":
+                    description: Enforcement actions.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                additionalProperties: false
+                                required: [items]
+                                properties:
+                                    items:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/EnforcementAction"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        post:
+            tags: [admin.trustSafety]
+            operationId: adminCreateEnforcementAction
+            summary: Create an enforcement action
+            description: |
+                Creates an enforcement action (mute/suspension/restriction).
+                MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/UserId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminCreateEnforcementActionRequest"
+            responses:
+                "201":
+                    description: Enforcement action created.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            description: Canonical URL of the created enforcement action.
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/enforcement-actions/enf_01J8W0K7E2ZQZ6P0M4NQW2Y7IA
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EnforcementAction"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/enforcement-actions/{actionId}:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminGetEnforcementAction
+            summary: Get enforcement action
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/EnforcementActionId"
+            responses:
+                "200":
+                    description: Enforcement action.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EnforcementAction"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.trustSafety]
+            operationId: adminUpdateEnforcementAction
+            summary: Update/resolve enforcement action
+            description: |
+                Updates an enforcement action (e.g., end early, change scope, mark as resolved).
+                MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/EnforcementActionId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminUpdateEnforcementActionRequest"
+            responses:
+                "200":
+                    description: Updated action.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EnforcementAction"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/reports:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminListReports
+            summary: List reports
+            description: Moderation queue for user-submitted reports.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: status
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/ReportStatus" }
+                - name: reason
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/ReportReason" }
+                - name: type
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/ReportType" }
+                - name: since
+                  in: query
+                  required: false
+                  schema: { type: string, format: date-time }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Reports page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ReportPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/reports/{reportId}:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminGetReport
+            summary: Get report
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/ReportId"
+            responses:
+                "200":
+                    description: Report.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Report"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.trustSafety]
+            operationId: adminUpdateReport
+            summary: Update report status
+            description: |
+                Updates report status (triage/resolve) and internal resolution notes.
+                MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/ReportId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminUpdateReportRequest"
+            responses:
+                "200":
+                    description: Updated report.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Report"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/appeals:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminListAppeals
+            summary: List appeals
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: status
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/AppealStatus" }
+                - name: since
+                  in: query
+                  required: false
+                  schema: { type: string, format: date-time }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Appeals page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AppealPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/appeals/{appealId}:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminGetAppeal
+            summary: Get appeal
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AppealId"
+            responses:
+                "200":
+                    description: Appeal.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Appeal"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.trustSafety]
+            operationId: adminUpdateAppeal
+            summary: Resolve appeal
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AppealId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminUpdateAppealRequest"
+            responses:
+                "200":
+                    description: Updated appeal.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Appeal"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/moderation/media:
+        get:
+            tags: [admin.media]
+            operationId: adminListMediaModerationQueue
+            summary: List media moderation queue
+            description: Media review queue (avatars, branding, etc.).
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/MediaModerationStatus"
+                - name: purpose
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/MediaPurpose"
+                - name: since
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                      format: date-time
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Media moderation page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminMediaModerationPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/moderation/media/{mediaId}/approve:
+        post:
+            tags: [admin.media]
+            operationId: adminApproveMedia
+            summary: Approve media asset
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/MediaId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "200":
+                    description: Approved media.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Media" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+
+    /admin/moderation/media/{mediaId}/reject:
+        post:
+            tags: [admin.media]
+            operationId: adminRejectMedia
+            summary: Reject media asset
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/MediaId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminRejectMediaRequest"
+            responses:
+                "200":
+                    description: Rejected media.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Media" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/moderation/chat/messages:
+        get:
+            tags: [admin.trustSafety]
+            operationId: adminListChatModerationQueue
+            summary: List chat moderation queue
+            description: Queue/search for potentially abusive messages.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: tournamentId
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/TournamentId" }
+                - name: userId
+                  in: query
+                  required: false
+                  schema: { type: string }
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      { $ref: "#/components/schemas/AdminChatModerationStatus" }
+                - name: since
+                  in: query
+                  required: false
+                  schema: { type: string, format: date-time }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Chat moderation page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminChatModerationPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/moderation/chat/messages/{messageId}/delete:
+        post:
+            tags: [admin.trustSafety]
+            operationId: adminDeleteChatMessage
+            summary: Delete a chat message (staff)
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/ChatMessageId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Deleted.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/tournaments:
+        get:
+            tags: [admin.tournaments]
+            operationId: adminListTournaments
+            summary: List tournaments (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: q
+                  in: query
+                  required: false
+                  description: Search by tournamentId/name/invitationCode (server-defined).
+                  schema:
+                      type: string
+                      minLength: 2
+                      maxLength: 128
+                - name: verifiedOnly
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+                - name: creatorId
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/CreatorId"
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: "#/components/schemas/AdminTournamentStatus"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Tournament page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminTournamentPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/tournaments/{tournamentId}:
+        get:
+            tags: [admin.tournaments]
+            operationId: adminGetTournament
+            summary: Get tournament (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/TournamentId"
+                - name: include
+                  in: query
+                  required: false
+                  style: form
+                  explode: false
+                  schema:
+                      type: array
+                      items:
+                          {
+                              $ref: "#/components/schemas/AdminTournamentInclude",
+                          }
+            responses:
+                "200":
+                    description: Tournament.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminTournament"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.tournaments]
+            operationId: adminUpdateTournament
+            summary: Update tournament (staff override)
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminUpdateTournamentRequest"
+            responses:
+                "200":
+                    description: Updated tournament.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminTournament"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/tournaments/{tournamentId}/recompute:
+        post:
+            tags: [admin.tournaments]
+            operationId: adminRecomputeTournament
+            summary: Recompute tournament standings/results
+            description: |
+                Triggers recomputation (use when sports data corrections arrive or scoring/rules changed).
+                MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminRecomputeTournamentRequest"
+            responses:
+                "202":
+                    description: Recompute started.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminJob"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+
+    /admin/tournaments/{tournamentId}/members:
+        get:
+            tags: [admin.tournaments]
+            operationId: adminListTournamentMembers
+            summary: List tournament members (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Members page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                additionalProperties: false
+                                required: [items]
+                                properties:
+                                    items:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/TournamentMember"
+                                    nextCursor:
+                                        type: string
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/tournaments/{tournamentId}/members/{userId}:
+        delete:
+            tags: [admin.tournaments]
+            operationId: adminRemoveTournamentMember
+            summary: Remove user from tournament (staff)
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/UserId"
+                - $ref: "#/components/parameters/AdminJustification"
+            responses:
+                "204":
+                    description: Removed.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/verified/hub:
+        get:
+            tags: [admin.verified]
+            operationId: adminGetVerifiedHubConfig
+            summary: Get verified hub curation config
+            security:
+                - StaffBearerAuth: []
+            responses:
+                "200":
+                    description: Hub config.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminVerifiedHubConfig"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        put:
+            tags: [admin.verified]
+            operationId: adminUpdateVerifiedHubConfig
+            summary: Update verified hub curation config
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AdminVerifiedHubConfig"
+            responses:
+                "200":
+                    description: Updated hub config.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdminVerifiedHubConfig"
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/verified/events:
+        get:
+            tags: [admin.verified]
+            operationId: adminListVerifiedEvents
+            summary: List verified events (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: status
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/VerifiedEventStatus" }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Events page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                {
+                                    $ref: "#/components/schemas/VerifiedEventPage",
+                                }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        post:
+            tags: [admin.verified]
+            operationId: adminCreateVerifiedEvent
+            summary: Create verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminCreateVerifiedEventRequest",
+                            }
+            responses:
+                "201":
+                    description: Created event.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/verified/events/vev_01J8W0K7E2ZQZ6P0M4NQW2Y7BA
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/VerifiedEvent" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/verified/events/{eventId}:
+        get:
+            tags: [admin.verified]
+            operationId: adminGetVerifiedEvent
+            summary: Get verified event (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+            responses:
+                "200":
+                    description: Event.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/VerifiedEvent" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.verified]
+            operationId: adminUpdateVerifiedEvent
+            summary: Update verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminUpdateVerifiedEventRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated event.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/VerifiedEvent" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/verified/events/{eventId}/publish:
+        post:
+            tags: [admin.verified]
+            operationId: adminPublishVerifiedEvent
+            summary: Publish verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Published.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+
+    /admin/verified/events/{eventId}/unpublish:
+        post:
+            tags: [admin.verified]
+            operationId: adminUnpublishVerifiedEvent
+            summary: Unpublish verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            responses:
+                "204":
+                    description: Unpublished.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+
+    /admin/verified/events/{eventId}/tournaments:
+        post:
+            tags: [admin.verified]
+            operationId: adminAttachTournamentToVerifiedEvent
+            summary: Attach tournament to verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            additionalProperties: false
+                            required: [tournamentId]
+                            properties:
+                                tournamentId:
+                                    $ref: "#/components/schemas/TournamentId"
+            responses:
+                "204":
+                    description: Attached.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "409": { $ref: "#/components/responses/Conflict" }
+
+    /admin/verified/events/{eventId}/tournaments/{tournamentId}:
+        delete:
+            tags: [admin.verified]
+            operationId: adminDetachTournamentFromVerifiedEvent
+            summary: Detach tournament from verified event
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/VerifiedEventId"
+                - $ref: "#/components/parameters/TournamentId"
+                - $ref: "#/components/parameters/AdminJustification"
+            responses:
+                "204":
+                    description: Detached.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/creators:
+        get:
+            tags: [admin.creators]
+            operationId: adminListCreators
+            summary: List creators (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: q
+                  in: query
+                  required: false
+                  schema: { type: string, minLength: 2, maxLength: 64 }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Creators page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreatorPage"
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        post:
+            tags: [admin.creators]
+            operationId: adminCreateCreator
+            summary: Create creator
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminCreateCreatorRequest",
+                            }
+            responses:
+                "201":
+                    description: Created creator.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/creators/cr_01J8W0K7E2ZQZ6P0M4NQW2Y7CA
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/CreatorProfile" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/creators/{creatorId}:
+        get:
+            tags: [admin.creators]
+            operationId: adminGetCreator
+            summary: Get creator (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/CreatorId"
+            responses:
+                "200":
+                    description: Creator profile.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/CreatorProfile" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.creators]
+            operationId: adminUpdateCreator
+            summary: Update creator
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/CreatorId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminUpdateCreatorRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated creator.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                { $ref: "#/components/schemas/CreatorProfile" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/promotions:
+        get:
+            tags: [admin.promotions]
+            operationId: adminListPromotions
+            summary: List promotions (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - name: status
+                  in: query
+                  required: false
+                  schema: { $ref: "#/components/schemas/PromotionStatus" }
+                - $ref: "#/components/parameters/Cursor"
+                - $ref: "#/components/parameters/PageSize"
+            responses:
+                "200":
+                    description: Promotions page.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                {
+                                    $ref: "#/components/schemas/PromotionSummaryPage",
+                                }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        post:
+            tags: [admin.promotions]
+            operationId: adminCreatePromotion
+            summary: Create promotion
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminCreatePromotionRequest",
+                            }
+            responses:
+                "201":
+                    description: Created promotion.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/promotions/pr_01J8W0K7E2ZQZ6P0M4NQW2Y7FA
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Promotion" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+    /admin/promotions/{promotionId}:
+        get:
+            tags: [admin.promotions]
+            operationId: adminGetPromotion
+            summary: Get promotion (staff)
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/PromotionId"
+            responses:
+                "200":
+                    description: Promotion.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Promotion" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+        patch:
+            tags: [admin.promotions]
+            operationId: adminUpdatePromotion
+            summary: Update promotion
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/PromotionId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminUpdatePromotionRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated promotion.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Promotion" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/ranked/tracks:
+        get:
+            tags: [admin.ranked]
+            operationId: adminListRankedTracks
+            summary: List ranked tracks (staff)
+            security:
+                - StaffBearerAuth: []
+            responses:
+                "200":
+                    description: Tracks.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                additionalProperties: false
+                                required: [items]
+                                properties:
+                                    items:
+                                        type: array
+                                        items:
+                                            {
+                                                $ref: "#/components/schemas/RankedTrack",
+                                            }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+        post:
+            tags: [admin.ranked]
+            operationId: adminCreateRankedTrack
+            summary: Create ranked track
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminCreateRankedTrackRequest",
+                            }
+            responses:
+                "201":
+                    description: Created track.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/ranked/tracks/rtk_scorePrediction_global
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/RankedTrack" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/ranked/tracks/{rankedTrackId}:
+        patch:
+            tags: [admin.ranked]
+            operationId: adminUpdateRankedTrack
+            summary: Update ranked track
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/RankedTrackId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminUpdateRankedTrackRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated track.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/RankedTrack" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/achievements:
+        post:
+            tags: [admin.achievements]
+            operationId: adminCreateAchievement
+            summary: Create achievement definition
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AdminJustification"
+                - $ref: "#/components/parameters/IdempotencyKey"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AchievementDefinition",
+                            }
+            responses:
+                "201":
+                    description: Created achievement definition.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Location:
+                            schema: { type: string, format: uri-reference }
+                            example: /admin/achievements/ach_scorePrediction_exact10
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                {
+                                    $ref: "#/components/schemas/AchievementDefinition",
+                                }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+
+    /admin/achievements/{achievementId}:
+        patch:
+            tags: [admin.achievements]
+            operationId: adminUpdateAchievement
+            summary: Update achievement definition
+            description: MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/AchievementId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminUpdateAchievementRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated achievement definition.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema:
+                                {
+                                    $ref: "#/components/schemas/AchievementDefinition",
+                                }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+    /admin/sports/matches/{matchId}:
+        patch:
+            tags: [admin.sports]
+            operationId: adminOverrideMatch
+            summary: Override match result/status (staff)
+            description: |
+                Manual override for match status/score in exceptional cases (provider issues/corrections).
+                MUST be audited and require justification.
+            security:
+                - StaffBearerAuth: []
+            parameters:
+                - $ref: "#/components/parameters/MatchId"
+                - $ref: "#/components/parameters/AdminJustification"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            {
+                                $ref: "#/components/schemas/AdminOverrideMatchRequest",
+                            }
+            responses:
+                "200":
+                    description: Updated match.
+                    headers:
+                        X-Request-Id:
+                            { $ref: "#/components/headers/X-Request-Id" }
+                        Cache-Control:
+                            {
+                                $ref: "#/components/headers/Cache-Control-NoStore",
+                            }
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Match" }
+                "400": { $ref: "#/components/responses/BadRequest" }
+                "401": { $ref: "#/components/responses/Unauthorized" }
+                "403": { $ref: "#/components/responses/Forbidden" }
+                "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+    securitySchemes:
+        StaffBearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+            description: |
+                Staff-only bearer token. MUST be issued from a separate staff identity provider or with
+                strict audience/claims and mandatory audit logging.
+
+    parameters:
+        AdminJustification:
+            name: X-Admin-Justification
+            in: header
+            required: true
+            description: Human-readable justification for privileged actions (audited).
+            schema:
+                type: string
+                minLength: 10
+                maxLength: 500
+
+        AuditEventId:
+            name: auditEventId
+            in: path
+            required: true
+            schema:
+                $ref: "#/components/schemas/AuditEventId"
+
+        EnforcementActionId:
+            name: actionId
+            in: path
+            required: true
+            schema:
+                type: string
+                example: enf_01J8W0K7E2ZQZ6P0M4NQW2Y7IA
+
+    schemas:
+        AdminMeta:
+            type: object
+            additionalProperties: false
+            required: [serverTime, capabilities]
+            properties:
+                serverTime:
+                    type: string
+                    format: date-time
+                capabilities:
+                    type: array
+                    items:
+                        type: string
+                    examples:
+                        - [
+                              "trustSafety.enforcement.write",
+                              "verified.events.write",
+                              "promotions.write",
+                              "media.moderation.write",
+                          ]
+
+        StaffProfile:
+            type: object
+            additionalProperties: false
+            required: [staffId, displayName]
+            properties:
+                staffId:
+                    type: string
+                    example: stf_01J8W0K7E2ZQZ6P0M4NQW2Y7ZZ
+                displayName:
+                    type: string
+                email:
+                    type: string
+                    format: email
+                role:
+                    type: string
+                    description: Single-role model supported; still explicit for audit.
+                    example: staff
+
+        AuditEventId:
+            type: string
+            example: aud_01J8W0K7E2ZQZ6P0M4NQW2Y7KA
+
+        AuditActionType:
+            type: string
+            description: Stable action id for audit.
+            enum:
+                - user.update
+                - enforcement.create
+                - enforcement.update
+                - report.update
+                - appeal.update
+                - media.approve
+                - media.reject
+                - chat.deleteMessage
+                - tournament.update
+                - tournament.recompute
+                - verifiedEvent.create
+                - verifiedEvent.update
+                - verifiedEvent.publish
+                - verifiedEvent.unpublish
+                - promotion.create
+                - promotion.update
+                - rankedTrack.create
+                - rankedTrack.update
+                - achievement.update
+                - sports.match.override
+
+        AuditEvent:
+            type: object
+            additionalProperties: false
+            required: [auditEventId, actionType, actorStaffId, occurredAt]
+            properties:
+                auditEventId:
+                    $ref: "#/components/schemas/AuditEventId"
+                actionType:
+                    $ref: "#/components/schemas/AuditActionType"
+                actorStaffId:
+                    type: string
+                justification:
+                    type: string
+                occurredAt:
+                    type: string
+                    format: date-time
+                target:
+                    type: object
+                    additionalProperties: true
+                    description: Target identifiers (userId/tournamentId/mediaId/etc).
+                request:
+                    type: object
+                    additionalProperties: true
+                    description: Redacted request summary (no secrets).
+                outcome:
+                    type: object
+                    additionalProperties: true
+                    description: Result summary (status codes, ids created).
+
+        AuditEventPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AuditEvent"
+                nextCursor:
+                    type: string
+
+        AdminUserStatus:
+            type: string
+            enum: [active, restricted, suspended, banned]
+
+        AdminUserInclude:
+            type: string
+            enum: [email, enforcement, devices]
+            description: Optional expansions.
+
+        AdminUser:
+            type: object
+            additionalProperties: false
+            required: [userId, username, status, createdAt]
+            properties:
+                userId:
+                    type: string
+                username:
+                    type: string
+                email:
+                    type: string
+                    format: email
+                status:
+                    $ref: "#/components/schemas/AdminUserStatus"
+                createdAt:
+                    type: string
+                    format: date-time
+                lastActiveAt:
+                    type: string
+                    format: date-time
+                country:
+                    type: string
+                    example: ES
+                flags:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+                    examples:
+                        - { suspectedSpam: false, creatorAccount: true }
+                enforcement:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/EnforcementAction"
+
+        AdminUserPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AdminUser"
+                nextCursor:
+                    type: string
+
+        AdminUpdateUserRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                status:
+                    $ref: "#/components/schemas/AdminUserStatus"
+                flags:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+
+        AdminCreateEnforcementActionRequest:
+            type: object
+            additionalProperties: false
+            required: [type, reasonCode]
+            properties:
+                type:
+                    $ref: "#/components/schemas/EnforcementActionType"
+                scope:
+                    $ref: "#/components/schemas/EnforcementScope"
+                reasonCode:
+                    type: string
+                reasonText:
+                    type: string
+                startsAt:
+                    type: string
+                    format: date-time
+                endsAt:
+                    type: string
+                    format: date-time
+                appealable:
+                    type: boolean
+                    default: true
+                policyId:
+                    $ref: "#/components/schemas/TrustPolicyId"
+
+        AdminUpdateEnforcementActionRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                endsAt:
+                    type: string
+                    format: date-time
+                reasonText:
+                    type: string
+                appealable:
+                    type: boolean
+
+        AdminUpdateReportRequest:
+            type: object
+            additionalProperties: false
+            required: [status]
+            properties:
+                status:
+                    $ref: "#/components/schemas/ReportStatus"
+                resolutionNote:
+                    type: string
+                    maxLength: 2000
+
+        AdminUpdateAppealRequest:
+            type: object
+            additionalProperties: false
+            required: [status]
+            properties:
+                status:
+                    $ref: "#/components/schemas/AppealStatus"
+                responseMessage:
+                    type: string
+                    maxLength: 2000
+
+        AdminMediaModerationPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        type: object
+                        additionalProperties: false
+                        required: [media]
+                        properties:
+                            media:
+                                $ref: "#/components/schemas/Media"
+                            submittedByUserId:
+                                type: string
+                            submittedAt:
+                                type: string
+                                format: date-time
+                nextCursor:
+                    type: string
+
+        AdminRejectMediaRequest:
+            type: object
+            additionalProperties: false
+            required: [reasonCode]
+            properties:
+                reasonCode:
+                    type: string
+                    examples: [adult, violence, hate, spam, unsafe, other]
+                message:
+                    type: string
+                    description: Localized user-facing message.
+
+        AdminChatModerationStatus:
+            type: string
+            enum: [flagged, reviewed, actioned]
+
+        AdminChatModerationPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        type: object
+                        additionalProperties: false
+                        required:
+                            [
+                                messageId,
+                                tournamentId,
+                                userId,
+                                content,
+                                createdAt,
+                            ]
+                        properties:
+                            messageId:
+                                $ref: "#/components/schemas/ChatMessageId"
+                            tournamentId:
+                                $ref: "#/components/schemas/TournamentId"
+                            userId:
+                                type: string
+                            content:
+                                type: string
+                            createdAt:
+                                type: string
+                                format: date-time
+                            signals:
+                                type: object
+                                additionalProperties: true
+                nextCursor:
+                    type: string
+
+        AdminTournamentStatus:
+            type: string
+            enum: [active, ended, deleted]
+
+        AdminTournamentInclude:
+            type: string
+            enum: [invitationCode, joinRules, verification]
+            description: Optional expansions.
+
+        AdminTournament:
+            allOf:
+                - $ref: "#/components/schemas/Tournament"
+                - type: object
+                  additionalProperties: false
+                  properties:
+                      status:
+                          $ref: "#/components/schemas/AdminTournamentStatus"
+                      invitationCode:
+                          type: string
+                      verification:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                              verified:
+                                  type: boolean
+                              verifiedEventId:
+                                  $ref: "#/components/schemas/VerifiedEventId"
+                              creatorId:
+                                  $ref: "#/components/schemas/CreatorId"
+
+        AdminTournamentPage:
+            type: object
+            additionalProperties: false
+            required: [items]
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AdminTournament"
+                nextCursor:
+                    type: string
+
+        AdminUpdateTournamentRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                name:
+                    type: string
+                open:
+                    type: boolean
+                chatEnabled:
+                    type: boolean
+                status:
+                    $ref: "#/components/schemas/AdminTournamentStatus"
+
+        AdminRecomputeTournamentRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                matchday:
+                    type: integer
+                    minimum: 1
+                    description: If provided, recompute only one matchday.
+                force:
+                    type: boolean
+                    default: false
+
+        AdminJob:
+            type: object
+            additionalProperties: false
+            required: [jobId, status]
+            properties:
+                jobId:
+                    type: string
+                    example: job_01J8W0K7E2ZQZ6P0M4NQW2Y7LB
+                status:
+                    type: string
+                    enum: [queued, running, completed, failed]
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AdminVerifiedHubConfig:
+            type: object
+            additionalProperties: false
+            required: [sections]
+            properties:
+                sections:
+                    type: array
+                    items:
+                        type: object
+                        additionalProperties: false
+                        required: [sectionId, type, items]
+                        properties:
+                            sectionId:
+                                type: string
+                            type:
+                                $ref: "#/components/schemas/VerifiedHubSectionType"
+                            title:
+                                type: string
+                            items:
+                                type: array
+                                items:
+                                    type: object
+                                    additionalProperties: false
+                                    required: [type]
+                                    properties:
+                                        type:
+                                            $ref: "#/components/schemas/VerifiedHubItemType"
+                                        eventId:
+                                            $ref: "#/components/schemas/VerifiedEventId"
+                                        tournamentId:
+                                            $ref: "#/components/schemas/TournamentId"
+
+        AdminCreateVerifiedEventRequest:
+            type: object
+            additionalProperties: false
+            required: [branding, schedule, sportId, gameModeId]
+            properties:
+                branding:
+                    $ref: "#/components/schemas/VerifiedBranding"
+                schedule:
+                    $ref: "#/components/schemas/VerifiedEventSchedule"
+                eligibility:
+                    $ref: "#/components/schemas/VerifiedEligibility"
+                sportId:
+                    $ref: "#/components/schemas/SportId"
+                gameModeId:
+                    $ref: "#/components/schemas/GameModeId"
+                description:
+                    type: string
+
+        AdminUpdateVerifiedEventRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                branding:
+                    $ref: "#/components/schemas/VerifiedBranding"
+                schedule:
+                    $ref: "#/components/schemas/VerifiedEventSchedule"
+                eligibility:
+                    $ref: "#/components/schemas/VerifiedEligibility"
+                description:
+                    type: string
+                status:
+                    $ref: "#/components/schemas/VerifiedEventStatus"
+
+        AdminCreateCreatorRequest:
+            type: object
+            additionalProperties: false
+            required: [handle, branding]
+            properties:
+                handle:
+                    $ref: "#/components/schemas/CreatorHandle"
+                type:
+                    $ref: "#/components/schemas/CreatorType"
+                verified:
+                    type: boolean
+                    default: true
+                branding:
+                    $ref: "#/components/schemas/CreatorBranding"
+                shortDescription:
+                    type: string
+                longDescription:
+                    type: string
+                links:
+                    type: array
+                    items: { $ref: "#/components/schemas/CreatorLink" }
+                primaryUserId:
+                    type: string
+
+        AdminUpdateCreatorRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                type:
+                    $ref: "#/components/schemas/CreatorType"
+                verified:
+                    type: boolean
+                branding:
+                    $ref: "#/components/schemas/CreatorBranding"
+                shortDescription:
+                    type: string
+                longDescription:
+                    type: string
+                links:
+                    type: array
+                    items: { $ref: "#/components/schemas/CreatorLink" }
+                primaryUserId:
+                    type: string
+
+        AdminCreatePromotionRequest:
+            type: object
+            additionalProperties: false
+            required: [type, title, schedule, scope, legal]
+            properties:
+                type:
+                    $ref: "#/components/schemas/PromotionType"
+                title:
+                    type: string
+                subtitle:
+                    type: string
+                heroImageUrl:
+                    type: string
+                    format: uri
+                schedule:
+                    $ref: "#/components/schemas/PromotionSchedule"
+                scope:
+                    $ref: "#/components/schemas/PromotionScope"
+                mechanics:
+                    type: array
+                    items: { $ref: "#/components/schemas/PromotionMechanic" }
+                rewards:
+                    type: array
+                    items:
+                        {
+                            $ref: "#/components/schemas/PromotionRewardDefinition",
+                        }
+                eligibility:
+                    $ref: "#/components/schemas/PromotionEligibility"
+                legal:
+                    $ref: "#/components/schemas/PromotionLegal"
+                featured:
+                    type: boolean
+                    default: false
+
+        AdminUpdatePromotionRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                title:
+                    type: string
+                subtitle:
+                    type: string
+                heroImageUrl:
+                    type: string
+                    format: uri
+                schedule:
+                    $ref: "#/components/schemas/PromotionSchedule"
+                mechanics:
+                    type: array
+                    items: { $ref: "#/components/schemas/PromotionMechanic" }
+                rewards:
+                    type: array
+                    items:
+                        {
+                            $ref: "#/components/schemas/PromotionRewardDefinition",
+                        }
+                eligibility:
+                    $ref: "#/components/schemas/PromotionEligibility"
+                legal:
+                    $ref: "#/components/schemas/PromotionLegal"
+                featured:
+                    type: boolean
+                status:
+                    $ref: "#/components/schemas/PromotionStatus"
+
+        AdminCreateRankedTrackRequest:
+            type: object
+            additionalProperties: false
+            required: [rankedTrackId, name, ratingModel, scope, eligibility]
+            properties:
+                rankedTrackId:
+                    $ref: "#/components/schemas/RankedTrackId"
+                name:
+                    type: string
+                description:
+                    type: string
+                ratingModel:
+                    $ref: "#/components/schemas/RankedRatingModel"
+                cadence:
+                    $ref: "#/components/schemas/RankedSeasonCadence"
+                scope:
+                    $ref: "#/components/schemas/RankedTrackScope"
+                eligibility:
+                    $ref: "#/components/schemas/RankedEligibilityPolicy"
+                tiers:
+                    type: array
+                    items: { $ref: "#/components/schemas/RankedTierDefinition" }
+                featured:
+                    type: boolean
+
+        AdminUpdateRankedTrackRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    $ref: "#/components/schemas/RankedTrackStatus"
+                eligibility:
+                    $ref: "#/components/schemas/RankedEligibilityPolicy"
+                tiers:
+                    type: array
+                    items: { $ref: "#/components/schemas/RankedTierDefinition" }
+                featured:
+                    type: boolean
+
+        AdminUpdateAchievementRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                category:
+                    $ref: "#/components/schemas/AchievementCategory"
+                rarity:
+                    $ref: "#/components/schemas/AchievementRarity"
+                featured:
+                    type: boolean
+                hidden:
+                    type: boolean
+                eligibility:
+                    $ref: "#/components/schemas/AchievementEligibility"
+                requirements:
+                    type: array
+                    items:
+                        { $ref: "#/components/schemas/AchievementRequirement" }
+                rewards:
+                    type: array
+                    items: { $ref: "#/components/schemas/AchievementReward" }
+
+        AdminOverrideMatchRequest:
+            type: object
+            additionalProperties: false
+            properties:
+                status:
+                    type: string
+                result:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                        home:
+                            type: integer
+                            minimum: 0
+                        away:
+                            type: integer
+                            minimum: 0
+                note:
+                    type: string
+                    maxLength: 500

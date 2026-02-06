@@ -26,45 +26,45 @@ footer, header, hgroup, menu, nav, section {
 	display: block;
 }
 body {
-  line-height: 1;
+	line-height: 1;
 }
 ol,
 ul {
-  list-style: none;
+	list-style: none;
 }
 blockquote,
 q {
-  quotes: none;
+	quotes: none;
 }
 blockquote:before,
 blockquote:after,
 q:before,
 q:after {
-  content: '';
-  content: none;
+	content: '';
+	content: none;
 }
 table {
-  border-collapse: collapse;
-  border-spacing: 0;
+	border-collapse: collapse;
+	border-spacing: 0;
 }
 
 a {
-  text-decoration: none;
-  color: inherit;
-  font-size: 1.4rem;
-  color: var(--color-accent-fg);
+	text-decoration: none;
+	color: inherit;
+	font-size: 1.4rem;
+	color: var(--color-accent-fg);
 }
 
 a:focus-visible,
 button {
-  outline-offset: 1px;
+	outline-offset: 1px;
 }
 
 button {
-  padding: 0;
-  margin: 0;
-  background: inherit;
-  border: none;
-  cursor: pointer;
-  color: inherit;
+	padding: 0;
+	margin: 0;
+	background: inherit;
+	border: none;
+	cursor: pointer;
+	color: inherit;
 }
