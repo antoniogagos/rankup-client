@@ -1,0 +1,6 @@
+{
+	"operationId": "resolveUserByUsername",
+	"params": {
+		"username": "string"
+	}
+}

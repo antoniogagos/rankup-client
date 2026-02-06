@@ -1,0 +1,10 @@
+{
+	"operationId": "declineMyTournamentInvite",
+	"params": {
+		"inviteId": "inv_01J8W0K7E2ZQZ6P0M4NQW2Y7AB"
+	},
+	"body": {
+		"reason": "string",
+		"clientContext": {}
+	}
+}

@@ -65,6 +65,8 @@
 | 0054 | Scaffold Rankup Engine layers and domain placeholders             | Accepted | 2026-02-03 | packages/rankup |
 | 0055 | Heads-Up is a tournament format (not a game mode)                 | Accepted | 2026-02-04 | OpenAPI + domains |
 | 0056 | Operation Coverage Gate (OpenAPI ↔ Mock ↔ Gateways)               | Accepted | 2026-02-05 | repo         |
+| 0057 | Rankup-web landing runtime and animation stack                    | Accepted | 2026-02-06 | apps/rankup-web |
+| 0058 | Lit Localize msg() explicit-id policy and global guardrail        | Accepted | 2026-02-06 | repo         |
 
 Note: ADR 0005 updated on 2026-01-29 to clarify composite TypeScript declaration requirements.
 Note: ADR 0011 updated on 2026-01-29 to reference the DI normative document.

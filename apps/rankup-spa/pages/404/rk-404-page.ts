@@ -7,7 +7,7 @@ export class Rk404Page extends LitElement {
 	override render() {
 		return html`
 			<h1>404 Missing</h1>
-			<a href="/">${msg('Volver')}</a>
+			<a href="/">${msg('Volver', { id: 'apps.rankup.spa.pages.404.rk.404.page.msg.l10c18' })}</a>
 		`;
 	}
 

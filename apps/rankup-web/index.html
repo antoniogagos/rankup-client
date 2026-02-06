@@ -1,15 +1,52 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Rankup</title>
-		<meta name="description" content="Rankup – tournament-first social sports gaming." />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<title>Rankup | Competición social en vivo sin apuestas</title>
+		<meta name="description" content="Rankup convierte cada gol en presión real de torneo. Predice marcadores, compite con amigos y sube en vivo. Sin apuestas. Sin dinero real." />
+		<meta name="robots" content="index,follow" />
+		<link rel="canonical" href="https://rankup.app/es" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Rankup | Cada gol te cambia de puesto" />
+		<meta property="og:description" content="El juego social competitivo que vive al ritmo del partido. Predicciones, ranking en vivo y torneos con amigos." />
+		<meta property="og:url" content="https://rankup.app/es" />
+		<meta property="og:image" content="/assets/images/rk-logo-splash.svg" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Rankup | Competición social en vivo" />
+		<meta name="twitter:description" content="Predice, compite y sube en vivo con tus amigos. Sin apuestas y sin dinero real." />
+		<meta name="twitter:image" content="/assets/images/rk-logo-splash.svg" />
+		<link rel="stylesheet" href="/node_modules/@rankup/samba/styles/theme.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				min-height: 100%;
+			}
+		</style>
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "SoftwareApplication",
+				"name": "Rankup",
+				"applicationCategory": "GameApplication",
+				"operatingSystem": "iOS, Android, Web",
+				"description": "Juego social competitivo sobre deporte en vivo con ranking dinámico, sin apuestas y sin dinero real.",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "EUR"
+				},
+				"isAccessibleForFree": true
+			}
+		</script>
 	</head>
 	<body>
-		<main>
-			<h1>Rankup</h1>
-			<p>Landing placeholder. Content will move here once marketing scope is defined.</p>
-		</main>
+		<rk-web-landing></rk-web-landing>
+		<script type="module" src="./src/index.ts"></script>
 	</body>
 </html>

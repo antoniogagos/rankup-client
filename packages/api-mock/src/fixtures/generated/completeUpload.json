@@ -1,0 +1,25 @@
+{
+	"operationId": "completeUpload",
+	"params": {
+		"uploadId": "upl_01J8W0K7E2ZQZ6P0M4NQW2Y7JA"
+	},
+	"body": {
+		"storage": {
+			"etag": "string",
+			"sizeBytes": 1,
+			"contentType": "string",
+			"checksum": {
+				"algorithm": "sha256",
+				"value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+			}
+		},
+		"imageCrop": {
+			"x": 1,
+			"y": 1,
+			"width": 1,
+			"height": 1
+		},
+		"makePrimary": false,
+		"notes": "string"
+	}
+}

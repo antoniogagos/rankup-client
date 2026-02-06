@@ -24,12 +24,12 @@ export class RkShareTourney extends LitElement {
 				<button id="arrow" @click=${this._onGoBackClick} @keydown=${this._onGoBackKeydown} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Invita a tus amigos')}</h1>
-				<p class="f3 mt-4 mb-4">${msg(`Invita a tus amigos compartiendo el enlace al pulsar el boton de Compartir o pasándoles el código de acceso único para acceder al torneo.`)}</p>
+				<h1 class="text-bold">${msg('Invita a tus amigos', { id: 'apps.rankup.spa.pages.tourney.pages.rk.share.tourney.msg.l27c29' })}</h1>
+				<p class="f3 mt-4 mb-4">${msg(`Invita a tus amigos compartiendo el enlace al pulsar el boton de Compartir o pasándoles el código de acceso único para acceder al torneo.`, { id: 'apps.rankup.spa.pages.tourney.pages.rk.share.tourney.msg.l28c31' })}</p>
 				<div class="description">
-					<button class="btn btn--primary btn--md">${msg('Compartir enlace')} ${Icons('share', 20)}</button>
+					<button class="btn btn--primary btn--md">${msg('Compartir enlace', { id: 'apps.rankup.spa.pages.tourney.pages.rk.share.tourney.msg.l30c49' })} ${Icons('share', 20)}</button>
 					<div class="tourney-code-description mt-6">
-						<div>${msg('Código de acceso al torneo:')}</div>
+						<div>${msg('Código de acceso al torneo:', { id: 'apps.rankup.spa.pages.tourney.pages.rk.share.tourney.msg.l32c14' })}</div>
 						<div class="tourney-code text-bold mt-2">PUI_KD</div>
 					</div>
 				</div>

@@ -1,0 +1,15 @@
+{
+	"operationId": "createTournamentInvites",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
+	},
+	"body": {
+		"recipientUserIds": [
+			"string"
+		],
+		"message": "string",
+		"expiresAt": "2019-08-24T14:15:22Z",
+		"sendNotification": true,
+		"clientContext": {}
+	}
+}

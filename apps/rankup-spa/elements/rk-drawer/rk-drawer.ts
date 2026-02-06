@@ -54,14 +54,14 @@ export class RkDrawer extends LitElement {
 				<img src="/assets/images/rk-logo-with-bg.svg" alt="Rankup logo" />
 				<div class="rankup">Rankup</div>
 				<a href=${path('CREATE_TOURNEY')}>
-					<button class="btn btn--md">${Icons('create-tourney', 18)}${msg('Crear liga')}</button>
+					<button class="btn btn--md">${Icons('create-tourney', 18)}${msg('Crear liga', { id: 'apps.rankup.spa.elements.rk.drawer.rk.drawer.msg.l57c66' })}</button>
 				</a>
 				<a href=${path('JOIN_TOURNEY')}>
-					<button class="btn btn--md">${Icons('join-tourney', 18)}${msg('Unirse a una liga')}</button>
+					<button class="btn btn--md">${Icons('join-tourney', 18)}${msg('Unirse a una liga', { id: 'apps.rankup.spa.elements.rk.drawer.rk.drawer.msg.l60c64' })}</button>
 				</a>
 				<div class="divisor-line"></div>
-				<button class="btn btn--md">${Icons('twitter', 18)}${msg('¡Síguenos en Twitter!')}</button>
-				<button id="signoutBtn" @click=${this._onSignOutClicked} class="btn btn--md">${Icons('sign-out', 18)}${msg('Cerrar sesión')}</button>
+				<button class="btn btn--md">${Icons('twitter', 18)}${msg('¡Síguenos en Twitter!', { id: 'apps.rankup.spa.elements.rk.drawer.rk.drawer.msg.l63c58' })}</button>
+				<button id="signoutBtn" @click=${this._onSignOutClicked} class="btn btn--md">${Icons('sign-out', 18)}${msg('Cerrar sesión', { id: 'apps.rankup.spa.elements.rk.drawer.rk.drawer.msg.l64c108' })}</button>
 			</main>
 		`;
 	}

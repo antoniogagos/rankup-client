@@ -1,0 +1,9 @@
+{
+	"operationId": "acceptFriendRequest",
+	"params": {
+		"friendRequestId": "frq_01J8W0K7E2ZQZ6P0M4NQW2Y7AD"
+	},
+	"body": {
+		"clientContext": {}
+	}
+}

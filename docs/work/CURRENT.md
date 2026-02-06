@@ -1,10 +1,14 @@
 # Current work
 
 -   Active epic: `docs/work/epics/008-domain-tourney-boundaries.md`
--   Status: In Progress (domain umbrella + heads-up tournament format alignment)
--   Last updated: 2026-02-05
+-   Status: In Progress (domain hardening + ADR-0056 waiver burn-down)
+-   Last updated: 2026-02-06
 
 ## Summary
+
+Epic 009 landing work is paused and moved to backlog by product decision (2026-02-06) until explicitly resumed. `apps/rankup-web` currently ships the delivered landing runtime baseline (ADR 0057), and the Lit Localize explicit `msg(..., { id })` policy rollout remains completed (ADR 0058).
+
+ADR-0056 burn-down milestone (WP-008-28) completed for the tournaments/submissions-first slice: fixtures were added for 30 operations, gateway `operationOwners` were made explicit across core/scoring/engagement/submissions API gateways, `WAIVERS_MAX_TOTAL` was ratcheted down to `700`, and the tournaments slice now shows `missingFixture=0`, `missingOwner=0`, and the scoped schema-flaky follow-up completed (`schemaValidationFlaky` cleared for the targeted 12 operations). Follow-up continuations added explicit core mock handlers + OpenAPI-contract context wiring for `tournaments.core|lifecycle|submissions|rankings|results|live`, added operationId-named HTTP client aliases for the same slice (including SSE `streamTournamentLive`), and removed 32 additional waivers (`missingMockHandler=23`, `httpFidelityMissing=9`). Latest continuation completed the cross-slice waiver burn-down by generating fixtures for remaining non-admin operations and removing residual `missingMockHandler`, `missingFixture`, and `httpFidelityMissing`; current waiver set is `81` total (`missingOwner=35`, `schemaValidationFlaky=46`).
 
 Epic 002 is closed (DI skeleton/service layering complete). Epic 007 is closed: `yarn validate` now builds composite workspace deps (`@rankup/base`, `@rankup/platform`, `@rankup/common`, `@rankup/samba`, `@rankup/api`, `@rankup/api-mock`) before the app typecheck (ADR 0030), UI tourney pages consume `ITourneyCoreService`/`ITourneyMatchdaysService`/`ITourneyRankingService` instead of injecting `IRankupApiClient`, the legacy `packages/app/lib/data-service/*` path was retired (ADR 0031), the API facade/network request service decision was deferred (ADR 0032), guardrails now forbid UI SDK injection, UI `fetch()` calls, UI `@rankup/api-mock` imports, and any `@rankup/api` usage outside app `services/api/**` or in domain packages (ADR 0033, ADR 0034, ADR 0035, ADR 0036, ADR 0048). Mock selection now lives in the app composition root with `@rankup/api-mock` allowlisted there and HTTP-only client factories kept in `services/api/**`. Package exports now map `.js` subpaths to TS sources (no dist runtime), and the shared WDS config resolves workspace packages via node-resolve/commonjs/json with outside-root handling for `/assets`, `/docs`, and `/node_modules` plus `__APP_ENV__` injection (optional `--compile-css`). Platform env now reads only `__APP_ENV__` (no json.example imports) with defaults for missing values. The base + platform extraction and API request flow standardization remain complete (ADR 0025, ADR 0027, ADR 0028). ESLint uses flat config with a lint wrapper that runs Prettier on non-TS files during `--fix` (ADR 0026). Epic 006 (HTTP mock server) remains complete: fallback stack validated, server wired to core handlers, stateful CRUD in core store, scenario engine implemented, and smoke script added (`smoke:scenario`). openapi-backend remains removed (runtime incompatibility under Node v24.13.0).
 
@@ -37,6 +41,15 @@ Maintenance note (2026-02-04): Implemented promotions domain (campaigns/rewards)
 Maintenance note (2026-02-04): Implemented creators domain (directory/catalog) with contracts, gateways, services, and api-mock parity.
 Maintenance note (2026-02-05): Prepared ADR 0056 operation coverage gate prerequisites (default Problem response policy, operations manifest generation, allowlist spec alignment).
 Maintenance note (2026-02-05): Implemented ADR 0056 operation coverage gates (mock coverage, gateway ownership, schema validation, HTTP fidelity) with waivers seeding and validate wiring.
+Maintenance note (2026-02-06): Implemented the full conversion landing runtime in `apps/rankup-web` (interactive sections, particle canvas, sticky CTA, SEO metadata) with CTA flow aligned to `/es/registro` (ADR 0057).
+Maintenance note (2026-02-06): Added global Lit Localize explicit-id guardrail for `msg()` and backfilled existing calls with deterministic IDs via codemod (ADR 0058).
+Maintenance note (2026-02-06): Landing V2 game-first redesign implemented (HUD visual language, upgraded GSAP choreography, richer section interactivity, particle-field V2, refreshed metadata/fonts); WP-009-04 remains open pending Lighthouse mobile target.
+Maintenance note (2026-02-06): Landing performance hardening (WP-009-04) moved to backlog/paused until explicit resume request.
+Maintenance note (2026-02-06): Completed WP-008-28 ADR-0056 waiver burn-down slice (`tournaments.core|submissions|rankings|matchdays|lifecycle|live|results`) with 30 fixtures, explicit gateway owners, waiver cleanup, and initial schema-flaky tracking waivers for non contract-valid mock responses.
+Maintenance note (2026-02-06): Completed WP-008-28 schema-flaky follow-up by aligning OpenAPI tournament/results/submission schemas for contract-valid mock responses and removing the targeted 12 `schemaValidationFlaky` waivers.
+Maintenance note (2026-02-06): Continued ADR-0056 burn-down by adding 10 explicit core handlers for `tournaments.core` + `tournaments.lifecycle` in `@rankup/api-mock` and removing the matching `missingMockHandler` waivers.
+Maintenance note (2026-02-06): Continued ADR-0056 burn-down for `tournaments.submissions|rankings|results|live` by adding contract-valid core handlers + context wiring, extending HTTP operationId fidelity coverage (including SSE), and removing 13 `missingMockHandler` + 9 `httpFidelityMissing` waivers.
+Maintenance note (2026-02-06): Continued ADR-0056 burn-down outside the tournaments slice by adding fixtures for remaining non-admin operations and clearing residual `missingMockHandler` + `missingFixture` + `httpFidelityMissing` waivers; residual waiver categories are now `missingOwner` and `schemaValidationFlaky`.
 
 Maintenance note (2026-02-01): Added optional VS Code multi-root workspace file (`rankup-client.code-workspace`) to mirror repo folders and editor settings (ADR 0041).
 
@@ -55,10 +68,6 @@ Planning note (2026-01-30): Epic 006 drafted (HTTP mock server) with ADR 0018, a
 -   `yarn validate`
 
 ## Next actions
-
-1.
-	- 1.1 Reduce ADR-0056 waivers by adding fixtures + operationOwners for core operations (start with tournaments/submissions).
-	- 1.2 Add explicit operationOwners to core gateways to shrink missingOwner waivers.
-	- 1.3 Lower WAIVERS_MAX_TOTAL once fixture coverage ramps up.
+1. Continue ADR-0056 burn-down by replacing remaining `schemaValidationFlaky` waivers with contract-valid mock responses/handlers and reducing residual `missingOwner`.
 2. Phase 2: Define the next Phase 2 WP (admin overlay or remaining scope) now that creators are complete.
 3. Decide when to split tournaments/preview into a real capability once OpenAPI/negocio clarify preview fields.

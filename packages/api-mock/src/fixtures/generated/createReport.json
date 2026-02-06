@@ -1,0 +1,16 @@
+{
+	"operationId": "createReport",
+	"body": {
+		"target": {
+			"type": "chatMessage",
+			"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+			"messageId": "msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA",
+			"userId": "string",
+			"creatorId": "cr_01J8W0K7E2ZQZ6P0M4NQW2Y7CA",
+			"url": "http://example.com"
+		},
+		"reason": "spam",
+		"comment": "string",
+		"context": {}
+	}
+}

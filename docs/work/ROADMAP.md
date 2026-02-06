@@ -9,3 +9,5 @@
 | 005  | TS-only compliance + toolchain unification   | Done                                 |
 | 006  | HTTP mock server (contract-first, stateful)  | Done                                 |
 | 007  | Workspace archetype alignment (Hadron/VS Code)| Done                                 |
+| 008  | Domain tourney boundaries (Apibase-aligned)  | In Progress                          |
+| 009  | Landing page + Lit Localize ID policy        | Backlog (paused until explicit resume) |

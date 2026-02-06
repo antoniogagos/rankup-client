@@ -3,6 +3,16 @@ import type * as Api from '@rankup/api';
 import type { ITourneyRankingGateway } from '@rankup/rankup/domains/scoring/ranking/contracts/tourneyRankingGateway.js';
 import type * as Domain from '@rankup/rankup/domains/scoring/ranking/contracts/types.js';
 
+export const operationOwners = {
+	getMatchdayResultsSummary: 'api.tourney.ranking.getMatchdayResultsSummary',
+	getMyMatchdayResults: 'api.tourney.ranking.getMyMatchdayResults',
+	getMyTournamentMatchdayRankingWindow: 'api.tourney.ranking.getMyTournamentMatchdayRankingWindow',
+	getMyTournamentSeasonRankingWindow: 'api.tourney.ranking.getMyTournamentSeasonRankingWindow',
+	getUserMatchdayResults: 'api.tourney.ranking.getUserMatchdayResults',
+	listTournamentMatchdayRanking: 'api.tourney.ranking.listTournamentMatchdayRanking',
+	listTournamentSeasonRanking: 'api.tourney.ranking.listTournamentSeasonRanking',
+} as const;
+
 const mapGetTournamentRankingQuery = (query?: Domain.GetTournamentRankingQuery): Api.GetTournamentRankingQuery | undefined =>
 	query
 		? {

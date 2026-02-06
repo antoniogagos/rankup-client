@@ -34,9 +34,9 @@ export class RkTourneySettings extends LitElement {
 				<button id="arrow" @click=${this._onGoBackClick} @keydown=${this._onGoBackKeydown} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Ajustes')}</h1>
+				<h1 class="text-bold">${msg('Ajustes', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l37c29' })}</h1>
 				<section>
-					<p class="section-title text-bold f3 mt-6 mb-3">${Icons('bell', 24)} ${msg('Notificaciones')}</p>
+					<p class="section-title text-bold f3 mt-6 mb-3">${Icons('bell', 24)} ${msg('Notificaciones', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l39c77' })}</p>
 					<div class="section-list f5">
 						<div class="list--item">
 							<div class="list--item-block f4">
@@ -45,7 +45,7 @@ export class RkTourneySettings extends LitElement {
                   height="28"
                   src="/assets/images/finished-match.webp"
                   alt="Finished match" /> -->
-								${msg('Partidos finalizados')}
+								${msg('Partidos finalizados', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l48c11' })}
 							</div>
 							<toggle-input tabindex="0"></toggle-input>
 						</div>
@@ -56,14 +56,14 @@ export class RkTourneySettings extends LitElement {
                   height="28"
                   src="/assets/images/postponed-match.webp"
                   alt="Postponed match" /> -->
-								${msg('Partidos postpuestos a punto de comenzar')}
+								${msg('Partidos postpuestos a punto de comenzar', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l59c11' })}
 							</div>
 							<toggle-input tabindex="0"></toggle-input>
 						</div>
 						<div class="list--item">
 							<div class="list--item-block f4">
 								<!-- <img width="28" height="28" src="/assets/images/goal.webp" alt="Goal" /> -->
-								${msg('Goles en vivo')}
+								${msg('Goles en vivo', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l66c11' })}
 							</div>
 							<toggle-input tabindex="0"></toggle-input>
 						</div>
@@ -74,7 +74,7 @@ export class RkTourneySettings extends LitElement {
                   height="28"
                   src="/assets/images/finished-matchday.webp"
                   alt="Finished matchday" /> -->
-								${msg('Jornada finalizada')}
+								${msg('Jornada finalizada', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l77c11' })}
 							</div>
 							<toggle-input tabindex="0"></toggle-input>
 						</div>
@@ -85,15 +85,15 @@ export class RkTourneySettings extends LitElement {
                   height="28"
                   src="/assets/images/new-messages.webp"
                   alt="New message" /> -->
-								${msg('Nuevos mensajes en el chat')}
+								${msg('Nuevos mensajes en el chat', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l88c11' })}
 							</div>
 							<toggle-input tabindex="0"></toggle-input>
 						</div>
 					</div>
 				</section>
 				<div class="buttons mt-6">
-					<a class="btn btn--primary btn--md" href=${tourneyBase + relativePath('RULES_TOURNEY')}> ${msg('Ver sistema de puntuación')} ${Icons('paper', 24)} </a>
-					<button class="btn btn--primary btn--md btn--danger">${msg('Abandonar torneo')} ${Icons('leave', 20)}</button>
+					<a class="btn btn--primary btn--md" href=${tourneyBase + relativePath('RULES_TOURNEY')}> ${msg('Ver sistema de puntuación', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l95c97' })} ${Icons('paper', 24)} </a>
+					<button class="btn btn--primary btn--md btn--danger">${msg('Abandonar torneo', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.settings.msg.l96c61' })} ${Icons('leave', 20)}</button>
 				</div>
 			</main>
 		`;

@@ -1,0 +1,6 @@
+{
+	"operationId": "refreshSession",
+	"body": {
+		"refreshToken": "stringstringstri"
+	}
+}

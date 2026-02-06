@@ -23,11 +23,11 @@ export class RkJoinTourneyPage extends LitElement {
 				<button id="arrow" @click=${this._onGoBackClick} @keydown=${this._onGoBackKeydown} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Unirse a un torneo')}</h1>
-				<p class="f3 mt-4 mb-4">${msg('Introduce el código de invitación del torneo al que quieras unirte.')}</p>
-				<input class="mb-3" id="textInput" type="text" placeholder=${msg('Escribe el código aquí')} />
+				<h1 class="text-bold">${msg('Unirse a un torneo', { id: 'apps.rankup.spa.pages.join.tourney.rk.join.tourney.page.msg.l26c29' })}</h1>
+				<p class="f3 mt-4 mb-4">${msg('Introduce el código de invitación del torneo al que quieras unirte.', { id: 'apps.rankup.spa.pages.join.tourney.rk.join.tourney.page.msg.l27c31' })}</p>
+				<input class="mb-3" id="textInput" type="text" placeholder=${msg('Escribe el código aquí', { id: 'apps.rankup.spa.pages.join.tourney.rk.join.tourney.page.msg.l28c66' })} />
 				<div class="description mt-4">
-					<button class="btn btn--primary btn--lg">${msg('Jugar ya')} ${Icons('arrow-right', 16)}</button>
+					<button class="btn btn--primary btn--lg">${msg('Jugar ya', { id: 'apps.rankup.spa.pages.join.tourney.rk.join.tourney.page.msg.l30c49' })} ${Icons('arrow-right', 16)}</button>
 				</div>
 			</main>
 		`;

@@ -1,0 +1,9 @@
+{
+	"operationId": "transferTournamentOwnership",
+	"params": {
+		"tournamentId": "tourney-1"
+	},
+	"body": {
+		"newOwnerUserId": "user-cr7"
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"operationId": "createDuel",
+	"body": {
+		"name": "string",
+		"description": "string",
+		"visibility": "private",
+		"discoverability": "listed",
+		"sportId": "football",
+		"gameModeId": "scorePrediction",
+		"formatId": "headsUp",
+		"formatConfig": {
+			"roundUnit": "matchday",
+			"duration": {
+				"type": "singleRound",
+				"roundCount": 1,
+				"startMatchday": 1,
+				"endMatchday": 1
+			},
+			"victoryCondition": "mostPointsTotal",
+			"tieBreakers": [
+				{
+					"kind": "metric",
+					"metricId": "string",
+					"order": "desc"
+				}
+			],
+			"requiresDirectInvite": true,
+			"onPlayerLeave": "endNoContest"
+		},
+		"opponentUserId": "usr_01HR9D9Z3N7J2K1M8QW8X0Z4Y1",
+		"modality": "matchday",
+		"timing": {
+			"competitionId": "FOOTBALL_SPAIN_LEAGUE_1",
+			"seasonId": "2025-2026",
+			"startMatchday": 1,
+			"endMatchday": 1,
+			"startsAt": "2019-08-24T14:15:22Z",
+			"endsAt": "2019-08-24T14:15:22Z"
+		},
+		"joinPolicy": {
+			"joinMode": "open",
+			"joinMidSeasonAllowed": true,
+			"maxPlayers": 2,
+			"locked": true,
+			"joinClosesAt": "2019-08-24T14:15:22Z"
+		},
+		"chatEnabled": true,
+		"rulesetId": "ruleset_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+		"rulesetConfig": {
+			"resultScope": "extra_time",
+			"lockPolicy": {
+				"type": "kickoff"
+			},
+			"scoring": {
+				"correctOutcome": 8,
+				"exactScore": 6,
+				"exactGoalsOneTeam": 2,
+				"wrongGoalsBothTeamsNonDrawPenalty": -2
+			},
+			"tieBreakers": [
+				"mostExactScores",
+				"mostCorrectOutcomes",
+				"mostExactGoalsOneTeam",
+				"earliestSubmission"
+			]
+		}
+	}
+}

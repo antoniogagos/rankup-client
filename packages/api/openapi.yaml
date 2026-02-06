@@ -17161,6 +17161,14 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+                rulesetId:
+                    $ref: "#/components/schemas/RulesetId"
+                formatConfig:
+                    $ref: "#/components/schemas/TournamentFormatConfig"
+                headsUpAcceptance:
+                    $ref: "#/components/schemas/HeadsUpAcceptance"
+                myMembership:
+                    $ref: "#/components/schemas/MyMembershipSummary"
         AdminVerifiedHubConfig:
             type: object
             additionalProperties: false
@@ -21637,7 +21645,10 @@ components:
                     type: integer
                     minimum: 1
                 gameModeId:
-                    $ref: "#/components/schemas/GameModeId"
+                    allOf:
+                        - $ref: "#/components/schemas/GameModeId"
+                        - not:
+                              const: scorePrediction
                 user:
                     $ref: "#/components/schemas/MeSummary"
                 serverTime:
@@ -22422,6 +22433,15 @@ components:
                 lastUpdatedAt:
                     type: string
                     format: date-time
+                lockState:
+                    $ref: "#/components/schemas/MatchLockState"
+                lockAt:
+                    type: string
+                    format: date-time
+                    description: Optional lock time when match is returned in tournament context.
+                lockReason:
+                    type: string
+                    description: Optional lock reason when match is returned in tournament context.
         MatchPage:
             type: object
             additionalProperties: false
@@ -23352,7 +23372,7 @@ components:
                     $ref: "#/components/schemas/SubmissionStatus"
         MatchdaySubmissionBase:
             type: object
-            additionalProperties: false
+            additionalProperties: true
             required:
                 - submissionId
                 - tournamentId
@@ -23431,7 +23451,7 @@ components:
             allOf:
                 - $ref: "#/components/schemas/MatchdaySubmissionBase"
                 - type: object
-                  additionalProperties: false
+                  additionalProperties: true
                   required:
                       - predictions
                   properties:
@@ -23452,6 +23472,11 @@ components:
                 - type: object
                   additionalProperties: true
                   properties:
+                      gameModeId:
+                          allOf:
+                              - $ref: "#/components/schemas/GameModeId"
+                              - not:
+                                    const: scorePrediction
                       items:
                           type: array
                           description: Generic item list for future modes.
@@ -23513,7 +23538,10 @@ components:
                 - gameModeId
             properties:
                 gameModeId:
-                    $ref: "#/components/schemas/GameModeId"
+                    allOf:
+                        - $ref: "#/components/schemas/GameModeId"
+                        - not:
+                              const: scorePrediction
         UpsertMatchdaySubmissionRequest:
             oneOf:
                 - $ref: "#/components/schemas/UpsertScorePredictionMatchdaySubmissionRequest"
@@ -24234,11 +24262,19 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+                rulesetId:
+                    $ref: "#/components/schemas/RulesetId"
+                formatConfig:
+                    $ref: "#/components/schemas/TournamentFormatConfig"
+                headsUpAcceptance:
+                    $ref: "#/components/schemas/HeadsUpAcceptance"
+                myMembership:
+                    $ref: "#/components/schemas/MyMembershipSummary"
         Tournament:
             allOf:
                 - $ref: "#/components/schemas/TournamentSummary"
                 - type: object
-                  additionalProperties: false
+                  additionalProperties: true
                   properties:
                       rulesetId:
                           $ref: "#/components/schemas/RulesetId"
@@ -24299,6 +24335,9 @@ components:
                     minimum: 0
                 rewardSummary:
                     type: string
+                cta:
+                    type: string
+                    description: Optional server-computed CTA label.
         TournamentDiscoverSort:
             type: string
             description: Sorting mode for discovery.
@@ -24311,7 +24350,7 @@ components:
             allOf:
                 - $ref: "#/components/schemas/TournamentPreview"
                 - type: object
-                  additionalProperties: false
+                  additionalProperties: true
                   properties:
                       cta:
                           type: string
@@ -24735,11 +24774,24 @@ components:
                     description: Convenience flag set by the server.
                 availabilitySummary:
                     $ref: "#/components/schemas/MatchdayAvailability"
+                tournamentId:
+                    $ref: "#/components/schemas/TournamentId"
+                serverTime:
+                    type: string
+                    format: date-time
+                previousMatchday:
+                    type: integer
+                    minimum: 1
+                    description: Optional convenience pointer.
+                nextMatchday:
+                    type: integer
+                    minimum: 1
+                    description: Optional convenience pointer.
         TournamentMatchday:
             allOf:
                 - $ref: "#/components/schemas/TournamentMatchdaySummary"
                 - type: object
-                  additionalProperties: false
+                  additionalProperties: true
                   required:
                       - tournamentId
                       - serverTime
@@ -24784,7 +24836,7 @@ components:
             allOf:
                 - $ref: "#/components/schemas/Match"
                 - type: object
-                  additionalProperties: false
+                  additionalProperties: true
                   required:
                       - lockState
                   properties:

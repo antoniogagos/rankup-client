@@ -1,0 +1,16 @@
+{
+	"operationId": "sendTournamentChatMessage",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
+	},
+	"body": {
+		"type": "text",
+		"text": "string",
+		"replyToMessageId": "msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA",
+		"mentions": [
+			"string"
+		],
+		"clientMessageId": "string",
+		"clientSentAt": "2019-08-24T14:15:22Z"
+	}
+}

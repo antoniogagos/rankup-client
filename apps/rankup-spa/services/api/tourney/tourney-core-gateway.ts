@@ -3,6 +3,25 @@ import type * as Api from '@rankup/api';
 import type { ITourneyCoreGateway } from '@rankup/rankup/domains/tournaments/core/contracts/tourneyCoreGateway.js';
 import type * as Domain from '@rankup/rankup/domains/tournaments/core/contracts/types.js';
 
+export const operationOwners = {
+	archiveTournament: 'api.tourney.core.archiveTournament',
+	createDuel: 'api.tourney.core.createDuel',
+	createDuelRematch: 'api.tourney.core.createDuelRematch',
+	createTournament: 'api.tourney.core.createTournament',
+	deleteTournament: 'api.tourney.core.deleteTournament',
+	getTournament: 'api.tourney.core.getTournament',
+	getTournamentPreview: 'api.tourney.core.getTournamentPreview',
+	getTournamentRules: 'api.tourney.core.getTournamentRules',
+	listDiscoverableTournaments: 'api.tourney.core.listDiscoverableTournaments',
+	listMyDuels: 'api.tourney.core.listMyDuels',
+	listMyTournaments: 'api.tourney.core.listMyTournaments',
+	lockTournament: 'api.tourney.core.lockTournament',
+	transferTournamentOwnership: 'api.tourney.core.transferTournamentOwnership',
+	unarchiveTournament: 'api.tourney.core.unarchiveTournament',
+	unlockTournament: 'api.tourney.core.unlockTournament',
+	updateTournament: 'api.tourney.core.updateTournament',
+} as const;
+
 const mapListMyTournamentsQuery = (query?: Domain.ListMyTournamentsQuery): Api.ListMyTournamentsQuery | undefined =>
 	query
 		? {

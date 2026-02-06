@@ -3,6 +3,12 @@ import type * as Api from '@rankup/api';
 import type { IUpdatesGateway } from '@rankup/rankup/domains/engagement/updates/contracts/updatesGateway.js';
 import type * as Domain from '@rankup/rankup/domains/engagement/updates/contracts/types.js';
 
+export const operationOwners = {
+	listMyUpdates: 'api.engagement.updates.listMyUpdates',
+	listTournamentUpdates: 'api.engagement.updates.listTournamentUpdates',
+	streamMyLiveUpdates: 'api.engagement.updates.streamMyLiveUpdates',
+} as const;
+
 const mapListMyUpdatesQuery = (query?: Domain.ListMyUpdatesQuery): Api.ListMyUpdatesQuery | undefined =>
 	query
 		? {

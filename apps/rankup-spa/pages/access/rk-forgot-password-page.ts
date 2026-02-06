@@ -43,7 +43,7 @@ export class RkForgotPasswordPage extends LitElement {
 
 	private _formRender() {
 		return html`
-			<p>${msg('Introduce el email con el que te registraste en Rankup para recuperar la contraseña')}</p>
+			<p>${msg('Introduce el email con el que te registraste en Rankup para recuperar la contraseña', { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l46c9' })}</p>
 
 			<form @submit=${this._onFormSubmit}>
 				<section>
@@ -52,20 +52,20 @@ export class RkForgotPasswordPage extends LitElement {
 						<input id="email" name="email" placeholder="Email" type="email" class="form-control" autocomplete="email" required />
 					</div>
 				</section>
-				<button class="btn--primary" ?disabled=${this._loading}>${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}</button>
+				<button class="btn--primary" ?disabled=${this._loading}>${msg('Restablecer contraseña', { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l55c63' })} ${Icons('arrow-right', 16)}</button>
 			</form>
 		`;
 	}
 
 	private _sentRender() {
-		return html` <p>${msg(str`Se ha enviado un email a ${this._emailInput.value}. Revisa tu correo para continuar con el proceso.`)}</p> `;
+		return html` <p>${msg(str`Se ha enviado un email a ${this._emailInput.value}. Revisa tu correo para continuar con el proceso.`, { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l61c21' })}</p> `;
 	}
 
 	override render() {
 		return html`
 			<header>
 				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
-				<div>${msg('Recordar contraseña')}</div>
+				<div>${msg('Recordar contraseña', { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l68c12' })}</div>
 			</header>
 
 			${choose(this._sent, [
@@ -74,8 +74,8 @@ export class RkForgotPasswordPage extends LitElement {
 			])}
 
 			<footer>
-				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
+				${msg('¿No tienes una cuenta?', { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l77c7' })}
+				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una', { id: 'apps.rankup.spa.pages.access.rk.forgot.password.page.msg.l78c55' })}</a>
 			</footer>
 		`;
 	}

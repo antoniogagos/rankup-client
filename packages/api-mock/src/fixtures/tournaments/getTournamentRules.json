@@ -1,0 +1,6 @@
+{
+	"operationId": "getTournamentRules",
+	"params": {
+		"tournamentId": "tourney-1"
+	}
+}

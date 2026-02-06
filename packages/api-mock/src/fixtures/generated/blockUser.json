@@ -1,0 +1,10 @@
+{
+	"operationId": "blockUser",
+	"params": {
+		"userId": "user-cr7"
+	},
+	"body": {
+		"reason": "string",
+		"context": {}
+	}
+}

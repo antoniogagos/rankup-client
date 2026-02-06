@@ -1,0 +1,10 @@
+{
+	"operationId": "deleteTournament",
+	"params": {
+		"tournamentId": "tourney-1"
+	},
+	"body": {
+		"reason": "string",
+		"hardDelete": true
+	}
+}

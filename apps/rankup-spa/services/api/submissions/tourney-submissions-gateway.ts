@@ -3,6 +3,14 @@ import type * as Api from '@rankup/api';
 import type { ITourneySubmissionsGateway } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tourneySubmissionsGateway.js';
 import type * as Domain from '@rankup/rankup/domains/submissions/scorePrediction/contracts/types.js';
 
+export const operationOwners = {
+	clearMyMatchdaySubmission: 'api.submissions.tourney.clearMyMatchdaySubmission',
+	getMyMatchdaySubmission: 'api.submissions.tourney.getMyMatchdaySubmission',
+	getUserMatchdaySubmission: 'api.submissions.tourney.getUserMatchdaySubmission',
+	listMatchdaySubmissions: 'api.submissions.tourney.listMatchdaySubmissions',
+	upsertMyMatchdaySubmission: 'api.submissions.tourney.upsertMyMatchdaySubmission',
+} as const;
+
 const mapListMatchdaySubmissionsQuery = (
 	query?: Domain.ListMatchdaySubmissionsQuery,
 ): Api.ListMatchdaySubmissionsQuery | undefined =>

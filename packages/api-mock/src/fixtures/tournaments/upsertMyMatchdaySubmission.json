@@ -1,0 +1,21 @@
+{
+	"operationId": "upsertMyMatchdaySubmission",
+	"params": {
+		"tournamentId": "tourney-1",
+		"matchday": 1
+	},
+	"body": {
+		"gameModeId": "scorePrediction",
+		"upserts": [
+			{
+				"matchId": "m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+				"homeScore": 0,
+				"awayScore": 0
+			}
+		],
+		"removes": [
+			"m_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
+		],
+		"clientSubmittedAt": "2019-08-24T14:15:22Z"
+	}
+}

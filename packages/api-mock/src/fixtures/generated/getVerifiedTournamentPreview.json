@@ -1,0 +1,6 @@
+{
+	"operationId": "getVerifiedTournamentPreview",
+	"params": {
+		"tournamentId": "tourney-1"
+	}
+}

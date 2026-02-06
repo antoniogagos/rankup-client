@@ -1,0 +1,6 @@
+{
+	"operationId": "searchUsers",
+	"query": {
+		"q": "string"
+	}
+}

@@ -86,8 +86,8 @@ function loadWaivers(): Map<string, Set<string>> {
 	return map;
 }
 
-function buildOperationMap(spec: OpenAPIV3.Document): Map<string, { operation: OpenAPIV3.OperationObject; hasSse: boolean }> {
-	const map = new Map<string, { operation: OpenAPIV3.OperationObject; hasSse: boolean }>();
+function buildOperationMap(spec: OpenAPIV3.Document): Map<string, { operation: OpenAPIV3.OperationObject }> {
+	const map = new Map<string, { operation: OpenAPIV3.OperationObject }>();
 	const paths = spec.paths ?? {};
 	for (const pathItem of Object.values(paths)) {
 		if (!pathItem) continue;
@@ -95,13 +95,7 @@ function buildOperationMap(spec: OpenAPIV3.Document): Map<string, { operation: O
 		for (const method of ['get', 'post', 'put', 'patch', 'delete']) {
 			const operation = (item as Record<string, OpenAPIV3.OperationObject | undefined>)[method];
 			if (!operation?.operationId) continue;
-			const responses = operation.responses ?? {};
-			const hasSse = Object.values(responses).some(resp => {
-				const response = resp as OpenAPIV3.ResponseObject | undefined;
-				const content = response?.content ?? {};
-				return Object.keys(content).some(contentType => normalizeContentType(contentType) === 'text/event-stream');
-			});
-			map.set(operation.operationId, { operation, hasSse });
+			map.set(operation.operationId, { operation });
 		}
 	}
 	return map;
@@ -271,11 +265,6 @@ async function run() {
 			errors.push(`OpenAPI spec missing operationId ${fixture.operationId}`);
 			continue;
 		}
-		if (specEntry.hasSse) {
-			errors.push(`${fixture.operationId}: SSE operation requires httpFidelityMissing waiver`);
-			continue;
-		}
-
 		const clientFn = (client as Record<string, unknown>)[fixture.operationId];
 		if (typeof clientFn !== 'function') {
 			errors.push(`${fixture.operationId}: http client missing method (add waiver httpFidelityMissing)`);

@@ -1,1 +1,1 @@
-export {};
+import './rk-web-landing.js';

@@ -1,0 +1,6 @@
+{
+	"operationId": "markMyFriendRequestSeen",
+	"params": {
+		"friendRequestId": "string"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"operationId": "getGameMode",
+	"params": {
+		"gameModeId": "scorePrediction"
+	}
+}

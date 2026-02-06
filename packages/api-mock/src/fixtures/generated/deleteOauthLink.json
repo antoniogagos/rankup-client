@@ -1,0 +1,6 @@
+{
+	"operationId": "deleteOauthLink",
+	"params": {
+		"provider": "google"
+	}
+}

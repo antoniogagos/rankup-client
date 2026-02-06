@@ -1,0 +1,12 @@
+{
+	"operationId": "updateMyRankedSettings",
+	"body": {
+		"defaultVisibility": "public",
+		"perTrackVisibility": {
+			"property1": "public",
+			"property2": "public"
+		},
+		"showOnPublicLeaderboards": true,
+		"allowFriendComparisons": true
+	}
+}

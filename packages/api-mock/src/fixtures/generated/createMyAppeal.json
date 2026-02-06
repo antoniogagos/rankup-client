@@ -1,0 +1,10 @@
+{
+	"operationId": "createMyAppeal",
+	"body": {
+		"actionId": "string",
+		"message": "stringstri",
+		"attachments": [
+			"string"
+		]
+	}
+}

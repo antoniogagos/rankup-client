@@ -1,0 +1,6 @@
+{
+	"operationId": "getMyAppeal",
+	"params": {
+		"appealId": "apl_01J8W0K7E2ZQZ6P0M4NQW2Y7GA"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"operationId": "getUserPublicProfile",
+	"params": {
+		"userId": "string"
+	}
+}

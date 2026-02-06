@@ -1,0 +1,6 @@
+{
+	"operationId": "getUserStats",
+	"params": {
+		"userId": "user-cr7"
+	}
+}

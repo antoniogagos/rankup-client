@@ -1,0 +1,13 @@
+{
+	"operationId": "createTournamentInvitationCode",
+	"params": {
+		"tournamentId": "tourney-1"
+	},
+	"body": {
+		"revokeExisting": true,
+		"expiresAt": "2019-08-24T14:15:22Z",
+		"maxUses": 1,
+		"label": "string",
+		"reason": "string"
+	}
+}

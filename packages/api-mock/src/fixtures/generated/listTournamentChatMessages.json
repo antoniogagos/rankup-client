@@ -1,0 +1,6 @@
+{
+	"operationId": "listTournamentChatMessages",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"operationId": "updateTournamentChatSettings",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
+	},
+	"body": {
+		"enabled": true,
+		"slowModeSeconds": 3600,
+		"maxMessageLength": 1,
+		"allowLinks": true,
+		"allowImages": true,
+		"profanityFilterLevel": "off",
+		"reason": "string"
+	}
+}

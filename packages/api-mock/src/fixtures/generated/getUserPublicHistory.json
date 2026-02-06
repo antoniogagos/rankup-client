@@ -1,0 +1,6 @@
+{
+	"operationId": "getUserPublicHistory",
+	"params": {
+		"userId": "string"
+	}
+}

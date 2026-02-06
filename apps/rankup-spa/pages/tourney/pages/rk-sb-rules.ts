@@ -23,15 +23,15 @@ export class RkSbRules extends LitElement {
 				<button id="arrow" @click=${this._onGoBackClick} @keydown=${this._onGoBackKeydown} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Sistema de puntuación')}</h1>
+				<h1 class="text-bold">${msg('Sistema de puntuación', { id: 'apps.rankup.spa.pages.tourney.pages.rk.sb.rules.msg.l26c29' })}</h1>
 				<p class="f3 mt-4 mb-4">
 					${msg(
 						`Al finalizar cada partido, se calcularán los puntos para ese partido.
-            Según tu pronóstico y el resultado final tendrás una determinada puntuación.`,
+            Según tu pronóstico y el resultado final tendrás una determinada puntuación.`, { id: 'apps.rankup.spa.pages.tourney.pages.rk.sb.rules.msg.l28c8' },
 					)}
 				</p>
 				<div class="f3 description mt-4">
-					${msg('Al acertar el...')}
+					${msg('Al acertar el...', { id: 'apps.rankup.spa.pages.tourney.pages.rk.sb.rules.msg.l34c8' })}
 					<ul class="rules">
 						<li>
 							<span class="rule-text">Ganador del partido</span>

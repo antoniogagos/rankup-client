@@ -1,0 +1,6 @@
+{
+	"operationId": "removeFriend",
+	"params": {
+		"userId": "string"
+	}
+}

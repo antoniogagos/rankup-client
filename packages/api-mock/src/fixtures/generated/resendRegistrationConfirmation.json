@@ -1,0 +1,6 @@
+{
+	"operationId": "resendRegistrationConfirmation",
+	"body": {
+		"email": "user@example.com"
+	}
+}

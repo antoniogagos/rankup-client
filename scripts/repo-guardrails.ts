@@ -701,6 +701,120 @@ function runOpenApiLocationGuardrail(): void {
 	}
 }
 
+function runLitLocalizeMsgIdGuardrail(): void {
+	const command = 'rg --files apps packages --glob "*.ts"';
+	let files: string[] = [];
+	try {
+		const output = execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+			.toString()
+			.trim();
+		if (!output) {
+			return;
+		}
+		files = output
+			.split('\n')
+			.map(line => line.trim())
+			.filter(Boolean)
+			.filter(filePath => !filePath.endsWith('.d.ts'));
+	} catch (error) {
+		const status = (error as { status?: number }).status;
+		if (status === 1) {
+			return;
+		}
+		console.error('repo:guardrails failed');
+		console.error('- Unable to scan TypeScript files for localize msg() id enforcement.');
+		throw error;
+	}
+
+	const msgIdPattern = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
+	const violations: string[] = [];
+
+	const getPropertyName = (name: ts.PropertyName): string | null => {
+		if (ts.isIdentifier(name)) {
+			return name.text;
+		}
+		if (ts.isStringLiteral(name)) {
+			return name.text;
+		}
+		return null;
+	};
+
+	for (const filePath of files) {
+		const text = readFileSync(filePath, 'utf8');
+		const source = ts.createSourceFile(filePath, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+
+		const msgIdentifiers = new Set<string>();
+		for (const statement of source.statements) {
+			if (!ts.isImportDeclaration(statement) || !statement.importClause || !statement.moduleSpecifier) {
+				continue;
+			}
+			if (!ts.isStringLiteral(statement.moduleSpecifier) || statement.moduleSpecifier.text !== '@lit/localize') {
+				continue;
+			}
+			const bindings = statement.importClause.namedBindings;
+			if (!bindings || !ts.isNamedImports(bindings)) {
+				continue;
+			}
+			for (const element of bindings.elements) {
+				const imported = element.propertyName?.text ?? element.name.text;
+				if (imported === 'msg') {
+					msgIdentifiers.add(element.name.text);
+				}
+			}
+		}
+
+		if (msgIdentifiers.size === 0) {
+			continue;
+		}
+
+		const visit = (node: ts.Node): void => {
+			if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && msgIdentifiers.has(node.expression.text)) {
+				const location = source.getLineAndCharacterOfPosition(node.getStart(source));
+				const locationLabel = `${filePath}:${location.line + 1}:${location.character + 1}`;
+				const optionsArgument = node.arguments[1];
+				if (!optionsArgument) {
+					violations.push(`${locationLabel} - msg() is missing options with explicit id`);
+					return;
+				}
+				if (!ts.isObjectLiteralExpression(optionsArgument)) {
+					violations.push(`${locationLabel} - msg() options must be an object literal with id`);
+					return;
+				}
+				const idProperty = optionsArgument.properties.find(property => {
+					if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) {
+						return false;
+					}
+					if (!property.name) {
+						return false;
+					}
+					return getPropertyName(property.name) === 'id';
+				});
+				if (!idProperty || !ts.isPropertyAssignment(idProperty)) {
+					violations.push(`${locationLabel} - msg() options must include id`);
+					return;
+				}
+				if (!ts.isStringLiteral(idProperty.initializer)) {
+					violations.push(`${locationLabel} - msg() id must be a string literal`);
+					return;
+				}
+				if (!msgIdPattern.test(idProperty.initializer.text)) {
+					violations.push(`${locationLabel} - msg() id "${idProperty.initializer.text}" must match ^[a-z0-9]+(\\.[a-z0-9]+)*$`);
+				}
+			}
+			ts.forEachChild(node, visit);
+		};
+
+		visit(source);
+	}
+
+	if (violations.length > 0) {
+		console.error('repo:guardrails failed');
+		console.error('- Lit Localize policy: every msg() must include explicit id with dot-separated lowercase tokens.');
+		console.error(violations.join('\n'));
+		process.exit(1);
+	}
+}
+
 export function runGuardrails(): void {
 	runAgentEntryGuardrail();
 	runStructuralAdr();
@@ -723,6 +837,7 @@ export function runGuardrails(): void {
 	runAppApiContractGuardrail();
 	runDomainApiContractGuardrail();
 	runApiMockServerLeakageGuardrail();
+	runLitLocalizeMsgIdGuardrail();
 	runRatchet();
 }
 

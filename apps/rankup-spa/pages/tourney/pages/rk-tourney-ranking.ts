@@ -102,7 +102,7 @@ export class RkTourneyRanking extends LitElement {
 					? html`
 						<div class="matchday-status text-bold">
 							<div class="circle"></div>
-							${msg('Jornada en juego')}
+							${msg('Jornada en juego', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.ranking.msg.l105c10' })}
 						</div>
 					`
 					: ''}
@@ -113,9 +113,9 @@ export class RkTourneyRanking extends LitElement {
 					})}
 				</div>
 				<div class="buttons mb-3" @click=${this._onSelectRankingClick} @keydown=${this._onSelectRankingKeydown}>
-					<button class="btn btn--primary btn--s f5" name=${RankingType.SEASON} ?selected=${this.selectedRanking === RankingType.SEASON}>${msg('Temporada')}</button>
+					<button class="btn btn--primary btn--s f5" name=${RankingType.SEASON} ?selected=${this.selectedRanking === RankingType.SEASON}>${msg('Temporada', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.ranking.msg.l116c135' })}</button>
 					<button class="btn btn--primary btn--s f5 matchday-btn" name=${RankingType.MATCHDAY} ?selected=${this.selectedRanking === RankingType.MATCHDAY}>
-						${msg('Jornada 8')}
+						${msg('Jornada 8', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.ranking.msg.l118c9' })}
 						<span id="chevron">${Icons('chevron-down', 16)}</span>
 					</button>
 				</div>

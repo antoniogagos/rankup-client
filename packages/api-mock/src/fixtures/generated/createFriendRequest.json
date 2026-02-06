@@ -1,0 +1,9 @@
+{
+	"operationId": "createFriendRequest",
+	"body": {
+		"toUserId": "string",
+		"message": "string",
+		"sendNotification": true,
+		"clientContext": {}
+	}
+}

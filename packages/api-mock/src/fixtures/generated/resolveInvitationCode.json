@@ -1,0 +1,6 @@
+{
+	"operationId": "resolveInvitationCode",
+	"params": {
+		"code": "string"
+	}
+}

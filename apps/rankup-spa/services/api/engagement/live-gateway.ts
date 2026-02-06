@@ -3,6 +3,21 @@ import type * as Api from '@rankup/api';
 import type { ILiveGateway } from '@rankup/rankup/domains/engagement/live/contracts/liveGateway.js';
 import type * as Domain from '@rankup/rankup/domains/engagement/live/contracts/types.js';
 
+export const operationOwners = {
+	batchUpdateMyNotifications: 'api.engagement.live.batchUpdateMyNotifications',
+	dismissMyNotification: 'api.engagement.live.dismissMyNotification',
+	getMyFeedItem: 'api.engagement.live.getMyFeedItem',
+	getMyFeedReadCursor: 'api.engagement.live.getMyFeedReadCursor',
+	getMyNotification: 'api.engagement.live.getMyNotification',
+	getMyNotificationUnreadCount: 'api.engagement.live.getMyNotificationUnreadCount',
+	listMyFeed: 'api.engagement.live.listMyFeed',
+	listMyNotifications: 'api.engagement.live.listMyNotifications',
+	markMyNotificationRead: 'api.engagement.live.markMyNotificationRead',
+	markMyNotificationSeen: 'api.engagement.live.markMyNotificationSeen',
+	streamTournamentLive: 'api.engagement.live.streamTournamentLive',
+	updateMyFeedReadCursor: 'api.engagement.live.updateMyFeedReadCursor',
+} as const;
+
 const mapListMyNotificationsQuery = (query?: Domain.ListMyNotificationsQuery): Api.ListMyNotificationsQuery | undefined =>
 	query
 		? {

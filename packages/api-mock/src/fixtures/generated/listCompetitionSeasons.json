@@ -1,0 +1,6 @@
+{
+	"operationId": "listCompetitionSeasons",
+	"params": {
+		"competitionId": "FOOTBALL_SPAIN_LEAGUE_1"
+	}
+}

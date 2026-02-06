@@ -1,0 +1,9 @@
+{
+	"operationId": "lockTournament",
+	"params": {
+		"tournamentId": "tourney-1"
+	},
+	"body": {
+		"reason": "string"
+	}
+}

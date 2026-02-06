@@ -83,7 +83,7 @@
 			".git": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-			"**/dist": false
+			"**/dist": true
 		},
 		"[typescript]": {
 			"editor.defaultFormatter": "esbenp.prettier-vscode",

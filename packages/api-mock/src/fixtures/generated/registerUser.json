@@ -1,0 +1,9 @@
+{
+	"operationId": "registerUser",
+	"body": {
+		"email": "user@example.com",
+		"password": "pa$$word",
+		"username": "maria",
+		"locale": "es"
+	}
+}

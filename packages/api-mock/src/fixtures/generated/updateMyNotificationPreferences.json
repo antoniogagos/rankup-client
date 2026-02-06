@@ -1,0 +1,20 @@
+{
+	"operationId": "updateMyNotificationPreferences",
+	"body": {
+		"pushEnabled": true,
+		"inAppEnabled": true,
+		"categories": {
+			"matchEvents": true,
+			"rankingChanges": true,
+			"chatMessages": true,
+			"invites": true,
+			"officialEvents": true,
+			"marketing": true
+		},
+		"quietHours": {
+			"enabled": true,
+			"startLocalTime": "23:00",
+			"endLocalTime": "08:00"
+		}
+	}
+}

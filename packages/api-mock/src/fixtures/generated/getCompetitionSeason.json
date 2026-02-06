@@ -1,0 +1,7 @@
+{
+	"operationId": "getCompetitionSeason",
+	"params": {
+		"competitionId": "FOOTBALL_SPAIN_LEAGUE_1",
+		"seasonId": "2025-2026"
+	}
+}

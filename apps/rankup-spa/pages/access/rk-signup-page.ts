@@ -45,7 +45,7 @@ export class RkSignUpPage extends LitElement {
 		this.passwordInput.setCustomValidity('');
 		this.passwordRepeatInput.setCustomValidity('');
 		if (password !== repeatedPassword) {
-			this.passwordRepeatInput.setCustomValidity(msg("Passwords doesn't match"));
+			this.passwordRepeatInput.setCustomValidity(msg("Passwords doesn't match", { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l48c47' }));
 			this.form.reportValidity();
 		} else if (this.form.checkValidity()) {
 			const email = this.emailInput.value;
@@ -67,17 +67,17 @@ export class RkSignUpPage extends LitElement {
 			redirectToPublicPage('CONFIRM_REGISTRATION', { email });
 		} catch (error: any) {
 			if (error?.name === 'UsernameExistsException') {
-				this.emailInput.setCustomValidity(msg('An account with this email already exists'));
+				this.emailInput.setCustomValidity(msg('An account with this email already exists', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l70c39' }));
 				this.form.reportValidity();
 			} else if (error?.name === 'InvalidPasswordException') {
 				if (error?.message?.match('uppercase')) {
-					this.passwordInput.setCustomValidity(msg('Password must have uppercase characters'));
+					this.passwordInput.setCustomValidity(msg('Password must have uppercase characters', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l74c43' }));
 				} else if (error?.message?.match('not long enough')) {
-					this.passwordInput.setCustomValidity(msg('Password must have at least 6 characters'));
+					this.passwordInput.setCustomValidity(msg('Password must have at least 6 characters', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l76c43' }));
 				} else if (error?.message?.match('numeric characters')) {
-					this.passwordInput.setCustomValidity(msg('Password must have numeric characters'));
+					this.passwordInput.setCustomValidity(msg('Password must have numeric characters', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l78c43' }));
 				} else {
-					this.passwordInput.setCustomValidity(msg(error.message));
+					this.passwordInput.setCustomValidity(msg(error.message, { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l80c43' }));
 				}
 				this.form.reportValidity();
 			}
@@ -94,7 +94,7 @@ export class RkSignUpPage extends LitElement {
 				<section>
 					<div class="input-wrapper">
 						${Icons('username', 24)}
-						<input class="form-control" id="username" name="username" placeholder=${msg('Nombre de usuario')} type="text" autocomplete="username" required />
+						<input class="form-control" id="username" name="username" placeholder=${msg('Nombre de usuario', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l97c79' })} type="text" autocomplete="username" required />
 					</div>
 				</section>
 
@@ -108,7 +108,7 @@ export class RkSignUpPage extends LitElement {
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="password" name="password" placeholder=${msg('Contraseña')} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
+						<input class="form-control" id="password" name="password" placeholder=${msg('Contraseña', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l111c79' })} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
 						<button id="togglePassword" @click=${this.togglePassword} type="button" tabindex="-1" aria-label=${this._showPassword ? 'Hide password' : 'Show password as plain text. Warning: this will display your password on the screen.'}>${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}</button>
 					</div>
 				</section>
@@ -116,16 +116,16 @@ export class RkSignUpPage extends LitElement {
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="repeatedPassword" name="password" placeholder=${msg('Confirmar contraseña')} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
+						<input class="form-control" id="repeatedPassword" name="password" placeholder=${msg('Confirmar contraseña', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l119c87' })} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
 					</div>
 				</section>
 
-				<button class="btn btr--primary btn--md" id="signInButton">${msg('Crear cuenta')} ${Icons('arrow-right', 16)}</button>
+				<button class="btn btr--primary btn--md" id="signInButton">${msg('Crear cuenta', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l123c66' })} ${Icons('arrow-right', 16)}</button>
 			</form>
 
 			<footer>
-				${msg('¿Ya tienes cuenta?')}
-				<a href=${path('SIGNIN')}>${msg('Inicia sesión')}</a>
+				${msg('¿Ya tienes cuenta?', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l127c7' })}
+				<a href=${path('SIGNIN')}>${msg('Inicia sesión', { id: 'apps.rankup.spa.pages.access.rk.signup.page.msg.l128c33' })}</a>
 			</footer>
 		`;
 	}

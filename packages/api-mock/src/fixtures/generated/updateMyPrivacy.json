@@ -1,0 +1,9 @@
+{
+	"operationId": "updateMyPrivacy",
+	"body": {
+		"profileVisibility": "public",
+		"historyVisibility": "verifiedOnlyPublic",
+		"allowFriendRequests": true,
+		"allowFollows": true
+	}
+}

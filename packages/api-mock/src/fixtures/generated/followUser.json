@@ -1,0 +1,6 @@
+{
+	"operationId": "followUser",
+	"params": {
+		"userId": "string"
+	}
+}

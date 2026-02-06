@@ -1,0 +1,10 @@
+{
+	"operationId": "oauthTokenExchange",
+	"body": {
+		"grantType": "authorization_code",
+		"provider": "google",
+		"code": "string",
+		"redirectUri": "http://example.com",
+		"codeVerifier": "string"
+	}
+}

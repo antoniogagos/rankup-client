@@ -1,0 +1,11 @@
+{
+	"operationId": "joinTournament",
+	"params": {
+		"tournamentId": "tourney-1"
+	},
+	"body": {
+		"invitationCode": "string",
+		"acceptTournamentRules": true,
+		"clientContext": {}
+	}
+}

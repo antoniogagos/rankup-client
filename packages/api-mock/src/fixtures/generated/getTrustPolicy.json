@@ -1,0 +1,6 @@
+{
+	"operationId": "getTrustPolicy",
+	"params": {
+		"policyId": "pol_community_guidelines"
+	}
+}

@@ -4,7 +4,7 @@
 
 -   Status: In Progress
 -   Owner: Rankup maintainers
--   Last updated: 2026-02-05
+-   Last updated: 2026-02-06
 -   Depends on: Epic 007 (done)
 
 ## Goal
@@ -701,6 +701,41 @@ Notes:
 
 ### Verification
 
+-   `yarn validate`
+
+---
+
+## WP-008-28: ADR-0056 waiver burn-down (tournaments/submissions first)
+
+### Goal
+
+-   Reduce waiver volume for `tournaments.core|submissions|rankings|matchdays|lifecycle|live|results` by adding fixtures and explicit gateway ownership.
+-   Apply an initial waiver budget ratchet once coverage ramps up.
+
+### DoD
+
+-   [x] Added fixtures for 30 tournaments/submissions operations under `packages/api-mock/src/fixtures/tournaments/*.json`.
+-   [x] Added explicit `operationOwners` maps in core/scoring/engagement/submissions gateways to remove missing owners for the targeted operations.
+-   [x] Removed targeted waivers:
+	- `missingFixture` for the 30-operation tournaments/submissions slice.
+	- `missingOwner` for the 20 targeted core operations.
+	- `httpFidelityMissing` for operations with `operationId`-named HTTP client methods in the targeted slice.
+-   [x] Updated waiver budget ratchet from `WAIVERS_MAX_TOTAL=2000` to `WAIVERS_MAX_TOTAL=700` in `package.json` and ADR 0056.
+-   [x] Added scoped `schemaValidationFlaky` waivers for operations that still return non contract-valid mock payloads during this burn-down step.
+-   [x] Follow-up (2026-02-06): removed the targeted 12 `schemaValidationFlaky` waivers by aligning OpenAPI schemas and validating contract-valid mock responses for `createTournament`, `getTournament`, `updateTournament`, `transferTournamentOwnership`, `getTournamentMatchday`, `listDiscoverableTournaments`, `listTournamentMatchdayMatches`, `getMyMatchdayResults`, `getUserMatchdayResults`, `getMyMatchdaySubmission`, `getUserMatchdaySubmission`, and `upsertMyMatchdaySubmission`.
+-   [x] Follow-up (2026-02-06): added explicit core handlers + OpenAPI-contract context wiring for `tournaments.core` + `tournaments.lifecycle` (`getTournament`, `getTournamentRules`, `listDiscoverableTournaments`, `updateTournament`, `archiveTournament`, `deleteTournament`, `lockTournament`, `transferTournamentOwnership`, `unarchiveTournament`, `unlockTournament`) and removed their 10 `missingMockHandler` waivers.
+-   [x] Follow-up (2026-02-06): added explicit core handlers + OpenAPI-contract context wiring for `tournaments.submissions|rankings|results|live` (`clearMyMatchdaySubmission`, `getMyMatchdaySubmission`, `upsertMyMatchdaySubmission`, `getUserMatchdaySubmission`, `listMatchdaySubmissions`, `listTournamentMatchdayRanking`, `getMyTournamentMatchdayRankingWindow`, `getMyTournamentSeasonRankingWindow`, `getMyMatchdayResults`, `getUserMatchdayResults`, `getMatchdayResultsSummary`, `listTournamentUpdates`, `streamTournamentLive`) and removed their 13 `missingMockHandler` waivers.
+-   [x] Follow-up (2026-02-06): extended `apps/rankup-spa/services/api/http-client.ts` with operationId-named HTTP fidelity aliases for tournaments rankings/results/live (including SSE `streamTournamentLive`) and removed 9 matching `httpFidelityMissing` waivers.
+-   [x] Follow-up (2026-02-06): completed cross-slice ADR-0056 burn-down by adding fixtures for the remaining non-admin operations outside the tournaments slice, removing residual `missingMockHandler` + `missingFixture` + `httpFidelityMissing` waivers, and leaving only `missingOwner` + `schemaValidationFlaky` categories (`81` waivers total).
+-   [x] Work tracking updated (`AGENTS.md`, `CURRENT.md`, this epic, and daily log).
+-   [x] Validation evidence recorded with `yarn validate` PASS.
+
+### Verification
+
+-   `yarn gateways:ownership`
+-   `yarn api-mock:schema-validate`
+-   `yarn api-http:schema-validate`
+-   `yarn waivers:check`
 -   `yarn validate`
 
 ---

@@ -1,0 +1,18 @@
+{
+	"operationId": "registerMyDevice",
+	"body": {
+		"platform": "ios",
+		"provider": "apns",
+		"pushToken": "string",
+		"webPushSubscription": {
+			"endpoint": "http://example.com",
+			"keys": {
+				"p256dh": "string",
+				"auth": "string"
+			}
+		},
+		"appVersion": "1.2.0",
+		"deviceName": "string",
+		"locale": "string"
+	}
+}

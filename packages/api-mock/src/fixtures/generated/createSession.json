@@ -1,0 +1,7 @@
+{
+	"operationId": "createSession",
+	"body": {
+		"email": "user@example.com",
+		"password": "pa$$word"
+	}
+}

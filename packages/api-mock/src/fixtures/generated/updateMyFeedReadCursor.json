@@ -1,0 +1,7 @@
+{
+	"operationId": "updateMyFeedReadCursor",
+	"body": {
+		"lastSeenAt": "2019-08-24T14:15:22Z",
+		"lastSeenFeedItemId": "fed_01J8W0K7E2ZQZ6P0M4NQW2Y7AH"
+	}
+}

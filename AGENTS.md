@@ -37,6 +37,7 @@ This repo has **non-negotiable** invariants enforced by docs + guardrails. If yo
 -   **Lit css template formatting**: content inside ` css\`` must align with the  `css\``line, closing backticks must align with the `css\``line, and`static styles` arrays must close as `` `]`` (no trailing comma/newline; ADR 0023 + ADR 0024).
 -   **Lit html template formatting**: content inside ` html\`` must indent one tab beyond the  `html\``line and the closing backtick must align with the`html\`` line (ADR 0029).
 -   **Tabs only**: indent with tabs, tab size 4 (EditorConfig/Prettier/VS Code; ADR 0024).
+-   **Lit Localize IDs**: every `msg()` call MUST include explicit `id` and the id MUST match `^[a-z0-9]+(\\.[a-z0-9]+)*$` (ADR 0058).
 -   **Work tracking is inviolable**:
     -   Structural changes MUST update: `AGENTS.md`, `docs/work/CURRENT.md`, the active epic file, and today’s work log entry (ADR 0012 + ADR 0015).
 
@@ -109,6 +110,7 @@ This repo has **non-negotiable** invariants enforced by docs + guardrails. If yo
 -   **Lit css template formatting**: content inside ` css\`` must align with the  `css\``line, closing backticks must align with the `css\``line, and`static styles` arrays must close as `` `]`` (no trailing comma/newline; ADR 0023 + ADR 0024).
 -   **Lit html template formatting**: content inside ` html\`` must indent one tab beyond the  `html\``line and the closing backtick must align with the`html\`` line (ADR 0029).
 -   **Tabs only**: indent with tabs, tab size 4 (EditorConfig/Prettier/VS Code; ADR 0024).
+-   **Lit Localize IDs**: every `msg()` call MUST include explicit `id` and the id MUST match `^[a-z0-9]+(\\.[a-z0-9]+)*$` (ADR 0058).
 -   **Work tracking is inviolable**:
     -   Structural changes MUST update: `AGENTS.md`, `docs/work/CURRENT.md`, the active epic file, and today’s work log entry (ADR 0012 + ADR 0015).
 
@@ -185,6 +187,13 @@ Maintenance note (2026-02-04): Implemented promotions domain (campaigns/rewards)
 Maintenance note (2026-02-04): Implemented creators domain (directory/catalog) with contracts, gateways, services, and api-mock parity.
 Maintenance note (2026-02-05): Prepared ADR 0056 operation coverage gate prerequisites (default Problem response policy, operations manifest generation, allowlist spec alignment).
 Maintenance note (2026-02-05): Implemented ADR 0056 operation coverage gates (mock coverage, gateway ownership, schema validation, HTTP fidelity) with waivers seeding and validate wiring.
+Maintenance note (2026-02-06): Implemented the full conversion-focused landing in `apps/rankup-web` (preloader + sections + interactive ranking/live simulator + particle canvas + sticky CTA + SEO metadata) and aligned CTA routing to `/es/registro` (ADR 0057).
+Maintenance note (2026-02-06): Enforced global Lit Localize `msg()` explicit-id policy with repository guardrail and codemod backfill for existing usage (ADR 0058).
+Maintenance note (2026-02-06): WP-008-28 reduced ADR-0056 waivers for tournaments/submissions (fixtures + explicit gateway operationOwners), lowered `WAIVERS_MAX_TOTAL` to `700`, and seeded scoped `schemaValidationFlaky` waivers for endpoints still returning non contract-valid mock payloads.
+Maintenance note (2026-02-06): Completed the WP-008-28 schema-flaky follow-up by aligning OpenAPI discriminator/allOf schemas for tournaments/results/submissions mocks and removing 12 targeted `schemaValidationFlaky` waivers after `api-mock` + `api-http` schema validation passed.
+Maintenance note (2026-02-06): Continued ADR-0056 burn-down by adding contract-valid core handlers for `tournaments.core` + `tournaments.lifecycle` operations (`getTournament`, `getTournamentRules`, `listDiscoverableTournaments`, `updateTournament`, `archiveTournament`, `deleteTournament`, `lockTournament`, `transferTournamentOwnership`, `unarchiveTournament`, `unlockTournament`) and removing 10 matching `missingMockHandler` waivers.
+Maintenance note (2026-02-06): Continued ADR-0056 burn-down for `tournaments.submissions|rankings|results|live` by adding contract-valid core handlers + OpenAPI contract context mapping, adding HTTP operationId aliases (including SSE `streamTournamentLive`) in the SPA API client, and removing 13 `missingMockHandler` + 9 `httpFidelityMissing` waivers (waiver total now 630).
+Maintenance note (2026-02-06): Continued ADR-0056 cross-slice burn-down by adding fixtures for remaining non-admin operations, clearing residual `missingMockHandler` + `missingFixture` + `httpFidelityMissing` waivers, and reducing waivers to 81 (`missingOwner=35`, `schemaValidationFlaky=46`).
 
 ## Truth hierarchy
 

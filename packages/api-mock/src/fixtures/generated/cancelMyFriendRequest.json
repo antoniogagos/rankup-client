@@ -1,0 +1,6 @@
+{
+	"operationId": "cancelMyFriendRequest",
+	"params": {
+		"friendRequestId": "string"
+	}
+}

@@ -1,0 +1,8 @@
+{
+	"operationId": "updateMe",
+	"body": {
+		"username": "maria",
+		"pictureUrl": "http://example.com",
+		"bio": "string"
+	}
+}

@@ -51,7 +51,7 @@ export class RkSignInPage extends LitElement {
 			await this._sessionManager.signInWithPassword({ email, password });
 		} catch (error: any) {
 			if (error?.name === 'NotAuthorizedException' || error?.name === 'UserNotFoundException') {
-				this.passwordInput.setCustomValidity(msg('Email o contraseña inválidos'));
+				this.passwordInput.setCustomValidity(msg('Email o contraseña inválidos', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l54c42' }));
 				this.form.reportValidity();
 			}
 		}
@@ -77,27 +77,27 @@ export class RkSignInPage extends LitElement {
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="currentPassword" name="current-password" placeholder=${msg('Contraseña')} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
+						<input class="form-control" id="currentPassword" name="current-password" placeholder=${msg('Contraseña', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l80c94' })} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
 						<button id="togglePassword" @click=${this._togglePasswordVisibility} type="button" aria-label=${this._showPassword ? 'Hide password' : 'Show password as plain text. Warning: this will display your password on the screen.'}>${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}</button>
 					</div>
 				</section>
 
-				<a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}> ${msg('Olvidaste la contraseña?')} </a>
+				<a class="link--primary forgot-password-link" href=${path('FORGOT_PASSWORD')}> ${msg('Olvidaste la contraseña?', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l85c86' })} </a>
 
-				<button class="btn--primary" id="signInButton">${msg('Iniciar sesión')} ${Icons('arrow-right', 16)}</button>
+				<button class="btn--primary" id="signInButton">${msg('Iniciar sesión', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l87c54' })} ${Icons('arrow-right', 16)}</button>
 			</form>
 
 			<div class="divisor">
 				<div class="cross"></div>
-				<div class="divisor-text">${msg('o continua con')}</div>
+				<div class="divisor-text">${msg('o continua con', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l92c33' })}</div>
 			</div>
 
 			<button id="googleBtn" @click=${this._onGoogleSignInClick}>${Icons('google', 48)}</button>
-			<button class="btn--primary" id="mockBtn" @click=${this._onMockSignInClick}>${msg('Entrar sin backend')}</button>
+			<button class="btn--primary" id="mockBtn" @click=${this._onMockSignInClick}>${msg('Entrar sin backend', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l96c82' })}</button>
 
 			<footer>
-				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
+				${msg('¿No tienes una cuenta?', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l99c7' })}
+				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una', { id: 'apps.rankup.spa.pages.access.rk.signin.page.msg.l100c55' })}</a>
 			</footer>
 		`;
 	}

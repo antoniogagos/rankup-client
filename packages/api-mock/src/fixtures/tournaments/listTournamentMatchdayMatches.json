@@ -1,0 +1,7 @@
+{
+	"operationId": "listTournamentMatchdayMatches",
+	"params": {
+		"tournamentId": "tourney-1",
+		"matchday": 1
+	}
+}

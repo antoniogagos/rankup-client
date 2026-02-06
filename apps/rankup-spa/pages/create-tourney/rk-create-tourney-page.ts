@@ -111,7 +111,7 @@ export class RkCreateTourneyPage extends LitElement {
 		const league = this._getSelectedLeague();
 		const name = this._tourneyName.trim();
 		if (!league || !name) {
-			this._errorMessage = msg('Completa todos los campos para continuar.');
+			this._errorMessage = msg('Completa todos los campos para continuar.', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l114c25' });
 			return;
 		}
 		this._isSubmitting = true;
@@ -119,7 +119,7 @@ export class RkCreateTourneyPage extends LitElement {
 		try {
 			const service = this._tourneyService;
 			if (!service) {
-				this._errorMessage = msg('Servicio no disponible. Inténtalo de nuevo.');
+				this._errorMessage = msg('Servicio no disponible. Inténtalo de nuevo.', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l122c26' });
 				return;
 			}
 			const request = this._buildRequest(league, name);
@@ -128,7 +128,7 @@ export class RkCreateTourneyPage extends LitElement {
 			this._navigateTo(path('TOURNEYS'));
 		} catch (error) {
 			console.error(error);
-			this._errorMessage = msg('No se pudo crear el torneo. Inténtalo de nuevo.');
+			this._errorMessage = msg('No se pudo crear el torneo. Inténtalo de nuevo.', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l131c25' });
 		} finally {
 			this._isSubmitting = false;
 		}
@@ -136,14 +136,14 @@ export class RkCreateTourneyPage extends LitElement {
 
 	override render() {
 		const canSubmit = Boolean(this._selectedCompetitionId && this._tourneyName.trim().length > 0);
-		const buttonLabel = this._isSubmitting ? msg('Creando...') : msg('Empezar liga');
+		const buttonLabel = this._isSubmitting ? msg('Creando...', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l139c44' }) : msg('Empezar liga', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l139c64' });
 		return html`
 			<header>
 				<button id="arrow" @click=${this._onClickGoBack} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Crear una liga')}</h1>
-				<div class="f3 mt-5 mb-3">${msg('Escoge una competición:')}</div>
+				<h1 class="text-bold">${msg('Crear una liga', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l145c29' })}</h1>
+				<div class="f3 mt-5 mb-3">${msg('Escoge una competición:', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l146c33' })}</div>
 				${leagueOptions.map(
 					option => html`
 						<div class="league-container f4 text-bold">
@@ -162,12 +162,12 @@ export class RkCreateTourneyPage extends LitElement {
 						</div>
 					`,
 				)}
-				<p class="f4 mt-5">${msg('Introduce el nombre de la liga.')}</p>
+				<p class="f4 mt-5">${msg('Introduce el nombre de la liga.', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l165c26' })}</p>
 				<input
 					class="mb-3"
 					id="textInput"
 					type="text"
-					placeholder=${msg('Nombre de la liga')}
+					placeholder=${msg('Nombre de la liga', { id: 'apps.rankup.spa.pages.create.tourney.rk.create.tourney.page.msg.l170c20' })}
 					.value=${this._tourneyName}
 					@input=${this._onNameInput}
 				/>

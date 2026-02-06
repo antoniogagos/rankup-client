@@ -93,16 +93,16 @@ export class RkConfirmRegistrationPage extends LitElement {
 			<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
 
 			<form action="#" method="post" @submit=${this._handleFormSubmit} @input=${this._onFormInput}>
-				<section>${msg('Se ha enviado un código a tu email. Introdúcelo abajo para confirmar tu cuenta.')}</section>
+				<section>${msg('Se ha enviado un código a tu email. Introdúcelo abajo para confirmar tu cuenta.', { id: 'apps.rankup.spa.pages.access.rk.confirm.registration.page.msg.l96c16' })}</section>
 
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="verificationCode" name="verification-code" placeholder=${msg('Código de verificación')} type="text" autocomplete="off" .value=${this.code ?? ''} required />
+						<input class="form-control" id="verificationCode" name="verification-code" placeholder=${msg('Código de verificación', { id: 'apps.rankup.spa.pages.access.rk.confirm.registration.page.msg.l101c96' })} type="text" autocomplete="off" .value=${this.code ?? ''} required />
 					</div>
 				</section>
 
-				<button class="btn btr--primary btn--md" id="signinButton">${msg('Confirmar Registro')} ${Icons('arrow-right', 16)}</button>
+				<button class="btn btr--primary btn--md" id="signinButton">${msg('Confirmar Registro', { id: 'apps.rankup.spa.pages.access.rk.confirm.registration.page.msg.l105c66' })} ${Icons('arrow-right', 16)}</button>
 
 				<section>
 					¿No lo recibiste?
@@ -111,8 +111,8 @@ export class RkConfirmRegistrationPage extends LitElement {
 			</form>
 
 			<footer>
-				${msg('¿Ya tienes cuenta?')}
-				<a href=${path('SIGNIN')}>${msg('Inicia sesión')}</a>
+				${msg('¿Ya tienes cuenta?', { id: 'apps.rankup.spa.pages.access.rk.confirm.registration.page.msg.l114c7' })}
+				<a href=${path('SIGNIN')}>${msg('Inicia sesión', { id: 'apps.rankup.spa.pages.access.rk.confirm.registration.page.msg.l115c33' })}</a>
 			</footer>
 		`;
 	}

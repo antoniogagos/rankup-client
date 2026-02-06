@@ -1,0 +1,6 @@
+{
+	"operationId": "getUserRankedProfile",
+	"params": {
+		"userId": "user-cr7"
+	}
+}

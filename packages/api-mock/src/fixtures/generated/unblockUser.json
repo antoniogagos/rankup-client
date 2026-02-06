@@ -1,0 +1,6 @@
+{
+	"operationId": "unblockUser",
+	"params": {
+		"userId": "string"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"operationId": "muteTournamentChatUser",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+		"userId": "string"
+	},
+	"body": {
+		"mutedUntil": "2019-08-24T14:15:22Z",
+		"reason": "string"
+	}
+}

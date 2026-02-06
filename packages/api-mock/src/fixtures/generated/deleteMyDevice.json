@@ -1,0 +1,6 @@
+{
+	"operationId": "deleteMyDevice",
+	"params": {
+		"deviceId": "string"
+	}
+}

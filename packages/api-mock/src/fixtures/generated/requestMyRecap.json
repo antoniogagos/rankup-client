@@ -1,0 +1,15 @@
+{
+	"operationId": "requestMyRecap",
+	"body": {
+		"type": "tournamentFinal",
+		"context": {
+			"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+			"matchday": 1,
+			"gameModeId": "scorePrediction",
+			"sportId": "football",
+			"tournamentName": "string"
+		},
+		"view": "me",
+		"clientContext": {}
+	}
+}

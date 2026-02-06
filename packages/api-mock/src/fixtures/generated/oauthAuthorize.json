@@ -1,0 +1,8 @@
+{
+	"operationId": "oauthAuthorize",
+	"query": {
+		"provider": "google",
+		"redirectUri": "http://example.com",
+		"state": "stringst"
+	}
+}

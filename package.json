@@ -40,7 +40,7 @@
 		"repo:work-log-verification": "node --import tsx scripts/repo-work-log-verification.ts",
 		"typecheck:api": "tsc -b packages/api packages/api-mock && tsc -b --clean packages/api packages/api-mock",
 		"typecheck:workspace": "tsc -b tsconfig-build.json",
-		"waivers:check": "WAIVERS_MAX_TOTAL=2000 node --import tsx scripts/repo-operation-waivers.ts check",
+		"waivers:check": "WAIVERS_MAX_TOTAL=700 node --import tsx scripts/repo-operation-waivers.ts check",
 		"waivers:report": "node --import tsx scripts/repo-operation-waivers.ts report",
 		"waivers:seed": "node --import tsx scripts/waivers-seed.ts",
 		"start": "yarn workspace @rankup/app start",

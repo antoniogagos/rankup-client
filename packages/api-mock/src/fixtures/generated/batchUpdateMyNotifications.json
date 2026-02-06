@@ -1,0 +1,10 @@
+{
+	"operationId": "batchUpdateMyNotifications",
+	"body": {
+		"action": "markSeen",
+		"notificationIds": [
+			"ntf_01J8W0K7E2ZQZ6P0M4NQW2Y7AF"
+		],
+		"untilCreatedAt": "2019-08-24T14:15:22Z"
+	}
+}

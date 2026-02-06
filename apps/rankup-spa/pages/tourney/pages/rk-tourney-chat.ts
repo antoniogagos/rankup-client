@@ -63,7 +63,7 @@ export class RkTourneyChat extends LitElement {
 			</ul>
 			<div class="input-container">
 				${Icons('happy-emoji', 24)}
-				<input id="textInput" type="text" @keydown=${this._handleTextInput} @change=${this._handleTextInput} class="form-control" placeholder=${msg('Escribe un mensaje aquí')} />
+				<input id="textInput" type="text" @keydown=${this._handleTextInput} @change=${this._handleTextInput} class="form-control" placeholder=${msg('Escribe un mensaje aquí', { id: 'apps.rankup.spa.pages.tourney.pages.rk.tourney.chat.msg.l66c141' })} />
 			</div>
 		`;
 	}

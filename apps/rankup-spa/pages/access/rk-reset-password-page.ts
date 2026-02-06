@@ -79,27 +79,27 @@ export class RkResetPasswordPage extends LitElement {
 		return html`
 			<header>
 				<a class="link--primary go-back-arrow" href=${path('SIGNIN')}>${Icons('arrow-left', 16)}</a>
-				<div>${msg('Restablecer contraseña')}</div>
+				<div>${msg('Restablecer contraseña', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l82c12' })}</div>
 			</header>
 			<form @submit=${this._onFormSubmit}>
 				<section ?hidden=${!!this.emailFromURL}>
 					<div class="input-wrapper">
 						${Icons('email-open', 24)}
-						<input class="form-control" id="email" name="email" type="email" autocomplete="email" placeholder=${msg('Email')} required .value=${this.emailFromURL} />
+						<input class="form-control" id="email" name="email" type="email" autocomplete="email" placeholder=${msg('Email', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l88c107' })} required .value=${this.emailFromURL} />
 					</div>
 				</section>
 
 				<section ?hidden=${!!this.codeFromURL}>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="verificationCode" name="verification-code" type="text" autocomplete="off" placeholder=${msg('Código recibido por email')} required .value=${this.codeFromURL} />
+						<input class="form-control" id="verificationCode" name="verification-code" type="text" autocomplete="off" placeholder=${msg('Código recibido por email', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l95c127' })} required .value=${this.codeFromURL} />
 					</div>
 				</section>
 
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="password" name="current-password" type=${this.showPassword ? 'text' : 'password'} autocomplete="current-password" placeholder=${msg('Contraseña')} aria-describedby="password-constraints" required />
+						<input class="form-control" id="password" name="current-password" type=${this.showPassword ? 'text' : 'password'} autocomplete="current-password" placeholder=${msg('Contraseña', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l102c167' })} aria-describedby="password-constraints" required />
 						<button tab-index="-1" id="togglePassword" @click=${this._togglePassword} type="button" aria-label=${this._showPassword ? 'Hide password' : 'Show password as plain text. Warning: this will display your password on the screen.'}>${Icons(`${this._showPassword ? 'eye-hide' : 'eye'}`, 24)}</button>
 					</div>
 				</section>
@@ -107,14 +107,14 @@ export class RkResetPasswordPage extends LitElement {
 				<section>
 					<div class="input-wrapper">
 						${Icons('privacy', 24)}
-						<input class="form-control" id="repeatPassword" name="current-password" placeholder=${msg('Confirmar contraseña')} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
+						<input class="form-control" id="repeatPassword" name="current-password" placeholder=${msg('Confirmar contraseña', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l110c93' })} type=${this._showPassword ? 'text' : 'password'} autocomplete="current-password" aria-describedby="password-constraints" required />
 					</div>
 				</section>
-				<button class="btn--primary">${msg('Restablecer contraseña')} ${Icons('arrow-right', 16)}</button>
+				<button class="btn--primary">${msg('Restablecer contraseña', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l113c36' })} ${Icons('arrow-right', 16)}</button>
 			</form>
 			<footer>
-				${msg('¿No tienes una cuenta?')}
-				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una')}</a>
+				${msg('¿No tienes una cuenta?', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l116c7' })}
+				<a class="link--primary" href=${path('SIGNUP')}>${msg('Crea una', { id: 'apps.rankup.spa.pages.access.rk.reset.password.page.msg.l117c55' })}</a>
 			</footer>
 		`;
 	}

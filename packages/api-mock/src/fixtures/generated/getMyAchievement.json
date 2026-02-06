@@ -1,0 +1,6 @@
+{
+	"operationId": "getMyAchievement",
+	"params": {
+		"achievementId": "ach_scorePrediction_exact10"
+	}
+}

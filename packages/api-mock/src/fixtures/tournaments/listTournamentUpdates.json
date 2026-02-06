@@ -1,0 +1,6 @@
+{
+	"operationId": "listTournamentUpdates",
+	"params": {
+		"tournamentId": "tourney-1"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"operationId": "getMyRankedTrack",
+	"params": {
+		"rankedTrackId": "rtk_scorePrediction_global"
+	}
+}

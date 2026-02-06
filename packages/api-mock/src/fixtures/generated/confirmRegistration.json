@@ -1,0 +1,7 @@
+{
+	"operationId": "confirmRegistration",
+	"body": {
+		"email": "user@example.com",
+		"code": "string"
+	}
+}

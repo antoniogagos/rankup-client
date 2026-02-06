@@ -1,0 +1,6 @@
+{
+	"operationId": "markMyTournamentInviteSeen",
+	"params": {
+		"inviteId": "string"
+	}
+}

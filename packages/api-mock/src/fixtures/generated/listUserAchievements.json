@@ -1,0 +1,6 @@
+{
+	"operationId": "listUserAchievements",
+	"params": {
+		"userId": "string"
+	}
+}

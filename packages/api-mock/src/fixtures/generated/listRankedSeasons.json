@@ -1,0 +1,6 @@
+{
+	"operationId": "listRankedSeasons",
+	"params": {
+		"rankedTrackId": "rtk_scorePrediction_global"
+	}
+}

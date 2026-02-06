@@ -42,11 +42,11 @@ export class RkSbBetMatch extends LitElement {
 					<div class="card-header--right-content">
 						${hasDerby
 							? html`
-								<div>${msg('Derbi')}</div>
+								<div>${msg('Derbi', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l45c16' })}</div>
 								<img id="derbiLightningImg" src="/assets/images/lightning.svg" alt="Lightning" />
 							`
 							: ''}
-						${hasUpsetOdds ? html` <div>${msg('Sorpresa')} ${Icons('speedometer', 20)}</div> ` : ''}
+						${hasUpsetOdds ? html` <div>${msg('Sorpresa', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l49c37' })} ${Icons('speedometer', 20)}</div> ` : ''}
 					</div>
 				</div>
 				<div class="teams">
@@ -105,11 +105,11 @@ export class RkSbBetMatch extends LitElement {
 							? html`
 								<div>
 									<img id="derbiLightningImg" class="xs" src="/assets/images/lightning.svg" alt="Lightning" />
-									${msg('¡Derbi! Bonus de +5 puntos al acertar resultado exacto')}
+									${msg('¡Derbi! Bonus de +5 puntos al acertar resultado exacto', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l108c12' })}
 								</div>
 							`
 							: ''}
-						${hasUpsetOdds ? html` <div>${Icons('speedometer', 10)} ${msg('¡Sorpresa! Bonus de puntos si empata o gana el Sevilla')}</div> ` : ''}
+						${hasUpsetOdds ? html` <div>${Icons('speedometer', 10)} ${msg('¡Sorpresa! Bonus de puntos si empata o gana el Sevilla', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l112c65' })}</div> ` : ''}
 					</div>
 				`
 				: ''}

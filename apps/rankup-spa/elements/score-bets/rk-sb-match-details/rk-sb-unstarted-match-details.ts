@@ -31,7 +31,7 @@ export class RkSbUnStartedMatchDetails extends LitElement implements Partial<RkS
 				<button id="arrow" @click=${this._onClickGoBack} class="link--primary">${Icons('arrow-left', 20)}</button>
 			</header>
 			<main>
-				<h1 class="text-bold">${msg('Detalles del partido')}</h1>
+				<h1 class="text-bold">${msg('Detalles del partido', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l34c29' })}</h1>
 				<div class="match-date">Hoy 21:00</div>
 				<rk-sb-bet-match class="match" .match=${this.match}></rk-sb-bet-match>
 				<section class="odds">
@@ -55,7 +55,7 @@ export class RkSbUnStartedMatchDetails extends LitElement implements Partial<RkS
 								</svg>
 							</div>
 							<div class="odd-desc text-bold">
-								${msg('Empate')}
+								${msg('Empate', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l58c11' })}
 								<span class="odds-number">30%</span>
 							</div>
 						</div>
@@ -69,7 +69,7 @@ export class RkSbUnStartedMatchDetails extends LitElement implements Partial<RkS
 					</div>
 				</section>
 				<section class="standings">
-					<div class="section-title mb-3">${Icons('target', 20)} ${msg('Temporada actual')}</div>
+					<div class="section-title mb-3">${Icons('target', 20)} ${msg('Temporada actual', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l72c63' })}</div>
 					<div class="section-content">
 						<div class="row">
 							<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
@@ -77,38 +77,38 @@ export class RkSbUnStartedMatchDetails extends LitElement implements Partial<RkS
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number">3º</div>
-							<div class="row-info--text">${msg('Posición')}</div>
+							<div class="row-info--text">${msg('Posición', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l80c38' })}</div>
 							<div class="row-info--number winner">2º</div>
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number">9</div>
-							<div class="row-info--text">${msg('Victorias')}</div>
+							<div class="row-info--text">${msg('Victorias', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l85c38' })}</div>
 							<div class="row-info--number">9</div>
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number">3</div>
-							<div class="row-info--text">${msg('Empates')}</div>
+							<div class="row-info--text">${msg('Empates', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l90c38' })}</div>
 							<div class="row-info--number winner">4</div>
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number">4</div>
-							<div class="row-info--text">${msg('Derrotas')}</div>
+							<div class="row-info--text">${msg('Derrotas', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l95c38' })}</div>
 							<div class="row-info--number winner">2</div>
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number winner">26</div>
-							<div class="row-info--text">${msg('Goles marcados')}</div>
+							<div class="row-info--text">${msg('Goles marcados', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l100c38' })}</div>
 							<div class="row-info--number">25</div>
 						</div>
 						<div class="row row-info">
 							<div class="row-info--number winner">18</div>
-							<div class="row-info--text">${msg('Goles recibidos')}</div>
+							<div class="row-info--text">${msg('Goles recibidos', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l105c38' })}</div>
 							<div class="row-info--number">11</div>
 						</div>
 					</div>
 				</section>
 				<section class="last-matches">
-					<div class="section-title mb-3">${Icons('calendar', 28)} ${msg('Últimos partidos en LaLiga')}</div>
+					<div class="section-title mb-3">${Icons('calendar', 28)} ${msg('Últimos partidos en LaLiga', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l111c65' })}</div>
 					<div class="section-content">
 						<div class="left-column column">
 							<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
@@ -176,7 +176,7 @@ export class RkSbUnStartedMatchDetails extends LitElement implements Partial<RkS
 					</div>
 				</section>
 				<section class="h2h">
-					<div class="section-title mb-3">${Icons('whistle', 28)} ${msg('Enfrentamientos anteriores')}</div>
+					<div class="section-title mb-3">${Icons('whistle', 28)} ${msg('Enfrentamientos anteriores', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.match.details.rk.sb.unstarted.match.details.msg.l179c64' })}</div>
 
 					<div class="section-content">
 						<rk-match-row .match=${this.match}></rk-match-row>

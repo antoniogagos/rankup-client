@@ -399,7 +399,7 @@ Reglas duras:
 
 * `maxWaiversTotal = 0` por defecto (recomendado para P0 una vez migrado).
 * Durante rollout, permitir temporalmente `maxWaiversTotal = N`, con fecha de reducción.
-* Rollout actual: `WAIVERS_MAX_TOTAL=2000` en `waivers:check` (se reduce al cerrar la migración).
+* Rollout actual: `WAIVERS_MAX_TOTAL=700` en `waivers:check` (se reduce al cerrar la migración).
 * CI falla si:
 
   * waiver expirado

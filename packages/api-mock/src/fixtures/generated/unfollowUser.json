@@ -1,0 +1,6 @@
+{
+	"operationId": "unfollowUser",
+	"params": {
+		"userId": "string"
+	}
+}

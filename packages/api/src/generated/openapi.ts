@@ -3166,6 +3166,10 @@ export interface components {
       createdAt?: string;
       /** Format: date-time */
       updatedAt?: string;
+      rulesetId?: components["schemas"]["RulesetId"];
+      formatConfig?: components["schemas"]["TournamentFormatConfig"];
+      headsUpAcceptance?: components["schemas"]["HeadsUpAcceptance"];
+      myMembership?: components["schemas"]["MyMembershipSummary"];
     };
     AdminVerifiedHubConfig: {
       sections: {
@@ -5633,6 +5637,14 @@ export interface components {
       eventCounters?: components["schemas"]["MatchEventCounters"];
       /** Format: date-time */
       lastUpdatedAt?: string;
+      lockState?: components["schemas"]["MatchLockState"];
+      /**
+       * Format: date-time
+       * @description Optional lock time when match is returned in tournament context.
+       */
+      lockAt?: string;
+      /** @description Optional lock reason when match is returned in tournament context. */
+      lockReason?: string;
     };
     MatchPage: {
       items: components["schemas"]["Match"][];
@@ -6050,6 +6062,7 @@ export interface components {
       createdAt?: string;
       /** Format: date-time */
       updatedAt?: string;
+      [key: string]: unknown;
     };
     ScorePredictionPredictionView: {
       matchId: components["schemas"]["MatchId"];
@@ -6075,8 +6088,10 @@ export interface components {
        * Matches not present here are treated as "not submitted".
        */
       predictions: components["schemas"]["ScorePredictionPredictionView"][];
+      [key: string]: unknown;
     };
     GenericMatchdaySubmission: components["schemas"]["MatchdaySubmissionBase"] & {
+      gameModeId?: components["schemas"]["GameModeId"];
       /** @description Generic item list for future modes. */
       items?: {
           [key: string]: unknown;
@@ -6479,12 +6494,17 @@ export interface components {
       createdAt?: string;
       /** Format: date-time */
       updatedAt?: string;
+      rulesetId?: components["schemas"]["RulesetId"];
+      formatConfig?: components["schemas"]["TournamentFormatConfig"];
+      headsUpAcceptance?: components["schemas"]["HeadsUpAcceptance"];
+      myMembership?: components["schemas"]["MyMembershipSummary"];
     };
     Tournament: components["schemas"]["TournamentSummary"] & {
       rulesetId?: components["schemas"]["RulesetId"];
       formatConfig?: components["schemas"]["TournamentFormatConfig"];
       headsUpAcceptance?: components["schemas"]["HeadsUpAcceptance"];
       myMembership?: components["schemas"]["MyMembershipSummary"];
+      [key: string]: unknown;
     };
     TournamentPreview: {
       tournamentId: components["schemas"]["TournamentId"];
@@ -6505,6 +6525,8 @@ export interface components {
       joinPolicy: components["schemas"]["TournamentJoinPolicy"];
       memberCount?: number;
       rewardSummary?: string;
+      /** @description Optional server-computed CTA label. */
+      cta?: string;
     };
     /**
      * @description Sorting mode for discovery.
@@ -6514,6 +6536,7 @@ export interface components {
     TournamentDiscoverCard: components["schemas"]["TournamentPreview"] & {
       /** @description Optional server-computed CTA label. */
       cta?: string;
+      [key: string]: unknown;
     };
     TournamentDiscoverPage: {
       items: components["schemas"]["TournamentDiscoverCard"][];
@@ -6696,6 +6719,13 @@ export interface components {
       /** @description Convenience flag set by the server. */
       isCurrent?: boolean;
       availabilitySummary?: components["schemas"]["MatchdayAvailability"];
+      tournamentId?: components["schemas"]["TournamentId"];
+      /** Format: date-time */
+      serverTime?: string;
+      /** @description Optional convenience pointer. */
+      previousMatchday?: number;
+      /** @description Optional convenience pointer. */
+      nextMatchday?: number;
     };
     TournamentMatchday: components["schemas"]["TournamentMatchdaySummary"] & {
       tournamentId: components["schemas"]["TournamentId"];
@@ -6705,6 +6735,7 @@ export interface components {
       previousMatchday?: number;
       /** @description Optional convenience pointer. */
       nextMatchday?: number;
+      [key: string]: unknown;
     };
     TournamentMatchdayPage: {
       /** Format: date-time */
@@ -6728,6 +6759,7 @@ export interface components {
       lockAt?: string;
       /** @description Optional explanatory reason (server-defined, stable ids recommended). */
       lockReason?: string;
+      [key: string]: unknown;
     };
     TournamentMatchPage: {
       /** Format: date-time */

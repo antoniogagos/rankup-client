@@ -3,6 +3,13 @@ import type * as Api from '@rankup/api';
 import type { ITourneyMatchdaysGateway } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tourneyMatchdaysGateway.js';
 import type * as Domain from '@rankup/rankup/domains/tournaments/matchdays/contracts/types.js';
 
+export const operationOwners = {
+	getTournamentMatchday: 'api.tourney.matchdays.getTournamentMatchday',
+	getTournamentMatchdayAvailability: 'api.tourney.matchdays.getTournamentMatchdayAvailability',
+	listTournamentMatchdayMatches: 'api.tourney.matchdays.listTournamentMatchdayMatches',
+	listTournamentMatchdays: 'api.tourney.matchdays.listTournamentMatchdays',
+} as const;
+
 const mapListTournamentMatchdaysQuery = (
 	query?: Domain.ListTournamentMatchdaysQuery,
 ): Api.ListTournamentMatchdaysQuery | undefined =>

@@ -1,0 +1,6 @@
+{
+	"operationId": "getMyTournamentSeasonRankingWindow",
+	"params": {
+		"tournamentId": "tourney-1"
+	}
+}

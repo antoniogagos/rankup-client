@@ -395,8 +395,77 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 			}
 			case 'listCompetitions':
 				return { query: Object.keys(query).length ? (query as MockHandlerContextMap['listCompetitions']['query']) : undefined };
+			case 'listDiscoverableTournaments':
+				return {
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['listDiscoverableTournaments']['query']) : undefined,
+				};
 			case 'listMyTournaments':
 				return { query: Object.keys(query).length ? (query as MockHandlerContextMap['listMyTournaments']['query']) : undefined };
+			case 'getTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getTournament']['query']) : undefined,
+				};
+			}
+			case 'updateTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId || !body || typeof body !== 'object') return null;
+				return {
+					params: { tournamentId },
+					body: body as MockHandlerContextMap['updateTournament']['body'],
+				};
+			}
+			case 'archiveTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return { params: { tournamentId } };
+			}
+			case 'deleteTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					body: body && typeof body === 'object' ? (body as MockHandlerContextMap['deleteTournament']['body']) : undefined,
+				};
+			}
+			case 'lockTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					body: body && typeof body === 'object' ? (body as MockHandlerContextMap['lockTournament']['body']) : undefined,
+				};
+			}
+			case 'unlockTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return { params: { tournamentId } };
+			}
+			case 'unarchiveTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return { params: { tournamentId } };
+			}
+			case 'transferTournamentOwnership': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId || !body || typeof body !== 'object') return null;
+				const newOwnerUserId = (body as Record<string, unknown>).newOwnerUserId;
+				if (typeof newOwnerUserId !== 'string') return null;
+				return {
+					params: { tournamentId },
+					body: { newOwnerUserId },
+				};
+			}
+			case 'getTournamentRules': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getTournamentRules']['query']) : undefined,
+				};
+			}
 			case 'listTournamentSeasonRanking': {
 				const tournamentId = params.tournamentId;
 				if (!tournamentId) return null;
@@ -414,6 +483,123 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 					params: { tournamentId, matchday },
 					query: Object.keys(query).length ? (query as MockHandlerContextMap['listTournamentMatchdayMatches']['query']) : undefined,
 				};
+			}
+			case 'listTournamentMatchdayRanking': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return {
+					params: { tournamentId, matchday },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['listTournamentMatchdayRanking']['query']) : undefined,
+				};
+			}
+			case 'getMyTournamentSeasonRankingWindow': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getMyTournamentSeasonRankingWindow']['query']) : undefined,
+				};
+			}
+			case 'getMyTournamentMatchdayRankingWindow': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return {
+					params: { tournamentId, matchday },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getMyTournamentMatchdayRankingWindow']['query']) : undefined,
+				};
+			}
+			case 'getMyMatchdayResults': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return {
+					params: { tournamentId, matchday },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getMyMatchdayResults']['query']) : undefined,
+				};
+			}
+			case 'getUserMatchdayResults': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				const userId = params.userId;
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday) || !userId) return null;
+				return {
+					params: { tournamentId, matchday, userId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getUserMatchdayResults']['query']) : undefined,
+				};
+			}
+			case 'getMatchdayResultsSummary': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return {
+					params: { tournamentId, matchday },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['getMatchdayResultsSummary']['query']) : undefined,
+				};
+			}
+			case 'listTournamentUpdates': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['listTournamentUpdates']['query']) : undefined,
+				};
+			}
+			case 'streamTournamentLive': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				return {
+					params: { tournamentId },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['streamTournamentLive']['query']) : undefined,
+				};
+			}
+			case 'listMatchdaySubmissions': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return {
+					params: { tournamentId, matchday },
+					query: Object.keys(query).length ? (query as MockHandlerContextMap['listMatchdaySubmissions']['query']) : undefined,
+				};
+			}
+			case 'getMyMatchdaySubmission': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return { params: { tournamentId, matchday } };
+			}
+			case 'upsertMyMatchdaySubmission': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday) || !body || typeof body !== 'object') return null;
+				return {
+					params: { tournamentId, matchday },
+					body: body as MockHandlerContextMap['upsertMyMatchdaySubmission']['body'],
+				};
+			}
+			case 'clearMyMatchdaySubmission': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
+				return { params: { tournamentId, matchday } };
+			}
+			case 'getUserMatchdaySubmission': {
+				const tournamentId = params.tournamentId;
+				const matchdayRaw = params.matchday;
+				const matchday = Number(matchdayRaw);
+				const userId = params.userId;
+				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday) || !userId) return null;
+				return { params: { tournamentId, matchday, userId } };
 			}
 			case 'oauthAuthorize': {
 				const provider = query.provider;

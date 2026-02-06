@@ -1,0 +1,14 @@
+{
+	"operationId": "updateMyPreferences",
+	"body": {
+		"locale": "string",
+		"country": "string",
+		"timezone": "string",
+		"interests": {
+			"sportIds": [
+				"string"
+			]
+		},
+		"analyticsOptIn": true
+	}
+}

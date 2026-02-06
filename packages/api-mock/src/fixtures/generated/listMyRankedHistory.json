@@ -1,0 +1,6 @@
+{
+	"operationId": "listMyRankedHistory",
+	"params": {
+		"rankedTrackId": "rtk_scorePrediction_global"
+	}
+}

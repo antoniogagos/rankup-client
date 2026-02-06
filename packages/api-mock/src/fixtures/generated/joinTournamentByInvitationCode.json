@@ -1,0 +1,10 @@
+{
+	"operationId": "joinTournamentByInvitationCode",
+	"params": {
+		"code": "AB12CD34"
+	},
+	"body": {
+		"acceptTournamentRules": true,
+		"clientContext": {}
+	}
+}

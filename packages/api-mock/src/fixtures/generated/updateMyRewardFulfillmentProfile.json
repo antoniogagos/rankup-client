@@ -1,0 +1,16 @@
+{
+	"operationId": "updateMyRewardFulfillmentProfile",
+	"body": {
+		"defaultEmail": "user@example.com",
+		"shippingAddress": {
+			"fullName": "string",
+			"line1": "string",
+			"line2": "string",
+			"city": "string",
+			"region": "string",
+			"postalCode": "string",
+			"country": "ES",
+			"phone": "string"
+		}
+	}
+}

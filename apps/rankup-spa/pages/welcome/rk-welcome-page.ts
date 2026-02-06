@@ -12,8 +12,8 @@ export class WelcomePage extends LitElement {
 			<div class="main">
 				<img class="logo" src="/assets/icons/rk-logo.svg" alt="Rankup logo" />
 				<span class="title">Rankup</span>
-				<p>${msg('Juega contra tus amigos prediciendo los resultados')}</p>
-				<a class="btn btn--primary btn--lg" href=${path('SIGNIN')}> ${msg('Jugar ya')} ${Icons('arrow-right', 16)} </a>
+				<p>${msg('Juega contra tus amigos prediciendo los resultados', { id: 'apps.rankup.spa.pages.welcome.rk.welcome.page.msg.l15c10' })}</p>
+				<a class="btn btn--primary btn--lg" href=${path('SIGNIN')}> ${msg('Jugar ya', { id: 'apps.rankup.spa.pages.welcome.rk.welcome.page.msg.l16c67' })} ${Icons('arrow-right', 16)} </a>
 			</div>
 			<picture>
 				<source type="image/avif" srcset="/assets/images/ball-bg.avif" />

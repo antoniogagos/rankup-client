@@ -1,0 +1,7 @@
+{
+	"operationId": "unpinTournamentChatMessage",
+	"params": {
+		"tournamentId": "tourn_01J8VZQ7QJ1Y6T4R3E2W1A0B9C",
+		"messageId": "msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA"
+	}
+}

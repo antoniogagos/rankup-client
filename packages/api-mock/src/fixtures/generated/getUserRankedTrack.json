@@ -1,0 +1,7 @@
+{
+	"operationId": "getUserRankedTrack",
+	"params": {
+		"userId": "user-cr7",
+		"rankedTrackId": "rtk_scorePrediction_global"
+	}
+}
