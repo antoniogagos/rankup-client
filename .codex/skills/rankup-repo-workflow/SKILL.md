@@ -1,9 +1,8 @@
 ---
-name: rankup-repo-workflow
-description: Workflow for Rankup agents: pick the right epic/WP, respect guardrails, record evidence (yarn validate), keep PRs small and conflict-free.
-metadata:
-  owner: rankup
-  scope: workflow
+name: "rankup-repo-workflow"
+description: "Workflow for Rankup agents: pick the right epic/WP, respect guardrails, record evidence (yarn validate), keep PRs small and conflict-free."
+owner: "rankup"
+scope: "workflow"
 ---
 
 # Skill: Rankup repo workflow (entry, WPs, evidence)

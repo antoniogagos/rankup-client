@@ -1,10 +1,9 @@
 ---
-name: rankup-epic-002-di-foundation
-description: Epic 002 DI foundation skill: implement minimal DI primitives (createDecorator, ServiceCollection, SyncDescriptor, InstantiationService) under platform/instantiation.
-metadata:
-  owner: rankup
-  epic: "002"
-  wp: "002-01"
+name: "rankup-epic-002-di-foundation"
+description: "Epic 002 DI foundation skill: implement minimal DI primitives (createDecorator, ServiceCollection, SyncDescriptor, InstantiationService) under platform/instantiation."
+owner: "rankup"
+epic: "002"
+wp: "002-01"
 ---
 
 # Skill: Epic 002 DI foundation (VS Code-grade primitives)
@@ -35,6 +34,11 @@ Implement the minimal DI primitives required by Epic 002:
 -   `packages/platform/src/instantiation/common/descriptors.ts`
 -   `packages/platform/src/instantiation/common/instantiation.ts` (types)
 -   `packages/platform/src/instantiation/common/instantiationService.ts`
+
+## Preconditions
+
+-   Epic 002 exists and WP-002-01 is the active WP.
+-   Repo is green: `yarn validate` passes before changes.
 
 ## Implementation constraints
 

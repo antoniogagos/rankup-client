@@ -1,9 +1,8 @@
 ---
-name: rankup-mock-http-server
-description: HTTP mock server (contract-first, stateful) for Rankup. Use for Epic 006 work packets.
-metadata:
-    owner: rankup
-    scope: mock-server
+name: "rankup-mock-http-server"
+description: "HTTP mock server (contract-first, stateful) for Rankup. Use for Epic 006 work packets."
+owner: "rankup"
+scope: "mock-server"
 ---
 
 # Rankup Skill: HTTP Mock Server (contract-first, VSCode-grade)

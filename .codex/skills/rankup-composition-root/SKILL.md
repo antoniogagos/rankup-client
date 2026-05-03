@@ -1,10 +1,9 @@
 ---
-name: rankup-composition-root
-description: Implement the app composition root for Rankup (single place selecting implementations). Use when registering platform services (Environment, ApiClient) and creating the root InstantiationService; keep UI independent.
-metadata:
-    owner: rankup
-    epic: '002'
-    wp: '002-02'
+name: "rankup-composition-root"
+description: "Implement the app composition root for Rankup (single place selecting implementations). Use when registering platform services (Environment, ApiClient) and creating the root InstantiationService; keep UI independent."
+owner: "rankup"
+epic: "002"
+wp: "002-02"
 ---
 
 # WP-002-02: Composition root skeleton + platform service registration

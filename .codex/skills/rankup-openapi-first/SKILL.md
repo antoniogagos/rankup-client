@@ -1,9 +1,8 @@
 ---
-name: rankup-openapi-first
-description: OpenAPI-first workflow for Rankup. Use when adding/changing endpoints or schemas: edit packages/api/openapi.yaml as source of truth, regenerate @rankup/api artifacts, update api-mock parity, and run yarn validate.
-metadata:
-  owner: rankup
-  scope: api-contract
+ame: "rankup-openapi-first"
+description: "OpenAPI-first workflow for Rankup. Use when adding/changing endpoints or schemas: edit packages/api/openapi.yaml as source of truth, regenerate @rankup/api artifacts, update api-mock parity, and run yarn validate."
+owner: "rankup"
+scope: "api-contract"
 ---
 
 # Rankup: OpenAPI-first workflow

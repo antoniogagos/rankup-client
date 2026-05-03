@@ -1,10 +1,9 @@
 ---
-name: rankup-epic-002-composition-root
-description: Epic 002 composition root skill: register platform/domain services and centralize mock/real selection in compositionRoot.
-metadata:
-  owner: rankup
-  epic: "002"
-  wp: "002-02"
+name: "rankup-epic-002-composition-root"
+description: "Epic 002 composition root skill: register platform/domain services and centralize mock/real selection in compositionRoot."
+owner: "rankup"
+epic: "002"
+wp: "002-02"
 ---
 
 # Skill: Epic 002 composition root (single implementation selector)

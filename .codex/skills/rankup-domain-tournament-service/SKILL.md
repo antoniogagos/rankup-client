@@ -1,10 +1,9 @@
 ---
-name: rankup-domain-tournament-service
-description: Implement a tournament capability service (contract in <capability>/contracts, implementation in <capability>/services) with a matching gateway, and register it in registerTournamentDomainServices.
-metadata:
-    owner: rankup
-    epic: '002'
-    wp: '002-04'
+name: "rankup-domain-tournament-service"
+description: "Implement a tournament capability service (contract in <capability>/contracts, implementation in <capability>/services) with a matching gateway, and register it in registerTournamentDomainServices."
+owner: "rankup"
+epic: "002"
+wp: "002-04"
 ---
 
 # WP-002-04: Domain — Tournament capability services

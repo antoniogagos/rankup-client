@@ -1,9 +1,8 @@
 ---
-name: rankup-engine-testing-vitest
-description: Engine-only Vitest workflow for Rankup Epic 010. Use when adding or refactoring deterministic runtime/algorithm tests under packages/rankup/test without introducing UI/browser tests.
-metadata:
-    owner: rankup
-    scope: engine-testing
+name: "rankup-engine-testing-vitest"
+description: "Engine-only Vitest workflow for Rankup Epic 010. Use when adding or refactoring deterministic runtime/algorithm tests under packages/rankup/test without introducing UI/browser tests."
+owner: "rankup"
+scope: "engine-testing"
 ---
 
 # Rankup Skill: Engine Testing with Vitest

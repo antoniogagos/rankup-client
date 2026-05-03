@@ -1,10 +1,9 @@
 ---
-name: rankup-di-primitives
-description: Implement VS Code-style DI primitives in TypeScript (createDecorator, ServiceCollection, SyncDescriptor, InstantiationService). Use when building or debugging DI foundations under packages/platform/src/instantiation.
-metadata:
-    owner: rankup
-    epic: '002'
-    wp: '002-01'
+name: "rankup-di-primitives"
+description: "Implement VS Code-style DI primitives in TypeScript (createDecorator, ServiceCollection, SyncDescriptor, InstantiationService). Use when building or debugging DI foundations under packages/platform/src/instantiation."
+owner: "rankup"
+epic: "002"
+wp: "002-01"
 ---
 
 # WP-002-01: DI primitives (foundation)

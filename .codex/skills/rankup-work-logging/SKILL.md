@@ -1,9 +1,8 @@
 ---
-name: rankup-work-logging
-description: Work tracking + evidence logging for Rankup. Use when updating docs/work (CURRENT, ROADMAP, epics, log) and recording yarn validate evidence to close WPs/epics reproducibly.
-metadata:
-    owner: rankup
-    scope: work-tracking
+name: "rankup-work-logging"
+description: "Work tracking + evidence logging for Rankup. Use when updating docs/work (CURRENT, ROADMAP, epics, log) and recording yarn validate evidence to close WPs/epics reproducibly."
+owner: "rankup"
+scope: "work-tracking"
 ---
 
 # Rankup: Work tracking + evidence logging

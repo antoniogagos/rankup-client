@@ -1,10 +1,9 @@
 ---
-name: rankup-ui-appservices-bridge
-description: Create a typed UI bridge (AppServices) so UI consumes explicit services without DI or service locator access. Use when wiring composition root output into app-context/bootstrap.
-metadata:
-    owner: rankup
-    epic: '002'
-    wp: '002-03'
+name: "rankup-ui-appservices-bridge"
+description: "Create a typed UI bridge (AppServices) so UI consumes explicit services without DI or service locator access. Use when wiring composition root output into app-context/bootstrap."
+owner: "rankup"
+epic: "002"
+wp: "002-03"
 ---
 
 # WP-002-03: UI bridge — typed AppServices (no service locator)

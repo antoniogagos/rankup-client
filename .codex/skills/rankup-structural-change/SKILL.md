@@ -1,9 +1,8 @@
 ---
-name: rankup-structural-change
-description: Structural change protocol for Rankup. Use when renaming/moving packages, changing boundaries, introducing new layers, or any large refactor: create/update ADRs, follow repo guardrails, keep diffs scoped, and validate.
-metadata:
-  owner: rankup
-  scope: repo-structure
+name: "rankup-structural-change"
+description: "Structural change protocol for Rankup. Use when renaming/moving packages, changing boundaries, introducing new layers, or any large refactor: create/update ADRs, follow repo guardrails."
+owner: "rankup"
+scope: "repo-structure"
 ---
 
 # Rankup: Structural change protocol

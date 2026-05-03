@@ -1,10 +1,9 @@
 ---
-name: rankup-epic-002
-description: Epic 002 execution guide (service layering + DI skeleton). Use when implementing DI primitives, composition root, typed UI bridge (AppServices), tournament capability services (core/matchdays/ranking/etc), or import guardrails for layering.
-metadata:
-    owner: rankup
-    epic: '002'
-    scope: service-layering
+name: "rankup-epic-002"
+description: "Epic 002 execution guide (service layering + DI skeleton). Use when implementing DI primitives, composition root, typed UI bridge (AppServices), tournament capability services (core/matchdays/ranking/etc), or import guardrails for layering."
+owner: "rankup"
+epic: "002"
+scope: "service-layering"
 ---
 
 # Epic 002: Service layering + DI skeleton
@@ -41,7 +40,7 @@ Implement in this order (or equivalent incremental order):
 -   **WP-002-02**: Composition root skeleton + platform service registration (Environment, ApiClient)
 -   **WP-002-03**: UI bridge: typed `AppServices` (no service locator)
 -   **WP-002-04**: Domain: tournament capability services contract + implementation + registration
--   **WP-002-05**: Vertical slice migration: Home uses `ITournamentCoreService`
+-   **WP-002-05**: Vertical slice migration: Home uses ITournamentCoreService
 -   **WP-002-06**: Enforcement: ESLint import restrictions (late in the epic)
 -   **WP-002-07**: Docs + catalog updates
 -   **WP-002-08**: Closeout: work log + status updates

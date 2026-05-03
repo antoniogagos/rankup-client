@@ -1,9 +1,8 @@
 ---
-name: rankup-mock-first
-description: Mock-first workflow for Rankup. Use when implementing features end-to-end before real backend: update api-mock deterministically, keep OpenAPI parity, wire app to mock via composition root, and validate.
-metadata:
-  owner: rankup
-  scope: mock-backend
+name: "rankup-mock-first"
+description: "Mock-first workflow for Rankup. Use when implementing features end-to-end before real backend: update api-mock deterministically, keep OpenAPI parity, wire app to mock via composition root, and validate."
+owner: "rankup"
+scope: "mock-backend"
 ---
 
 # Rankup: Mock-first workflow

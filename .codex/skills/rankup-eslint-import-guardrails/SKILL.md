@@ -1,10 +1,9 @@
 ---
-name: rankup-eslint-import-guardrails
-description: Add ESLint rules to enforce repo layering (UI cannot import platform instantiation, browser implementations, env, or api-mock). Use late in Epic 002 after migrations to avoid blocking progress.
-metadata:
-    owner: rankup
-    epic: '002'
-    wp: '002-06'
+name: "rankup-eslint-import-guardrails"
+description: "Add ESLint rules to enforce repo layering (UI cannot import platform instantiation, browser implementations, env, or api-mock). Use late in Epic 002 after migrations to avoid blocking progress."
+owner: "rankup"
+epic: "002"
+wp: "002-06"
 ---
 
 # WP-002-06: Enforcement — ESLint restrictions
