@@ -1,8 +1,8 @@
-import { ITourneySubmissionsService } from './scorePrediction/contracts/tourneySubmissions.js';
-import { TourneySubmissionsService } from './scorePrediction/services/tourneySubmissionsService.js';
+import { ITournamentSubmissionsService } from './scorePrediction/contracts/tournamentSubmissions.js';
+import { TournamentSubmissionsService } from './scorePrediction/services/tournamentSubmissionsService.js';
 import { SyncDescriptor } from '@rankup/platform/instantiation/common/descriptors.js';
 import { ServiceCollection } from '@rankup/platform/instantiation/common/serviceCollection.js';
 
 export function registerSubmissionsDomainServices(services: ServiceCollection): void {
-	services.set(ITourneySubmissionsService, new SyncDescriptor(TourneySubmissionsService));
+	services.set(ITournamentSubmissionsService, new SyncDescriptor(TournamentSubmissionsService));
 }

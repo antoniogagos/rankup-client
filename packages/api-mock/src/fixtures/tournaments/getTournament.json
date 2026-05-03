@@ -1,6 +1,0 @@
-{
-	"operationId": "getTournament",
-	"params": {
-		"tournamentId": "tourney-1"
-	}
-}

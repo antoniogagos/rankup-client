@@ -1,6 +1,0 @@
-{
-	"operationId": "unlockTournament",
-	"params": {
-		"tournamentId": "tourney-1"
-	}
-}

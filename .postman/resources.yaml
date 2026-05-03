@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: 689086c1-2e92-44b8-8502-3d6b88aa1f0f
+
+localResources:
+  specs: []
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+cloudResources:
+  collections:
+    ../postman/collections/New Collection: 1855806-6782749e-8142-49d1-a587-9f013242fb01
+  specs:
+    ../postman/specs/index.yaml: 48890306-5efd-4ed0-870a-b853c9c71167

@@ -143,17 +143,17 @@ Secuencia de wiring actual:
 | sports | schedule | calendario deportivo | Implemented | `sports.schedule` | `packages/rankup/src/domains/sports/schedule/{models,contracts,services}`; `apps/rankup-spa/services/api/sports/sports-schedule-gateway.ts`; `registerSportsDomainServices.ts` | Sí |
 | rules | gameModes | modos de juego | Implemented | `game.modes` | `packages/rankup/src/domains/rules/gameModes/{models,contracts,services}`; `apps/rankup-spa/services/api/rules/game-modes-gateway.ts`; `registerRulesDomainServices.ts` | Sí |
 | rules | rulesets | reglas versionadas | Implemented | `game.rulesets` | `packages/rankup/src/domains/rules/rulesets/{models,contracts,services}`; `apps/rankup-spa/services/api/rules/rulesets-gateway.ts`; `registerRulesDomainServices.ts` | Sí |
-| tournaments | core | lifecycle + list/create/get | Implemented | `tournaments`, `tournaments.core`, `tournaments.lifecycle` | `packages/rankup/src/domains/tournaments/core/{models,contracts,services,validation}`; `apps/rankup-spa/services/api/tourney/tourney-core-gateway.ts`; `registerTourneyDomainServices.ts` | Sí |
-| tournaments | matchdays | navegación jornadas | Implemented | `tournaments.matchdays` | `packages/rankup/src/domains/tournaments/matchdays/{models,contracts,services}`; `apps/rankup-spa/services/api/tourney/tourney-matchdays-gateway.ts`; `registerTourneyDomainServices.ts` | Sí |
-| tournaments | members | membresía/roles | Implemented | `tournaments.members` | `packages/rankup/src/domains/tournaments/members/{models,contracts,services}`; `apps/rankup-spa/services/api/tourney/tourney-members-gateway.ts`; `registerTourneyDomainServices.ts` | Sí |
-| tournaments | codes | invitation codes | Implemented | `tournaments.invitationCodes` | `packages/rankup/src/domains/tournaments/codes/{models,contracts,services}`; `apps/rankup-spa/services/api/tourney/tourney-invitation-codes-gateway.ts`; `registerTourneyDomainServices.ts` | Sí |
-| tournaments | invites | direct invites + inbox | Implemented | `tournaments.invites`, `me.tournamentInvites` | `packages/rankup/src/domains/tournaments/invites/{models,contracts,services}`; `apps/rankup-spa/services/api/tourney/tourney-invites-gateway.ts`; `registerTourneyDomainServices.ts` | Sí |
+| tournaments | core | lifecycle + list/create/get | Implemented | `tournaments`, `tournaments.core`, `tournaments.lifecycle` | `packages/rankup/src/domains/tournaments/core/{models,contracts,services,validation}`; `apps/rankup-spa/services/api/tournaments/tournament-core-gateway.ts`; `registerTournamentDomainServices.ts` | Sí |
+| tournaments | matchdays | navegación jornadas | Implemented | `tournaments.matchdays` | `packages/rankup/src/domains/tournaments/matchdays/{models,contracts,services}`; `apps/rankup-spa/services/api/tournaments/tournament-matchdays-gateway.ts`; `registerTournamentDomainServices.ts` | Sí |
+| tournaments | members | membresía/roles | Implemented | `tournaments.members` | `packages/rankup/src/domains/tournaments/members/{models,contracts,services}`; `apps/rankup-spa/services/api/tournaments/tournament-members-gateway.ts`; `registerTournamentDomainServices.ts` | Sí |
+| tournaments | codes | invitation codes | Implemented | `tournaments.invitationCodes` | `packages/rankup/src/domains/tournaments/codes/{models,contracts,services}`; `apps/rankup-spa/services/api/tournaments/tournament-invitation-codes-gateway.ts`; `registerTournamentDomainServices.ts` | Sí |
+| tournaments | invites | direct invites + inbox | Implemented | `tournaments.invites`, `me.tournamentInvites` | `packages/rankup/src/domains/tournaments/invites/{models,contracts,services}`; `apps/rankup-spa/services/api/tournaments/tournament-invites-gateway.ts`; `registerTournamentDomainServices.ts` | Sí |
 | tournaments | preview | preview surface | Placeholder | `tournaments.preview` | `packages/rankup/src/domains/tournaments/preview/README.md` | No |
-| submissions | scorePrediction | submissions por jornada | Implemented | `tournaments.submissions` | `packages/rankup/src/domains/submissions/scorePrediction/{models,contracts,services}`; `apps/rankup-spa/services/api/submissions/tourney-submissions-gateway.ts`; `registerSubmissionsDomainServices.ts` | Sí |
-| scoring | ranking | rankings + windows | Implemented | `tournaments.rankings` | `packages/rankup/src/domains/scoring/ranking/{models,contracts,services}`; `apps/rankup-spa/services/api/tourney/tourney-ranking-gateway.ts`; `registerScoringDomainServices.ts` | Sí |
+| submissions | scorePrediction | submissions por jornada | Implemented | `tournaments.submissions` | `packages/rankup/src/domains/submissions/scorePrediction/{models,contracts,services}`; `apps/rankup-spa/services/api/submissions/tournament-submissions-gateway.ts`; `registerSubmissionsDomainServices.ts` | Sí |
+| scoring | ranking | rankings + windows | Implemented | `tournaments.rankings` | `packages/rankup/src/domains/scoring/ranking/{models,contracts,services}`; `apps/rankup-spa/services/api/tournaments/tournament-ranking-gateway.ts`; `registerScoringDomainServices.ts` | Sí |
 | scoring | results | resultados/snapshots | Placeholder | `tournaments.results` | `packages/rankup/src/domains/scoring/results/README.md` | No |
 | scoring | timeline | deltas de ranking | Placeholder | N/A | `packages/rankup/src/domains/scoring/timeline/README.md` | No |
-| engagement | chat | chat + moderación | Implemented | `tournaments.chat`, `tournaments.chatModeration` | `packages/rankup/src/domains/engagement/chat/{models,contracts,services}`; `apps/rankup-spa/services/api/engagement/tourney-chat-gateway.ts`; `registerEngagementDomainServices.ts` | Sí |
+| engagement | chat | chat + moderación | Implemented | `tournaments.chat`, `tournaments.chatModeration` | `packages/rankup/src/domains/engagement/chat/{models,contracts,services}`; `apps/rankup-spa/services/api/engagement/tournament-chat-gateway.ts`; `registerEngagementDomainServices.ts` | Sí |
 | engagement | live | notificaciones/feed | Implemented | `live.notifications`, `live.feed`, `tournaments.live` | `packages/rankup/src/domains/engagement/live/{models,contracts,services}`; `apps/rankup-spa/services/api/engagement/live-gateway.ts`; `registerEngagementDomainServices.ts` | Sí |
 | engagement | updates | SSE/streaming | Implemented | `live.stream` | `packages/rankup/src/domains/engagement/updates/{models,contracts,services}`; `apps/rankup-spa/services/api/engagement/updates-gateway.ts`; `registerEngagementDomainServices.ts` | Sí |
 | engagement | stats | snapshots | Partial | `stats.me`, `stats.users`, `stats.tournaments` | `packages/rankup/src/domains/engagement/stats/{models,contracts,services}`; `apps/rankup-spa/services/api/engagement/stats-gateway.ts`; `registerEngagementDomainServices.ts` | Sí |
@@ -406,14 +406,14 @@ TREECLIP:
 │   │   │   ├── chat
 │   │   │   │   ├── README.md
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyChat.ts
-│   │   │   │   │   ├── tourneyChatGateway.ts
+│   │   │   │   │   ├── tournamentChat.ts
+│   │   │   │   │   ├── tournamentChatGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── chat.ts
 │   │   │   │   │   └── index.ts
 │   │   │   │   └── services
-│   │   │   │       └── tourneyChatService.ts
+│   │   │   │       └── tournamentChatService.ts
 │   │   │   ├── index.ts
 │   │   │   ├── live
 │   │   │   │   ├── README.md
@@ -605,14 +605,14 @@ TREECLIP:
 │   │   │   ├── index.ts
 │   │   │   ├── ranking
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyRanking.ts
-│   │   │   │   │   ├── tourneyRankingGateway.ts
+│   │   │   │   │   ├── tournamentRanking.ts
+│   │   │   │   │   ├── tournamentRankingGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── ranking.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyRankingService.ts
+│   │   │   │   │   └── tournamentRankingService.ts
 │   │   │   │   └── validation
 │   │   │   ├── registerScoringDomainServices.ts
 │   │   │   ├── results
@@ -662,14 +662,14 @@ TREECLIP:
 │   │   │   ├── scorePrediction
 │   │   │   │   ├── README.md
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneySubmissions.ts
-│   │   │   │   │   ├── tourneySubmissionsGateway.ts
+│   │   │   │   │   ├── tournamentSubmissions.ts
+│   │   │   │   │   ├── tournamentSubmissionsGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── submissions.ts
 │   │   │   │   └── services
-│   │   │   │       └── tourneySubmissionsService.ts
+│   │   │   │       └── tournamentSubmissionsService.ts
 │   │   │   └── shared
 │   │   │       ├── README.md
 │   │   │       └── models
@@ -681,26 +681,26 @@ TREECLIP:
 │   │   │   ├── README.md
 │   │   │   ├── codes
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyInvitationCodes.ts
-│   │   │   │   │   ├── tourneyInvitationCodesGateway.ts
+│   │   │   │   │   ├── tournamentInvitationCodes.ts
+│   │   │   │   │   ├── tournamentInvitationCodesGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── invitationCodes.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyInvitationCodesService.ts
+│   │   │   │   │   └── tournamentInvitationCodesService.ts
 │   │   │   │   └── validation
 │   │   │   ├── core
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyCore.ts
-│   │   │   │   │   ├── tourneyCoreGateway.ts
+│   │   │   │   │   ├── tournamentCore.ts
+│   │   │   │   │   ├── tournamentCoreGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   ├── preview.ts
 │   │   │   │   │   └── tournament.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyCoreService.ts
+│   │   │   │   │   └── tournamentCoreService.ts
 │   │   │   │   └── validation
 │   │   │   │       └── validateCreateTournamentRequest.ts
 │   │   │   ├── fixtures
@@ -708,40 +708,40 @@ TREECLIP:
 │   │   │   ├── index.ts
 │   │   │   ├── invites
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyInvites.ts
-│   │   │   │   │   ├── tourneyInvitesGateway.ts
+│   │   │   │   │   ├── tournamentInvites.ts
+│   │   │   │   │   ├── tournamentInvitesGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── invites.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyInvitesService.ts
+│   │   │   │   │   └── tournamentInvitesService.ts
 │   │   │   │   └── validation
 │   │   │   ├── matchdays
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyMatchdays.ts
-│   │   │   │   │   ├── tourneyMatchdaysGateway.ts
+│   │   │   │   │   ├── tournamentMatchdays.ts
+│   │   │   │   │   ├── tournamentMatchdaysGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── matchday.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyMatchdaysService.ts
+│   │   │   │   │   └── tournamentMatchdaysService.ts
 │   │   │   │   └── validation
 │   │   │   ├── members
 │   │   │   │   ├── contracts
-│   │   │   │   │   ├── tourneyMembers.ts
-│   │   │   │   │   ├── tourneyMembersGateway.ts
+│   │   │   │   │   ├── tournamentMembers.ts
+│   │   │   │   │   ├── tournamentMembersGateway.ts
 │   │   │   │   │   └── types.ts
 │   │   │   │   ├── models
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── members.ts
 │   │   │   │   ├── services
-│   │   │   │   │   └── tourneyMembersService.ts
+│   │   │   │   │   └── tournamentMembersService.ts
 │   │   │   │   └── validation
 │   │   │   ├── preview
 │   │   │   │   └── README.md
-│   │   │   ├── registerTourneyDomainServices.ts
+│   │   │   ├── registerTournamentDomainServices.ts
 │   │   │   └── shared
 │   │   │       ├── index.ts
 │   │   │       ├── models
@@ -846,7 +846,7 @@ TREECLIP:
 │   │   ├── README.md
 │   │   ├── game
 │   │   │   └── README.md
-│   │   └── tourney
+│   │   └── tournament
 │   │       └── README.md
 │   └── shared
 │       ├── README.md

@@ -32,6 +32,7 @@ export type ListTournamentMembersQuery = {
 
 export type JoinTournamentParams = {
 	tournamentId: TournamentId;
+	idempotencyKey?: string;
 };
 
 export type JoinTournamentRequest = {

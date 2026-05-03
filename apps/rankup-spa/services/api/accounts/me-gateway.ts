@@ -3,6 +3,22 @@ import type * as Api from '@rankup/api';
 import type { IMeGateway } from '@rankup/rankup/domains/accounts/me/contracts/meGateway.js';
 import type * as Domain from '@rankup/rankup/domains/accounts/me/contracts/types.js';
 
+export const operationOwners = {
+	changeMyPassword: 'api.accounts.me.changeMyPassword',
+	deleteMe: 'api.accounts.me.deleteMe',
+	deleteMyDevice: 'api.accounts.me.deleteMyDevice',
+	getMe: 'api.accounts.me.getMe',
+	getMyNotificationPreferences: 'api.accounts.me.getMyNotificationPreferences',
+	getMyPreferences: 'api.accounts.me.getMyPreferences',
+	getMyPrivacy: 'api.accounts.me.getMyPrivacy',
+	listMyDevices: 'api.accounts.me.listMyDevices',
+	registerMyDevice: 'api.accounts.me.registerMyDevice',
+	updateMe: 'api.accounts.me.updateMe',
+	updateMyNotificationPreferences: 'api.accounts.me.updateMyNotificationPreferences',
+	updateMyPreferences: 'api.accounts.me.updateMyPreferences',
+	updateMyPrivacy: 'api.accounts.me.updateMyPrivacy',
+} as const;
+
 const mapUpdateMeRequest = (request: Domain.UpdateMeRequest): Api.UpdateMeRequest => ({
 	username: request.username,
 	pictureUrl: request.pictureUrl,

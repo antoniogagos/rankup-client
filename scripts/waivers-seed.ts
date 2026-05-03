@@ -22,7 +22,8 @@ type WaiverEntry = {
 	owner: string;
 	issue: string;
 	createdAt: string;
-	expiresOn: string;
+	expiresAt: string;
+	plan: string;
 	scope: string;
 	severity: string;
 };
@@ -37,6 +38,7 @@ const WAIVERS_PATH = resolve(process.cwd(), 'diagnostics/operation-waivers.json'
 const DEFAULT_OWNER = process.env.WAIVERS_OWNER ?? 'rankup-platform';
 const DEFAULT_ISSUE = process.env.WAIVERS_ISSUE ?? 'migration-adr-0056';
 const DEFAULT_REASON = process.env.WAIVERS_REASON ?? 'Seeded by waivers:seed for ADR-0056 rollout.';
+const DEFAULT_PLAN = process.env.WAIVERS_PLAN ?? 'Remove waiver by implementing operation coverage requirements.';
 const DEFAULT_SEVERITY = process.env.WAIVERS_SEVERITY ?? 'P0';
 
 function readJson<T>(path: string): T {
@@ -200,7 +202,7 @@ function loadOwnerOperationIds(operationIds: Set<string>): Set<string> {
 
 function buildWaiver(operationId: string, waiverType: string): WaiverEntry {
 	const createdAt = getDateStamp(new Date());
-	const expiresOn = getDateStamp(addDays(new Date(), 30));
+	const expiresAt = getDateStamp(addDays(new Date(), 30));
 	const scope = waiverType === 'httpFidelityMissing' ? 'http' : waiverType === 'schemaValidationFlaky' ? 'schema' : 'coverage';
 	return {
 		operationId,
@@ -209,7 +211,8 @@ function buildWaiver(operationId: string, waiverType: string): WaiverEntry {
 		owner: DEFAULT_OWNER,
 		issue: DEFAULT_ISSUE,
 		createdAt,
-		expiresOn,
+		expiresAt,
+		plan: DEFAULT_PLAN,
 		scope,
 		severity: DEFAULT_SEVERITY,
 	};

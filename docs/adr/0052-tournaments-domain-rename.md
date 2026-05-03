@@ -1,4 +1,4 @@
-# ADR 0052: Rename tourney domain folder to tournaments
+# ADR 0052: Rename tournament domain folder to tournaments
 
 -   Status: Accepted
 -   Date: 2026-02-03
@@ -7,20 +7,20 @@
 
 ## Context
 
-Rankup Engine is adopting a broader domain partitioning plan. The current domain umbrella is located at `packages/rankup/src/domains/tourney`, but the business language and the partitioning proposal use `tournaments`.
+Rankup Engine is adopting a broader domain partitioning plan. The current domain umbrella is located at `packages/rankup/src/domains/tournament`, but the business language and the partitioning proposal use `tournaments`.
 Keeping the old path creates drift between business terminology and code, and it complicates the upcoming split of domains (tournaments, scoring, submissions, etc.).
 
 ## Decision
 
 Rename the domain folder from:
 
--   `packages/rankup/src/domains/tourney`
+-   `packages/rankup/src/domains/tournament`
 
 to:
 
 -   `packages/rankup/src/domains/tournaments`
 
-Update all imports and docs to the new path with no compatibility shims. Service identifiers (`ITourney*`) remain unchanged for now to minimize churn.
+Update all imports and docs to the new path with no compatibility shims. Service identifiers (`ITournament*`) remain unchanged for now to minimize churn.
 
 ## Constraints
 
@@ -42,7 +42,7 @@ Update all imports and docs to the new path with no compatibility shims. Service
 
 ## Alternatives considered
 
--   Keep `tourney` path and defer rename (rejected: increases drift and future migration cost).
+-   Keep `tournament` path and defer rename (rejected: increases drift and future migration cost).
 -   Add an alias path for backward compatibility (rejected: violates no-legacy/compatibility shims).
 
 ## Implementation plan

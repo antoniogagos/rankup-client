@@ -11,7 +11,7 @@
 -   Note (2026-01-31): API request flow standardized (ADR 0028).
 -   Note (2026-01-31): Lit css closing backtick alignment enforced; lint wrapper runs Prettier on non-TS files (ADR 0024, ADR 0026).
 -   Note (2026-01-31): Validation builds workspace deps for project references (ADR 0030).
--   Note (2026-01-31): UI tourney pages now consume ITourneyService (no IRankupApiClient injection).
+-   Note (2026-01-31): UI tournament pages now consume ITournamentService (no IRankupApiClient injection).
 -   Note (2026-01-31): Legacy app data-service retired (ADR 0031).
 -   Note (2026-01-31): API facade/network request service decision deferred (ADR 0032).
 
@@ -134,7 +134,7 @@ Move UI access to API data through domain services/controllers only.
 -   [x] UI no longer injects `IRankupApiClient` directly.
 -   [x] `rg -n "@service\(IRankupApiClient" packages/app` returns 0.
     -   UI packages = `packages/app/pages/**`, `packages/app/elements/**`, `packages/samba/**` (see `docs/architecture/ui-packages.md`)
--   [x] Domain services expanded to cover tourney pages (matchday, ranking, header/footer).
+-   [x] Domain services expanded to cover tournament pages (matchday, ranking, header/footer).
 -   [x] `yarn validate` PASS recorded.
 
 ---

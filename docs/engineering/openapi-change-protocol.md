@@ -26,6 +26,7 @@ Applies to any change in:
 3. **Update SDK contract exports**
 
 -   Ensure `packages/api/src/generated/openapi.ts` reflects the new spec.
+-   Ensure OpenAPI-derived catalogs remain in sync (`packages/api/src/generated/operations.{ts,json}` and `packages/api/src/generated/match-status-catalog.{ts,json}`).
 -   Update `packages/api/src/client.ts` and `packages/api/src/types.ts` if needed.
 
 4. **Update domain models and contracts**

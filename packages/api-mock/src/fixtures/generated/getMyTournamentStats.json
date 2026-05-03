@@ -1,6 +1,6 @@
 {
 	"operationId": "getMyTournamentStats",
 	"params": {
-		"tournamentId": "tourney-1"
+		"tournamentId": "tournament-1"
 	}
 }

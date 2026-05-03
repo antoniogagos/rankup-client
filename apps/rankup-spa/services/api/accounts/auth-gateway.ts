@@ -3,6 +3,26 @@ import type * as Api from '@rankup/api';
 import type { IAuthGateway } from '@rankup/rankup/domains/accounts/auth/contracts/authGateway.js';
 import type * as Domain from '@rankup/rankup/domains/accounts/auth/contracts/types.js';
 
+export const operationOwners = {
+	confirmPasswordReset: 'api.accounts.auth.confirmPasswordReset',
+	confirmRegistration: 'api.accounts.auth.confirmRegistration',
+	createOauthLink: 'api.accounts.auth.createOauthLink',
+	createSession: 'api.accounts.auth.createSession',
+	deleteOauthLink: 'api.accounts.auth.deleteOauthLink',
+	getAppBootstrap: 'api.meta.config.getAppBootstrap',
+	getAppConfig: 'api.meta.config.getAppConfig',
+	getHealthz: 'api.meta.health.getHealthz',
+	getReadyz: 'api.meta.health.getReadyz',
+	listOauthLinks: 'api.accounts.auth.listOauthLinks',
+	logout: 'api.accounts.auth.logout',
+	oauthAuthorize: 'api.accounts.auth.oauthAuthorize',
+	oauthTokenExchange: 'api.accounts.auth.oauthTokenExchange',
+	refreshSession: 'api.accounts.auth.refreshSession',
+	registerUser: 'api.accounts.auth.registerUser',
+	requestPasswordReset: 'api.accounts.auth.requestPasswordReset',
+	resendRegistrationConfirmation: 'api.accounts.auth.resendRegistrationConfirmation',
+} as const;
+
 const mapRegisterUserRequest = (request: Domain.RegisterUserRequest): Api.RegisterUserRequest => ({
 	email: request.email,
 	password: request.password,

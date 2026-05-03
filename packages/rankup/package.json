@@ -8,5 +8,9 @@
 	},
 	"dependencies": {
 		"@rankup/platform": "workspace:*"
+	},
+	"devDependencies": {
+		"@rankup/base": "workspace:*",
+		"@rankup/testkit": "workspace:*"
 	}
 }

@@ -26,7 +26,7 @@ Introducir un modelo mínimo de servicios (inspirado en VS Code) que habilite:
 
 -   Identificadores de servicio + inyección por constructor (para clases no-UI).
 -   Un único **composition root** que registra implementaciones (mock vs real).
--   Alcance inicial **app-scope**, con camino claro a **scopes** posteriores (p.ej. tourney-scope).
+-   Alcance inicial **app-scope**, con camino claro a **scopes** posteriores (p.ej. tournament-scope).
 -   Migrar **un vertical slice** de UI a consumir un **servicio de dominio/workbench** sin tocar directamente env/fetch/impl API.
 
 ## No-objetivos
@@ -57,8 +57,8 @@ Introducir un modelo mínimo de servicios (inspirado en VS Code) que habilite:
 | WP-002-01 | DI primitives                                      | `packages/app/src/platform/instantiation/common/**`            | WP-002-00               | Bajo   | Bajo                  |
 | WP-002-02 | Composition root + platform registrations          | `packages/app/src/platform/compositionRoot.ts` + `platform/**` | WP-002-01               | Medio  | compositionRoot       |
 | WP-002-03 | UI bridge: AppServices explícito (sin locator)     | `packages/app/lib/app-context.ts` (o nuevo módulo de bridge)   | WP-002-02               | Medio  | app-context/bootstrap |
-| WP-002-04 | Servicio dominio/workbench: ITourneyService        | `packages/app/src/**/tourney/**`                               | WP-002-02               | Medio  | registro servicios    |
-| WP-002-05 | Vertical slice: Home consume ITourneyService       | `packages/app/pages/home/**`                                   | WP-002-03 + WP-002-04   | Medio  | home page             |
+| WP-002-04 | Servicio dominio/workbench: ITournamentService        | `packages/app/src/**/tournament/**`                               | WP-002-02               | Medio  | registro servicios    |
+| WP-002-05 | Vertical slice: Home consume ITournamentService       | `packages/app/pages/home/**`                                   | WP-002-03 + WP-002-04   | Medio  | home page             |
 | WP-002-06 | Enforcement: ESLint import boundaries + allowlists | config ESLint                                                  | WP-002-05               | Alto   | eslint config         |
 | WP-002-07 | Docs + service catalog                             | `docs/architecture/**`                                         | WP-002-02 (API estable) | Bajo   | docs                  |
 | WP-002-08 | UI provider: @service + ProviderService + scopes   | `platform/instantiation/browser/**` + `rk-app`                 | WP-002-02               | Medio  | rk-app/bootstrap      |
@@ -205,7 +205,7 @@ Se centralizó la selección mock/real en `compositionRoot.ts` y se eliminó el 
 
 Exponer a UI un objeto tipado y explícito:
 
--   UI consume `appServices.tourneyService` (o controller equivalente)
+-   UI consume `appServices.tournamentService` (o controller equivalente)
 -   UI NO recibe `InstantiationService`, accessor, ni `ServiceCollection`.
 
 ### Implementación (recomendación)
@@ -230,7 +230,7 @@ UI consume `getAppServices()` en lugar de `getAppContext().apiClient` (no expone
 
 ---
 
-## WP-002-04: Servicio dominio/workbench — ITourneyService
+## WP-002-04: Servicio dominio/workbench — ITournamentService
 
 ### DoR
 
@@ -238,7 +238,7 @@ UI consume `getAppServices()` en lugar de `getAppContext().apiClient` (no expone
 
 ### Objetivo
 
-Introducir `ITourneyService`:
+Introducir `ITournamentService`:
 
 -   contract en `common/` (service id + interface)
 -   impl en `browser/` dependiente solo de `IRankupApiClient` (y quizá `IEnvironmentService` si estrictamente necesario)
@@ -253,15 +253,15 @@ Este servicio es “dominio/workbench” (no UI). Si se decide ubicarlo bajo `sr
 
 ### DoD
 
--   [x] `ITourneyService` registrado y accesible desde el bridge de WP-002-03.
+-   [x] `ITournamentService` registrado y accesible desde el bridge de WP-002-03.
 
 ### Nota (2026-01-30)
 
-`ITourneyService` ya existe (contract en `common/`, impl en `browser/`, registro en `registerDomainServices.ts`).
+`ITournamentService` ya existe (contract en `common/`, impl en `browser/`, registro en `registerDomainServices.ts`).
 
 ---
 
-## WP-002-05: Vertical slice — Home consume ITourneyService
+## WP-002-05: Vertical slice — Home consume ITournamentService
 
 ### DoR
 
@@ -272,7 +272,7 @@ Este servicio es “dominio/workbench” (no UI). Si se decide ubicarlo bajo `sr
 Migrar 1 consumidor real:
 
 -   Home page deja de usar env/fetch/api impl directamente
--   Home obtiene datos vía `appServices.tourneyService.*`
+-   Home obtiene datos vía `appServices.tournamentService.*`
 
 ### Restricciones
 
@@ -291,7 +291,7 @@ Migrar 1 consumidor real:
 
 ### Nota (2026-01-30)
 
-La Home slice ya usa `ITourneyService` vía `getAppServices()` en `rk-tourney-list`.
+La Home slice ya usa `ITournamentService` vía `getAppServices()` en `rk-tournament-list`.
 
 ---
 
@@ -384,7 +384,7 @@ Habilitar inyección de servicios en UI mediante un provider DOM:
 
 ### Nota (2026-01-30)
 
-Se migraron componentes/páginas de tourney a `@service` para `IRankupApiClient` y `ITourneyService`.
+Se migraron componentes/páginas de tournament a `@service` para `IRankupApiClient` y `ITournamentService`.
 Se normalizó el formato inline de decoradores (`@property/@state/@service`) y se agregó guardrail (ADR 0020).
 Se añadieron servicios `IEventBus`/`ISessionManager` y se migraron usos de eventBus/sessionManager en UI a `@service`.
 

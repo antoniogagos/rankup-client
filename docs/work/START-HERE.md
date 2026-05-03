@@ -113,7 +113,7 @@ UI packages SHOULD:
 -   Contracts live in `packages/platform/src/**/common/**`
 -   Implementations live in `packages/platform/src/**/browser/**`
 -   Composition root is the only selector of implementations (mock vs real)
--   Scopes are explicit (app-scope now, tourney-scope later)
+-   Scopes are explicit (app-scope now, tournament-scope later)
 
 ---
 

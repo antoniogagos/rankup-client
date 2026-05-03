@@ -17,7 +17,7 @@ Enable multi-game, multi-sport extensibility via registries and scoped runtimes.
 ## Checklist
 
 -   [ ] Define registries for game modes and sports
--   [ ] Add tourney-scope runtime to resolve game mode implementation
+-   [ ] Add tournament-scope runtime to resolve game mode implementation
 -   [ ] Document extension points and update service catalog
 
 ## Verification

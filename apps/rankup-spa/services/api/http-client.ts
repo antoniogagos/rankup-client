@@ -1,5 +1,6 @@
 import type { AcceptMyTournamentInviteParams, AcceptMyTournamentInviteRequest, AcceptMyTournamentInviteResponse, AuthorizeParams, AuthorizeResponse, CancelTournamentInviteParams, CreateDuelRematchParams, CreateDuelRematchRequest, CreateDuelRematchResponse, CreateDuelRequest, CreateDuelResponse, CreateInvitationCodeRequest, CreateTournamentInvitationCodeParams, CreateTournamentInvitationCodeResponse, CreateTournamentInvitesParams, CreateTournamentInvitesRequest, CreateTournamentInvitesResponse, CreateTournamentRequest, CreateTournamentResponse, DeclineMyTournamentInviteParams, DeclineMyTournamentInviteRequest, DeclineMyTournamentInviteResponse, GetCompetitionParams, GetCompetitionResponse, GetCompetitionSeasonParams, GetCompetitionSeasonResponse, GetGameModeParams, GetGameModeResponse, GetMatchdayMatchesParams, GetMatchdayMatchesQuery, GetMatchdayMatchesResponse, ListMatchdaySubmissionsParams, ListMatchdaySubmissionsQuery, ListMatchdaySubmissionsResponse, GetMyMatchdaySubmissionParams, GetMyMatchdaySubmissionResponse, UpsertMyMatchdaySubmissionParams, UpsertMyMatchdaySubmissionRequest, UpsertMyMatchdaySubmissionResponse, ClearMyMatchdaySubmissionParams, GetUserMatchdaySubmissionParams, GetUserMatchdaySubmissionResponse, GetMatchParams, GetMatchResponse, GetMyTournamentInviteParams, GetMyTournamentInviteQuery, GetMyTournamentInviteResponse, GetMyTournamentInviteUnreadCountResponse, GetRulesetParams, GetRulesetResponse, GetTeamParams, GetTeamResponse, GetTournamentMatchdayAvailabilityParams, GetTournamentMatchdayAvailabilityResponse, GetTournamentMatchdayParams, GetTournamentMatchdayRankingParams, GetTournamentMatchdayRankingQuery, GetTournamentMatchdayRankingResponse, GetTournamentMatchdayRankingWindowParams, GetTournamentMatchdayRankingWindowQuery, GetTournamentMatchdayRankingWindowResponse, GetTournamentMatchdayResponse, GetTournamentPreviewParams, GetTournamentPreviewQuery, GetTournamentPreviewResponse, GetTournamentRankingParams, GetTournamentRankingQuery, GetTournamentRankingResponse, GetTournamentRankingWindowParams, GetTournamentRankingWindowQuery, GetTournamentRankingWindowResponse, GetUserParams, GetUserQuery, GetUserResponse, GetVerifiedEventParams, GetVerifiedEventQuery, GetVerifiedEventResponse, GetVerifiedHubQuery, GetVerifiedHubResponse, GetVerifiedTournamentPreviewParams, GetVerifiedTournamentPreviewResponse, HideMyTournamentInviteParams, JoinTournamentByInvitationCodeParams, JoinTournamentByInvitationCodeRequest, JoinTournamentByInvitationCodeResponse, JoinTournamentParams, JoinTournamentRequest, JoinTournamentResponse, LeaveTournamentParams, ListCompetitionSeasonsParams, ListCompetitionSeasonsResponse, ListCompetitionsQuery, ListCompetitionsResponse, ListGameModesQuery, ListGameModesResponse, ListMatchdayMatchesParams, ListMatchdayMatchesQuery, ListMatchdayMatchesResponse, ListMatchdaysParams, ListMatchdaysQuery, ListMatchdaysResponse, ListMatchEventsParams, ListMatchEventsQuery, ListMatchEventsResponse, ListMyDuelsQuery, ListMyDuelsResponse, ListMyTournamentInvitesQuery, ListMyTournamentInvitesResponse, ListMyTournamentsQuery, ListMyTournamentsResponse, ListRulesetsQuery, ListRulesetsResponse, ListSportsResponse, RegisterUserRequest, RegisterUserResponse, ConfirmRegistrationRequest, ConfirmRegistrationResponse, ResendConfirmationRequest, CreateSessionRequest, CreateSessionResponse, RefreshSessionRequest, RefreshSessionResponse, RequestPasswordResetRequest, ConfirmPasswordResetRequest, GetMeResponse, UpdateMeRequest, UpdateMeResponse, SearchUsersQuery, SearchUsersResponse, ResolveUserByUsernameParams, ResolveUserByUsernameResponse, GetMyRelationshipParams, GetMyRelationshipResponse, ListMyFriendsQuery, ListMyFriendsResponse, ListMyFollowersQuery, ListMyFollowersResponse, ListMyFollowingQuery, ListMyFollowingResponse, FollowUserParams, FollowUserResponse, UnfollowUserParams, ListTournamentInvitationCodesParams, ListTournamentInvitationCodesQuery, ListTournamentInvitationCodesResponse, ListTournamentInvitesParams, ListTournamentInvitesQuery, ListTournamentInvitesResponse, ListTournamentMatchdaysParams, ListTournamentMatchdaysQuery, ListTournamentMatchdaysResponse, ListTournamentMembersParams, ListTournamentMembersQuery, ListTournamentMembersResponse, ListVerifiedEventTournamentsParams, ListVerifiedEventTournamentsQuery, ListVerifiedEventTournamentsResponse, ListVerifiedEventsQuery, ListVerifiedEventsResponse, ListVerifiedTournamentsQuery, ListVerifiedTournamentsResponse, MarkMyTournamentInviteSeenParams, BatchUpdateMyNotificationsRequest, BatchUpdateMyNotificationsResponse, DismissMyNotificationParams, DeleteTournamentChatMessageParams, DeleteTournamentChatMessageRequest, EditTournamentChatMessageParams, EditTournamentChatMessageRequest, EditTournamentChatMessageResponse, GetMyFeedItemParams, GetMyFeedItemResponse, GetMyFeedReadCursorResponse, GetMyNotificationParams, GetMyNotificationQuery, GetMyNotificationResponse, GetMyNotificationUnreadCountQuery, GetMyNotificationUnreadCountResponse, GetMyRecapParams, GetMyRecapResponse, GetMyStatsQuery, GetMyStatsResponse, GetMyTournamentMatchdayStatsParams, GetMyTournamentMatchdayStatsQuery, GetMyTournamentMatchdayStatsResponse, GetMyTournamentStatsParams, GetMyTournamentStatsQuery, GetMyTournamentStatsResponse, GetTournamentChatMessageParams, GetTournamentChatMessageResponse, GetTournamentChatParams, GetTournamentChatResponse, GetTournamentChatReadCursorParams, GetTournamentChatReadCursorResponse, GetTournamentChatUnreadCountParams, GetTournamentChatUnreadCountResponse, GetTournamentMatchdayStatsParams, GetTournamentMatchdayStatsQuery, GetTournamentMatchdayStatsResponse, GetTournamentRecapParams, GetTournamentRecapQuery, GetTournamentRecapResponse, GetTournamentStatsParams, GetTournamentStatsQuery, GetTournamentStatsResponse, GetUserStatsParams, GetUserStatsQuery, GetUserStatsResponse, HideMyRecapParams, ListMyFeedQuery, ListMyFeedResponse, ListMyNotificationsQuery, ListMyNotificationsResponse, ListMyRecapsQuery, ListMyRecapsResponse, ListMyUpdatesQuery, ListMyUpdatesResponse, ListTournamentChatMessagesParams, ListTournamentChatMessagesQuery, ListTournamentChatMessagesResponse, ListTournamentChatMutesParams, ListTournamentChatMutesQuery, ListTournamentChatMutesResponse, ListTournamentChatPinsParams, ListTournamentChatPinsResponse, ListTournamentChatUpdatesParams, ListTournamentChatUpdatesQuery, ListTournamentChatUpdatesResponse, ListTournamentRecapsParams, ListTournamentRecapsQuery, ListTournamentRecapsResponse, MarkMyNotificationReadParams, MarkMyNotificationSeenParams, MuteTournamentChatUserParams, MuteTournamentChatUserRequest, MuteTournamentChatUserResponse, PinTournamentChatMessageParams, PinTournamentChatMessageRequest, PinTournamentChatMessageResponse, ReportTournamentChatContentParams, ReportTournamentChatContentRequest, ReportTournamentChatContentResponse, RequestMyRecapRequest, RequestMyRecapResponse, SendTournamentChatMessageParams, SendTournamentChatMessageRequest, SendTournamentChatMessageResponse, StreamMyLiveUpdatesQuery, StreamMyLiveUpdatesResponse, StreamTournamentChatLiveParams, StreamTournamentChatLiveResponse, UnpinTournamentChatMessageParams, UnmuteTournamentChatUserParams, UpdateMyFeedReadCursorRequest, UpdateMyFeedReadCursorResponse, UpdateTournamentChatReadCursorParams, UpdateTournamentChatReadCursorRequest, UpdateTournamentChatReadCursorResponse, UpdateTournamentChatSettingsParams, UpdateTournamentChatSettingsRequest, UpdateTournamentChatSettingsResponse, RemoveTournamentMemberParams, RemoveTournamentMemberRequest, ResolveInvitationCodeParams, ResolveInvitationCodeResponse, SearchMatchesQuery, SearchMatchesResponse, TokenRequestBody, TokenResponse, UpdateTournamentMemberParams, UpdateTournamentMemberRequest, UpdateTournamentMemberResponse, GetRankedMetaQuery, GetRankedMetaResponse, ListRankedTracksQuery, ListRankedTracksResponse, GetRankedTrackParams, GetRankedTrackQuery, GetRankedTrackResponse, ListRankedSeasonsParams, ListRankedSeasonsQuery, ListRankedSeasonsResponse, GetRankedSeasonParams, GetRankedSeasonQuery, GetRankedSeasonResponse, GetRankedLeaderboardParams, GetRankedLeaderboardQuery, GetRankedLeaderboardResponse, GetRankedSeasonLeaderboardParams, GetRankedSeasonLeaderboardQuery, GetRankedSeasonLeaderboardResponse, GetMyRankedProfileQuery, GetMyRankedProfileResponse, GetMyRankedSettingsResponse, UpdateMyRankedSettingsRequest, UpdateMyRankedSettingsResponse, GetMyRankedTrackParams, GetMyRankedTrackQuery, GetMyRankedTrackResponse, ListMyRankedHistoryParams, ListMyRankedHistoryQuery, ListMyRankedHistoryResponse, GetUserRankedProfileParams, GetUserRankedProfileQuery, GetUserRankedProfileResponse, GetUserRankedTrackParams, GetUserRankedTrackQuery, GetUserRankedTrackResponse, GetAchievementMetaQuery, GetAchievementMetaResponse, ListAchievementDefinitionsQuery, ListAchievementDefinitionsResponse, GetAchievementDefinitionParams, GetAchievementDefinitionQuery, GetAchievementDefinitionResponse, ListMyAchievementsQuery, ListMyAchievementsResponse, ListMyUnlockedAchievementsQuery, ListMyUnlockedAchievementsResponse, GetMyAchievementParams, GetMyAchievementQuery, GetMyAchievementResponse, ListUserAchievementsParams, ListUserAchievementsQuery, ListUserAchievementsResponse, CreateUploadRequest, CreateUploadResponse, GetUploadParams, GetUploadResponse, AbortUploadParams, CompleteUploadParams, CompleteUploadRequest, CompleteUploadResponse, GetMediaParams, GetMediaQuery, GetMediaResponse, DeleteMediaParams, ListTrustPoliciesQuery, ListTrustPoliciesResponse, GetTrustPolicyParams, GetTrustPolicyResponse, GetMyEnforcementStatusResponse, ListMyAppealsQuery, ListMyAppealsResponse, CreateMyAppealRequest, CreateMyAppealResponse, GetMyAppealParams, GetMyAppealResponse, ListMyReportsQuery, ListMyReportsResponse, CreateReportRequest, CreateReportResponse, GetMyReportParams, GetMyReportResponse, ListMyTrustBlocksQuery, ListMyTrustBlocksResponse, ListPromotionsQuery, ListPromotionsResponse, GetPromotionParams, GetPromotionQuery, GetPromotionResponse, ListPromotionWinnersParams, ListPromotionWinnersQuery, ListPromotionWinnersResponse, GetMyPromotionStatusParams, GetMyPromotionStatusResponse, OptInToPromotionParams, OptInToPromotionRequest, OptInToPromotionResponse, OptOutFromPromotionParams, ListMyPromotionsQuery, ListMyPromotionsResponse, ListMyRewardsQuery, ListMyRewardsResponse, GetMyRewardParams, GetMyRewardQuery, GetMyRewardResponse, ClaimMyRewardParams, ClaimMyRewardRequest, ClaimMyRewardResponse, GetMyRewardFulfillmentProfileResponse, UpdateMyRewardFulfillmentProfileRequest, UpdateMyRewardFulfillmentProfileResponse, ListCreatorsQuery, ListCreatorsResponse, GetCreatorParams, GetCreatorQuery, GetCreatorResponse, GetCreatorHubParams, GetCreatorHubQuery, GetCreatorHubResponse, ListCreatorEventsParams, ListCreatorEventsQuery, ListCreatorEventsResponse, ListCreatorTournamentsParams, ListCreatorTournamentsQuery, ListCreatorTournamentsResponse, ListCreatorCollectionsParams, ListCreatorCollectionsQuery, ListCreatorCollectionsResponse, GetCreatorCollectionParams, GetCreatorCollectionQuery, GetCreatorCollectionResponse, RankupApiClient } from '@rankup/api';
 import { operations } from '@rankup/api/generated/operations.js';
+import { mapProblemToDomainError } from './problem/mapProblemToDomainError.js';
 
 export type HttpClientOptions = {
 	apiBaseUrl: string;
@@ -64,6 +65,52 @@ function hasPathParams(pathTemplate: string): boolean {
 	return /\{[^}]+\}/.test(pathTemplate);
 }
 
+function toHttpStatusTitle(status: number, statusText: string): string {
+	return statusText || `HTTP ${status}`;
+}
+
+function normalizeHttpErrorPayload(payload: unknown, response: Response): Record<string, unknown> {
+	const title = toHttpStatusTitle(response.status, response.statusText);
+	if (typeof payload === 'string') {
+		return {
+			status: response.status,
+			title,
+			detail: payload,
+		};
+	}
+	if (typeof payload === 'object' && payload !== null) {
+		const normalized = { ...(payload as Record<string, unknown>) };
+		if (typeof normalized.status !== 'number') {
+			normalized.status = response.status;
+		}
+		if (typeof normalized.title !== 'string') {
+			normalized.title = title;
+		}
+		if (typeof normalized.detail !== 'string' && typeof normalized.message === 'string') {
+			normalized.detail = normalized.message;
+		}
+		return normalized;
+	}
+	return {
+		status: response.status,
+		title,
+	};
+}
+
+async function readHttpErrorPayload(response: Response): Promise<unknown> {
+	const contentType = normalizeContentType(response.headers.get('content-type'));
+	if (contentType.includes('json') || contentType.endsWith('+json')) {
+		return response.json().catch(() => undefined);
+	}
+	return response.text().catch(() => '');
+}
+
+async function throwHttpProblem(response: Response): Promise<never> {
+	const payload = await readHttpErrorPayload(response);
+	const normalizedPayload = normalizeHttpErrorPayload(payload, response);
+	throw mapProblemToDomainError(normalizedPayload);
+}
+
 export function createHttpRankupApiClient(options: HttpClientOptions): RankupApiClient {
 	const apiBaseUrl = normalizeBaseUrl(options.apiBaseUrl);
 	const authBaseUrl = options.authBaseUrl ? normalizeBaseUrl(options.authBaseUrl) : '';
@@ -72,7 +119,7 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 	async function getJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 		const resp = await fetchFn(input, init);
 		if (!resp.ok) {
-			throw new Error(`HTTP ${resp.status}`);
+			await throwHttpProblem(resp);
 		}
 		return (await resp.json()) as T;
 	}
@@ -80,7 +127,7 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 	async function getText(input: RequestInfo, init?: RequestInit): Promise<string> {
 		const resp = await fetchFn(input, init);
 		if (!resp.ok) {
-			throw new Error(`HTTP ${resp.status}`);
+			await throwHttpProblem(resp);
 		}
 		return resp.text();
 	}
@@ -88,7 +135,7 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 	async function sendVoid(input: RequestInfo, init?: RequestInit): Promise<void> {
 		const resp = await fetchFn(input, init);
 		if (!resp.ok) {
-			throw new Error(`HTTP ${resp.status}`);
+			await throwHttpProblem(resp);
 		}
 	}
 
@@ -979,19 +1026,30 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 			const url = new URL(
 				`${apiBaseUrl}/tournaments/${encodeURIComponent(params.tournamentId)}/matchdays/${encodeURIComponent(String(params.matchday))}/submissions/me`,
 			);
+			const headers = createJsonHeaders(options.getAccessToken);
 			return getJson<UpsertMyMatchdaySubmissionResponse>(url.toString(), {
 				method: 'PUT',
 				body: JSON.stringify(body),
-				headers: createJsonHeaders(options.getAccessToken),
+				headers: {
+					...headers,
+					...(params.idempotencyKey ? { 'X-Idempotency-Key': params.idempotencyKey } : {}),
+					...(params.ifMatch ? { 'If-Match': params.ifMatch } : {}),
+				},
 			});
 		},
 		async clearMyMatchdaySubmission(params: ClearMyMatchdaySubmissionParams): Promise<void> {
 			const url = new URL(
 				`${apiBaseUrl}/tournaments/${encodeURIComponent(params.tournamentId)}/matchdays/${encodeURIComponent(String(params.matchday))}/submissions/me`,
 			);
+			const headers = createHeaders(options.getAccessToken);
 			return sendVoid(url.toString(), {
 				method: 'DELETE',
-				headers: createHeaders(options.getAccessToken),
+				headers: params.idempotencyKey
+					? {
+						...headers,
+						'X-Idempotency-Key': params.idempotencyKey,
+					}
+					: headers,
 			});
 		},
 		async getUserMatchdaySubmission(params: GetUserMatchdaySubmissionParams): Promise<GetUserMatchdaySubmissionResponse> {
@@ -1011,10 +1069,16 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 		},
 		async joinTournament(params: JoinTournamentParams, body?: JoinTournamentRequest): Promise<JoinTournamentResponse> {
 			const url = new URL(`${apiBaseUrl}/tournaments/${encodeURIComponent(params.tournamentId)}/members/me`);
+			const headers = body ? createJsonHeaders(options.getAccessToken) : createHeaders(options.getAccessToken);
 			return getJson<JoinTournamentResponse>(url.toString(), {
 				method: 'PUT',
 				body: body ? JSON.stringify(body) : undefined,
-				headers: body ? createJsonHeaders(options.getAccessToken) : createHeaders(options.getAccessToken),
+				headers: params.idempotencyKey
+					? {
+						...headers,
+						'X-Idempotency-Key': params.idempotencyKey,
+					}
+					: headers,
 			});
 		},
 		async leaveTournament(params: LeaveTournamentParams): Promise<void> {
@@ -1079,10 +1143,16 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 			body?: JoinTournamentByInvitationCodeRequest,
 		): Promise<JoinTournamentByInvitationCodeResponse> {
 			const url = new URL(`${apiBaseUrl}/invitation-codes/${encodeURIComponent(params.code)}/members/me`);
+			const headers = body ? createJsonHeaders(options.getAccessToken) : createHeaders(options.getAccessToken);
 			return getJson<JoinTournamentByInvitationCodeResponse>(url.toString(), {
 				method: 'PUT',
 				body: body ? JSON.stringify(body) : undefined,
-				headers: body ? createJsonHeaders(options.getAccessToken) : createHeaders(options.getAccessToken),
+				headers: params.idempotencyKey
+					? {
+						...headers,
+						'X-Idempotency-Key': params.idempotencyKey,
+					}
+					: headers,
 			});
 		},
 		async listTournamentInvites(params: ListTournamentInvitesParams, query?: ListTournamentInvitesQuery): Promise<ListTournamentInvitesResponse> {
@@ -1173,9 +1243,13 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 				provider: params.provider,
 				redirectUri: params.redirectUri,
 				state: params.state,
-				codeChallenge: params.codeChallenge ?? '',
-				codeChallengeMethod: params.codeChallengeMethod ?? '',
 			});
+			if (params.codeChallenge) {
+				query.set('codeChallenge', params.codeChallenge);
+			}
+			if (params.codeChallengeMethod) {
+				query.set('codeChallengeMethod', params.codeChallengeMethod);
+			}
 			const baseUrl = authBaseUrl || apiBaseUrl;
 			const url = `${baseUrl}/auth/oauth/authorize?${query.toString()}`;
 			const resp = await fetchFn(url, { redirect: 'manual' });
@@ -1568,6 +1642,13 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 	};
 
 	const operationIdClient = client as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
+	operationIdClient.getUserPublicProfile = (params?: unknown, query?: unknown) =>
+		client.getUser(params as GetUserParams, query as GetUserQuery | undefined);
+	operationIdClient.oauthAuthorize = (params?: unknown) =>
+		client.authorize(params as AuthorizeParams);
+	operationIdClient.oauthTokenExchange = (body?: unknown) =>
+		client.token(body as TokenRequestBody);
+
 	for (const operation of Object.values(operations)) {
 		if (operation.path.startsWith('/admin') || operation.tags.some(tag => tag.startsWith('admin.'))) {
 			continue;
@@ -1604,21 +1685,21 @@ export function createHttpRankupApiClient(options: HttpClientOptions): RankupApi
 			}
 
 			const url = new URL(`${apiBaseUrl}${buildPathFromTemplate(operation.path, params)}`);
-			applyQuery(url, query);
+				applyQuery(url, query);
 
-			const headers = body === undefined ? createHeaders(options.getAccessToken) : createJsonHeaders(options.getAccessToken);
-			const response = await fetchFn(url.toString(), {
-				method,
-				redirect: 'manual',
-				headers,
-				body: body === undefined ? undefined : JSON.stringify(body),
-			});
-			if (response.status < 200 || response.status >= 400) {
-				throw new Error(`HTTP ${response.status}`);
-			}
-			if (response.status === 204) {
-				return undefined;
-			}
+				const headers = body === undefined ? createHeaders(options.getAccessToken) : createJsonHeaders(options.getAccessToken);
+				const response = await fetchFn(url.toString(), {
+					method,
+					redirect: 'manual',
+					headers,
+					body: body === undefined ? undefined : JSON.stringify(body),
+				});
+				if (response.status < 200 || response.status >= 400) {
+					await throwHttpProblem(response);
+				}
+				if (response.status === 204) {
+					return undefined;
+				}
 			const contentType = normalizeContentType(response.headers.get('content-type'));
 			if (contentType === 'text/event-stream') {
 				return response.text();

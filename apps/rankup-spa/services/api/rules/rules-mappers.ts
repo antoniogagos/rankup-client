@@ -1,4 +1,6 @@
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as GameModes from '@rankup/rankup/domains/rules/gameModes/contracts/types.js';
 import type * as Rulesets from '@rankup/rankup/domains/rules/rulesets/contracts/types.js';
 
@@ -83,3 +85,5 @@ function mapRulesetSummary(item: Api.ListRulesetsResponse['items'][number]): Rul
 		publishedAt: item.publishedAt,
 	};
 }
+
+export const mapRulesProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

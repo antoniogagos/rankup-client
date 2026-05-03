@@ -12,10 +12,12 @@ import type { IGameModesService as IGameModesServiceContract } from '@rankup/ran
 import { IGameModesService } from '@rankup/rankup/domains/rules/gameModes/contracts/gameModes.js';
 import type { IRulesetsService as IRulesetsServiceContract } from '@rankup/rankup/domains/rules/rulesets/contracts/rulesets.js';
 import { IRulesetsService } from '@rankup/rankup/domains/rules/rulesets/contracts/rulesets.js';
-import type { ITourneyRankingService as ITourneyRankingServiceContract } from '@rankup/rankup/domains/scoring/ranking/contracts/tourneyRanking.js';
-import { ITourneyRankingService } from '@rankup/rankup/domains/scoring/ranking/contracts/tourneyRanking.js';
-import type { ITourneyChatService as ITourneyChatServiceContract } from '@rankup/rankup/domains/engagement/chat/contracts/tourneyChat.js';
-import { ITourneyChatService } from '@rankup/rankup/domains/engagement/chat/contracts/tourneyChat.js';
+import type { ITournamentRankingService as ITournamentRankingServiceContract } from '@rankup/rankup/domains/scoring/ranking/contracts/tournamentRanking.js';
+import { ITournamentRankingService } from '@rankup/rankup/domains/scoring/ranking/contracts/tournamentRanking.js';
+import type { ITournamentResultsService as ITournamentResultsServiceContract } from '@rankup/rankup/domains/scoring/results/contracts/tournamentResults.js';
+import { ITournamentResultsService } from '@rankup/rankup/domains/scoring/results/contracts/tournamentResults.js';
+import type { ITournamentChatService as ITournamentChatServiceContract } from '@rankup/rankup/domains/engagement/chat/contracts/tournamentChat.js';
+import { ITournamentChatService } from '@rankup/rankup/domains/engagement/chat/contracts/tournamentChat.js';
 import type { ILiveService as ILiveServiceContract } from '@rankup/rankup/domains/engagement/live/contracts/live.js';
 import { ILiveService } from '@rankup/rankup/domains/engagement/live/contracts/live.js';
 import type { IRecapsService as IRecapsServiceContract } from '@rankup/rankup/domains/engagement/recaps/contracts/recaps.js';
@@ -60,26 +62,27 @@ import type { ISportsCatalogService as ISportsCatalogServiceContract } from '@ra
 import { ISportsCatalogService } from '@rankup/rankup/domains/sports/catalog/contracts/sportsCatalog.js';
 import type { ISportsScheduleService as ISportsScheduleServiceContract } from '@rankup/rankup/domains/sports/schedule/contracts/sportsSchedule.js';
 import { ISportsScheduleService } from '@rankup/rankup/domains/sports/schedule/contracts/sportsSchedule.js';
-import type { ITourneySubmissionsService as ITourneySubmissionsServiceContract } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tourneySubmissions.js';
-import { ITourneySubmissionsService } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tourneySubmissions.js';
-import type { ITourneyInvitationCodesService as ITourneyInvitationCodesServiceContract } from '@rankup/rankup/domains/tournaments/codes/contracts/tourneyInvitationCodes.js';
-import { ITourneyInvitationCodesService } from '@rankup/rankup/domains/tournaments/codes/contracts/tourneyInvitationCodes.js';
-import type { ITourneyCoreService as ITourneyCoreServiceContract } from '@rankup/rankup/domains/tournaments/core/contracts/tourneyCore.js';
-import { ITourneyCoreService } from '@rankup/rankup/domains/tournaments/core/contracts/tourneyCore.js';
-import type { ITourneyInvitesService as ITourneyInvitesServiceContract } from '@rankup/rankup/domains/tournaments/invites/contracts/tourneyInvites.js';
-import { ITourneyInvitesService } from '@rankup/rankup/domains/tournaments/invites/contracts/tourneyInvites.js';
-import type { ITourneyMatchdaysService as ITourneyMatchdaysServiceContract } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tourneyMatchdays.js';
-import { ITourneyMatchdaysService } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tourneyMatchdays.js';
-import type { ITourneyMembersService as ITourneyMembersServiceContract } from '@rankup/rankup/domains/tournaments/members/contracts/tourneyMembers.js';
-import { ITourneyMembersService } from '@rankup/rankup/domains/tournaments/members/contracts/tourneyMembers.js';
+import type { ITournamentSubmissionsService as ITournamentSubmissionsServiceContract } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tournamentSubmissions.js';
+import { ITournamentSubmissionsService } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tournamentSubmissions.js';
+import type { ITournamentInvitationCodesService as ITournamentInvitationCodesServiceContract } from '@rankup/rankup/domains/tournaments/codes/contracts/tournamentInvitationCodes.js';
+import { ITournamentInvitationCodesService } from '@rankup/rankup/domains/tournaments/codes/contracts/tournamentInvitationCodes.js';
+import type { ITournamentCoreService as ITournamentCoreServiceContract } from '@rankup/rankup/domains/tournaments/core/contracts/tournamentCore.js';
+import { ITournamentCoreService } from '@rankup/rankup/domains/tournaments/core/contracts/tournamentCore.js';
+import type { ITournamentInvitesService as ITournamentInvitesServiceContract } from '@rankup/rankup/domains/tournaments/invites/contracts/tournamentInvites.js';
+import { ITournamentInvitesService } from '@rankup/rankup/domains/tournaments/invites/contracts/tournamentInvites.js';
+import type { ITournamentMatchdaysService as ITournamentMatchdaysServiceContract } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tournamentMatchdays.js';
+import { ITournamentMatchdaysService } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tournamentMatchdays.js';
+import type { ITournamentMembersService as ITournamentMembersServiceContract } from '@rankup/rankup/domains/tournaments/members/contracts/tournamentMembers.js';
+import { ITournamentMembersService } from '@rankup/rankup/domains/tournaments/members/contracts/tournamentMembers.js';
 
-export type TourneyServices = {
-	core: ITourneyCoreServiceContract;
-	matchdays: ITourneyMatchdaysServiceContract;
-	ranking: ITourneyRankingServiceContract;
-	members: ITourneyMembersServiceContract;
-	codes: ITourneyInvitationCodesServiceContract;
-	invites: ITourneyInvitesServiceContract;
+export type TournamentServices = {
+	core: ITournamentCoreServiceContract;
+	matchdays: ITournamentMatchdaysServiceContract;
+	ranking: ITournamentRankingServiceContract;
+	results: ITournamentResultsServiceContract;
+	members: ITournamentMembersServiceContract;
+	codes: ITournamentInvitationCodesServiceContract;
+	invites: ITournamentInvitesServiceContract;
 };
 
 export type SportsServices = {
@@ -93,7 +96,7 @@ export type RulesServices = {
 };
 
 export type SubmissionsServices = {
-	matchdays: ITourneySubmissionsServiceContract;
+	matchdays: ITournamentSubmissionsServiceContract;
 };
 
 export type AccountsServices = {
@@ -104,7 +107,7 @@ export type AccountsServices = {
 };
 
 export type EngagementServices = {
-	chat: ITourneyChatServiceContract;
+	chat: ITournamentChatServiceContract;
 	live: ILiveServiceContract;
 	recaps: IRecapsServiceContract;
 	stats: IStatsServiceContract;
@@ -149,7 +152,7 @@ export type CreatorsServices = {
 };
 
 export type AppServices = {
-	tourney: TourneyServices;
+	tournament: TournamentServices;
 	sports: SportsServices;
 	rules: RulesServices;
 	submissions: SubmissionsServices;
@@ -166,22 +169,23 @@ export type AppServices = {
 };
 
 export function createAppServices(instantiationService: IInstantiationService): AppServices {
-	const core = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyCoreService));
-	const matchdays = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyMatchdaysService));
-	const ranking = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyRankingService));
-	const members = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyMembersService));
-	const codes = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyInvitationCodesService));
-	const invites = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyInvitesService));
+	const core = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentCoreService));
+	const matchdays = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentMatchdaysService));
+	const ranking = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentRankingService));
+	const results = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentResultsService));
+	const members = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentMembersService));
+	const codes = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentInvitationCodesService));
+	const invites = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentInvitesService));
 	const catalog = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ISportsCatalogService));
 	const schedule = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ISportsScheduleService));
 	const gameModes = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IGameModesService));
 	const rulesets = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IRulesetsService));
-	const submissions = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneySubmissionsService));
+	const submissions = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentSubmissionsService));
 	const auth = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IAuthService));
 	const me = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IMeService));
 	const users = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IUsersService));
 	const social = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ISocialService));
-	const chat = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITourneyChatService));
+	const chat = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ITournamentChatService));
 	const live = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ILiveService));
 	const recaps = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IRecapsService));
 	const stats = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(IStatsService));
@@ -205,10 +209,11 @@ export function createAppServices(instantiationService: IInstantiationService): 
 	const sessionManager = instantiationService.invokeFunction((accessor: ServicesAccessor) => accessor.get(ISessionManager));
 
 	return {
-		tourney: {
+		tournament: {
 			core,
 			matchdays,
 			ranking,
+			results,
 			members,
 			codes,
 			invites,

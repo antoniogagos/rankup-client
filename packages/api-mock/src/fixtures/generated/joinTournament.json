@@ -1,11 +1,14 @@
 {
 	"operationId": "joinTournament",
 	"params": {
-		"tournamentId": "tourney-1"
+		"tournamentId": "tournament-1",
+		"idempotencyKey": "fixture-join-tournament-key-1"
 	},
 	"body": {
-		"invitationCode": "string",
+		"invitationCode": "AB12CD34",
 		"acceptTournamentRules": true,
-		"clientContext": {}
+		"clientContext": {
+			"source": "parity-fixture"
+		}
 	}
 }

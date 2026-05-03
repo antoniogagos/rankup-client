@@ -1,6 +1,0 @@
-{
-	"operationId": "listTournamentSeasonRanking",
-	"params": {
-		"tournamentId": "tourney-1"
-	}
-}

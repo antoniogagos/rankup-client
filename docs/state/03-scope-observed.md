@@ -3,7 +3,7 @@
 ## High-level summary
 
 -   Web client for Rankup with public and authenticated flows.
--   Core flow centers on tournaments (tourneys) and match result predictions.
+-   Core flow centers on tournaments (tournaments) and match result predictions.
 -   packages/api/openapi.yaml is ALWAYS the source of truth for the API (maintainers decision). The frontend may extend the spec ahead of backend implementation.
 
 ## Pages and screens (observed)
@@ -18,15 +18,15 @@ Public:
 
 Authenticated:
 
--   Home / tourney list
--   Create tourney
--   Join tourney
--   Tourney shell with tabs:
+-   Home / tournament list
+-   Create tournament
+-   Join tournament
+-   Tournament shell with tabs:
     -   Matchday (fixtures + betting)
     -   Ranking (season or matchday)
     -   Chat (local list)
-    -   Share tourney
-    -   Settings (notification toggles, leave tourney)
+    -   Share tournament
+    -   Settings (notification toggles, leave tournament)
     -   Rules / scoring system
 
 ## Game modes (observed)

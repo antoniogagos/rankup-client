@@ -1,41 +1,6 @@
-import type { AuthorizeParams, AuthorizeResponse, ClearMyMatchdaySubmissionParams, CreateDuelRematchParams, CreateDuelRematchRequest, CreateDuelRematchResponse, CreateDuelRequest, CreateDuelResponse, CreateTournamentRequest, CreateTournamentResponse, GetMatchdayMatchesParams, GetMatchdayMatchesQuery, GetMatchdayMatchesResponse, GetMyMatchdaySubmissionParams, GetMyMatchdaySubmissionResponse, GetTournamentMatchdayRankingParams, GetTournamentMatchdayRankingQuery, GetTournamentMatchdayRankingResponse, GetTournamentMatchdayRankingWindowParams, GetTournamentMatchdayRankingWindowQuery, GetTournamentMatchdayRankingWindowResponse, GetTournamentRankingParams, GetTournamentRankingQuery, GetTournamentRankingResponse, GetTournamentRankingWindowParams, GetTournamentRankingWindowQuery, GetTournamentRankingWindowResponse, GetUserMatchdaySubmissionParams, GetUserMatchdaySubmissionResponse, GetUserParams, GetUserQuery, GetUserResponse, ListCompetitionsQuery, ListCompetitionsResponse, ListMatchdaySubmissionsParams, ListMatchdaySubmissionsQuery, ListMatchdaySubmissionsResponse, ListMyDuelsQuery, ListMyDuelsResponse, ListMyTournamentsQuery, ListMyTournamentsResponse, Problem, TokenRequestBody, TokenResponse, UpsertMyMatchdaySubmissionParams, UpsertMyMatchdaySubmissionRequest, UpsertMyMatchdaySubmissionResponse } from '@rankup/api';
+import type { AuthorizeParams, AuthorizeResponse, ClearMyMatchdaySubmissionParams, CreateDuelRematchParams, CreateDuelRematchRequest, CreateDuelRematchResponse, CreateDuelRequest, CreateDuelResponse, CreateTournamentRequest, CreateTournamentResponse, GetMatchdayMatchesParams, GetMatchdayMatchesQuery, GetMatchdayMatchesResponse, GetMyMatchdaySubmissionParams, GetMyMatchdaySubmissionResponse, GetTournamentMatchdayAvailabilityParams, GetTournamentMatchdayAvailabilityResponse, GetTournamentMatchdayParams, GetTournamentMatchdayRankingParams, GetTournamentMatchdayRankingQuery, GetTournamentMatchdayRankingResponse, GetTournamentMatchdayRankingWindowParams, GetTournamentMatchdayRankingWindowQuery, GetTournamentMatchdayRankingWindowResponse, GetTournamentMatchdayResponse, GetTournamentRankingParams, GetTournamentRankingQuery, GetTournamentRankingResponse, GetTournamentRankingWindowParams, GetTournamentRankingWindowQuery, GetTournamentRankingWindowResponse, GetUserMatchdaySubmissionParams, GetUserMatchdaySubmissionResponse, GetUserParams, GetUserQuery, GetUserResponse, JoinTournamentByInvitationCodeParams, JoinTournamentByInvitationCodeRequest, JoinTournamentByInvitationCodeResponse, JoinTournamentParams, JoinTournamentRequest, JoinTournamentResponse, ListCompetitionsQuery, ListCompetitionsResponse, ListMatchdaySubmissionsParams, ListMatchdaySubmissionsQuery, ListMatchdaySubmissionsResponse, ListMyDuelsQuery, ListMyDuelsResponse, ListMyTournamentsQuery, ListMyTournamentsResponse, ListTournamentMatchdaysParams, ListTournamentMatchdaysQuery, ListTournamentMatchdaysResponse, Problem, TokenRequestBody, TokenResponse, UpsertMyMatchdaySubmissionParams, UpsertMyMatchdaySubmissionRequest, UpsertMyMatchdaySubmissionResponse } from '@rankup/api';
+import type { OperationId as OpenApiOperationId } from '@rankup/api/generated/operations.js';
 import type { MockDb } from '../mock-db.js';
-
-export type OperationId =
-	| 'getUserPublicProfile'
-	| 'listCompetitions'
-	| 'listDiscoverableTournaments'
-	| 'listMyTournaments'
-	| 'listMyDuels'
-	| 'createTournament'
-	| 'createDuel'
-	| 'createDuelRematch'
-	| 'getTournament'
-	| 'updateTournament'
-	| 'archiveTournament'
-	| 'deleteTournament'
-	| 'lockTournament'
-	| 'unlockTournament'
-	| 'unarchiveTournament'
-	| 'transferTournamentOwnership'
-	| 'getTournamentRules'
-	| 'listTournamentSeasonRanking'
-	| 'listTournamentMatchdayMatches'
-	| 'listTournamentMatchdayRanking'
-	| 'getMyTournamentSeasonRankingWindow'
-	| 'getMyTournamentMatchdayRankingWindow'
-	| 'getMyMatchdayResults'
-	| 'getUserMatchdayResults'
-	| 'getMatchdayResultsSummary'
-	| 'listTournamentUpdates'
-	| 'streamTournamentLive'
-	| 'listMatchdaySubmissions'
-	| 'getMyMatchdaySubmission'
-	| 'upsertMyMatchdaySubmission'
-	| 'clearMyMatchdaySubmission'
-	| 'getUserMatchdaySubmission'
-	| 'oauthAuthorize'
-	| 'oauthTokenExchange';
 
 export type MockHandlerContextMap = {
 	getUserPublicProfile: { params: GetUserParams; query?: GetUserQuery };
@@ -46,7 +11,16 @@ export type MockHandlerContextMap = {
 	createTournament: { body: CreateTournamentRequest };
 	createDuel: { body: CreateDuelRequest };
 	createDuelRematch: { params: CreateDuelRematchParams; body?: CreateDuelRematchRequest };
+	joinTournament: { params: JoinTournamentParams; body?: JoinTournamentRequest; headers?: { idempotencyKey?: string } };
+	joinTournamentByInvitationCode: {
+		params: JoinTournamentByInvitationCodeParams;
+		body?: JoinTournamentByInvitationCodeRequest;
+		headers?: { idempotencyKey?: string };
+	};
 	getTournament: { params: { tournamentId: string }; query?: Record<string, unknown> };
+	listTournamentMatchdays: { params: ListTournamentMatchdaysParams; query?: ListTournamentMatchdaysQuery };
+	getTournamentMatchday: { params: GetTournamentMatchdayParams };
+	getTournamentMatchdayAvailability: { params: GetTournamentMatchdayAvailabilityParams };
 	updateTournament: { params: { tournamentId: string }; body: Record<string, unknown> };
 	archiveTournament: { params: { tournamentId: string } };
 	deleteTournament: { params: { tournamentId: string }; body?: Record<string, unknown> };
@@ -71,7 +45,7 @@ export type MockHandlerContextMap = {
 	listMatchdaySubmissions: { params: ListMatchdaySubmissionsParams; query?: ListMatchdaySubmissionsQuery };
 	getMyMatchdaySubmission: { params: GetMyMatchdaySubmissionParams };
 	upsertMyMatchdaySubmission: { params: UpsertMyMatchdaySubmissionParams; body: UpsertMyMatchdaySubmissionRequest };
-	clearMyMatchdaySubmission: { params: ClearMyMatchdaySubmissionParams };
+	clearMyMatchdaySubmission: { params: ClearMyMatchdaySubmissionParams; headers?: { idempotencyKey?: string } };
 	getUserMatchdaySubmission: { params: GetUserMatchdaySubmissionParams };
 	oauthAuthorize: { params: AuthorizeParams };
 	oauthTokenExchange: { body: TokenRequestBody };
@@ -86,7 +60,12 @@ export type MockHandlerResponseMap = {
 	createTournament: CreateTournamentResponse;
 	createDuel: CreateDuelResponse;
 	createDuelRematch: CreateDuelRematchResponse;
+	joinTournament: JoinTournamentResponse;
+	joinTournamentByInvitationCode: JoinTournamentByInvitationCodeResponse;
 	getTournament: unknown;
+	listTournamentMatchdays: ListTournamentMatchdaysResponse;
+	getTournamentMatchday: GetTournamentMatchdayResponse;
+	getTournamentMatchdayAvailability: GetTournamentMatchdayAvailabilityResponse;
 	updateTournament: unknown;
 	archiveTournament: undefined;
 	deleteTournament: unknown;
@@ -114,14 +93,34 @@ export type MockHandlerResponseMap = {
 	oauthTokenExchange: TokenResponse;
 };
 
+type AssertNever<T extends never> = T;
+type ContextOperationId = keyof MockHandlerContextMap;
+type ResponseOperationId = keyof MockHandlerResponseMap;
+type _UnknownContextOperationIds = Exclude<ContextOperationId, OpenApiOperationId>;
+type _UnknownResponseOperationIds = Exclude<ResponseOperationId, OpenApiOperationId>;
+type _MissingResponseOperationIds = Exclude<ContextOperationId, ResponseOperationId>;
+type _MissingContextOperationIds = Exclude<ResponseOperationId, ContextOperationId>;
+
+export type OperationIdConsistencyGuard =
+	| AssertNever<_UnknownContextOperationIds>
+	| AssertNever<_UnknownResponseOperationIds>
+	| AssertNever<_MissingResponseOperationIds>
+	| AssertNever<_MissingContextOperationIds>;
+
+export type OperationId = Extract<ContextOperationId & ResponseOperationId, OpenApiOperationId>;
+
 export type MockHandlerResult<TResponse> = {
 	status: number;
 	response: TResponse;
+	headers?: Record<string, string>;
 };
 
 export type MockErrorResponse = Problem;
 
-export type MockHandler<TContext, TResponse> = (context: TContext, db: MockDb) => MockHandlerResult<TResponse>;
+export type MockHandler<TContext, TResponse> = (
+	context: TContext,
+	db: MockDb,
+) => MockHandlerResult<TResponse> | Promise<MockHandlerResult<TResponse>>;
 
 export type MockHandlers = {
 	[K in OperationId]: MockHandler<MockHandlerContextMap[K], MockHandlerResponseMap[K]>;

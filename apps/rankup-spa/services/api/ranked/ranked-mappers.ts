@@ -1,6 +1,8 @@
 import { mapOptional } from '../gateway-mapping.js';
-import { mapUserSummary } from '../tourney/tourney-mappers.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
+import { mapUserSummary } from '../tournaments/tournament-mappers.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Leaderboards from '@rankup/rankup/domains/ranked/leaderboards/contracts/types.js';
 import type * as Seasons from '@rankup/rankup/domains/ranked/seasons/contracts/types.js';
 
@@ -244,3 +246,5 @@ export function mapPublicRankedProfile(profile: Api.PublicRankedProfile): Leader
 		tracks: profile.tracks.map(mapPublicRankedTrackStanding),
 	};
 }
+
+export const mapRankedProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

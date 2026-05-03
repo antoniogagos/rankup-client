@@ -1,7 +1,7 @@
 {
 	"operationId": "removeTournamentMember",
 	"params": {
-		"tournamentId": "tourney-1",
+		"tournamentId": "tournament-1",
 		"userId": "user-cr7"
 	},
 	"body": {

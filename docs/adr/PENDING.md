@@ -56,6 +56,8 @@ Epic 003 is blocked until the API architecture team provides the full specificat
 
 -   Final OpenAPI specification for game-mode + sport extensibility.
 -   Any required registry or discovery endpoints.
--   Migration expectations for existing tourney flows.
+-   Migration expectations for existing tournament flows.
 
 Resolved: P-0007 moved to ADR 0044 (internal game-mode registry + ruleset versioning).
+
+Resolved: P-0008 moved to ADR 0068 (engine test platform standardized on Vitest, Node-only).

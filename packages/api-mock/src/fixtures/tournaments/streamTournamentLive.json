@@ -1,6 +1,0 @@
-{
-	"operationId": "streamTournamentLive",
-	"params": {
-		"tournamentId": "tourney-1"
-	}
-}

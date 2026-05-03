@@ -1,0 +1,8 @@
+{
+	"operationId": "getUserMatchdayResults",
+	"params": {
+		"tournamentId": "tournament-1",
+		"matchday": 1,
+		"userId": "user-cr7"
+	}
+}

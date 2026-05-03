@@ -15,7 +15,7 @@ We also want mock/real selection to happen exclusively in the composition root, 
 
 -   UI packages and domain packages must not import `@rankup/api`.
 -   Domain DTOs live in `@rankup/rankup/domains/*/<capability>/contracts/types` and are the only types UI consumes.
--   Domain services depend on **capability gateways** (e.g., `ITourneyCoreGateway`, `ITourneyMatchdaysGateway`) instead of the SDK client.
+-   Domain services depend on **capability gateways** (e.g., `ITournamentCoreGateway`, `ITournamentMatchdaysGateway`) instead of the SDK client.
 -   Gateways are implemented in the host (`apps/rankup-spa/services/api/**`) and map SDK DTOs to domain DTOs.
 -   Mock vs HTTP selection happens only in the composition root; SDK client factories inside `services/api/**` are HTTP-only.
 
@@ -35,7 +35,7 @@ We also want mock/real selection to happen exclusively in the composition root, 
 ## Implementation
 
 -   Added domain DTOs + capability gateways (core/matchdays/ranking/members/codes/invites).
--   Tourney gateways map SDK DTOs to domain DTOs in app `services/api/**`.
+-   Tournament gateways map SDK DTOs to domain DTOs in app `services/api/**`.
 -   Composition root selects mock vs HTTP and registers gateways.
 -   Removed `IRankupApiClient` from domain.
 -   Guardrails updated to block `@rankup/api` in UI/domain.

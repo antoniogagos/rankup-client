@@ -1,0 +1,21 @@
+{
+	"name": "@rankup/testkit",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts",
+		"./assert/deep.js": "./src/assert/deep.ts",
+		"./assert/no-undefined.js": "./src/assert/no-undefined.ts",
+		"./assert/problem.js": "./src/assert/problem.ts",
+		"./fixtures.js": "./src/fixtures/index.ts",
+		"./http/startApiMock.js": "./src/http/startApiMock.ts",
+		"./streaming/fakeEventStreamClient.js": "./src/streaming/fakeEventStreamClient.ts",
+		"./streaming/fakeSseServer.js": "./src/streaming/fakeSseServer.ts",
+		"./*.js": "./src/*.ts",
+		"./package.json": "./package.json"
+	},
+	"dependencies": {
+		"@rankup/base": "workspace:*",
+		"@rankup/api-mock": "workspace:*"
+	}
+}

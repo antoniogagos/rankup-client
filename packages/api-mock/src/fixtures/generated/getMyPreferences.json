@@ -1,3 +1,6 @@
 {
-	"operationId": "getMyPreferences"
+	"operationId": "getMyPreferences",
+	"expect": {
+		"status": 501
+	}
 }

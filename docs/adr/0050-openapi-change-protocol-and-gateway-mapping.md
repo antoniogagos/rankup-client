@@ -45,7 +45,7 @@ We need a documented, repeatable protocol for OpenAPI changes and light-weight a
 
 -   [x] Add `docs/engineering/openapi-change-protocol.md`.
 -   [x] Add gateway mapping helpers.
--   [x] Update tourney gateway to use the helpers.
+-   [x] Update tournament gateway to use the helpers.
 -   [x] Add guardrail for gateway spreads/assertions.
 -   [x] Update work tracking and run `yarn validate`.
 

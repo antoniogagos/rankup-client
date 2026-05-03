@@ -1,5 +1,5 @@
-import { ITourneyChatService } from './chat/contracts/tourneyChat.js';
-import { TourneyChatService } from './chat/services/tourneyChatService.js';
+import { ITournamentChatService } from './chat/contracts/tournamentChat.js';
+import { TournamentChatService } from './chat/services/tournamentChatService.js';
 import { ILiveService } from './live/contracts/live.js';
 import { LiveService } from './live/services/liveService.js';
 import { IRecapsService } from './recaps/contracts/recaps.js';
@@ -12,7 +12,7 @@ import { SyncDescriptor } from '@rankup/platform/instantiation/common/descriptor
 import { ServiceCollection } from '@rankup/platform/instantiation/common/serviceCollection.js';
 
 export function registerEngagementDomainServices(services: ServiceCollection): void {
-	services.set(ITourneyChatService, new SyncDescriptor(TourneyChatService));
+	services.set(ITournamentChatService, new SyncDescriptor(TournamentChatService));
 	services.set(ILiveService, new SyncDescriptor(LiveService));
 	services.set(IRecapsService, new SyncDescriptor(RecapsService));
 	services.set(IStatsService, new SyncDescriptor(StatsService));

@@ -15,8 +15,8 @@ This document is normative and complements `docs/architecture/services.md` and `
 ## Request flow (happy path)
 
 UI (Lit)
--> Domain service (ITourneyCoreService, ITourneyMatchdaysService, ...)
--> Domain gateway (ITourneyCoreGateway, ITourneyMatchdaysGateway, ...)
+-> Domain service (ITournamentCoreService, ITournamentMatchdaysService, ...)
+-> Domain gateway (ITournamentCoreGateway, ITournamentMatchdaysGateway, ...)
 -> SDK client (`RankupApiClient`)
 -> Runtime implementation (mock or HTTP)
 

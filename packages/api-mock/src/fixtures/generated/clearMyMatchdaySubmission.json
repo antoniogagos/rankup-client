@@ -1,0 +1,8 @@
+{
+	"operationId": "clearMyMatchdaySubmission",
+	"params": {
+		"tournamentId": "tournament-1",
+		"matchday": 1,
+		"idempotencyKey": "fixture-clear-submission-key-1"
+	}
+}

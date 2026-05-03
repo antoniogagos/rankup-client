@@ -51,8 +51,8 @@ No other layer may select mock vs real or wire implementations.
 ### 3) Scopes are explicit
 
 -   App-scope (now): root instantiation service and app singletons.
--   Tourney-scope (planned): a child instantiation service created per tournament context, used for:
-    -   tourney-specific state,
+-   Tournament-scope (planned): a child instantiation service created per tournament context, used for:
+    -   tournament-specific state,
     -   game-mode runtime resolution,
     -   future registries/runtimes without leaking state globally.
 
@@ -97,7 +97,7 @@ The goal is explicit dependency graphs:
 
 -   Stable, enforceable service boundaries and explicit dependencies.
 -   Mock vs real selection remains centralized.
--   Enables future tourney-scope game runtimes (Draft, new sports) without global state drift.
+-   Enables future tournament-scope game runtimes (Draft, new sports) without global state drift.
 -   Multi-agent work becomes reproducible: the service model is documented and checkable.
 
 ### Negative / Risks
@@ -123,7 +123,7 @@ The goal is explicit dependency graphs:
 -   [ ] Add `apps/rankup-spa/lib/composition-root.ts` to register:
     -   IEnvironmentService
     -   Domain gateways (mock-first via composition root selection)
--   [ ] Introduce the first domain service (recommended: ITourneyService) and migrate one vertical slice.
+-   [ ] Introduce the first domain service (recommended: ITournamentService) and migrate one vertical slice.
 -   [ ] Add lint rules to prevent:
     -   UI importing platform implementations (`browser/`)
     -   UI importing DI primitives or composition root

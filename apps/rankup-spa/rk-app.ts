@@ -1,9 +1,9 @@
 import './elements/app-router/app-router.js';
 import './pages/404/rk-404-page.js';
-import './pages/create-tourney/rk-create-tourney-page.js';
+import './pages/create-tournament/rk-create-tournament-page.js';
 import './pages/home/rk-home-page.js';
-import './pages/join-tourney/rk-join-tourney-page.js';
-import './pages/tourney/rk-tourney-page.js';
+import './pages/join-tournament/rk-join-tournament-page.js';
+import './pages/tournament/rk-tournament-page.js';
 import AppRouterStyles from './elements/app-router/styles.css';
 import type { AppServices } from './lib/app-services.js';
 import { path } from './lib/localization/rk-url-paths.js';
@@ -23,21 +23,21 @@ export class RkApp extends LitElement {
 		this.sessionManager.signOut();
 	}
 
-	// <button path=${path('TOURNEYS')} @click=${this.onSignOutClick}>Sign Out</button>
-	// <div path=${path('TOURNEYS')} animation="opacity">
-	//   List of tourneys
+	// <button path=${path('TOURNAMENTS')} @click=${this.onSignOutClick}>Sign Out</button>
+	// <div path=${path('TOURNAMENTS')} animation="opacity">
+	//   List of tournaments
 	//   <button @click=${this.onSignOutClick}>Sign Out</button>
 	// </div>
-	// <div path=${path('TOURNEY') + '/:id'} animation="opacity">Tourney Foo</div>
+	// <div path=${path('TOURNAMENT') + '/:id'} animation="opacity">Tournament Foo</div>
 	override render() {
 		return html`
 			<app-router .animations=${appRouterAnimations}>
-				<rk-home-page path=${path('TOURNEYS')} animation="opacity"></rk-home-page>
-				<rk-tourney-page path=${path('TOURNEY', '*')} animation="opacity"></rk-tourney-page>
-				<rk-join-tourney-page path=${path('JOIN_TOURNEY')} animation="opacity"></rk-join-tourney-page>
-				<rk-create-tourney-page path=${path('CREATE_TOURNEY')} animation="opacity"></rk-create-tourney-page>
+				<rk-home-page path=${path('TOURNAMENTS')} animation="opacity"></rk-home-page>
+				<rk-tournament-page path=${path('TOURNAMENT', '*')} animation="opacity"></rk-tournament-page>
+				<rk-join-tournament-page path=${path('JOIN_TOURNAMENT')} animation="opacity"></rk-join-tournament-page>
+				<rk-create-tournament-page path=${path('CREATE_TOURNAMENT')} animation="opacity"></rk-create-tournament-page>
 				<rk-404-page path="/404"></rk-404-page>
-				<app-router__redirect path="*" redirect=${path('TOURNEYS')}></app-router__redirect>
+				<app-router__redirect path="*" redirect=${path('TOURNAMENTS')}></app-router__redirect>
 			</app-router>
 		`;
 	}

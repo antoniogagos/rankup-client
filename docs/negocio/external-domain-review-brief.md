@@ -116,7 +116,7 @@ Today, it contains only one domain:
 
 - domains/tournaments
 
-Tourney is split into capabilities:
+Tournament is split into capabilities:
 
 - shared (ids/enums/user summary + shared validation)
 - core (list/create/preview)
@@ -151,7 +151,7 @@ The marketing site lives in:
 The technical service catalog includes product layers that are not domains per se:
 
 - Registry layer (e.g., game mode registry, sport catalog registry).
-- Runtime layer (per-tourney context and game runtime).
+- Runtime layer (per-tournament context and game runtime).
 - Algorithm layer (scoring engine, draft rules engine, odds calculator).
 
 These do not yet have a defined physical location but may live inside Rankup Engine if desired.
@@ -1471,7 +1471,7 @@ This catalog defines stable services, their scope, and allowed dependencies.
 ## Legend
 
 -   Layer: platform | domain | registry | runtime | algorithm
--   Scope: app (singleton) | tourney (child)
+-   Scope: app (singleton) | tournament (child)
 -   State: implemented | stub | planned
 
 | Service ID                    | Responsibility                                            | Layer     | Scope   | Instantiation | Allowed deps                                     | Allowed consumers                           | State       | Verification                                        |
@@ -1487,26 +1487,26 @@ This catalog defines stable services, their scope, and allowed dependencies.
 | IAuthService                  | Auth state and login/logout                               | platform  | app     | eager         | Auth gateway (TBD), IStorageService, IClockService | controllers, services                       | planned     | lint: UI does not call fetch for auth               |
 | ISessionManager               | Auth session lifecycle (Cognito)                          | platform  | app     | eager         | none                                             | controllers, UI                             | implemented | lint: UI uses @service                              |
 | ISessionService               | Session lifecycle and refresh                             | platform  | app     | eager         | IAuthService, IStorageService                    | controllers, services                       | planned     | lint: UI does not handle tokens                     |
-| ITourneyCoreGateway           | Tourney core gateway (list/create/preview)                | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyMatchdaysGateway      | Matchdays gateway (matchdays + matches)                   | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyRankingGateway        | Ranking gateway (ranking + windows)                       | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyMembersGateway        | Members gateway (join/leave/roles)                        | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyInvitationCodesGateway | Invitation codes gateway (resolve/join)                  | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyInvitesGateway        | Direct invites gateway + inbox                            | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
-| ITourneyCoreService           | Tourney list/create/preview                               | domain    | app     | eager         | ITourneyCoreGateway                              | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
-| ITourneyMatchdaysService      | Matchdays + matches                                       | domain    | app     | eager         | ITourneyMatchdaysGateway                         | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
-| ITourneyRankingService        | Ranking + windows                                         | domain    | app     | eager         | ITourneyRankingGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
-| ITourneyMembersService        | Membership/roles                                          | domain    | app     | eager         | ITourneyMembersGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
-| ITourneyInvitationCodesService | Invitation codes                                         | domain    | app     | eager         | ITourneyInvitationCodesGateway                   | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
-| ITourneyInvitesService        | Direct invites + inbox                                    | domain    | app     | eager         | ITourneyInvitesGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentCoreGateway           | Tournament core gateway (list/create/preview)                | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentMatchdaysGateway      | Matchdays gateway (matchdays + matches)                   | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentRankingGateway        | Ranking gateway (ranking + windows)                       | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentMembersGateway        | Members gateway (join/leave/roles)                        | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentInvitationCodesGateway | Invitation codes gateway (resolve/join)                  | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentInvitesGateway        | Direct invites gateway + inbox                            | domain    | app     | eager         | RankupApiClient (SDK)                            | domain services                             | implemented | lint: no @rankup/api in domain                      |
+| ITournamentCoreService           | Tournament list/create/preview                               | domain    | app     | eager         | ITournamentCoreGateway                              | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentMatchdaysService      | Matchdays + matches                                       | domain    | app     | eager         | ITournamentMatchdaysGateway                         | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentRankingService        | Ranking + windows                                         | domain    | app     | eager         | ITournamentRankingGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentMembersService        | Membership/roles                                          | domain    | app     | eager         | ITournamentMembersGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentInvitationCodesService | Invitation codes                                         | domain    | app     | eager         | ITournamentInvitationCodesGateway                   | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
+| ITournamentInvitesService        | Direct invites + inbox                                    | domain    | app     | eager         | ITournamentInvitesGateway                           | controllers, UI                             | implemented | lint: UI consumes via @service/AppServices          |
 | IScorePredictionService       | ScorePrediction CRUD and validation                       | domain    | app     | eager         | ScorePrediction gateway (TBD), IAuthService, IClockService | controllers                                 | planned     | unit tests for validation                           |
 | IUserService                  | User profile/preferences                                  | domain    | app     | eager         | User gateway (TBD), IStorageService              | controllers                                 | planned     | lint: UI does not access DTOs                       |
 | IChatService                  | Chat fetch/send and moderation                            | domain    | app     | delayed       | Chat gateway (TBD), IAuthService                 | controllers                                 | planned     | lint: UI does not call chat APIs directly           |
 | ICompetitionService           | Competition catalog                                       | domain    | app     | delayed       | Competition gateway (TBD)                        | controllers                                 | planned     | lint: UI does not use DTOs directly                 |
 | ISportCatalogService          | Sport metadata and adapters                               | registry  | app     | eager         | none                                             | controllers, runtime                        | planned     | ADR required for new sport                          |
 | IGameModeRegistry             | Register game modes                                       | registry  | app     | eager         | none                                             | controllers, runtime                        | planned     | ADR required for new mode                           |
-| ITourneyContextService        | Tourney context (id, role, mode)                          | runtime   | tourney | delayed       | ITourneyCoreService, ITourneyMembersService      | controllers, runtime                        | planned     | scope: tourney only                                 |
-| IGameRuntimeService           | Game-mode runtime for tourney                             | runtime   | tourney | delayed       | IGameModeRegistry, ITourneyContextService        | controllers, UI                             | planned     | no direct api access in UI                          |
+| ITournamentContextService        | Tournament context (id, role, mode)                          | runtime   | tournament | delayed       | ITournamentCoreService, ITournamentMembersService      | controllers, runtime                        | planned     | scope: tournament only                                 |
+| IGameRuntimeService           | Game-mode runtime for tournament                             | runtime   | tournament | delayed       | IGameModeRegistry, ITournamentContextService        | controllers, UI                             | planned     | no direct api access in UI                          |
 | IScorePredictionScoringEngine | Pure scoring logic                                        | algorithm | app     | eager         | none                                             | domain services                             | planned     | tests required                                      |
 | IDraftRulesEngine             | Draft rules logic                                         | algorithm | app     | eager         | none                                             | domain services                             | planned     | tests required                                      |
 | IOddsCalculator               | Odds computation                                          | algorithm | app     | delayed       | none                                             | domain services                             | planned     | tests required if used                              |
@@ -1551,9 +1551,9 @@ API request flow is specified in `docs/architecture/api-request-flow.md`.
 -   Services must be cohesive by domain. Avoid a single monolithic service.
 -   Examples (non-exhaustive):
     -   IAuthService
-    -   ITourneyCoreService
-    -   ITourneyMatchdaysService
-    -   ITourneyRankingService
+    -   ITournamentCoreService
+    -   ITournamentMatchdaysService
+    -   ITournamentRankingService
 
 ## Lit usage (UI consumption)
 
@@ -1565,7 +1565,7 @@ API request flow is specified in `docs/architecture/api-request-flow.md`.
 ## Scopes / lifetimes
 
 -   app-scope (current): application-wide singletons.
--   future: tourney-scope or game-scope for per-tourney state.
+-   future: tournament-scope or game-scope for per-tournament state.
 
 ## Prohibitions
 
@@ -1604,7 +1604,7 @@ It follows a Hadron-style capability split so each surface maps cleanly to OpenA
 - `members/`: membership and roles.
 - `codes/`: invitation codes (resolve + join by code).
 - `invites/`: direct invites + inbox actions.
-- `chat/`, `submissions/`, `results/`, `stats/`, `recaps/`, `updates/`: placeholders for future tourney capabilities.
+- `chat/`, `submissions/`, `results/`, `stats/`, `recaps/`, `updates/`: placeholders for future tournament capabilities.
 - `analysis/`: pure algorithms (tie-breakers, lock rules) with no IO.
 - `fixtures/`: deterministic sample data.
 

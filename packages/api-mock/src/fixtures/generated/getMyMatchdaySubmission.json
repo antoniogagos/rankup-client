@@ -1,0 +1,7 @@
+{
+	"operationId": "getMyMatchdaySubmission",
+	"params": {
+		"tournamentId": "tournament-1",
+		"matchday": 1
+	}
+}

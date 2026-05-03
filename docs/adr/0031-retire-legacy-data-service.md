@@ -7,9 +7,9 @@
 
 ## Context
 
-`apps/rankup-spa/lib/data-service/*` contains a legacy API wrapper and mock implementation. It is no longer referenced by the UI and duplicates platform-domain services built on `IRankupApiClient`/`ITourneyService`. Keeping the legacy path adds confusion and risks reintroducing UI `fetch` usage outside the platform layer.
+`apps/rankup-spa/lib/data-service/*` contains a legacy API wrapper and mock implementation. It is no longer referenced by the UI and duplicates platform-domain services built on `IRankupApiClient`/`ITournamentService`. Keeping the legacy path adds confusion and risks reintroducing UI `fetch` usage outside the platform layer.
 
-WP-007-05 migrated tourney UI components to use `ITourneyService`, leaving DataService unused.
+WP-007-05 migrated tournament UI components to use `ITournamentService`, leaving DataService unused.
 
 ## Decision
 

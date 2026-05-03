@@ -13,7 +13,7 @@ metadata:
 
 Expose services to UI via an explicit, typed object:
 
--   UI can use `appServices.tourney.core` (and other capability services)
+-   UI can use `appServices.tournament.core` (and other capability services)
 -   UI cannot fetch arbitrary services by id
 
 ## Scope

@@ -1,9 +1,9 @@
-import { operations } from '@rankup/api/generated/operations.js';
-import type { DuelPage, Tournament, TournamentSummary } from '@rankup/api';
-import type { MockHandler, MockHandlers } from './types.js';
-import { resolveUser, toMeSummary } from '../mock-db.js';
-
-type OperationCatalogEntry = (typeof operations)[keyof typeof operations];
+import type { CreateDuelRequest, DuelPage, MatchdayAvailability, Tournament, TournamentMatchday, TournamentMatchdayPage, TournamentMatchdaySummary, TournamentSummary } from '@rankup/api';
+import type { MockHandlerResponseMap, MockHandlers } from './types.js';
+import { clearRuntimeMatchdaySubmission, getRuntimeMatchdayResults, getRuntimeMatchdayResultsSummary, getRuntimeMatchdaySubmission, getRuntimeRankingWindow, getRuntimeTournamentView, joinRuntimeTournament, joinRuntimeTournamentByInvitationCode, listRuntimeMatchdayRanking, listRuntimeMatchdaySubmissions, listRuntimeSeasonRanking, listRuntimeTournamentUpdates, streamRuntimeTournamentLive, syncRuntimeTournamentFromDb, upsertRuntimeMatchdaySubmission } from './engine-runtime.js';
+import { toTournamentMatchdayStatus } from './match-status.js';
+import { createNotImplementedMockHandlers } from './not-implemented-handler.js';
+import { resolveUser, toMeSummary, type MockDb } from '../mock-db.js';
 
 const now = () => new Date().toISOString();
 
@@ -54,156 +54,154 @@ const toTournamentResponse = (tournament: TournamentSummary, membership?: { role
 	myMembership: membership ?? { role: 'player' as const, joinedAt: now() },
 });
 
-const toRankingMeta = (tournamentId: string, totalPlayers: number, scope: 'season' | 'matchday', matchday?: number) => ({
-	tournamentId,
-	scope,
-	matchday,
-	state: scope === 'season' ? ('final' as const) : ('provisional' as const),
-	serverTime: now(),
-	computedAt: now(),
-	totalPlayers,
-});
-
-const toRankingItems = (db: Parameters<MockHandlers['listMyTournaments']>[1]) => {
-	const items = db.ranking.list();
-	if (items.length > 0) {
-		return items;
+function toEpochMs(value: string | undefined): number {
+	if (!value) {
+		return 0;
 	}
-	return [{ position: 1, points: 0, user: toMeSummary(resolveUser(db)) }];
-};
+	const parsed = Date.parse(value);
+	return Number.isNaN(parsed) ? 0 : parsed;
+}
 
-const toRankingWindow = (
-	db: Parameters<MockHandlers['listMyTournaments']>[1],
-	userId: string,
-	tournamentId: string,
-	scope: 'season' | 'matchday',
-	matchday?: number,
-) => {
-	const items = toRankingItems(db);
-	const center = items.find(entry => entry.user.userId === userId) ?? items[0];
-	return {
-		meta: toRankingMeta(tournamentId, items.length, scope, matchday),
-		center,
-		items: items.slice(0, 5),
-	};
-};
-
-const toSubmissionStatus = (submittedCount: number, expectedCount: number): 'missing' | 'partial' | 'complete' => {
-	if (submittedCount <= 0) {
-		return 'missing';
+function buildMatchdaySummaries(db: MockDb, tournament: TournamentSummary, serverTime: string): TournamentMatchdaySummary[] {
+	const byMatchday = new Map<number, ReturnType<typeof db.matches.list>>();
+	for (const match of db.matches.list()) {
+		if (typeof match.matchday !== 'number') {
+			continue;
+		}
+		const entries = byMatchday.get(match.matchday) ?? [];
+		entries.push(match);
+		byMatchday.set(match.matchday, entries);
 	}
-	if (submittedCount >= expectedCount) {
-		return 'complete';
-	}
-	return 'partial';
-};
 
-const toScorePredictionSubmission = (
-	db: Parameters<MockHandlers['listMyTournaments']>[1],
-	params: { tournamentId: string; matchday: number; userId: string; scope: 'me' | 'other' },
-	predictions?: Array<{ matchId: string; homeScore: number; awayScore: number }>,
-) => {
-	const expectedCount = Math.max(1, db.matches.list().length);
-	const seededPredictions =
-		predictions ??
-		db.matches
-			.list()
-			.slice(0, 2)
-			.map((match, index) => ({
-				matchId: match.matchId,
-				homeScore: index % 2 === 0 ? 1 : 0,
-				awayScore: index % 2 === 0 ? 0 : 1,
-			}));
-	const submittedCount = seededPredictions.length;
-	const completion = {
-		submittedCount,
-		expectedCount,
-		status: toSubmissionStatus(submittedCount, expectedCount),
-	};
-	return {
-		submissionId: `subm-${params.tournamentId}-${params.matchday}-${params.userId}`,
-		tournamentId: params.tournamentId,
-		matchday: params.matchday,
-		userId: params.userId,
-		gameModeId: 'scorePrediction' as const,
-		serverTime: now(),
-		scope: params.scope,
-		visibility: 'visible' as const,
-		completion,
-		createdAt: now(),
-		updatedAt: now(),
-		predictions: seededPredictions.map(item => {
-			const match = db.matches.get(item.matchId);
-			return {
-				matchId: item.matchId,
-				visibility: 'visible' as const,
-				isSubmitted: true,
-				homeScore: item.homeScore,
-				awayScore: item.awayScore,
-				lockState: match?.lockState ?? ('open' as const),
-				lockAt: match?.scheduledAt,
-				submittedAt: now(),
-				updatedAt: now(),
-			};
-		}),
-	};
-};
-
-const toMatchdayResults = (
-	db: Parameters<MockHandlers['listMyTournaments']>[1],
-	params: { tournamentId: string; matchday: number; userId: string },
-) => {
-	const lines = db.matches
-		.list()
-		.slice(0, 3)
-		.map((match, index) => ({
-			matchId: match.matchId,
-			prediction: {
-				homeScore: index % 2 === 0 ? 1 : 0,
-				awayScore: index % 2 === 0 ? 0 : 1,
-				visibility: 'visible' as const,
+	const sortedMatchdays = [...byMatchday.keys()].sort((left, right) => left - right);
+	if (sortedMatchdays.length === 0) {
+		return [
+			{
+				matchday: 1,
+				label: 'Matchday 1',
+				status: 'upcoming',
+				startsAt: serverTime,
+				endsAt: serverTime,
+				matchCount: 0,
 			},
-			actualScore: {
-				home: match.score?.home ?? null,
-				away: match.score?.away ?? null,
-			},
-			points: match.status === 'LIVE' ? 1 : 3,
-			state: match.status === 'LIVE' ? ('provisional' as const) : ('final' as const),
-		}));
-	const totalPoints = lines.reduce((acc, line) => acc + (line.points ?? 0), 0);
+		];
+	}
+
+	const summaries: TournamentMatchdaySummary[] = sortedMatchdays.map(matchday => {
+		const matches = byMatchday.get(matchday) ?? [];
+		const sortedMatches = [...matches].sort((left, right) => toEpochMs(left.scheduledAt) - toEpochMs(right.scheduledAt));
+		const startsAt = sortedMatches[0]?.scheduledAt ?? serverTime;
+		const endsAt = sortedMatches[sortedMatches.length - 1]?.scheduledAt ?? startsAt;
+		return {
+			matchday,
+			label: `Matchday ${matchday}`,
+			status: toTournamentMatchdayStatus(matches),
+			startsAt,
+			endsAt,
+			matchCount: matches.length,
+			tournamentId: tournament.tournamentId,
+			serverTime,
+		} satisfies TournamentMatchdaySummary;
+	});
+
+	const liveIndex = summaries.findIndex(summary => summary.status === 'live');
+	const upcomingIndex = summaries.findIndex(summary => summary.status === 'upcoming');
+	const currentIndex = liveIndex >= 0 ? liveIndex : (upcomingIndex >= 0 ? upcomingIndex : summaries.length - 1);
+	if (currentIndex >= 0) {
+		summaries[currentIndex] = {
+			...summaries[currentIndex],
+			isCurrent: true,
+		};
+	}
+	return summaries;
+}
+
+function buildMatchdayAvailability(tournament: TournamentSummary, summary: TournamentMatchdaySummary, serverTime: string): MatchdayAvailability {
+	if (tournament.status === 'archived') {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'locked',
+			canSubmit: false,
+			reason: 'tournamentArchived',
+			message: 'Tournament archived.',
+		};
+	}
+	if (tournament.status === 'cancelled') {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'locked',
+			canSubmit: false,
+			reason: 'tournamentCancelled',
+			message: 'Tournament cancelled.',
+		};
+	}
+	if (tournament.joinPolicy.locked) {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'locked',
+			canSubmit: false,
+			reason: 'tournamentLocked',
+			message: 'Tournament is locked.',
+		};
+	}
+	if (summary.matchCount === 0) {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'notStarted',
+			canSubmit: false,
+			reason: 'matchdayNotInTournamentWindow',
+			message: 'Matchday is not in tournament window.',
+		};
+	}
+	if (summary.status === 'finished') {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'finished',
+			canSubmit: false,
+			reason: 'matchdayFinished',
+			message: 'Matchday finished.',
+			opensAt: summary.startsAt,
+			locksAt: summary.startsAt,
+			closesAt: summary.endsAt,
+		};
+	}
+	if (summary.status === 'live') {
+		return {
+			tournamentId: tournament.tournamentId,
+			matchday: summary.matchday,
+			serverTime,
+			state: 'locked',
+			canSubmit: false,
+			reason: 'joinClosed',
+			message: 'Matchday lock active.',
+			opensAt: summary.startsAt,
+			locksAt: summary.startsAt,
+			closesAt: summary.endsAt,
+		};
+	}
 	return {
-		tournamentId: params.tournamentId,
-		matchday: params.matchday,
-		gameModeId: 'scorePrediction' as const,
-		user: toMeSummary(resolveUser(db, params.userId)),
-		serverTime: now(),
-		state: 'provisional' as const,
-		totalPoints,
-		pointsState: 'provisional' as const,
-		lines,
+		tournamentId: tournament.tournamentId,
+		matchday: summary.matchday,
+		serverTime,
+		state: 'open',
+		canSubmit: true,
+		reason: 'open',
+		message: 'Submissions open.',
+		opensAt: summary.startsAt,
+		locksAt: summary.startsAt,
+		closesAt: summary.endsAt,
 	};
-};
-
-const toLiveUpdateEvent = (
-	db: Parameters<MockHandlers['listMyTournaments']>[1],
-	params: { tournamentId: string; matchday?: number; scope: 'season' | 'matchday' },
-) => ({
-	type: 'ranking.delta' as const,
-	tournamentId: params.tournamentId,
-	scope: params.scope,
-	matchday: params.matchday,
-	serverTime: now(),
-	deltas: toRankingItems(db).slice(0, 3).map(entry => ({
-		userId: entry.user.userId,
-		oldPosition: entry.position + 1,
-		newPosition: entry.position,
-		pointsDelta: entry.position === 1 ? 12 : 5,
-		totalPoints: entry.points,
-	})),
-});
-
-const isAdminOperation = (operation: OperationCatalogEntry): boolean =>
-	operation.path.startsWith('/admin') || operation.tags.some(tag => tag.startsWith('admin.'));
+}
 
 const explicitMockHandlers: MockHandlers = {
 	getUserPublicProfile: ({ params }, db) => ({
@@ -214,19 +212,53 @@ const explicitMockHandlers: MockHandlers = {
 		status: 200,
 		response: { items: db.competitions.list() },
 	}),
-	listDiscoverableTournaments: (_context, db) => ({
-		status: 200,
-		response: {
-			items: db.tourneys.list().map(({ tournament }) => toDiscoverCard(tournament)),
-		},
-	}),
-	listMyTournaments: (_context, db) => ({
-		status: 200,
-		response: { items: db.tourneys.list().map(({ tournamentId: _ignore, ...item }) => item) },
-	}),
+	listDiscoverableTournaments: async (_context, db) => {
+		const items = await Promise.all(
+			db.tournaments.list().map(async ({ tournament }) => {
+				const runtime = await getRuntimeTournamentView(db, tournament.tournamentId);
+				return toDiscoverCard({
+					...tournament,
+					status: runtime.status,
+					joinPolicy: runtime.joinPolicy,
+					memberCount: runtime.memberCount,
+					rulesetId: runtime.rulesetId,
+				});
+			}),
+		);
+		return {
+			status: 200,
+			response: {
+				items,
+			},
+		};
+	},
+	listMyTournaments: async (_context, db) => {
+		const items = await Promise.all(
+			db.tournaments.list().map(async ({ tournamentId: _ignore, tournament, membership, ...rest }) => {
+				const runtime = await getRuntimeTournamentView(db, tournament.tournamentId);
+				return {
+					...rest,
+					tournament: {
+						...tournament,
+						status: runtime.status,
+						joinPolicy: runtime.joinPolicy,
+						memberCount: runtime.memberCount,
+						rulesetId: runtime.rulesetId,
+					},
+					membership,
+				};
+			}),
+		);
+		return {
+			status: 200,
+			response: {
+				items,
+			},
+		};
+	},
 	listMyDuels: (_context, db) => {
 		const opponent = resolveUser(db, 'user-cr7');
-		const items = db.tourneys
+		const items = db.tournaments
 			.list()
 			.filter(({ tournament }) => tournament.formatId === 'headsUp')
 			.map(({ tournament }) => ({
@@ -240,8 +272,8 @@ const explicitMockHandlers: MockHandlers = {
 			response: { items } satisfies DuelPage,
 		};
 	},
-	createTournament: ({ body }, db) => {
-		const tournamentId = `tourney-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+	createTournament: async ({ body }, db) => {
+		const tournamentId = `tournament-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 		const createdAt = now();
 		const tournament: TournamentSummary = {
 			tournamentId,
@@ -261,53 +293,73 @@ const explicitMockHandlers: MockHandlers = {
 			updatedAt: createdAt,
 		};
 		const membership = { role: 'owner' as const, joinedAt: createdAt };
-		db.tourneys.create({
+		db.tournaments.create({
 			tournamentId,
 			tournament,
 			membership,
 		});
+		await syncRuntimeTournamentFromDb(db, tournamentId);
 		return {
 			status: 201,
 			response: toTournamentResponse(tournament, membership),
 		};
 	},
-	createDuel: ({ body }, db) => {
+	createDuel: async ({ body }, db) => {
 		const tournamentId = `duel-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 		const createdAt = now();
+		const fallbackSeasonId = new Date(Date.now()).getUTCFullYear().toString();
+		const competition = db.competitions.list()[0];
+		const request = body as Partial<CreateDuelRequest>;
+		const timing = {
+			competitionId: request.timing?.competitionId ?? competition?.competitionId ?? 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId: request.timing?.seasonId ?? competition?.activeSeasonId ?? fallbackSeasonId,
+			startMatchday: request.timing?.startMatchday ?? 1,
+			endMatchday: request.timing?.endMatchday ?? 1,
+			startsAt: request.timing?.startsAt ?? createdAt,
+			endsAt: request.timing?.endsAt ?? createdAt,
+		};
+		const joinPolicy = {
+			joinMode: request.joinPolicy?.joinMode ?? ('closed' as const),
+			joinMidSeasonAllowed: request.joinPolicy?.joinMidSeasonAllowed ?? false,
+			maxPlayers: request.joinPolicy?.maxPlayers ?? 2,
+			locked: request.joinPolicy?.locked ?? false,
+			joinClosesAt: request.joinPolicy?.joinClosesAt,
+		};
 		const tournament: Tournament = {
 			tournamentId,
-			name: body.name,
-			visibility: body.visibility,
-			discoverability: body.discoverability ?? 'unlisted',
+			name: request.name ?? 'Duel de Predicciones',
+			visibility: request.visibility ?? 'private',
+			discoverability: request.discoverability ?? 'unlisted',
 			verificationStatus: 'community',
-			sportId: body.sportId,
-			gameModeId: body.gameModeId,
+			sportId: request.sportId ?? 'football',
+			gameModeId: request.gameModeId ?? 'scorePrediction',
 			formatId: 'headsUp',
-			modality: body.modality,
+			modality: request.modality ?? 'matchday',
 			status: 'live',
-			joinPolicy: body.joinPolicy,
+			joinPolicy,
 			memberCount: 2,
-			timing: body.timing,
+			timing,
 			createdAt,
 			updatedAt: createdAt,
-			formatConfig: body.formatConfig,
+			formatConfig: request.formatConfig,
 			headsUpAcceptance: {
 				status: 'pending',
 				challengerUserId: resolveUser(db).userId,
-				opponentUserId: body.opponentUserId,
+				opponentUserId: request.opponentUserId ?? resolveUser(db, 'user-cr7').userId,
 				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
 			},
 			myMembership: { role: 'owner', joinedAt: createdAt },
 		};
-		db.tourneys.create({
+		db.tournaments.create({
 			tournamentId,
 			tournament,
 			membership: { role: 'owner', joinedAt: createdAt },
 		});
+		await syncRuntimeTournamentFromDb(db, tournamentId);
 		return { status: 201, response: tournament };
 	},
-	createDuelRematch: ({ params, body }, db) => {
-		const source = db.tourneys.get(params.tournamentId);
+	createDuelRematch: async ({ params, body }, db) => {
+		const source = db.tournaments.get(params.tournamentId);
 		const tournamentId = `duel-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 		const createdAt = now();
 		const base = source?.tournament ?? ({} as TournamentSummary);
@@ -326,15 +378,40 @@ const explicitMockHandlers: MockHandlers = {
 			},
 			myMembership: { role: 'owner', joinedAt: createdAt },
 		};
-		db.tourneys.create({
+		db.tournaments.create({
 			tournamentId,
 			tournament,
 			membership: { role: 'owner', joinedAt: createdAt },
 		});
+		await syncRuntimeTournamentFromDb(db, tournamentId);
 		return { status: 201, response: tournament };
 	},
-	getTournament: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	joinTournament: async ({ params, headers }, db) => {
+		const runtimeResult = await joinRuntimeTournament(db, {
+			tournamentId: params.tournamentId,
+			userId: resolveUser(db).userId,
+			idempotencyKey: headers?.idempotencyKey,
+		});
+		return {
+			status: runtimeResult.status,
+			response: runtimeResult.response as MockHandlerResponseMap['joinTournament'],
+			headers: runtimeResult.headers,
+		};
+	},
+	joinTournamentByInvitationCode: async ({ params, headers }, db) => {
+		const runtimeResult = await joinRuntimeTournamentByInvitationCode(db, {
+			code: params.code,
+			userId: resolveUser(db).userId,
+			idempotencyKey: headers?.idempotencyKey,
+		});
+		return {
+			status: runtimeResult.status,
+			response: runtimeResult.response as MockHandlerResponseMap['joinTournamentByInvitationCode'],
+			headers: runtimeResult.headers,
+		};
+	},
+	getTournament: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		if (!record) {
 			const fallback = toFallbackTournamentSummary(params.tournamentId);
 			return {
@@ -342,13 +419,104 @@ const explicitMockHandlers: MockHandlers = {
 				response: toTournamentResponse(fallback),
 			};
 		}
+		const runtime = await getRuntimeTournamentView(db, params.tournamentId);
+		const tournament: TournamentSummary = {
+			...record.tournament,
+			status: runtime.status,
+			joinPolicy: runtime.joinPolicy,
+			memberCount: runtime.memberCount,
+			rulesetId: runtime.rulesetId,
+		};
 		return {
 			status: 200,
-			response: toTournamentResponse(record.tournament, record.membership),
+			response: toTournamentResponse(tournament, record.membership),
 		};
 	},
-	updateTournament: ({ params, body }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	listTournamentMatchdays: ({ params, query }, db) => {
+		const serverTime = now();
+		const record = db.tournaments.get(params.tournamentId);
+		const tournament = record?.tournament ?? toFallbackTournamentSummary(params.tournamentId);
+		const matchdays = buildMatchdaySummaries(db, tournament, serverTime)
+			.map(summary => ({
+				...summary,
+				availabilitySummary: buildMatchdayAvailability(tournament, summary, serverTime),
+			}));
+
+		const filtered = matchdays.filter(summary => {
+			if (typeof query?.fromMatchday === 'number' && summary.matchday < query.fromMatchday) {
+				return false;
+			}
+			if (typeof query?.toMatchday === 'number' && summary.matchday > query.toMatchday) {
+				return false;
+			}
+			if (query?.status && summary.status !== query.status) {
+				return false;
+			}
+			return true;
+		});
+
+		return {
+			status: 200,
+			response: {
+				serverTime,
+				items: filtered,
+			} satisfies TournamentMatchdayPage,
+		};
+	},
+	getTournamentMatchday: ({ params }, db) => {
+		const serverTime = now();
+		const record = db.tournaments.get(params.tournamentId);
+		const tournament = record?.tournament ?? toFallbackTournamentSummary(params.tournamentId);
+		const summaries = buildMatchdaySummaries(db, tournament, serverTime);
+		const sortedMatchdays = summaries.map(summary => summary.matchday).sort((left, right) => left - right);
+		const summary = summaries.find(item => item.matchday === params.matchday) ?? {
+			matchday: params.matchday,
+			label: `Matchday ${params.matchday}`,
+			status: 'upcoming' as const,
+			startsAt: serverTime,
+			endsAt: serverTime,
+			matchCount: 0,
+			tournamentId: params.tournamentId,
+			serverTime,
+		};
+		const ordered = [...new Set([...sortedMatchdays, params.matchday])].sort((left, right) => left - right);
+		const currentIndex = ordered.indexOf(params.matchday);
+		const previousMatchday = currentIndex > 0 ? ordered[currentIndex - 1] : undefined;
+		const nextMatchday = currentIndex >= 0 && currentIndex + 1 < ordered.length ? ordered[currentIndex + 1] : undefined;
+		const availabilitySummary = buildMatchdayAvailability(tournament, summary, serverTime);
+		return {
+			status: 200,
+			response: {
+				...summary,
+				tournamentId: params.tournamentId,
+				serverTime,
+				previousMatchday,
+				nextMatchday,
+				availabilitySummary,
+			} satisfies TournamentMatchday,
+		};
+	},
+	getTournamentMatchdayAvailability: ({ params }, db) => {
+		const serverTime = now();
+		const record = db.tournaments.get(params.tournamentId);
+		const tournament = record?.tournament ?? toFallbackTournamentSummary(params.tournamentId);
+		const summary = buildMatchdaySummaries(db, tournament, serverTime).find(item => item.matchday === params.matchday) ?? {
+			matchday: params.matchday,
+			label: `Matchday ${params.matchday}`,
+			status: 'upcoming' as const,
+			startsAt: serverTime,
+			endsAt: serverTime,
+			matchCount: 0,
+			tournamentId: params.tournamentId,
+			serverTime,
+		};
+		return {
+			status: 200,
+			response: buildMatchdayAvailability(tournament, summary, serverTime),
+		};
+	},
+	updateTournament: async ({ params, body }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		const fallback = record ?? {
 			tournamentId: params.tournamentId,
 			tournament: toFallbackTournamentSummary(params.tournamentId),
@@ -367,32 +535,43 @@ const explicitMockHandlers: MockHandlers = {
 				typeof patch.joinPolicy === 'object' && patch.joinPolicy
 					? (patch.joinPolicy as TournamentSummary['joinPolicy'])
 					: fallback.tournament.joinPolicy,
-			rulesetId: typeof patch.rulesetId === 'string' ? patch.rulesetId : fallback.tournament.rulesetId,
 			updatedAt: now(),
 		};
 		if (record) {
-			db.tourneys.update(record.tournamentId, { tournament: updatedTournament });
+			db.tournaments.update(record.tournamentId, { tournament: updatedTournament });
 		}
+		await syncRuntimeTournamentFromDb(db, params.tournamentId);
+		const runtime = await getRuntimeTournamentView(db, params.tournamentId);
 		return {
 			status: 200,
-			response: toTournamentResponse(updatedTournament, fallback.membership),
+			response: toTournamentResponse(
+				{
+					...updatedTournament,
+					status: runtime.status,
+					joinPolicy: runtime.joinPolicy,
+					memberCount: runtime.memberCount,
+					rulesetId: runtime.rulesetId,
+				},
+				fallback.membership,
+			),
 		};
 	},
-	archiveTournament: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	archiveTournament: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		if (record) {
-			db.tourneys.update(record.tournamentId, {
+			db.tournaments.update(record.tournamentId, {
 				tournament: {
 					...record.tournament,
 					status: 'archived',
 					updatedAt: now(),
 				},
 			});
+			await syncRuntimeTournamentFromDb(db, params.tournamentId);
 		}
 		return { status: 204, response: undefined };
 	},
 	deleteTournament: ({ params }, db) => {
-		db.tourneys.remove(params.tournamentId);
+		db.tournaments.remove(params.tournamentId);
 		return {
 			status: 202,
 			response: {
@@ -403,10 +582,10 @@ const explicitMockHandlers: MockHandlers = {
 			},
 		};
 	},
-	lockTournament: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	lockTournament: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		if (record) {
-			db.tourneys.update(record.tournamentId, {
+			db.tournaments.update(record.tournamentId, {
 				tournament: {
 					...record.tournament,
 					joinPolicy: {
@@ -416,13 +595,14 @@ const explicitMockHandlers: MockHandlers = {
 					updatedAt: now(),
 				},
 			});
+			await syncRuntimeTournamentFromDb(db, params.tournamentId);
 		}
 		return { status: 204, response: undefined };
 	},
-	unlockTournament: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	unlockTournament: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		if (record) {
-			db.tourneys.update(record.tournamentId, {
+			db.tournaments.update(record.tournamentId, {
 				tournament: {
 					...record.tournament,
 					joinPolicy: {
@@ -432,24 +612,26 @@ const explicitMockHandlers: MockHandlers = {
 					updatedAt: now(),
 				},
 			});
+			await syncRuntimeTournamentFromDb(db, params.tournamentId);
 		}
 		return { status: 204, response: undefined };
 	},
-	unarchiveTournament: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	unarchiveTournament: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		if (record) {
-			db.tourneys.update(record.tournamentId, {
+			db.tournaments.update(record.tournamentId, {
 				tournament: {
 					...record.tournament,
 					status: 'live',
 					updatedAt: now(),
 				},
 			});
+			await syncRuntimeTournamentFromDb(db, params.tournamentId);
 		}
 		return { status: 204, response: undefined };
 	},
-	transferTournamentOwnership: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	transferTournamentOwnership: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		const fallback = record ?? {
 			tournamentId: params.tournamentId,
 			tournament: toFallbackTournamentSummary(params.tournamentId),
@@ -461,19 +643,31 @@ const explicitMockHandlers: MockHandlers = {
 			updatedAt: now(),
 		};
 		if (record) {
-			db.tourneys.update(record.tournamentId, {
+			db.tournaments.update(record.tournamentId, {
 				tournament,
 				membership,
 			});
 		}
+		await syncRuntimeTournamentFromDb(db, params.tournamentId);
+		const runtime = await getRuntimeTournamentView(db, params.tournamentId);
 		return {
 			status: 200,
-			response: toTournamentResponse(tournament, membership),
+			response: toTournamentResponse(
+				{
+					...tournament,
+					status: runtime.status,
+					joinPolicy: runtime.joinPolicy,
+					memberCount: runtime.memberCount,
+					rulesetId: runtime.rulesetId,
+				},
+				membership,
+			),
 		};
 	},
-	getTournamentRules: ({ params }, db) => {
-		const record = db.tourneys.get(params.tournamentId);
+	getTournamentRules: async ({ params }, db) => {
+		const record = db.tournaments.get(params.tournamentId);
 		const tournament = record?.tournament ?? toFallbackTournamentSummary(params.tournamentId);
+		const runtime = await getRuntimeTournamentView(db, params.tournamentId);
 		return {
 			status: 200,
 			response: {
@@ -481,7 +675,7 @@ const explicitMockHandlers: MockHandlers = {
 				gameModeId: tournament.gameModeId,
 				sportId: tournament.sportId,
 				isRankedEligible: tournament.isRankedEligible ?? false,
-				rulesetId: tournament.rulesetId,
+				rulesetId: runtime.rulesetId,
 				sections: [
 					{
 						title: 'Scoring',
@@ -495,19 +689,9 @@ const explicitMockHandlers: MockHandlers = {
 			},
 		};
 	},
-	listTournamentSeasonRanking: ({ params }, db) => ({
+	listTournamentSeasonRanking: async ({ params }, db) => ({
 		status: 200,
-		response: {
-			meta: {
-				tournamentId: params.tournamentId,
-				scope: 'season',
-				state: 'final',
-				serverTime: now(),
-				computedAt: now(),
-				totalPlayers: db.ranking.list().length,
-			},
-			items: db.ranking.list(),
-		},
+		response: (await listRuntimeSeasonRanking(db, params.tournamentId)) as MockHandlerResponseMap['listTournamentSeasonRanking'],
 	}),
 	listTournamentMatchdayMatches: (_context, db) => ({
 		status: 200,
@@ -516,88 +700,81 @@ const explicitMockHandlers: MockHandlers = {
 			items: db.matches.list(),
 		},
 	}),
-	listTournamentMatchdayRanking: ({ params }, db) => {
-		const items = toRankingItems(db);
-		return {
-			status: 200,
-			response: {
-				meta: toRankingMeta(params.tournamentId, items.length, 'matchday', params.matchday),
-				items,
-				myEntry: items.find(entry => entry.user.userId === resolveUser(db).userId),
-			},
-		};
-	},
-	getMyTournamentSeasonRankingWindow: ({ params }, db) => ({
+	listTournamentMatchdayRanking: async ({ params }, db) => ({
 		status: 200,
-		response: toRankingWindow(db, resolveUser(db).userId, params.tournamentId, 'season'),
+		response: (await listRuntimeMatchdayRanking(db, params.tournamentId, params.matchday)) as MockHandlerResponseMap['listTournamentMatchdayRanking'],
 	}),
-	getMyTournamentMatchdayRankingWindow: ({ params }, db) => ({
+	getMyTournamentSeasonRankingWindow: async ({ params }, db) => ({
 		status: 200,
-		response: toRankingWindow(db, resolveUser(db).userId, params.tournamentId, 'matchday', params.matchday),
+		response: (await getRuntimeRankingWindow(db, {
+			tournamentId: params.tournamentId,
+			scope: 'season',
+			userId: resolveUser(db).userId,
+		})) as MockHandlerResponseMap['getMyTournamentSeasonRankingWindow'],
 	}),
-	getMyMatchdayResults: ({ params }, db) => ({
+	getMyTournamentMatchdayRankingWindow: async ({ params }, db) => ({
 		status: 200,
-		response: toMatchdayResults(db, { tournamentId: params.tournamentId, matchday: params.matchday, userId: resolveUser(db).userId }),
+		response: (await getRuntimeRankingWindow(db, {
+			tournamentId: params.tournamentId,
+			scope: 'matchday',
+			matchday: params.matchday,
+			userId: resolveUser(db).userId,
+		})) as MockHandlerResponseMap['getMyTournamentMatchdayRankingWindow'],
 	}),
-	getUserMatchdayResults: ({ params }, db) => ({
+	getMyMatchdayResults: async ({ params }, db) => ({
 		status: 200,
-		response: toMatchdayResults(db, { tournamentId: params.tournamentId, matchday: params.matchday, userId: params.userId }),
-	}),
-	getMatchdayResultsSummary: ({ params }, db) => ({
-		status: 200,
-		response: {
+		response: await getRuntimeMatchdayResults(db, {
 			tournamentId: params.tournamentId,
 			matchday: params.matchday,
-			serverTime: now(),
-			state: 'provisional',
-			topPerformers: toRankingItems(db).slice(0, 3).map(entry => ({
-				position: entry.position,
-				user: entry.user,
-				points: entry.points,
-			})),
-		},
+			userId: resolveUser(db).userId,
+		}),
 	}),
-	listTournamentUpdates: ({ params }, db) => ({
+	getUserMatchdayResults: async ({ params }, db) => ({
 		status: 200,
-		response: {
-			serverTime: now(),
-			events: [toLiveUpdateEvent(db, { tournamentId: params.tournamentId, matchday: 1, scope: 'matchday' })],
-			nextCursor: `cursor-${Date.now()}`,
-		},
+		response: await getRuntimeMatchdayResults(db, {
+			tournamentId: params.tournamentId,
+			matchday: params.matchday,
+			userId: params.userId,
+		}),
 	}),
-	streamTournamentLive: ({ params }, db) => {
-		const event = toLiveUpdateEvent(db, { tournamentId: params.tournamentId, matchday: 1, scope: 'matchday' });
-		return {
-			status: 200,
-			response: `event: update\ndata: ${JSON.stringify(event)}\n\n`,
-		};
-	},
-	listMatchdaySubmissions: ({ params }, db) => ({
+	getMatchdayResultsSummary: async ({ params }, db) => ({
 		status: 200,
-		response: {
-			serverTime: now(),
-			items: toRankingItems(db).slice(0, 5).map(entry => ({
-				user: entry.user,
-				status: 'complete',
-				completion: {
-					submittedCount: 3,
-					expectedCount: 3,
-					status: 'complete',
-				},
-				lastUpdatedAt: now(),
-			})),
-		},
+		response: await getRuntimeMatchdayResultsSummary(db, {
+			tournamentId: params.tournamentId,
+			matchday: params.matchday,
+		}),
 	}),
-	getMyMatchdaySubmission: ({ params }, db) => ({
+	listTournamentUpdates: async ({ params, query }, db) => ({
 		status: 200,
-		response: toScorePredictionSubmission(db, {
+		response: await listRuntimeTournamentUpdates(db, {
+			tournamentId: params.tournamentId,
+			matchday: typeof query?.matchday === 'number' ? query.matchday : undefined,
+		}),
+	}),
+	streamTournamentLive: async ({ params, query }, db) => ({
+		status: 200,
+		response: await streamRuntimeTournamentLive(db, {
+			tournamentId: params.tournamentId,
+			matchday: typeof query?.matchday === 'number' ? query.matchday : undefined,
+		}),
+	}),
+	listMatchdaySubmissions: async ({ params }, db) => ({
+		status: 200,
+		response: (await listRuntimeMatchdaySubmissions(db, {
+			tournamentId: params.tournamentId,
+			matchday: params.matchday,
+		})) as MockHandlerResponseMap['listMatchdaySubmissions'],
+	}),
+	getMyMatchdaySubmission: async ({ params }, db) => ({
+		status: 200,
+		response: (await getRuntimeMatchdaySubmission(db, {
 			tournamentId: params.tournamentId,
 			matchday: params.matchday,
 			userId: resolveUser(db).userId,
 			scope: 'me',
-		}),
+		})) as MockHandlerResponseMap['getMyMatchdaySubmission'],
 	}),
-	upsertMyMatchdaySubmission: ({ params, body }, db) => {
+	upsertMyMatchdaySubmission: async ({ params, body }, db) => {
 		const upserts = Array.isArray((body as { upserts?: unknown[] }).upserts)
 			? ((body as { upserts: Array<{ matchId: string; homeScore: number; awayScore: number }> }).upserts ?? []).filter(
 					item =>
@@ -607,44 +784,47 @@ const explicitMockHandlers: MockHandlers = {
 		const removes = Array.isArray((body as { removes?: unknown[] }).removes)
 			? ((body as { removes: string[] }).removes ?? []).filter(item => typeof item === 'string')
 			: [];
-		const submission = toScorePredictionSubmission(
-			db,
-			{
-				tournamentId: params.tournamentId,
-				matchday: params.matchday,
-				userId: resolveUser(db).userId,
-				scope: 'me',
+		const runtimeResult = await upsertRuntimeMatchdaySubmission(db, {
+			tournamentId: params.tournamentId,
+			matchday: params.matchday,
+			userId: resolveUser(db).userId,
+			body: {
+				upserts,
+				removes,
 			},
-			upserts.length > 0 ? upserts : undefined,
-		);
-		const applied = [...new Set([...upserts.map(item => item.matchId), ...removes])];
+		});
 		return {
 			status: 200,
-			response: {
-				submission,
-				applied,
-				rejected: [],
-			},
+			response: runtimeResult.response as MockHandlerResponseMap['upsertMyMatchdaySubmission'],
+			headers: runtimeResult.headers,
 		};
 	},
-	clearMyMatchdaySubmission: () => ({
-		status: 204,
-		response: undefined,
-	}),
-	getUserMatchdaySubmission: ({ params }, db) => ({
+	clearMyMatchdaySubmission: async ({ params, headers }, db) => {
+		await clearRuntimeMatchdaySubmission(db, {
+			tournamentId: params.tournamentId,
+			matchday: params.matchday,
+			userId: resolveUser(db).userId,
+			idempotencyKey: headers?.idempotencyKey,
+		});
+		return {
+			status: 204,
+			response: undefined,
+		};
+	},
+	getUserMatchdaySubmission: async ({ params }, db) => ({
 		status: 200,
-		response: toScorePredictionSubmission(db, {
+		response: (await getRuntimeMatchdaySubmission(db, {
 			tournamentId: params.tournamentId,
 			matchday: params.matchday,
 			userId: params.userId,
 			scope: 'other',
-		}),
+		})) as MockHandlerResponseMap['getUserMatchdaySubmission'],
 	}),
 	oauthAuthorize: ({ params }) => ({
 		status: 302,
-		response: {
-			headers: { 'X-Request-Id': `mock-request-${Date.now()}`, Location: `https://auth.mock/${params.provider}` },
-			content: undefined as never,
+		response: undefined as never,
+		headers: {
+			Location: `https://auth.mock/${params.provider}`,
 		},
 	}),
 	oauthTokenExchange: (_context, db) => ({
@@ -660,21 +840,9 @@ const explicitMockHandlers: MockHandlers = {
 	}),
 };
 
-const fallbackMockHandler: MockHandler<Record<string, unknown>, unknown> = () => ({
-	status: 200,
-	response: {},
-});
+const notImplementedMockHandlers = createNotImplementedMockHandlers();
 
-const augmentedMockHandlers = explicitMockHandlers as MockHandlers & Record<string, MockHandler<Record<string, unknown>, unknown>>;
-const dynamicMockHandlers = augmentedMockHandlers as Record<string, MockHandler<Record<string, unknown>, unknown>>;
-for (const operation of Object.values(operations)) {
-	if (isAdminOperation(operation)) {
-		continue;
-	}
-	if (Object.prototype.hasOwnProperty.call(dynamicMockHandlers, operation.operationId)) {
-		continue;
-	}
-	dynamicMockHandlers[operation.operationId] = fallbackMockHandler;
-}
-
-export const defaultMockHandlers = augmentedMockHandlers;
+export const defaultMockHandlers = {
+	...notImplementedMockHandlers,
+	...explicitMockHandlers,
+};

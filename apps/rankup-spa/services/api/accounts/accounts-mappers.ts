@@ -1,4 +1,6 @@
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Auth from '@rankup/rankup/domains/accounts/auth/contracts/types.js';
 import type * as Me from '@rankup/rankup/domains/accounts/me/contracts/types.js';
 import type * as Social from '@rankup/rankup/domains/accounts/social/contracts/types.js';
@@ -134,3 +136,5 @@ function mapUserSummary(summary: Api.MeSummary): Users.UserSummary {
 		pictureUrl: summary.pictureUrl,
 	};
 }
+
+export const mapAccountsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

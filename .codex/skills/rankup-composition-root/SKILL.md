@@ -22,17 +22,17 @@ Create a single composition root that:
 -   UI must not read env directly.
 -   UI must not import platform/browser implementations.
 -   `@rankup/api-mock` must be imported only in allowlisted app wiring.
--   Keep domain registration isolated (use `registerTourneyDomainServices.ts`).
+-   Keep domain registration isolated (use `registerTournamentDomainServices.ts`).
 
 ## Suggested files
 
 -   `apps/rankup-spa/lib/composition-root.ts`
 -   `packages/platform/src/registerPlatformServices.ts`
--   `packages/rankup/src/domains/tourney/registerTourneyDomainServices.ts`
+-   `packages/rankup/src/domains/tournaments/registerTournamentDomainServices.ts`
 -   `packages/platform/src/environment/common/environment.ts`
 -   `packages/platform/src/environment/browser/environmentService.ts`
 -   `apps/rankup-spa/services/api/create-rankup-api-client.ts`
--   `apps/rankup-spa/services/api/tourney/*-gateway.ts`
+-   `apps/rankup-spa/services/api/tournament/*-gateway.ts`
 
 ## Steps
 
@@ -48,13 +48,13 @@ Create a single composition root that:
 -   Use `RankupApiClient` from `@rankup/api` as the contract type.
 -   Implement HTTP factory in `apps/rankup-spa/services/api/create-rankup-api-client.ts`.
 -   Select mock vs HTTP in `apps/rankup-spa/lib/composition-root.ts`.
--   Register app-owned gateways (e.g., `TourneyCoreGateway`, `TourneyMatchdaysGateway`) in the composition root.
+-   Register app-owned gateways (e.g., `TournamentCoreGateway`, `TournamentMatchdaysGateway`) in the composition root.
 
 3. **Composition root**
 
 -   Build `ServiceCollection`.
 -   Call `registerPlatformServices(services)`.
--   Call `registerTourneyDomainServices(services)` (safe extension point).
+-   Call `registerTournamentDomainServices(services)` (safe extension point).
 -   Create `InstantiationService`.
 -   Export a small return shape that bootstrap can consume (do not expose generic `getService` to UI).
 

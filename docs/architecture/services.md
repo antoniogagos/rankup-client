@@ -32,9 +32,9 @@ API request flow is specified in `docs/architecture/api-request-flow.md`.
 -   Services must be cohesive by domain. Avoid a single monolithic service.
 -   Examples (non-exhaustive):
     -   IAuthService
-    -   ITourneyCoreService
-    -   ITourneyMatchdaysService
-    -   ITourneyRankingService
+    -   ITournamentCoreService
+    -   ITournamentMatchdaysService
+    -   ITournamentRankingService
 
 ## Lit usage (UI consumption)
 
@@ -46,7 +46,7 @@ API request flow is specified in `docs/architecture/api-request-flow.md`.
 ## Scopes / lifetimes
 
 -   app-scope (current): application-wide singletons.
--   future: tourney-scope or game-scope for per-tourney state.
+-   future: tournament-scope or game-scope for per-tournament state.
 
 ## Prohibitions
 

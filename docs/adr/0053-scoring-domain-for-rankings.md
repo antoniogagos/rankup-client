@@ -7,7 +7,7 @@
 
 ## Context
 
-After the tourney capability split, ranking lived under `packages/rankup/src/domains/tournaments/ranking`.
+After the tournament capability split, ranking lived under `packages/rankup/src/domains/tournaments/ranking`.
 The Rankup Engine partitioning proposal defines scoring as its own domain, owning rankings and snapshots.
 Keeping rankings inside tournaments mixes concerns and complicates future scoring work (results, timeline, ranked/achievements dependencies).
 
@@ -15,7 +15,7 @@ Keeping rankings inside tournaments mixes concerns and complicates future scorin
 
 Create `packages/rankup/src/domains/scoring` and move the ranking capability to `domains/scoring/ranking`.
 Update registration in the composition root and update imports in app gateways and UI.
-Service identifiers remain `ITourneyRanking*` for now to avoid churn.
+Service identifiers remain `ITournamentRanking*` for now to avoid churn.
 
 ## Constraints
 
@@ -59,4 +59,4 @@ Service identifiers remain `ITourneyRanking*` for now to avoid churn.
 ## References
 
 -   Docs: `docs/architecture/rankup-engine-domain-partitioning.md`
--   Epic: `docs/work/epics/008-domain-tourney-boundaries.md`
+-   Epic: `docs/work/epics/008-domain-tournament-boundaries.md`

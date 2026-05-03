@@ -1,5 +1,7 @@
 import { mapOptional } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Campaigns from '@rankup/rankup/domains/promotions/campaigns/contracts/types.js';
 import type * as Rewards from '@rankup/rankup/domains/promotions/rewards/contracts/types.js';
 
@@ -296,3 +298,5 @@ export function mapUpdateRewardFulfillmentProfileRequest(
 		shippingAddress: mapOptional(body.shippingAddress, mapShippingAddressRequest),
 	};
 }
+
+export const mapPromotionsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

@@ -1,7 +1,7 @@
 {
 	"operationId": "pinTournamentChatMessage",
 	"params": {
-		"tournamentId": "tourney-1",
+		"tournamentId": "tournament-1",
 		"messageId": "msg_01J8W0K7E2ZQZ6P0M4NQW2Y7AA"
 	},
 	"body": {

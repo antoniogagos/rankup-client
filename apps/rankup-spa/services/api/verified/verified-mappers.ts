@@ -1,6 +1,8 @@
 import { mapOptional } from '../gateway-mapping.js';
-import { mapTournamentPreview } from '../tourney/tourney-mappers.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
+import { mapTournamentPreview } from '../tournaments/tournament-mappers.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Events from '@rankup/rankup/domains/verified/events/contracts/types.js';
 import type * as Hub from '@rankup/rankup/domains/verified/hub/contracts/types.js';
 
@@ -154,3 +156,5 @@ export function mapVerifiedHub(hub: Api.VerifiedHub): Hub.VerifiedHub {
 		sections: hub.sections.map(mapVerifiedHubSection),
 	};
 }
+
+export const mapVerifiedProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

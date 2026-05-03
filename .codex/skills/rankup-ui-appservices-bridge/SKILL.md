@@ -13,7 +13,7 @@ metadata:
 
 Expose an explicit, typed service surface to UI:
 
--   UI uses `appServices.tourney.<capability>` (etc.)
+-   UI uses `appServices.tournament.<capability>` (etc.)
 -   UI does not import DI primitives
 -   UI cannot request arbitrary services by identifier
 
@@ -32,13 +32,13 @@ Expose an explicit, typed service surface to UI:
 
 1. Define `AppServices` with explicit fields only (start minimal):
 
--   `tourney: { core, matchdays, ranking, members, codes, invites }`
+-   `tournament: { core, matchdays, ranking, members, codes, invites }`
 
 2. Create a bootstrap factory:
 
 -   call composition root
 -   instantiate needed services once
--   build `{ tourney: { core, matchdays, ranking, members, codes, invites } }` object
+-   build `{ tournament: { core, matchdays, ranking, members, codes, invites } }` object
 -   pass it to `rk-app`/`rk-unauthenticated-app` as host properties
 
 3. Provide `AppServices` to UI:

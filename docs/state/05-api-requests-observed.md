@@ -8,7 +8,7 @@
 
 -   `rg -n "@rankup/api[\"'\/]" apps/rankup-spa --glob "*.ts"`
 -   `rg -n "@rankup/api[\"'\/]" packages/rankup/src/domains --glob "*.ts"`
--   `rg -n "ITourney.*Gateway|Tourney.*Gateway" apps/rankup-spa packages/rankup/src/domains/tournaments`
+-   `rg -n "ITournament.*Gateway|Tournament.*Gateway" apps/rankup-spa packages/rankup/src/domains/tournaments`
 -   `rg -n "createRankupApiClient|createHttpRankupApiClient" apps/rankup-spa`
 -   `rg -n "@service\(" apps/rankup-spa`
     -   UI packages = `apps/rankup-spa/pages/**`, `apps/rankup-spa/elements/**`, `packages/samba/**` (see `docs/architecture/ui-packages.md`)
@@ -41,19 +41,19 @@
 
 -   Domain DTOs live in `packages/rankup/src/domains/tournaments/<capability>/contracts/types.ts` (shared types in `shared/`), except rankings which live under `packages/rankup/src/domains/scoring/ranking`.
 -   App-owned gateways (SDK -> domain DTOs):
-    -   `apps/rankup-spa/services/api/tourney/tourney-core-gateway.ts`
-    -   `apps/rankup-spa/services/api/tourney/tourney-matchdays-gateway.ts`
-    -   `apps/rankup-spa/services/api/tourney/tourney-ranking-gateway.ts`
-    -   `apps/rankup-spa/services/api/tourney/tourney-members-gateway.ts`
-    -   `apps/rankup-spa/services/api/tourney/tourney-invitation-codes-gateway.ts`
-    -   `apps/rankup-spa/services/api/tourney/tourney-invites-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-core-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-matchdays-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-ranking-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-members-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-invitation-codes-gateway.ts`
+    -   `apps/rankup-spa/services/api/tournaments/tournament-invites-gateway.ts`
 -   Domain services (delegan en gateways):
-    -   `packages/rankup/src/domains/tournaments/core/services/tourneyCoreService.ts`
-    -   `packages/rankup/src/domains/tournaments/matchdays/services/tourneyMatchdaysService.ts`
-    -   `packages/rankup/src/domains/scoring/ranking/services/tourneyRankingService.ts`
-    -   `packages/rankup/src/domains/tournaments/members/services/tourneyMembersService.ts`
-    -   `packages/rankup/src/domains/tournaments/codes/services/tourneyInvitationCodesService.ts`
-    -   `packages/rankup/src/domains/tournaments/invites/services/tourneyInvitesService.ts`
+    -   `packages/rankup/src/domains/tournaments/core/services/tournamentCoreService.ts`
+    -   `packages/rankup/src/domains/tournaments/matchdays/services/tournamentMatchdaysService.ts`
+    -   `packages/rankup/src/domains/scoring/ranking/services/tournamentRankingService.ts`
+    -   `packages/rankup/src/domains/tournaments/members/services/tournamentMembersService.ts`
+    -   `packages/rankup/src/domains/tournaments/codes/services/tournamentInvitationCodesService.ts`
+    -   `packages/rankup/src/domains/tournaments/invites/services/tournamentInvitesService.ts`
 
 ## 5) UI access path (observed)
 
@@ -61,14 +61,14 @@
 -   `createCompositionRoot` -> `ProviderService` -> `createAppServices`.
 -   UI gets services via `@service(...)` decorator from `@rankup/platform/instantiation/browser`.
 -   Direct SDK/gateway usage in UI has been removed.
--   Tourney services used in UI:
-    -   `ITourneyCoreService`:
-        -   `apps/rankup-spa/elements/rk-tourney-list/rk-tourney-list.ts`
-        -   `apps/rankup-spa/pages/create-tourney/rk-create-tourney-page.ts`
-    -   `ITourneyMatchdaysService`:
-        -   `apps/rankup-spa/pages/tourney/pages/rk-tourney-matchday.ts`
-    -   `ITourneyRankingService`:
-        -   `apps/rankup-spa/pages/tourney/pages/rk-tourney-ranking.ts`
+-   Tournament services used in UI:
+    -   `ITournamentCoreService`:
+        -   `apps/rankup-spa/elements/rk-tournament-list/rk-tournament-list.ts`
+        -   `apps/rankup-spa/pages/create-tournament/rk-create-tournament-page.ts`
+    -   `ITournamentMatchdaysService`:
+        -   `apps/rankup-spa/pages/tournament/pages/rk-tournament-matchday.ts`
+    -   `ITournamentRankingService`:
+        -   `apps/rankup-spa/pages/tournament/pages/rk-tournament-ranking.ts`
 
 ## 6) Mocking modes
 

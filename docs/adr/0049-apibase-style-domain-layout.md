@@ -7,15 +7,15 @@
 
 ## Context
 
-Rankup currently isolates the tourney domain in a dedicated package (`packages/domain-tourney`). Apibase keeps domains inside a larger product package (`packages/apibase/domains/*`) and uses import guardrails to enforce boundaries. To align Rankup with the Apibase layout and reduce package sprawl while keeping platform infra-only, we need to move domain modules under an app-level package with `domains/*` submodules.
+Rankup currently isolates the tournament domain in a dedicated package (`packages/domain-tournament`). Apibase keeps domains inside a larger product package (`packages/apibase/domains/*`) and uses import guardrails to enforce boundaries. To align Rankup with the Apibase layout and reduce package sprawl while keeping platform infra-only, we need to move domain modules under an app-level package with `domains/*` submodules.
 
 ## Decision
 
 -   Introduce a product package: `packages/rankup` (workspace package `@rankup/rankup`).
--   Move tourney domain modules to `packages/rankup/src/domains/tournaments/**`.
+-   Move tournament domain modules to `packages/rankup/src/domains/tournaments/**`.
 -   Update imports to use `@rankup/rankup/domains/tournaments/**`.
 -   Update guardrails and docs to enforce domain boundaries in the new layout.
--   Retire `packages/domain-tourney`.
+-   Retire `packages/domain-tournament`.
 -   Supersede ADR 0043.
 
 ## Constraints
@@ -41,14 +41,14 @@ Rankup currently isolates the tourney domain in a dedicated package (`packages/d
 
 ## Alternatives considered
 
--   Keep `packages/domain-tourney` (rejected: diverges from Apibase layout).
+-   Keep `packages/domain-tournament` (rejected: diverges from Apibase layout).
 -   Split into multiple `packages/domain-*` packages (rejected: premature fragmentation).
 -   Keep domain wiring in platform (rejected: violates platform infra-only rule).
 
 ## Implementation plan
 
 -   [ ] Create `packages/rankup` with `src/domains/tournaments/**`.
--   [ ] Move tourney contracts/impl/register into the new domain path.
+-   [ ] Move tournament contracts/impl/register into the new domain path.
 -   [ ] Update imports, workspace config, and guardrails.
 -   [ ] Update docs/work tracking.
 -   [ ] Run `yarn validate`.

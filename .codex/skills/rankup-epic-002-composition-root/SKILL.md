@@ -21,7 +21,7 @@ Create a single composition root that:
 
 -   `apps/rankup-spa/lib/composition-root.ts`
 -   `packages/platform/src/registerPlatformServices.ts`
--   `packages/rankup/src/domains/tourney/registerTourneyDomainServices.ts`
+-   `packages/rankup/src/domains/tournaments/registerTournamentDomainServices.ts`
 
 ## Preconditions
 
@@ -31,7 +31,7 @@ Create a single composition root that:
 ## Constraints
 
 -   Keep `compositionRoot.ts` thin.
--   Put registrations into `registerPlatformServices.ts` and `registerTourneyDomainServices.ts`.
+-   Put registrations into `registerPlatformServices.ts` and `registerTournamentDomainServices.ts`.
 -   Domain registration must be isolated so WP-002-04 can proceed without merge conflicts.
 
 ## Mock vs real

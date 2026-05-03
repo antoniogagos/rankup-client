@@ -1,6 +1,6 @@
 # Domain glossary
 
-## Tournament (Tourney)
+## Tournament (Tournament)
 
 A competition container where a group of users play a selected game mode over a selected sport.
 

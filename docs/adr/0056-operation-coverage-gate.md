@@ -383,9 +383,10 @@ Entrada:
 * `waiverType`: `missingMockHandler | missingFixture | missingOwner | httpFidelityMissing | schemaValidationFlaky`
 * `reason` (obligatorio, 1–3 frases)
 * `owner` (persona/equipo responsable)
-* `issue` (ID interno/GitHub, obligatorio salvo migración inicial)
+* `issue` (ID interno/GitHub, obligatorio)
 * `createdAt` (YYYY‑MM‑DD)
-* `expiresOn` (YYYY‑MM‑DD, obligatorio)
+* `expiresAt` (YYYY‑MM‑DD, obligatorio)
+* `plan` (acción concreta de eliminación, obligatorio)
 * `scope`: `coverage | schema | http`
 * `severity`: `P0 | P1 | P2`
 
@@ -393,18 +394,105 @@ Reglas duras:
 
 * **No wildcards**: solo `operationId` exacto (nunca por tag/dominio).
 * **Expiry obligatoria**: waiver expirado = CI falla.
+* **No formato legacy**: `expiresOn` está prohibido.
 * **Budget**: límites por tipo (ver spec; `coverage` debe tender a 0 post‑migración).
+* **TTL acotado**: `expiresAt` no puede exceder 30 días desde `createdAt`.
 
 ### 12.2 Presupuesto (“waiver budget”)
 
 * `maxWaiversTotal = 0` por defecto (recomendado para P0 una vez migrado).
 * Durante rollout, permitir temporalmente `maxWaiversTotal = N`, con fecha de reducción.
-* Rollout actual: `WAIVERS_MAX_TOTAL=700` en `waivers:check` (se reduce al cerrar la migración).
+* Rollout actual (Epic 010): `WAIVERS_MAX_TOTAL=0` en `waivers:check` y archivo de waivers vacío.
 * CI falla si:
 
   * waiver expirado
   * waiver sin expiry/reason/owner
   * waivers > presupuesto
+
+### 12.3 Baseline parity bloqueante por `operationId`
+
+Para permitir ejecución incremental sin drift en el slice crítico del engine:
+
+* baseline bloqueante vive en `diagnostics/parity-baseline-operations.json`.
+* `api-mock:coverage`, `gateways:ownership`, `api-mock:schema-validate` y `api-http:schema-validate`
+  se evalúan contra esa baseline.
+* fuera de baseline no se aceptan waivers nuevos; para entrar al estándar bloqueante una operación debe añadirse a baseline con fixture + owner + schema/http parity en PASS.
+
+### 12.4 Update 2026-02-08 (WP-008-32 PR-001): baseline parcial -> objetivo global
+
+Decisión operativa vigente:
+
+* La baseline de paridad se declara **transicional** (ya no objetivo final).
+* El objetivo aprobado del ADR pasa a ser cobertura 4-way **global** para todo `operationId` no-admin del manifest.
+* Se añade inventario reproducible por operación en `diagnostics/operation-coverage-global-report.json` para medir el gap real y guiar la ejecución por PR.
+* Durante la transición, CI aún puede ejecutar gates baseline-scoped, pero la dirección oficial del ADR es remover esa dependencia y bloquear por cobertura global.
+
+Estado medido en PR-001 (2026-02-08):
+
+* operaciones no-admin: `226`
+* baseline bloqueante actual: `39`
+* owners detectados: `194/226`
+* handlers explícitos (sin fallback): `36/226`
+* fixtures canónicos (`generated/<operationId>.json`): `194/226`
+
+Implicación:
+
+* Las secciones de baseline deben leerse como mecanismo de rollout histórico.
+* La ejecución canónica para cierre global queda en `docs/work/epics/008-operation-coverage-4way-global.md`.
+
+### 12.5 Update 2026-02-08 (WP-008-32 PR-002): gate único global en validate
+
+Decisión operativa vigente:
+
+* `yarn validate` pasa a ejecutar un único gate de coverage: `yarn repo:operation-coverage`.
+* El gate recorre todas las operaciones no-admin del manifest (sin filtro por `parity-baseline-operations.json` para coverage).
+* Se elimina el acoplamiento de validate a la secuencia separada `api-mock:coverage` + `gateways:ownership`.
+* `missingOwner` queda reportado como deuda explícita no-bloqueante en PR-002 y se promueve a bloqueo en PR-004 junto al mapping central 1:1.
+
+Estado medido en PR-002 (2026-02-08):
+
+* operaciones no-admin evaluadas por gate global: `226`
+* coverage handlers: `226/226`
+* coverage fixtures: `226/226`
+* ownership detectado: `194/226` (`missingOwner=32`, deuda visible)
+* `yarn validate`: PASS con gate único global activo.
+
+### 12.6 Update 2026-02-08 (WP-008-32 PR-003): waivers v2 estrictos + migración de formato
+
+Decisión operativa vigente:
+
+* El schema de `diagnostics/operation-waivers.json` se endurece en formato v2:
+  * `owner|reason|issue|createdAt|expiresAt|plan|scope|severity` obligatorios.
+  * `expiresOn` pasa a ser formato legacy no admitido.
+* Se valida TTL máximo para waivers (`expiresAt - createdAt <= 30 días`), además de expiración obligatoria.
+* Se prohíben duplicados por clave `operationId + waiverType`.
+
+Estado medido en PR-003 (2026-02-08):
+
+* waivers activos: `0`
+* `yarn waivers:check`: PASS
+* `yarn validate`: PASS con schema v2 aplicado.
+
+### 12.7 Update 2026-02-08 (WP-008-32 PR-004): mapping central + ownership estricto
+
+Decisión operativa vigente:
+
+* Se introduce `gatewayOperationMapping` central en `apps/rankup-spa/services/api/gateway-mapping.ts` con cobertura completa no-admin.
+* `repo:operation-coverage` pasa a bloquear también por:
+  * `missingGatewayMapping`
+  * mismatch `gatewayOperationMapping` vs owner detectado en gateway
+  * referencias desconocidas de `operationId`/gateway en mapping central
+* `missingOwner` deja de ser deuda no-bloqueante; queda en enforcement estricto junto a mapping 1:1.
+* `gateways:ownership` queda alineado al mismo contrato estricto (owner único + mapping central sincronizado).
+
+Estado medido en PR-004 (2026-02-08):
+
+* operaciones no-admin evaluadas: `226`
+* ownership: `226/226`
+* mapping central: `226/226`
+* `yarn repo:operation-coverage`: PASS
+* `yarn gateways:ownership`: PASS
+* `yarn validate`: PASS
 
 ---
 
@@ -416,11 +504,10 @@ Insertar en el pipeline (en el punto donde ya se valida OpenAPI):
 2. `yarn openapi:generate` (existente + manifest operations)
 3. `yarn openapi:ops:check`
 4. `yarn waivers:check`
-5. `yarn api-mock:coverage`
-6. `yarn gateways:ownership`
-7. `yarn api-mock:schema-validate`
-8. `yarn api-http:schema-validate` (ratcheted; al menos para nuevas ops)
-9. `yarn typecheck:workspace` + resto de validate
+5. `yarn repo:operation-coverage` (global no-admin coverage gate)
+6. `yarn api-mock:schema-validate`
+7. `yarn api-http:schema-validate` (ratcheted; al menos para nuevas ops)
+8. `yarn typecheck:workspace` + resto de validate
 
 ---
 

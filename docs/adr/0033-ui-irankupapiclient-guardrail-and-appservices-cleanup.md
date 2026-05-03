@@ -7,7 +7,7 @@
 
 ## Context
 
-WP-007-05 removed UI usage of `IRankupApiClient` in favor of domain services (`ITourneyService`). However, the guardrails still allowed regressions and `AppServices` exposed `apiClient`, enabling new UI coupling. A debug path in `rk-app` also exercised `apiClient` directly.
+WP-007-05 removed UI usage of `IRankupApiClient` in favor of domain services (`ITournamentService`). However, the guardrails still allowed regressions and `AppServices` exposed `apiClient`, enabling new UI coupling. A debug path in `rk-app` also exercised `apiClient` directly.
 
 To preserve the service boundary, we need an explicit guardrail and to remove `apiClient` from the UI bridge surface.
 

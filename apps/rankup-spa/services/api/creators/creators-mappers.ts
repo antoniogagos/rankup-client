@@ -1,6 +1,8 @@
 import { mapOptional } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import { mapVerifiedEventSummary, mapVerifiedTournamentPreview } from '../verified/verified-mappers.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Catalog from '@rankup/rankup/domains/creators/catalog/contracts/types.js';
 import type * as Directory from '@rankup/rankup/domains/creators/directory/contracts/types.js';
 
@@ -137,3 +139,5 @@ export function mapCreatorTournamentPage(page: Api.CreatorTournamentPage): Catal
 		nextCursor: page.nextCursor,
 	};
 }
+
+export const mapCreatorsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

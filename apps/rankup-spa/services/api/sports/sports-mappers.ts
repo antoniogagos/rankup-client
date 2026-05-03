@@ -1,4 +1,6 @@
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Catalog from '@rankup/rankup/domains/sports/catalog/contracts/types.js';
 import type * as Schedule from '@rankup/rankup/domains/sports/schedule/contracts/types.js';
 
@@ -182,3 +184,5 @@ export function mapMatchEventPage(response: Api.ListMatchEventsResponse): Schedu
 		nextCursor: response.nextCursor,
 	};
 }
+
+export const mapSportsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

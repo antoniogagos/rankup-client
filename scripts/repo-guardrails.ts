@@ -1,11 +1,17 @@
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import * as ts from 'typescript';
 import { runRatchet } from './repo-ratchet';
 import { runAgentEntryGuardrail } from './repo-agent-entry';
 import { runStructuralAdr } from './repo-structural-adr';
 import { runWorkLogGuardrail } from './repo-work-log';
 import { runWorkLogVerification } from './repo-work-log-verification';
+import { runP0TestGuardrails } from './test-guardrails-p0';
+import { runEngineNoPiiLoggingGuardrail } from './repo-engine-no-pii-logging';
+import { runEnginePortabilityBoundaryGuardrail } from './repo-engine-portability-boundary';
+import { runEngineRuntimeErrorSurfaceGuardrail } from './repo-engine-runtime-error-surface';
+import { runEngineTypeSafetyBoundaryGuardrail } from './repo-engine-type-safety-boundary';
+import { runOpenApiSotDriftGuardrail } from './repo-openapi-sot-drift';
 
 function runInlineDecoratorGuardrail(): void {
 	const command = ['rg -n -U', '"@(property|state|query|queryAll|queryAsync|service)\\\\([^\\\\n]*\\\\)\\\\s*\\\\n\\\\s*(public|private|protected)?\\\\s*(readonly\\\\s+)?[#A-Za-z_\\\\$]"', 'packages'].join(' ');
@@ -140,6 +146,54 @@ function runGatewayMappingGuardrail(): void {
 		console.error('repo:guardrails failed');
 		console.error('- Unable to run gateway cast guardrail.');
 		throw error;
+	}
+}
+
+function runApiTournamentsNamingGuardrail(): void {
+	if (existsSync('apps/rankup-spa/services/api/tournament')) {
+		console.error('repo:guardrails failed');
+		console.error('- Legacy API folder apps/rankup-spa/services/api/tournament is forbidden. Use services/api/tournaments.');
+		process.exit(1);
+	}
+
+	const checks = [
+		{
+			command:
+				'rg -n "services/api/tournament/" apps/rankup-spa --glob "*.ts"',
+			message:
+				'Imports must not reference services/api/tournament/. Use services/api/tournaments/.',
+		},
+		{
+			command:
+				'rg -n "\\.\\./tournament/" apps/rankup-spa/services/api apps/rankup-spa/lib --glob "*.ts"',
+			message:
+				'Relative imports must not reference ../tournament/. Use ../tournaments/.',
+		},
+	];
+
+	for (const check of checks) {
+		try {
+			const output = execSync(check.command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+				.toString()
+				.trim();
+			if (output) {
+				console.error('repo:guardrails failed');
+				console.error(`- ${check.message}`);
+				console.error(output);
+				process.exit(1);
+			}
+			console.error('repo:guardrails failed');
+			console.error(`- ${check.message}`);
+			process.exit(1);
+		} catch (error) {
+			const status = (error as { status?: number }).status;
+			if (status === 1) {
+				continue;
+			}
+			console.error('repo:guardrails failed');
+			console.error('- Unable to run API tournaments naming guardrail.');
+			throw error;
+		}
 	}
 }
 
@@ -815,6 +869,58 @@ function runLitLocalizeMsgIdGuardrail(): void {
 	}
 }
 
+function runEngineTestDisciplineGuardrail(): void {
+	const onlySkipCommand = 'rg -n --glob "*.test.ts" "\\\\.(only|skip)\\\\(" packages/rankup/test';
+	try {
+		const output = execSync(onlySkipCommand, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+			.toString()
+			.trim();
+		if (output) {
+			console.error('repo:guardrails failed');
+			console.error('- Engine test suites must not contain .only() or .skip().');
+			console.error(output);
+			process.exit(1);
+		}
+		console.error('repo:guardrails failed');
+		console.error('- Engine test discipline guardrail (.only/.skip) did not behave as expected.');
+		process.exit(1);
+	} catch (error) {
+		const status = (error as { status?: number }).status;
+		if (status !== 1) {
+			console.error('repo:guardrails failed');
+			console.error('- Unable to run engine test discipline guardrail (.only/.skip).');
+			throw error;
+		}
+	}
+
+	const nodeTestImportCommand = 'rg -n --glob "*.test.ts" "node:test|node:assert/strict" packages/rankup/test';
+	try {
+		const output = execSync(nodeTestImportCommand, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+			.toString()
+			.trim();
+		if (output) {
+			console.error('repo:guardrails failed');
+			console.error('- Engine tests must use Vitest (node:test and node:assert/strict are forbidden in packages/rankup/test).');
+			console.error(output);
+			process.exit(1);
+		}
+		console.error('repo:guardrails failed');
+		console.error('- Engine test discipline guardrail (node:test imports) did not behave as expected.');
+		process.exit(1);
+	} catch (error) {
+		const status = (error as { status?: number }).status;
+		if (status !== 1) {
+			console.error('repo:guardrails failed');
+			console.error('- Unable to run engine test discipline guardrail (node:test imports).');
+			throw error;
+		}
+	}
+}
+
+function runProblemDetailsCanonicalizationGuardrails(): void {
+	runP0TestGuardrails();
+}
+
 export function runGuardrails(): void {
 	runAgentEntryGuardrail();
 	runStructuralAdr();
@@ -824,6 +930,7 @@ export function runGuardrails(): void {
 	runSingleLineImportsGuardrail();
 	runImportSpacingGuardrail();
 	runGatewayMappingGuardrail();
+	runApiTournamentsNamingGuardrail();
 	runLitCssIndentGuardrail();
 	runLitHtmlIndentGuardrail();
 	runUiApiClientGuardrail();
@@ -832,12 +939,19 @@ export function runGuardrails(): void {
 	runPlatformDomainBoundaryGuardrail();
 	runPlatformProductSdkGuardrail();
 	runOpenApiLocationGuardrail();
+	runOpenApiSotDriftGuardrail();
 	runUiApiMockGuardrail();
 	runAppApiMockGuardrail();
 	runAppApiContractGuardrail();
 	runDomainApiContractGuardrail();
 	runApiMockServerLeakageGuardrail();
 	runLitLocalizeMsgIdGuardrail();
+	runEngineTestDisciplineGuardrail();
+	runEnginePortabilityBoundaryGuardrail();
+	runEngineRuntimeErrorSurfaceGuardrail();
+	runEngineTypeSafetyBoundaryGuardrail();
+	runEngineNoPiiLoggingGuardrail();
+	runProblemDetailsCanonicalizationGuardrails();
 	runRatchet();
 }
 

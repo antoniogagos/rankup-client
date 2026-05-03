@@ -1,0 +1,20 @@
+{
+	"operationId": "updateTournament",
+	"params": {
+		"tournamentId": "tournament-1"
+	},
+	"body": {
+		"name": "string",
+		"description": "string",
+		"discoverability": "listed",
+		"joinPolicy": {
+			"joinMode": "open",
+			"joinMidSeasonAllowed": true,
+			"maxPlayers": 2,
+			"locked": true,
+			"joinClosesAt": "2019-08-24T14:15:22Z"
+		},
+		"chatEnabled": true,
+		"rulesetConfig": {}
+	}
+}

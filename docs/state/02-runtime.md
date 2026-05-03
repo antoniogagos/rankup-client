@@ -18,13 +18,13 @@
     -   /oauth -> redirect to SIGNIN
     -   -   -> redirect to /
 -   Authenticated app (rk-app):
-    -   TOURNEYS -> rk-home-page
-    -   TOURNEY/\* -> rk-tourney-page
-    -   JOIN_TOURNEY -> rk-join-tourney-page
-    -   CREATE_TOURNEY -> rk-create-tourney-page
+    -   TOURNAMENTS -> rk-home-page
+    -   TOURNAMENT/\* -> rk-tournament-page
+    -   JOIN_TOURNAMENT -> rk-join-tournament-page
+    -   CREATE_TOURNAMENT -> rk-create-tournament-page
     -   /404 -> rk-404-page
--   Tourney nested router (rk-tourney-page) with base getCurrentTourneyBase():
-    -   MATCHDAY, RANKING, CHAT, SHARE_TOURNEY, SETTINGS_TOURNEY, RULES_TOURNEY
+-   Tournament nested router (rk-tournament-page) with base getCurrentTournamentBase():
+    -   MATCHDAY, RANKING, CHAT, SHARE_TOURNAMENT, SETTINGS_TOURNAMENT, RULES_TOURNAMENT
 -   Paths are localized via @lit/localize; the path() helper prefixes /{Locale}/ and uses localized segments (see rk-url-paths.ts).
 
 ## Auth and session flow
@@ -34,7 +34,7 @@
 -   signIn/signUp with password uses CognitoUserPool; OAuth uses redirect to Auth server.
 -   SessionManager dispatches "session-updated" (bubbles + composed).
 -   rk-auth-wall determines initial state by checking Cognito keys in localStorage and updates on session-updated events.
--   rk-app listens to session-updated; on logout it navigates to TOURNEYS.
+-   rk-app listens to session-updated; on logout it navigates to TOURNAMENTS.
 -   rk-unauthenticated-app sets public context and, in mock mode, auto signs in.
 
 ## Data-service flow

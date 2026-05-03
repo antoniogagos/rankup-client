@@ -1,5 +1,5 @@
 import '../../elements/rk-app-header/rk-app-header.js';
-import '../../elements/rk-tourney-list/rk-tourney-list.js';
+import '../../elements/rk-tournament-list/rk-tournament-list.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -10,7 +10,7 @@ export class HomePage extends LitElement {
 	override render() {
 		return html`
 			<rk-app-header></rk-app-header>
-			<rk-tourney-list></rk-tourney-list>
+			<rk-tournament-list></rk-tournament-list>
 		`;
 	}
 

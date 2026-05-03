@@ -1,0 +1,166 @@
+{
+	"version": "2026-02-06",
+	"description": "Baseline per-operation Problem.code catalog for Epic 010 AC-010-F3-11. Profiles define stable status+code mappings; each baseline operation is assigned to exactly one profile.",
+	"sourceBaselineFile": "diagnostics/parity-baseline-operations.json",
+	"codesReference": "packages/rankup/src/runtime/errors.ts",
+	"profiles": {
+		"genericProtectedOperation": {
+			"description": "Protected baseline operation with role/resource gating.",
+			"problems": [
+				{
+					"status": 403,
+					"code": "forbiddenRole"
+				},
+				{
+					"status": 404,
+					"code": "notFound"
+				}
+			]
+		},
+		"joinOperation": {
+			"description": "Tournament join invariants and idempotency conflict profile.",
+			"problems": [
+				{
+					"status": 403,
+					"code": "forbiddenRole"
+				},
+				{
+					"status": 404,
+					"code": "notFound"
+				},
+				{
+					"status": 409,
+					"code": "tournamentArchived"
+				},
+				{
+					"status": 409,
+					"code": "tournamentCancelled"
+				},
+				{
+					"status": 409,
+					"code": "joinClosed"
+				},
+				{
+					"status": 409,
+					"code": "tournamentLocked"
+				},
+				{
+					"status": 409,
+					"code": "tournamentFull"
+				},
+				{
+					"status": 409,
+					"code": "idempotencyKeyReused"
+				}
+			]
+		},
+		"submissionUpsertOperation": {
+			"description": "Submission upsert invariants with strong idempotency and ETag concurrency.",
+			"problems": [
+				{
+					"status": 403,
+					"code": "forbiddenRole"
+				},
+				{
+					"status": 403,
+					"code": "notMember"
+				},
+				{
+					"status": 404,
+					"code": "notFound"
+				},
+				{
+					"status": 409,
+					"code": "tournamentLocked"
+				},
+				{
+					"status": 409,
+					"code": "matchdayClosed"
+				},
+				{
+					"status": 409,
+					"code": "idempotencyKeyReused"
+				},
+				{
+					"status": 412,
+					"code": "etagMismatch"
+				}
+			]
+		},
+		"submissionClearOperation": {
+			"description": "Submission clear invariants with strong idempotency semantics.",
+			"problems": [
+				{
+					"status": 403,
+					"code": "forbiddenRole"
+				},
+				{
+					"status": 403,
+					"code": "notMember"
+				},
+				{
+					"status": 404,
+					"code": "notFound"
+				},
+				{
+					"status": 409,
+					"code": "matchdayClosed"
+				},
+				{
+					"status": 409,
+					"code": "idempotencyKeyReused"
+				}
+			]
+		},
+		"publicReadOperation": {
+			"description": "Public read operation with only resource-not-found as stable domain error.",
+			"problems": [
+				{
+					"status": 404,
+					"code": "notFound"
+				}
+			]
+		}
+	},
+	"operationProfiles": {
+		"archiveTournament": "genericProtectedOperation",
+		"clearMyMatchdaySubmission": "submissionClearOperation",
+		"createDuel": "genericProtectedOperation",
+		"createDuelRematch": "genericProtectedOperation",
+		"createTournament": "genericProtectedOperation",
+		"deleteTournament": "genericProtectedOperation",
+		"getMatchdayResultsSummary": "genericProtectedOperation",
+		"getMyMatchdayResults": "genericProtectedOperation",
+		"getMyMatchdaySubmission": "genericProtectedOperation",
+		"getMyTournamentMatchdayRankingWindow": "genericProtectedOperation",
+		"getMyTournamentSeasonRankingWindow": "genericProtectedOperation",
+		"getTournament": "genericProtectedOperation",
+		"getTournamentMatchday": "genericProtectedOperation",
+		"getTournamentMatchdayAvailability": "genericProtectedOperation",
+		"getTournamentRules": "genericProtectedOperation",
+		"getUserMatchdayResults": "genericProtectedOperation",
+		"getUserMatchdaySubmission": "genericProtectedOperation",
+		"getUserPublicProfile": "publicReadOperation",
+		"joinTournament": "joinOperation",
+		"joinTournamentByInvitationCode": "joinOperation",
+		"listDiscoverableTournaments": "genericProtectedOperation",
+		"listCompetitions": "genericProtectedOperation",
+		"listMatchdaySubmissions": "genericProtectedOperation",
+		"listMyDuels": "genericProtectedOperation",
+		"listMyTournaments": "genericProtectedOperation",
+		"listTournamentMatchdayMatches": "genericProtectedOperation",
+		"listTournamentMatchdayRanking": "genericProtectedOperation",
+		"listTournamentMatchdays": "genericProtectedOperation",
+		"listTournamentSeasonRanking": "genericProtectedOperation",
+		"listTournamentUpdates": "genericProtectedOperation",
+		"lockTournament": "genericProtectedOperation",
+		"oauthAuthorize": "genericProtectedOperation",
+		"oauthTokenExchange": "genericProtectedOperation",
+		"streamTournamentLive": "genericProtectedOperation",
+		"transferTournamentOwnership": "genericProtectedOperation",
+		"unarchiveTournament": "genericProtectedOperation",
+		"unlockTournament": "genericProtectedOperation",
+		"updateTournament": "genericProtectedOperation",
+		"upsertMyMatchdaySubmission": "submissionUpsertOperation"
+	}
+}

@@ -1,0 +1,35 @@
+# Rankup baseline ownership (AC-010-F3-14 / CA-K1)
+
+# Default owner
+* @antoniogagos
+
+# Engine core
+/packages/rankup/src/domains/** @antoniogagos
+/packages/rankup/src/algorithms/** @antoniogagos
+/packages/rankup/src/registry/** @antoniogagos
+/packages/rankup/src/runtime/** @antoniogagos
+/packages/rankup/src/shared/** @antoniogagos
+/packages/rankup/test/** @antoniogagos
+
+# OpenAPI contract + API docs
+/packages/api/openapi.yaml @antoniogagos
+/packages/api/docs/** @antoniogagos
+/packages/api/src/generated/** @antoniogagos
+
+# Mock runtime and parity manifests
+/packages/api-mock/** @antoniogagos
+/diagnostics/parity-baseline-operations.json @antoniogagos
+/diagnostics/parity-baseline-problem-codes.json @antoniogagos
+
+# Critical gates and guardrails
+/scripts/repo-guardrails.ts @antoniogagos
+/scripts/repo-gateways-ownership.ts @antoniogagos
+/scripts/repo-operation-coverage.ts @antoniogagos
+/scripts/repo-operation-waivers.ts @antoniogagos
+/scripts/repo-engine-no-pii-logging.ts @antoniogagos
+/scripts/api-http-schema-validate.ts @antoniogagos
+/scripts/test-guardrails-p0.ts @antoniogagos
+/scripts/repo-ratchet.ts @antoniogagos
+
+# CI gates
+/.github/workflows/** @antoniogagos

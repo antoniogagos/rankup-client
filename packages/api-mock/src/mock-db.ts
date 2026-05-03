@@ -21,9 +21,14 @@ export type MockListStore<T> = {
 export type MockDb = {
 	users: MockEntityStore<PublicUserProfile, 'userId'>;
 	competitions: MockEntityStore<Competition, 'competitionId'>;
-	tourneys: MockEntityStore<MyTournamentRecord, 'tournamentId'>;
+	tournaments: MockEntityStore<MyTournamentRecord, 'tournamentId'>;
 	ranking: MockListStore<RankingEntry>;
 	matches: MockEntityStore<TournamentMatch, 'matchId'>;
+};
+
+export type MockDbOptions = {
+	now?: Date | number | string;
+	seasonId?: string;
 };
 
 type MyTournamentRecord = MyTournamentItem & { tournamentId: string };
@@ -43,142 +48,171 @@ const USERS: PublicUserProfile[] = [
 	{ userId: 'user-bichito', username: 'ElBichito', pictureUrl: '/assets/avatars/bulbasaur.svg', scope: 'full' },
 ];
 
-const COMPETITIONS: Competition[] = [
-	{
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		name: 'La Liga',
-		shortName: 'LaLiga',
-		sportId: 'football',
-		type: 'domestic',
-		status: 'live',
-		countryCode: 'ES',
-		activeSeasonId: '2024',
-	},
-	{
-		competitionId: 'FOOTBALL_UK_LEAGUE_1',
-		name: 'Premier League',
-		shortName: 'Premier',
-		sportId: 'football',
-		type: 'domestic',
-		status: 'live',
-		countryCode: 'GB',
-		activeSeasonId: '2024',
-	},
-	{
-		competitionId: 'FOOTBALL_CHAMPIONS_LEAGUE',
-		name: 'Champions League',
-		shortName: 'UCL',
-		sportId: 'football',
-		type: 'international',
-		status: 'live',
-		countryCode: 'EU',
-		activeSeasonId: '2024',
-	},
-];
+function resolveNowEpochMs(options: MockDbOptions): number {
+	const now = options.now;
+	if (now instanceof Date) {
+		const epochMs = now.getTime();
+		return Number.isNaN(epochMs) ? Date.now() : epochMs;
+	}
+	if (typeof now === 'number') {
+		return Number.isFinite(now) ? now : Date.now();
+	}
+	if (typeof now === 'string') {
+		const parsed = Date.parse(now);
+		return Number.isNaN(parsed) ? Date.now() : parsed;
+	}
+	return Date.now();
+}
 
-const TOURNEYS: MyTournamentRecord[] = [
-	{
-		tournamentId: 'tourney-1',
-		tournament: {
-			tournamentId: 'tourney-1',
-			name: 'The Squad Team',
-			visibility: 'private',
-			discoverability: 'unlisted',
-			verificationStatus: 'community',
+function resolveSeasonId(options: MockDbOptions, nowEpochMs: number): string {
+	const explicitSeasonId = options.seasonId?.trim();
+	if (explicitSeasonId) {
+		return explicitSeasonId;
+	}
+	return new Date(nowEpochMs).getUTCFullYear().toString();
+}
+
+function createCompetitions(activeSeasonId: string): Competition[] {
+	return [
+		{
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			name: 'La Liga',
+			shortName: 'LaLiga',
 			sportId: 'football',
-			gameModeId: 'scorePrediction',
-			formatId: 'league',
-			modality: 'season',
+			type: 'domestic',
 			status: 'live',
-			joinPolicy: {
-				joinMode: 'code',
-				joinMidSeasonAllowed: true,
-				locked: false,
-			},
-			memberCount: 18,
+			countryCode: 'ES',
+			activeSeasonId,
 		},
-		membership: {
-			role: 'admin',
-			joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
-		},
-	},
-	{
-		tournamentId: 'tourney-2',
-		tournament: {
-			tournamentId: 'tourney-2',
-			name: 'Una de Premier',
-			visibility: 'public',
-			discoverability: 'listed',
-			verificationStatus: 'community',
+		{
+			competitionId: 'FOOTBALL_UK_LEAGUE_1',
+			name: 'Premier League',
+			shortName: 'Premier',
 			sportId: 'football',
-			gameModeId: 'scorePrediction',
-			formatId: 'league',
-			modality: 'season',
+			type: 'domestic',
 			status: 'live',
-			joinPolicy: {
-				joinMode: 'open',
-				joinMidSeasonAllowed: true,
-				locked: false,
-			},
-			memberCount: 12,
+			countryCode: 'GB',
+			activeSeasonId,
 		},
-		membership: {
-			role: 'player',
-			joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
-		},
-	},
-	{
-		tournamentId: 'tourney-3',
-		tournament: {
-			tournamentId: 'tourney-3',
+		{
+			competitionId: 'FOOTBALL_CHAMPIONS_LEAGUE',
 			name: 'Champions League',
-			visibility: 'private',
-			discoverability: 'unlisted',
-			verificationStatus: 'community',
+			shortName: 'UCL',
 			sportId: 'football',
-			gameModeId: 'scorePrediction',
-			formatId: 'league',
-			modality: 'season',
+			type: 'international',
 			status: 'live',
-			joinPolicy: {
-				joinMode: 'code',
-				joinMidSeasonAllowed: true,
-				locked: false,
+			countryCode: 'EU',
+			activeSeasonId,
+		},
+	];
+}
+
+function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
+	const joinedAtDaysAgo = (days: number) => new Date(nowEpochMs - 1000 * 60 * 60 * 24 * days).toISOString();
+	return [
+		{
+			tournamentId: 'tournament-1',
+			tournament: {
+				tournamentId: 'tournament-1',
+				name: 'The Squad Team',
+				visibility: 'private',
+				discoverability: 'unlisted',
+				verificationStatus: 'community',
+				sportId: 'football',
+				gameModeId: 'scorePrediction',
+				formatId: 'league',
+				modality: 'season',
+				status: 'live',
+				joinPolicy: {
+					joinMode: 'code',
+					joinMidSeasonAllowed: true,
+					locked: false,
+				},
+				memberCount: 18,
 			},
-			memberCount: 10,
+			membership: {
+				role: 'admin',
+				joinedAt: joinedAtDaysAgo(20),
+			},
 		},
-		membership: {
-			role: 'player',
-			joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+		{
+			tournamentId: 'tournament-2',
+			tournament: {
+				tournamentId: 'tournament-2',
+				name: 'Una de Premier',
+				visibility: 'public',
+				discoverability: 'listed',
+				verificationStatus: 'community',
+				sportId: 'football',
+				gameModeId: 'scorePrediction',
+				formatId: 'league',
+				modality: 'season',
+				status: 'live',
+				joinPolicy: {
+					joinMode: 'open',
+					joinMidSeasonAllowed: true,
+					locked: false,
+				},
+				memberCount: 12,
+			},
+			membership: {
+				role: 'player',
+				joinedAt: joinedAtDaysAgo(10),
+			},
 		},
-	},
-	{
-		tournamentId: 'duel-1',
-		tournament: {
+		{
+			tournamentId: 'tournament-3',
+			tournament: {
+				tournamentId: 'tournament-3',
+				name: 'Champions League',
+				visibility: 'private',
+				discoverability: 'unlisted',
+				verificationStatus: 'community',
+				sportId: 'football',
+				gameModeId: 'scorePrediction',
+				formatId: 'league',
+				modality: 'season',
+				status: 'live',
+				joinPolicy: {
+					joinMode: 'code',
+					joinMidSeasonAllowed: true,
+					locked: false,
+				},
+				memberCount: 10,
+			},
+			membership: {
+				role: 'player',
+				joinedAt: joinedAtDaysAgo(5),
+			},
+		},
+		{
 			tournamentId: 'duel-1',
-			name: 'Duel de Predicciones',
-			visibility: 'private',
-			discoverability: 'unlisted',
-			verificationStatus: 'community',
-			sportId: 'football',
-			gameModeId: 'scorePrediction',
-			formatId: 'headsUp',
-			modality: 'matchday',
-			status: 'live',
-			joinPolicy: {
-				joinMode: 'closed',
-				joinMidSeasonAllowed: false,
-				locked: false,
-				maxPlayers: 2,
+			tournament: {
+				tournamentId: 'duel-1',
+				name: 'Duel de Predicciones',
+				visibility: 'private',
+				discoverability: 'unlisted',
+				verificationStatus: 'community',
+				sportId: 'football',
+				gameModeId: 'scorePrediction',
+				formatId: 'headsUp',
+				modality: 'matchday',
+				status: 'live',
+				joinPolicy: {
+					joinMode: 'closed',
+					joinMidSeasonAllowed: false,
+					locked: false,
+					maxPlayers: 2,
+				},
+				memberCount: 2,
 			},
-			memberCount: 2,
+			membership: {
+				role: 'player',
+				joinedAt: joinedAtDaysAgo(2),
+			},
 		},
-		membership: {
-			role: 'player',
-			joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-		},
-	},
-];
+	];
+}
 
 const RANKING: RankingEntry[] = [
 	{ position: 1, points: 1264, user: toMeSummary(USERS[0]) },
@@ -188,85 +222,86 @@ const RANKING: RankingEntry[] = [
 	{ position: 5, points: 734, user: toMeSummary(USERS[4]) },
 ];
 
-const NOW = Date.now();
-const MATCHES: TournamentMatch[] = [
-	{
-		matchId: 'match-1',
-		sportId: 'football',
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		seasonId: '2024',
-		matchday: 20,
-		scheduledAt: new Date(NOW - 1000 * 60 * 60 * 2).toISOString(),
-		isDerby: true,
-		weather: { code: 'CLEAR_SKY' },
-		status: 'LIVE',
-		odds: { raw: '2-4-3' },
-		score: { home: 1, away: 0 },
-		lockState: 'open',
-		homeTeam: { teamId: 'team-1', name: 'Sevilla', shortName: 'Sev' },
-		awayTeam: { teamId: 'team-2', name: 'Betis', shortName: 'Bet' },
-	},
-	{
-		matchId: 'match-2',
-		sportId: 'football',
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		seasonId: '2024',
-		matchday: 20,
-		scheduledAt: new Date(NOW + 1000 * 60 * 60 * 2).toISOString(),
-		isDerby: false,
-		weather: { code: 'CLEAR_SKY' },
-		status: 'NS',
-		odds: { raw: '2-4-3' },
-		lockState: 'open',
-		homeTeam: { teamId: 'team-3', name: 'Sevilla', shortName: 'Sev' },
-		awayTeam: { teamId: 'team-4', name: 'Betis', shortName: 'Bet' },
-	},
-	{
-		matchId: 'match-3',
-		sportId: 'football',
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		seasonId: '2024',
-		matchday: 20,
-		scheduledAt: new Date(NOW + 1000 * 60 * 60 * 5).toISOString(),
-		isDerby: false,
-		weather: { code: 'LIGHT_RAIN' },
-		status: 'NS',
-		odds: { raw: '1.3-3.8-10' },
-		lockState: 'open',
-		homeTeam: { teamId: 'team-5', name: 'Sevilla', shortName: 'Sev' },
-		awayTeam: { teamId: 'team-6', name: 'Betis', shortName: 'Bet' },
-	},
-	{
-		matchId: 'match-4',
-		sportId: 'football',
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		seasonId: '2024',
-		matchday: 20,
-		scheduledAt: new Date(NOW + 1000 * 60 * 60 * 7).toISOString(),
-		isDerby: false,
-		weather: { code: 'CLEAR_SKY' },
-		status: 'NS',
-		odds: { raw: '2.5-4-3' },
-		lockState: 'open',
-		homeTeam: { teamId: 'team-7', name: 'Sevilla', shortName: 'Sev' },
-		awayTeam: { teamId: 'team-8', name: 'Betis', shortName: 'Bet' },
-	},
-	{
-		matchId: 'match-5',
-		sportId: 'football',
-		competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
-		seasonId: '2024',
-		matchday: 20,
-		scheduledAt: new Date(NOW + 1000 * 60 * 60 * 9).toISOString(),
-		isDerby: true,
-		weather: { code: 'CLEAR_SKY' },
-		status: 'NS',
-		odds: { raw: '1.2-3-8' },
-		lockState: 'open',
-		homeTeam: { teamId: 'team-9', name: 'Sevilla', shortName: 'Sev' },
-		awayTeam: { teamId: 'team-10', name: 'Betis', shortName: 'Bet' },
-	},
-];
+function createMatches(nowEpochMs: number, seasonId: string): TournamentMatch[] {
+	return [
+		{
+			matchId: 'match-1',
+			sportId: 'football',
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId,
+			matchday: 20,
+			scheduledAt: new Date(nowEpochMs - 1000 * 60 * 60 * 2).toISOString(),
+			isDerby: true,
+			weather: { code: 'CLEAR_SKY' },
+			status: 'LIVE',
+			odds: { raw: '2-4-3' },
+			score: { home: 1, away: 0 },
+			lockState: 'open',
+			homeTeam: { teamId: 'team-1', name: 'Sevilla', shortName: 'Sev' },
+			awayTeam: { teamId: 'team-2', name: 'Betis', shortName: 'Bet' },
+		},
+		{
+			matchId: 'match-2',
+			sportId: 'football',
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId,
+			matchday: 20,
+			scheduledAt: new Date(nowEpochMs + 1000 * 60 * 60 * 2).toISOString(),
+			isDerby: false,
+			weather: { code: 'CLEAR_SKY' },
+			status: 'NS',
+			odds: { raw: '2-4-3' },
+			lockState: 'open',
+			homeTeam: { teamId: 'team-3', name: 'Sevilla', shortName: 'Sev' },
+			awayTeam: { teamId: 'team-4', name: 'Betis', shortName: 'Bet' },
+		},
+		{
+			matchId: 'match-3',
+			sportId: 'football',
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId,
+			matchday: 20,
+			scheduledAt: new Date(nowEpochMs + 1000 * 60 * 60 * 5).toISOString(),
+			isDerby: false,
+			weather: { code: 'LIGHT_RAIN' },
+			status: 'NS',
+			odds: { raw: '1.3-3.8-10' },
+			lockState: 'open',
+			homeTeam: { teamId: 'team-5', name: 'Sevilla', shortName: 'Sev' },
+			awayTeam: { teamId: 'team-6', name: 'Betis', shortName: 'Bet' },
+		},
+		{
+			matchId: 'match-4',
+			sportId: 'football',
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId,
+			matchday: 20,
+			scheduledAt: new Date(nowEpochMs + 1000 * 60 * 60 * 7).toISOString(),
+			isDerby: false,
+			weather: { code: 'CLEAR_SKY' },
+			status: 'NS',
+			odds: { raw: '2.5-4-3' },
+			lockState: 'open',
+			homeTeam: { teamId: 'team-7', name: 'Sevilla', shortName: 'Sev' },
+			awayTeam: { teamId: 'team-8', name: 'Betis', shortName: 'Bet' },
+		},
+		{
+			matchId: 'match-5',
+			sportId: 'football',
+			competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+			seasonId,
+			matchday: 20,
+			scheduledAt: new Date(nowEpochMs + 1000 * 60 * 60 * 9).toISOString(),
+			isDerby: true,
+			weather: { code: 'CLEAR_SKY' },
+			status: 'NS',
+			odds: { raw: '1.2-3-8' },
+			lockState: 'open',
+			homeTeam: { teamId: 'team-9', name: 'Sevilla', shortName: 'Sev' },
+			awayTeam: { teamId: 'team-10', name: 'Betis', shortName: 'Bet' },
+		},
+	];
+}
 
 function clone<T>(value: T): T {
 	if (typeof structuredClone === 'function') {
@@ -350,20 +385,26 @@ function createListStore<T>(seed: T[]): MockListStore<T> {
 	return { list, replace, reset };
 }
 
-export function createMockDb(): MockDb {
+export function createMockDb(options: MockDbOptions = {}): MockDb {
+	const nowEpochMs = resolveNowEpochMs(options);
+	const seasonId = resolveSeasonId(options, nowEpochMs);
+	const competitions = createCompetitions(seasonId);
+	const tournaments = createTournaments(nowEpochMs);
+	const matches = createMatches(nowEpochMs, seasonId);
+
 	return {
 		users: createEntityStore(USERS, 'userId', 'user'),
-		competitions: createEntityStore(COMPETITIONS, 'competitionId', 'competition'),
-		tourneys: createEntityStore(TOURNEYS, 'tournamentId', 'tournament'),
+		competitions: createEntityStore(competitions, 'competitionId', 'competition'),
+		tournaments: createEntityStore(tournaments, 'tournamentId', 'tournament'),
 		ranking: createListStore(RANKING),
-		matches: createEntityStore(MATCHES, 'matchId', 'match'),
+		matches: createEntityStore(matches, 'matchId', 'match'),
 	};
 }
 
 export function resetMockDb(db: MockDb): void {
 	db.users.reset();
 	db.competitions.reset();
-	db.tourneys.reset();
+	db.tournaments.reset();
 	db.ranking.reset();
 	db.matches.reset();
 }

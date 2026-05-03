@@ -1,0 +1,35 @@
+name: test-p0
+
+on:
+	pull_request:
+	push:
+		branches:
+			- main
+
+jobs:
+	test-p0:
+		runs-on: ubuntu-latest
+		steps:
+			- name: Checkout
+			  uses: actions/checkout@v4
+
+			- name: Setup Node
+			  uses: actions/setup-node@v4
+			  with:
+				node-version-file: .nvmrc
+				cache: yarn
+
+			- name: Enable Corepack
+			  run: corepack enable
+
+			- name: Install dependencies
+			  run: yarn install --immutable
+
+			- name: P0 Test Guardrails
+			  run: node --import tsx scripts/test-guardrails-p0.ts
+
+			- name: P0 Determinism Guardrails
+			  run: yarn test:determinism:p0
+
+			- name: P0 Budget Gate
+			  run: yarn test:budget:p0

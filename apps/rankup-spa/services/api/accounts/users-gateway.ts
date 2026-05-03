@@ -3,6 +3,13 @@ import type * as Api from '@rankup/api';
 import type { IUsersGateway } from '@rankup/rankup/domains/accounts/users/contracts/usersGateway.js';
 import type * as Domain from '@rankup/rankup/domains/accounts/users/contracts/types.js';
 
+export const operationOwners = {
+	getUserPublicHistory: 'api.accounts.users.getUserPublicHistory',
+	getUserPublicProfile: 'api.accounts.users.getUserPublicProfile',
+	resolveUserByUsername: 'api.accounts.users.resolveUserByUsername',
+	searchUsers: 'api.accounts.users.searchUsers',
+} as const;
+
 const mapSearchUsersQuery = (query: Domain.SearchUsersQuery): Api.SearchUsersQuery => ({
 	q: query.q,
 	match: query.match,

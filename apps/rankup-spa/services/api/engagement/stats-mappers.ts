@@ -1,6 +1,8 @@
 import { defineSharedKeys, mapOptional, pickFields } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import { mapRecapCard } from './recaps-mappers.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Domain from '@rankup/rankup/domains/engagement/stats/contracts/types.js';
 
 const userSummaryKeys = defineSharedKeys<Domain.UserSummary, Api.MeSummary>()(['userId', 'username', 'pictureUrl']);
@@ -306,3 +308,7 @@ export const mapUserMatchdayStatsSnapshot = (snapshot: Api.UserMatchdayStatsSnap
 	}
 	return mapGenericUserMatchdayStatsSnapshot(snapshot);
 };
+
+export const mapEngagementProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);
+
+export const mapStatsProblemToDomainError = mapEngagementProblemToDomainError;

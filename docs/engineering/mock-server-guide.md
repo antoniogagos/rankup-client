@@ -29,9 +29,9 @@ Examples:
 
 ```bash
 curl -H "x-rankup-mock-force-status: 500" http://localhost:4010/competitions
-curl "http://localhost:4010/tourneys?x-rankup-mock-delay-ms=300"
+curl "http://localhost:4010/tournaments?x-rankup-mock-delay-ms=300"
 curl -H "x-rankup-mock-auth: required" http://localhost:4010/competitions
-curl -H "x-rankup-mock-reset: 1" http://localhost:4010/tourneys
+curl -H "x-rankup-mock-reset: 1" http://localhost:4010/tournaments
 ```
 
 ## What to expect

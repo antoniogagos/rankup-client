@@ -2213,6 +2213,9 @@ export interface paths {
      *
      * Authorization:
      * - Admin/owner only (exact role policy is server-defined).
+     * Ruleset semantics:
+     * - `rulesetId` is immutable after tournament creation (treated as a
+     *   version identifier).
      */
     patch: operations["updateTournament"];
   };
@@ -6067,6 +6070,7 @@ export interface components {
     ScorePredictionPredictionView: {
       matchId: components["schemas"]["MatchId"];
       visibility: components["schemas"]["SubmissionVisibility"];
+      /** @description True when the server has accepted at least one valid prediction for this match while lockState was open. */
       isSubmitted: boolean;
       /** @description Redacted (null) when visibility=redacted. */
       homeScore?: number | null;
@@ -6075,7 +6079,10 @@ export interface components {
       lockState: components["schemas"]["MatchLockState"];
       /** Format: date-time */
       lockAt?: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Server-authoritative timestamp of the first accepted prediction for this match. Not overwritten by subsequent updates.
+       */
       submittedAt?: string;
       /** Format: date-time */
       updatedAt?: string;
@@ -6113,7 +6120,7 @@ export interface components {
       removes?: components["schemas"]["MatchId"][];
       /**
        * Format: date-time
-       * @description Optional client timestamp (best-effort; server is authoritative).
+       * @description Optional client timestamp (best-effort metadata only). It never overrides server-authoritative `submittedAt` and does not participate in tie-breakers.
        */
       clientSubmittedAt?: string;
     };
@@ -6621,14 +6628,16 @@ export interface components {
       startMatchday?: number;
       formatConfigOverrides?: components["schemas"]["HeadsUpFormatConfig"];
     };
-    /** @description Partial update. Server determines which fields are mutable based on tournament status. */
+    /**
+     * @description Partial update. Server determines which fields are mutable based on tournament status.
+     * `rulesetId` is intentionally excluded because it is immutable once the tournament is created.
+     */
     UpdateTournamentRequest: {
       name?: string;
       description?: string;
       discoverability?: components["schemas"]["TournamentDiscoverability"];
       joinPolicy?: components["schemas"]["TournamentJoinPolicy"];
       chatEnabled?: boolean;
-      rulesetId?: components["schemas"]["RulesetId"];
       /** @description GameMode-specific (advanced). */
       rulesetConfig?: {
         [key: string]: unknown;
@@ -7574,6 +7583,8 @@ export interface components {
     /**
      * @description Optional idempotency key for safe retries. When provided, the server MUST
      * guarantee idempotent semantics for the operation for a bounded time window.
+     * The key scope is actor + operation + resource.
+     * Reusing the same key with a different request fingerprint MUST return `409 Conflict` (`code=idempotencyKeyReused`).
      */
     IdempotencyKey?: string;
     ChatMessageId: components["schemas"]["ChatMessageId"];
@@ -7590,6 +7601,7 @@ export interface components {
     FeedItemId: components["schemas"]["FeedItemId"];
     /**
      * @description Optimistic concurrency control. Must be the ETag value returned by the latest GET of the resource.
+     * ETags are quoted version tokens. Mismatch returns `412 Precondition Failed` (`code=etagMismatch`).
      *
      * @example "me_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
      */
@@ -7616,6 +7628,7 @@ export interface components {
     /**
      * @description Optional optimistic concurrency control for submissions.
      * If provided, must match the latest ETag from `GET .../submissions/me`.
+     * Mismatch returns `412 Precondition Failed` (`code=etagMismatch`).
      *
      * @example "subm_01J8VZQ7QJ1Y6T4R3E2W1A0B9C"
      */
@@ -17034,6 +17047,9 @@ export interface operations {
    *
    * Authorization:
    * - Admin/owner only (exact role policy is server-defined).
+   * Ruleset semantics:
+   * - `rulesetId` is immutable after tournament creation (treated as a
+   *   version identifier).
    */
   updateTournament: {
     parameters: {

@@ -3,6 +3,27 @@ import type * as Api from '@rankup/api';
 import type { ISocialGateway } from '@rankup/rankup/domains/accounts/social/contracts/socialGateway.js';
 import type * as Domain from '@rankup/rankup/domains/accounts/social/contracts/types.js';
 
+export const operationOwners = {
+	acceptFriendRequest: 'api.accounts.social.acceptFriendRequest',
+	blockUser: 'api.accounts.social.blockUser',
+	cancelMyFriendRequest: 'api.accounts.social.cancelMyFriendRequest',
+	createFriendRequest: 'api.accounts.social.createFriendRequest',
+	declineFriendRequest: 'api.accounts.social.declineFriendRequest',
+	followUser: 'api.accounts.social.followUser',
+	getMyFriendRequest: 'api.accounts.social.getMyFriendRequest',
+	getMyFriendRequestUnreadCount: 'api.accounts.social.getMyFriendRequestUnreadCount',
+	getMyRelationshipWithUser: 'api.accounts.social.getMyRelationshipWithUser',
+	listMyBlockedUsers: 'api.accounts.social.listMyBlockedUsers',
+	listMyFollowers: 'api.accounts.social.listMyFollowers',
+	listMyFollowing: 'api.accounts.social.listMyFollowing',
+	listMyFriendRequests: 'api.accounts.social.listMyFriendRequests',
+	listMyFriends: 'api.accounts.social.listMyFriends',
+	markMyFriendRequestSeen: 'api.accounts.social.markMyFriendRequestSeen',
+	removeFriend: 'api.accounts.social.removeFriend',
+	unblockUser: 'api.accounts.social.unblockUser',
+	unfollowUser: 'api.accounts.social.unfollowUser',
+} as const;
+
 const mapFriendsQuery = (query?: Domain.ListMyFriendsQuery): Api.ListMyFriendsQuery | undefined =>
 	query
 		? {

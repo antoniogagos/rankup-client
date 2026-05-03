@@ -397,14 +397,19 @@ export type GetMyMatchdaySubmissionResponse =
 	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['get']['responses']['200']['content']['application/json'];
 
 export type UpsertMyMatchdaySubmissionParams =
-	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['put']['parameters']['path'];
+	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['put']['parameters']['path'] & {
+		idempotencyKey?: components['parameters']['IdempotencyKey'];
+		ifMatch?: components['parameters']['IfMatchOptional'];
+	};
 export type UpsertMyMatchdaySubmissionRequest =
 	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['put']['requestBody']['content']['application/json'];
 export type UpsertMyMatchdaySubmissionResponse =
 	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['put']['responses']['200']['content']['application/json'];
 
 export type ClearMyMatchdaySubmissionParams =
-	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['delete']['parameters']['path'];
+	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/me']['delete']['parameters']['path'] & {
+		idempotencyKey?: components['parameters']['IdempotencyKey'];
+	};
 
 export type GetUserMatchdaySubmissionParams =
 	paths['/tournaments/{tournamentId}/matchdays/{matchday}/submissions/users/{userId}']['get']['parameters']['path'];
@@ -415,7 +420,9 @@ export type ListTournamentMembersParams = paths['/tournaments/{tournamentId}/mem
 export type ListTournamentMembersQuery = paths['/tournaments/{tournamentId}/members']['get']['parameters']['query'];
 export type ListTournamentMembersResponse = paths['/tournaments/{tournamentId}/members']['get']['responses']['200']['content']['application/json'];
 
-export type JoinTournamentParams = paths['/tournaments/{tournamentId}/members/me']['put']['parameters']['path'];
+export type JoinTournamentParams = paths['/tournaments/{tournamentId}/members/me']['put']['parameters']['path'] & {
+	idempotencyKey?: components['parameters']['IdempotencyKey'];
+};
 export type JoinTournamentRequest = components['schemas']['JoinTournamentRequest'];
 export type JoinTournamentResponse = components['schemas']['JoinTournamentResult'];
 export type LeaveTournamentParams = paths['/tournaments/{tournamentId}/members/me']['delete']['parameters']['path'];
@@ -439,7 +446,9 @@ export type CreateTournamentInvitationCodeResponse = paths['/tournaments/{tourna
 export type ResolveInvitationCodeParams = paths['/invitation-codes/{code}']['get']['parameters']['path'];
 export type ResolveInvitationCodeResponse = paths['/invitation-codes/{code}']['get']['responses']['200']['content']['application/json'];
 
-export type JoinTournamentByInvitationCodeParams = paths['/invitation-codes/{code}/members/me']['put']['parameters']['path'];
+export type JoinTournamentByInvitationCodeParams = paths['/invitation-codes/{code}/members/me']['put']['parameters']['path'] & {
+	idempotencyKey?: components['parameters']['IdempotencyKey'];
+};
 export type JoinTournamentByInvitationCodeRequest = components['schemas']['JoinByInvitationCodeRequest'];
 export type JoinTournamentByInvitationCodeResponse = components['schemas']['JoinByInvitationCodeResult'];
 

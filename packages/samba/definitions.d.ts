@@ -10,7 +10,7 @@ declare module '@rankup/samba/styles/root.css';
 declare module '@rankup/samba/styles/sb-bet-match-card.css';
 declare module '@rankup/samba/styles/scrollbar.css';
 declare module '@rankup/samba/styles/theme.css';
-declare module '@rankup/samba/styles/tourney-card.css';
+declare module '@rankup/samba/styles/tournament-card.css';
 declare module '@rankup/samba/styles/typography.css';
 declare module '@rankup/samba/overlay/styles/overlay-container.css';
 declare module '@rankup/samba/overlay/styles/content-overlay.css';

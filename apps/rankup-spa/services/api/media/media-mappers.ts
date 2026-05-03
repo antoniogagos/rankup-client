@@ -1,5 +1,7 @@
 import { mapOptional } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Assets from '@rankup/rankup/domains/media/assets/contracts/types.js';
 import type * as Uploads from '@rankup/rankup/domains/media/uploads/contracts/types.js';
 
@@ -198,3 +200,5 @@ export function mapCompleteUploadResult(result: Api.Media | Api.UploadSession): 
 	}
 	return mapMedia(result);
 }
+
+export const mapMediaProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

@@ -1,5 +1,7 @@
 import { mapOptional } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Catalog from '@rankup/rankup/domains/achievements/catalog/contracts/types.js';
 import type * as Grants from '@rankup/rankup/domains/achievements/grants/contracts/types.js';
 
@@ -134,3 +136,5 @@ export function mapUserAchievementPage(page: Api.UserAchievementPage): Grants.Us
 		nextCursor: page.nextCursor,
 	};
 }
+
+export const mapAchievementsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

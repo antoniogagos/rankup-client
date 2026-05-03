@@ -113,11 +113,14 @@ export type GetMyMatchdaySubmissionParams = {
 export type UpsertMyMatchdaySubmissionParams = {
 	tournamentId: TournamentId;
 	matchday: number;
+	idempotencyKey?: string;
+	ifMatch?: string;
 };
 
 export type ClearMyMatchdaySubmissionParams = {
 	tournamentId: TournamentId;
 	matchday: number;
+	idempotencyKey?: string;
 };
 
 export type GetUserMatchdaySubmissionParams = {

@@ -1,7 +1,7 @@
 {
 	"operationId": "createTournamentInvitationCode",
 	"params": {
-		"tournamentId": "tourney-1"
+		"tournamentId": "tournament-1"
 	},
 	"body": {
 		"revokeExisting": true,

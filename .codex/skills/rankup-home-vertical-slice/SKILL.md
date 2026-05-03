@@ -1,17 +1,17 @@
 ---
 name: rankup-home-vertical-slice
-description: Migrate one UI vertical slice (recommended Home) to use ITourneyCoreService via appServices instead of direct data-service/fetch/env. Use when completing WP-002-05 and keeping UI free of platform implementations.
+description: Migrate one UI vertical slice (recommended Home) to use ITournamentCoreService via appServices instead of direct data-service/fetch/env. Use when completing WP-002-05 and keeping UI free of platform implementations.
 metadata:
     owner: rankup
     epic: '002'
     wp: '002-05'
 ---
 
-# WP-002-05: Vertical slice migration — Home uses ITourneyCoreService
+# WP-002-05: Vertical slice migration — Home uses ITournamentCoreService
 
 ## Objective
 
-Migrate a single UI consumer (Home page) to use `ITourneyCoreService` through `appServices`.
+Migrate a single UI consumer (Home page) to use `ITournamentCoreService` through `appServices`.
 
 ## Constraints
 
@@ -30,7 +30,7 @@ Migrate a single UI consumer (Home page) to use `ITourneyCoreService` through `a
 
 2. Replace with service call
 
--   Use `this.appContext.services.tourney.core.listMyTourneys()` (or equivalent)
+-   Use `this.appContext.services.tournament.core.listMyTournaments()` (or equivalent)
 -   Keep rendering logic as unchanged as possible.
 -   Convert result to existing UI model if needed.
 
@@ -49,6 +49,6 @@ rg -n "@rankup/api-mock|openapi-fetch|fetch\\(" apps/rankup-spa/pages apps/ranku
 
 ## Done criteria
 
--   Home page uses ITourneyCoreService via appServices.
+-   Home page uses ITournamentCoreService via appServices.
 -   No forbidden imports introduced.
 -   Validation passes.

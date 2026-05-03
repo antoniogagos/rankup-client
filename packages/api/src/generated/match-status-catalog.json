@@ -1,0 +1,27 @@
+{
+	"matchStatusCatalog": {
+		"pending": [
+			"NS",
+			"POSTP",
+			"CANCL"
+		],
+		"provisional": [
+			"LIVE",
+			"IN_PLAY",
+			"HT",
+			"provisional"
+		],
+		"final": [
+			"FT",
+			"AET",
+			"PEN",
+			"FINAL",
+			"completed"
+		],
+		"void": [
+			"CANC",
+			"ABAN",
+			"void"
+		]
+	}
+}

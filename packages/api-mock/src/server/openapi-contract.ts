@@ -7,6 +7,7 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { MockDb } from '../mock-db.js';
 import { resetMockDb } from '../mock-db.js';
+import { resetEngineMockHarness } from '../core/engine-runtime.js';
 import { createMockRegistry, executeMockHandler } from '../core/registry.js';
 import type { MockRegistry } from '../core/registry.js';
 import type { ScenarioDefaults } from '../core/scenario.js';
@@ -19,7 +20,7 @@ const DEFAULT_SPEC_PATH = resolve(__dirname, '../../../..', 'packages/api/openap
 
 const DEFAULT_HEADERS = {
 	'access-control-allow-origin': '*',
-	'access-control-allow-headers': 'content-type, authorization',
+	'access-control-allow-headers': 'content-type, authorization, x-idempotency-key',
 	'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
 };
 
@@ -48,6 +49,7 @@ type OperationEntry = {
 	responseStatus: number;
 	responseMediaType: string;
 	responseSchema?: OpenAPIV3.SchemaObject;
+	responses: OpenAPIV3.ResponsesObject;
 };
 
 type MatchResult = {
@@ -155,10 +157,17 @@ function sendJson(res: ServerResponse, status: number, body: unknown, headers: R
 	res.end(JSON.stringify(body));
 }
 
-function sendText(res: ServerResponse, status: number, text: string, contentType = 'text/plain; charset=utf-8') {
+function sendText(
+	res: ServerResponse,
+	status: number,
+	text: string,
+	contentType = 'text/plain; charset=utf-8',
+	headers: Record<string, string> = {},
+) {
 	res.writeHead(status, {
 		'content-type': contentType,
 		...DEFAULT_HEADERS,
+		...headers,
 	});
 	res.end(text);
 }
@@ -175,14 +184,14 @@ function sendResponse(res: ServerResponse, status: number, body: unknown, mediaT
 		return;
 	}
 	if (body == null) {
-		sendText(res, status, '', mediaType);
+		sendText(res, status, '', mediaType, headers);
 		return;
 	}
 	if (typeof body === 'string') {
-		sendText(res, status, body, mediaType);
+		sendText(res, status, body, mediaType, headers);
 		return;
 	}
-	sendText(res, status, JSON.stringify(body), mediaType);
+	sendText(res, status, JSON.stringify(body), mediaType, headers);
 }
 
 function escapeRegex(value: string) {
@@ -228,6 +237,145 @@ function pickResponse(operation: OpenAPIV3.OperationObject) {
 		mediaType,
 		schema,
 	};
+}
+
+function toResponseObject(response: OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.ResponseObject | undefined {
+	if (!response || '$ref' in response) {
+		return undefined;
+	}
+	return response;
+}
+
+function toHeaderObject(header: OpenAPIV3.HeaderObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.HeaderObject | undefined {
+	if (!header || '$ref' in header) {
+		return undefined;
+	}
+	return header;
+}
+
+function resolveResponseForStatus(responses: OpenAPIV3.ResponsesObject, status: number): OpenAPIV3.ResponseObject | undefined {
+	const statusKey = String(status);
+	const direct = toResponseObject(responses[statusKey] as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+	if (direct) {
+		return direct;
+	}
+
+	const rangeKey = `${Math.floor(status / 100)}XX`;
+	const ranged = toResponseObject(responses[rangeKey] as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+	if (ranged) {
+		return ranged;
+	}
+
+	return toResponseObject(responses.default as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+}
+
+function tryGetHeaderExample(header: OpenAPIV3.HeaderObject): string | undefined {
+	const fromHeader = (header as { example?: unknown }).example;
+	if (typeof fromHeader === 'string' && fromHeader.length > 0) {
+		return fromHeader;
+	}
+	if (typeof fromHeader === 'number' || typeof fromHeader === 'boolean') {
+		return String(fromHeader);
+	}
+	const schema = header.schema as OpenAPIV3.SchemaObject | undefined;
+	const fromSchema = schema ? (schema as { example?: unknown }).example : undefined;
+	if (typeof fromSchema === 'string' && fromSchema.length > 0) {
+		return fromSchema;
+	}
+	if (typeof fromSchema === 'number' || typeof fromSchema === 'boolean') {
+		return String(fromSchema);
+	}
+	return undefined;
+}
+
+function normalizeSingleHeaderValue(value: string | string[] | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+	return Array.isArray(value) ? value[0] : value;
+}
+
+function resolveContentLanguage(requestHeaders: Record<string, string | string[]>): string {
+	const raw = normalizeSingleHeaderValue(requestHeaders['accept-language']);
+	if (!raw) {
+		return 'en';
+	}
+	const preferred = raw
+		.split(',')
+		.map(item => item.trim())
+		.filter(item => item.length > 0)[0];
+	if (!preferred) {
+		return 'en';
+	}
+	return preferred.split(';')[0]?.trim() || 'en';
+}
+
+function resolveDefaultResponseHeaderValue(
+	headerName: string,
+	header: OpenAPIV3.HeaderObject,
+	operationId: string,
+	requestHeaders: Record<string, string | string[]>,
+): string {
+	const headerLower = headerName.toLowerCase();
+	if (headerLower === 'x-request-id') {
+		return `mock-request-${operationId}-${Date.now()}`;
+	}
+	if (headerLower === 'etag') {
+		return `"mock-etag-${operationId}"`;
+	}
+	if (headerLower === 'location') {
+		return `https://mock.rankup.dev/${operationId}`;
+	}
+	if (headerLower === 'content-language') {
+		return resolveContentLanguage(requestHeaders);
+	}
+	if (headerLower === 'cache-control') {
+		return tryGetHeaderExample(header) ?? 'no-store';
+	}
+	if (headerLower === 'vary') {
+		return tryGetHeaderExample(header) ?? 'Accept-Language';
+	}
+
+	const fromExample = tryGetHeaderExample(header);
+	if (fromExample) {
+		return fromExample;
+	}
+	const schema = header.schema as OpenAPIV3.SchemaObject | undefined;
+	switch (schema?.type) {
+		case 'integer':
+		case 'number':
+			return '0';
+		case 'boolean':
+			return 'false';
+		default:
+			return `mock-${headerName.toLowerCase()}`;
+	}
+}
+
+function hasHeader(headers: Record<string, string>, headerName: string): boolean {
+	return Object.keys(headers).some(name => name.toLowerCase() === headerName.toLowerCase());
+}
+
+function applyResponseHeadersFromSpec(
+	operation: OperationEntry,
+	status: number,
+	responseHeaders: Record<string, string>,
+	requestHeaders: Record<string, string | string[]>,
+): void {
+	const response = resolveResponseForStatus(operation.responses, status);
+	if (!response?.headers) {
+		return;
+	}
+	for (const [headerName, headerDefinition] of Object.entries(response.headers)) {
+		if (hasHeader(responseHeaders, headerName)) {
+			continue;
+		}
+		const header = toHeaderObject(headerDefinition as OpenAPIV3.HeaderObject | OpenAPIV3.ReferenceObject | undefined);
+		if (!header) {
+			continue;
+		}
+		responseHeaders[headerName] = resolveDefaultResponseHeaderValue(headerName, header, operation.operationId, requestHeaders);
+	}
 }
 
 function buildParametersSchema(parameters: OpenAPIV3.ParameterObject[], location: 'path' | 'query'): OpenAPIV3.SchemaObject | undefined {
@@ -298,6 +446,7 @@ function createOperationEntry(path: string, method: string, pathItem: OpenAPIV3.
 		responseStatus: responsePick.status,
 		responseMediaType: responsePick.mediaType,
 		responseSchema: responsePick.schema,
+		responses: operation.responses ?? {},
 	};
 }
 
@@ -386,6 +535,7 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 		params: Record<string, string>,
 		query: Record<string, QueryValue>,
 		body: unknown,
+		requestHeaders: Record<string, string | string[]>,
 	): MockHandlerContextMap[OperationId] | null => {
 		switch (operationId) {
 			case 'getUserPublicProfile': {
@@ -401,6 +551,35 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 				};
 			case 'listMyTournaments':
 				return { query: Object.keys(query).length ? (query as MockHandlerContextMap['listMyTournaments']['query']) : undefined };
+			case 'joinTournament': {
+				const tournamentId = params.tournamentId;
+				if (!tournamentId) return null;
+				const idempotencyHeader = requestHeaders['x-idempotency-key'];
+				const idempotencyKey = Array.isArray(idempotencyHeader) ? idempotencyHeader[0] : idempotencyHeader;
+				return {
+					params: { tournamentId },
+					body: body && typeof body === 'object' ? (body as MockHandlerContextMap['joinTournament']['body']) : undefined,
+					headers: {
+						idempotencyKey: typeof idempotencyKey === 'string' && idempotencyKey.length > 0 ? idempotencyKey : undefined,
+					},
+				};
+			}
+			case 'joinTournamentByInvitationCode': {
+				const code = params.code;
+				if (!code) return null;
+				const idempotencyHeader = requestHeaders['x-idempotency-key'];
+				const idempotencyKey = Array.isArray(idempotencyHeader) ? idempotencyHeader[0] : idempotencyHeader;
+				return {
+					params: { code },
+					body:
+						body && typeof body === 'object'
+							? (body as MockHandlerContextMap['joinTournamentByInvitationCode']['body'])
+							: undefined,
+					headers: {
+						idempotencyKey: typeof idempotencyKey === 'string' && idempotencyKey.length > 0 ? idempotencyKey : undefined,
+					},
+				};
+			}
 			case 'getTournament': {
 				const tournamentId = params.tournamentId;
 				if (!tournamentId) return null;
@@ -591,7 +770,14 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 				const matchdayRaw = params.matchday;
 				const matchday = Number(matchdayRaw);
 				if (!tournamentId || !matchdayRaw || Number.isNaN(matchday)) return null;
-				return { params: { tournamentId, matchday } };
+				const idempotencyHeader = requestHeaders['x-idempotency-key'];
+				const idempotencyKey = Array.isArray(idempotencyHeader) ? idempotencyHeader[0] : idempotencyHeader;
+				return {
+					params: { tournamentId, matchday },
+					headers: {
+						idempotencyKey: typeof idempotencyKey === 'string' && idempotencyKey.length > 0 ? idempotencyKey : undefined,
+					},
+				};
 			}
 			case 'getUserMatchdaySubmission': {
 				const tournamentId = params.tournamentId;
@@ -643,6 +829,7 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 		const scenario = resolveScenario(scenarioDefaults, parseScenarioOverrides({ headers: requestHeaders, query }));
 		if (scenario.reset && registry) {
 			resetMockDb(registry.db);
+			resetEngineMockHarness(registry.db);
 		}
 
 		const rawBody = await readBody(req);
@@ -719,12 +906,38 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 
 		if (responseSource !== 'scenario' && registry && coreOperationIds?.has(match.operation.operationId)) {
 			const operationId = match.operation.operationId as OperationId;
-			const context = buildCoreContext(operationId, match.params, query, body);
+			const context = buildCoreContext(operationId, match.params, query, body, requestHeaders);
 			if (context) {
-				const handlerResult = executeMockHandler(registry, operationId, context as MockHandlerContextMap[OperationId]);
-				responseBody = handlerResult.response;
-				responseStatus = handlerResult.status;
-				responseSource = 'core';
+				try {
+					const handlerResult = await executeMockHandler(registry, operationId, context as MockHandlerContextMap[OperationId]);
+					responseBody = handlerResult.response;
+					responseStatus = handlerResult.status;
+					if (handlerResult.headers) {
+						for (const [headerName, headerValue] of Object.entries(handlerResult.headers)) {
+							responseHeaders[headerName] = headerValue;
+						}
+					}
+					responseSource = 'core';
+				} catch (error) {
+					const runtimeProblem = (error as { problem?: { status?: number; type?: string; title?: string; detail?: string; code?: string } })?.problem;
+					if (runtimeProblem?.status && runtimeProblem.type && runtimeProblem.title && runtimeProblem.detail) {
+						responseStatus = runtimeProblem.status;
+						responseMediaType = 'application/problem+json';
+						responseBody = runtimeProblem;
+						responseSource = 'core';
+					} else {
+						responseStatus = 500;
+						responseMediaType = 'application/problem+json';
+						responseBody = {
+							type: 'https://errors.rankup.dev/internal',
+							title: 'Internal Server Error',
+							status: 500,
+							detail: 'Unhandled core handler error.',
+							code: 'internalError',
+						};
+						responseSource = 'core';
+					}
+				}
 			}
 		}
 
@@ -735,6 +948,8 @@ export async function createOpenApiMockServer(options: OpenApiMockServerOptions 
 		if (scenario.delayMs > 0) {
 			await sleep(scenario.delayMs);
 		}
+
+		applyResponseHeadersFromSpec(match.operation, responseStatus, responseHeaders, requestHeaders);
 
 		logger.info(`[openapi-mock] ${req.method} ${url.pathname} -> ${match.operation.operationId} (${responseSource})`);
 

@@ -7,7 +7,7 @@
 
 ## Context
 
-Rankup now routes UI API access through domain services (`ITourneyService` etc.) which depend on `IRankupApiClient`. The only non-OpenAPI HTTP usage is the OAuth token exchange in `ISessionManager`. Introducing a general API facade (`IApiService`) or network request service (`INetworkRequestService`) would add a new platform boundary without a clear cross-cutting need yet.
+Rankup now routes UI API access through domain services (`ITournamentService` etc.) which depend on `IRankupApiClient`. The only non-OpenAPI HTTP usage is the OAuth token exchange in `ISessionManager`. Introducing a general API facade (`IApiService`) or network request service (`INetworkRequestService`) would add a new platform boundary without a clear cross-cutting need yet.
 
 Epic 007 tracked a decision on whether to add a shared API facade or a general network request service for non-OpenAPI traffic.
 

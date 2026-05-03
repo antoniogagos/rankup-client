@@ -10,6 +10,7 @@
 -   `rankup-openapi-first`
 -   `rankup-mock-first`
 -   `rankup-structural-change`
+-   `rankup-engine-testing-vitest`
 
 ## Epic 002
 
@@ -24,7 +25,7 @@
 -   `rankup-di-primitives`
 -   `rankup-composition-root`
 -   `rankup-ui-appservices-bridge`
--   `rankup-domain-tourney-service`
+-   `rankup-domain-tournament-service`
 -   `rankup-home-vertical-slice`
 -   `rankup-eslint-import-guardrails`
 

@@ -9,8 +9,10 @@ const WAIVER_SCOPES = new Set(['coverage', 'schema', 'http']);
 const WAIVER_SEVERITIES = new Set(['P0', 'P1', 'P2']);
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DAYS_TO_MS = 24 * 60 * 60 * 1000;
 
 const MAX_WAIVERS_TOTAL = Number.isFinite(Number(process.env.WAIVERS_MAX_TOTAL)) ? Number(process.env.WAIVERS_MAX_TOTAL) : 0;
+const MAX_WAIVER_TTL_DAYS = Number.isFinite(Number(process.env.WAIVER_MAX_TTL_DAYS)) ? Number(process.env.WAIVER_MAX_TTL_DAYS) : 30;
 
 type OperationManifest = {
 	operations: Array<{
@@ -28,7 +30,8 @@ type WaiverEntry = {
 	owner: string;
 	issue: string;
 	createdAt: string;
-	expiresOn: string;
+	expiresAt: string;
+	plan: string;
 	scope: string;
 	severity: string;
 };
@@ -43,6 +46,20 @@ function formatDate(value: string): Date | null {
 	}
 	const parsed = new Date(`${value}T00:00:00Z`);
 	return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function requiredString(value: unknown): string | null {
+	if (typeof value !== 'string') {
+		return null;
+	}
+	const normalized = value.trim();
+	return normalized.length > 0 ? normalized : null;
+}
+
+function getUtcTodayStart(): Date {
+	const now = new Date();
+	now.setUTCHours(0, 0, 0, 0);
+	return now;
 }
 
 function loadOperationIds(): Set<string> {
@@ -63,7 +80,8 @@ function loadWaivers(): WaiverEntry[] {
 
 function validateWaivers(waivers: WaiverEntry[], operationIds: Set<string>): string[] {
 	const errors: string[] = [];
-	const now = new Date();
+	const todayStart = getUtcTodayStart();
+	const seen = new Set<string>();
 
 	waivers.forEach((waiver, index) => {
 		const prefix = `waiver[${index}]`;
@@ -71,7 +89,10 @@ function validateWaivers(waivers: WaiverEntry[], operationIds: Set<string>): str
 			errors.push(`${prefix} must be an object.`);
 			return;
 		}
-		if (!waiver.operationId || typeof waiver.operationId !== 'string') {
+		if ('expiresOn' in (waiver as Record<string, unknown>)) {
+			errors.push(`${prefix}.expiresOn is legacy; use expiresAt.`);
+		}
+		if (!requiredString(waiver.operationId)) {
 			errors.push(`${prefix}.operationId is required.`);
 		} else if (!operationIds.has(waiver.operationId)) {
 			errors.push(`${prefix}.operationId \"${waiver.operationId}\" not found in operations manifest.`);
@@ -79,14 +100,22 @@ function validateWaivers(waivers: WaiverEntry[], operationIds: Set<string>): str
 		if (!WAIVER_TYPES.has(waiver.waiverType)) {
 			errors.push(`${prefix}.waiverType must be one of ${[...WAIVER_TYPES].join(', ')}.`);
 		}
-		if (!waiver.reason || typeof waiver.reason !== 'string') {
+		const dedupeKey = `${waiver.operationId}:${waiver.waiverType}`;
+		if (seen.has(dedupeKey)) {
+			errors.push(`${prefix} duplicates waiver for ${dedupeKey}.`);
+		}
+		seen.add(dedupeKey);
+		if (!requiredString(waiver.reason)) {
 			errors.push(`${prefix}.reason is required.`);
 		}
-		if (!waiver.owner || typeof waiver.owner !== 'string') {
+		if (!requiredString(waiver.owner)) {
 			errors.push(`${prefix}.owner is required.`);
 		}
-		if (!waiver.issue || typeof waiver.issue !== 'string') {
+		if (!requiredString(waiver.issue)) {
 			errors.push(`${prefix}.issue is required.`);
+		}
+		if (!requiredString(waiver.plan)) {
+			errors.push(`${prefix}.plan is required.`);
 		}
 		if (!WAIVER_SCOPES.has(waiver.scope)) {
 			errors.push(`${prefix}.scope must be one of ${[...WAIVER_SCOPES].join(', ')}.`);
@@ -98,11 +127,21 @@ function validateWaivers(waivers: WaiverEntry[], operationIds: Set<string>): str
 		if (!createdAt) {
 			errors.push(`${prefix}.createdAt must be YYYY-MM-DD.`);
 		}
-		const expiresOn = waiver.expiresOn ? formatDate(waiver.expiresOn) : null;
-		if (!expiresOn) {
-			errors.push(`${prefix}.expiresOn must be YYYY-MM-DD.`);
-		} else if (expiresOn.getTime() < now.getTime()) {
-			errors.push(`${prefix}.expiresOn ${waiver.expiresOn} is expired.`);
+		const expiresAt = waiver.expiresAt ? formatDate(waiver.expiresAt) : null;
+		if (!expiresAt) {
+			errors.push(`${prefix}.expiresAt must be YYYY-MM-DD.`);
+		}
+		if (createdAt && expiresAt) {
+			if (expiresAt.getTime() < createdAt.getTime()) {
+				errors.push(`${prefix}.expiresAt ${waiver.expiresAt} must be >= createdAt ${waiver.createdAt}.`);
+			}
+			const ttlDays = Math.floor((expiresAt.getTime() - createdAt.getTime()) / DAYS_TO_MS);
+			if (ttlDays > MAX_WAIVER_TTL_DAYS) {
+				errors.push(`${prefix}.expiresAt exceeds max TTL (${ttlDays} > ${MAX_WAIVER_TTL_DAYS} days).`);
+			}
+		}
+		if (expiresAt && expiresAt.getTime() < todayStart.getTime()) {
+			errors.push(`${prefix}.expiresAt ${waiver.expiresAt} is expired.`);
 		}
 	});
 
@@ -114,13 +153,13 @@ function validateWaivers(waivers: WaiverEntry[], operationIds: Set<string>): str
 }
 
 function reportWaivers(waivers: WaiverEntry[]) {
-	const now = new Date();
+	const now = getUtcTodayStart();
 	const soon = waivers.filter(waiver => {
-		const expiresOn = waiver.expiresOn ? formatDate(waiver.expiresOn) : null;
-		if (!expiresOn) {
+		const expiresAt = waiver.expiresAt ? formatDate(waiver.expiresAt) : null;
+		if (!expiresAt) {
 			return false;
 		}
-		const delta = expiresOn.getTime() - now.getTime();
+		const delta = expiresAt.getTime() - now.getTime();
 		return delta <= 7 * 24 * 60 * 60 * 1000;
 	});
 
@@ -134,7 +173,7 @@ function reportWaivers(waivers: WaiverEntry[]) {
 	if (soon.length > 0) {
 		console.log('waivers expiring <= 7 days:');
 		for (const waiver of soon) {
-			console.log(`- ${waiver.operationId} (${waiver.expiresOn}) [${waiver.owner}]`);
+			console.log(`- ${waiver.operationId} (${waiver.expiresAt}) [${waiver.owner}]`);
 		}
 	} else {
 		console.log('waivers expiring <= 7 days: none');
@@ -145,6 +184,7 @@ function reportWaivers(waivers: WaiverEntry[]) {
 			console.log(`- ${owner}: ${count}`);
 		}
 	}
+	console.log(`waiver max ttl days: ${MAX_WAIVER_TTL_DAYS}`);
 }
 
 function usage(): void {

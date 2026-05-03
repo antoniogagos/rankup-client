@@ -16,9 +16,10 @@
   * `schemaValidationFlaky` *(solo si hay bug en harness; requiere issue link)*
 * `reason`: string (obligatorio, 1–3 frases)
 * `owner`: string (equipo o persona responsable)
-* `issue`: string (ID interno/GitHub, obligatorio salvo migración inicial)
+* `issue`: string (ID interno/GitHub, obligatorio)
 * `createdAt`: `YYYY-MM-DD`
-* `expiresOn`: `YYYY-MM-DD` (obligatorio)
+* `expiresAt`: `YYYY-MM-DD` (obligatorio)
+* `plan`: string (obligatorio; acción concreta para remover waiver)
 * `scope`: enum
 
   * `coverage` (handler/owner/fixture)
@@ -29,13 +30,16 @@
 ### Reglas duras en CI
 
 1. **Expiry obligatoria**: waiver expirado = CI falla.
-2. **Budget**: máximo `N` waivers totales (y/o por tipo). Recomendación:
+2. **Metadata obligatoria**: `owner|reason|issue|createdAt|expiresAt|plan|scope|severity`.
+3. **Budget**: máximo `N` waivers totales (y/o por tipo). Recomendación:
 
    * `coverage` budget = 0 (una vez migrado)
    * `http` budget = bajo (p.ej. 10) durante transición
-3. **No “wildcards”**: solo se permite waiver por `operationId` exacto (nunca por tag/dominio).
-4. **No “infinite waivers”**: `expiresOn` máximo 14–30 días (decisión).
-5. **Reporting**: el CI imprime:
+4. **No “wildcards”**: solo se permite waiver por `operationId` exacto (nunca por tag/dominio).
+5. **No “infinite waivers”**: `expiresAt` máximo 30 días desde `createdAt`.
+6. **No formato legacy**: `expiresOn` está prohibido; usar `expiresAt`.
+7. **No duplicados**: no se permite repetir `operationId + waiverType`.
+8. **Reporting**: el CI imprime:
 
    * conteo total
    * waivers que expiran en ≤7 días

@@ -1,10 +1,11 @@
 import type { AuthSession, GameMode, GameModeList, InvitationCode, InvitationCodePage, InvitationCodeResolution, JoinByInvitationCodeResult, DuelListItem, DuelPage, HeadsUpOverallSummary, HeadsUpRoundSummary, HeadsUpScoreboard, HeadsUpScoreboardEntry, MatchdayAvailability, MatchdaySubmission, MatchdaySubmissionSummary, MatchdaySubmissionSummaryPage, ScorePredictionMatchdaySubmission, ScorePredictionPredictionInput, ScorePredictionPredictionView, SubmissionCompletion, UpsertMatchdaySubmissionResult, UpsertScorePredictionMatchdaySubmissionRequest, Me, MeSummary, MyMembershipSummary, MyTournamentInvite, MyTournamentInvitePage, RankingEntry, RulesSection, Ruleset, RulesetPage, RulesetSummary, Registration, Tournament, TournamentInvite, TournamentInvitePage, TournamentMatch, TournamentMatchday, TournamentMatchdayPage, TournamentMatchdaySummary, TournamentMember, TournamentMemberPage, TournamentPreview, TournamentRankingPage, TournamentRankingWindow, TournamentSummary, UserDirectoryPage, RelationshipStatus, FriendPage, FollowPage, Notification, NotificationPage, NotificationUnreadCounts, NotificationBatchActionResult, FeedItem, FeedPage, FeedReadCursor, MeUpdatePage, TournamentChat, TournamentChatSettings, TournamentChatState, ChatMessage, ChatMessagePage, ChatPinnedMessages, ChatReadCursor, ChatReport, ChatUpdatePage, ChatMuteEntry, ChatMutePage, MyStatsSnapshot, PublicUserStatsSnapshot, TournamentStatsSnapshot, UserTournamentStatsSnapshot, MatchdayStatsSnapshot, UserMatchdayStatsSnapshot, RecapSummary, RecapSummaryPage, Recap, AchievementDefinition, AchievementDefinitionPage, AchievementEligibility, AchievementMeta, AchievementProgress, AchievementProgressPage, AchievementRequirement, AchievementReward, AchievementUnlockContext, UnlockedAchievementList, UserAchievementPage, VerifiedBranding, VerifiedEligibility, VerifiedEvent, VerifiedEventPage, VerifiedEventSchedule, VerifiedEventSummary, VerifiedHub, VerifiedHubSection, VerifiedJoinInfo, VerifiedTournamentPage, VerifiedTournamentPreview, VerifiedTournamentSummary, ScorePredictionAggregateCounters, ScorePredictionAggregateRates, RankedEligibilityPolicy, RankedTierRewardPreview, RankedTierDefinition, RankedTrackScope, RankedTrackSummary, RankedTrack, RankedTrackPage, RankedSeasonSummary, RankedSeason, RankedSeasonPage, RankedMeta, RankedTierProgress, RankedLeaderboardEntry, RankedLeaderboard, RankedSettings, MyRankedTrackStanding, PublicRankedTrackStanding, MyRankedProfile, PublicRankedProfile, RankedHistorySource, RankedHistoryEvent, RankedHistoryPage, Checksum, Media, MediaModeration, MediaVariant, UploadConstraints, UploadDestinationSinglePut, UploadSession, TrustPolicy, TrustPolicyList, EnforcementStatus, Appeal, AppealPage, Report, ReportPage, TrustBlockEntry, TrustBlockPage, PromotionRewardDefinition, PromotionSummary, PromotionSummaryPage, Promotion, PromotionMeState, PromotionWinnerPage, MyPromotionPage, RewardDelivery, RewardSource, RewardGrant, RewardGrantPage, RewardFulfillmentProfile, ShippingAddress, CreatorBranding, CreatorStats, CreatorSummary, CreatorCatalogItem, CreatorCatalogSummary, CreatorProfile, CreatorPage, CreatorHubSection, CreatorHub, CreatorEventPage, CreatorTournamentPage, CreatorCollectionSummary, CreatorCollection, CreatorCollectionPage, RankupApiClient } from '@rankup/api';
-import type {  MockDb } from './mock-db.js';
+import type { MockDb, MockDbOptions } from './mock-db.js';
 import { createMockRegistry, executeMockHandler } from './core/index.js';
 import { resolveUser, toMeSummary } from './mock-db.js';
 
 export type MockApiOptions = {
 	db?: MockDb;
+	dbOptions?: MockDbOptions;
 };
 
 function createFallbackTournamentSummary(tournamentId: string): TournamentSummary {
@@ -51,8 +52,9 @@ function toTournamentPreview(summary: TournamentSummary): TournamentPreview {
 }
 
 export function createMockRankupApiClient(options: MockApiOptions = {}): RankupApiClient {
-	const registry = createMockRegistry({ db: options.db });
+	const registry = createMockRegistry({ db: options.db, dbOptions: options.dbOptions });
 	const now = () => new Date().toISOString();
+	const currentSeasonFallback = () => new Date().getUTCFullYear().toString();
 	const baseUser = resolveUser(registry.db);
 
 	const gameModes: GameMode[] = [
@@ -363,24 +365,24 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 
 	const pickTournamentSummary = (tournamentId?: string): TournamentSummary => {
 		if (tournamentId) {
-			const record = registry.db.tourneys.get(tournamentId);
+			const record = registry.db.tournaments.get(tournamentId);
 			if (record) {
 				return record.tournament;
 			}
 		}
-		const fallback = registry.db.tourneys.list()[0]?.tournament;
-		return fallback ?? createFallbackTournamentSummary(tournamentId ?? 'tourney-mock');
+		const fallback = registry.db.tournaments.list()[0]?.tournament;
+		return fallback ?? createFallbackTournamentSummary(tournamentId ?? 'tournament-mock');
 	};
 
 	const pickMembership = (): MyMembershipSummary => {
-		const record = registry.db.tourneys.list()[0];
+		const record = registry.db.tournaments.list()[0];
 		if (record?.membership) {
 			return record.membership;
 		}
 		return { role: 'player', joinedAt: now() };
 	};
 
-	const buildDuelListItem = (record: ReturnType<MockDb['tourneys']['list']>[number]): DuelListItem => {
+	const buildDuelListItem = (record: ReturnType<MockDb['tournaments']['list']>[number]): DuelListItem => {
 		const opponent = registry.db.users.list().find(user => user.userId !== baseUser.userId) ?? registry.db.users.list()[0];
 		return {
 			tournament: record.tournament,
@@ -395,7 +397,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 	};
 
 	const buildDuelPage = (): DuelPage => {
-		const items = registry.db.tourneys
+		const items = registry.db.tournaments
 			.list()
 			.filter(record => record.tournament.formatId === 'headsUp')
 			.map(buildDuelListItem);
@@ -603,13 +605,13 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 			type: 'domestic',
 			status: 'live',
 			countryCode: 'ES',
-			activeSeasonId: '2024',
+			activeSeasonId: currentSeasonFallback(),
 		};
 	};
 
 	const buildSeasonList = (competitionId: string) => {
 		const competition = pickCompetition(competitionId);
-		const seasonId = competition.activeSeasonId ?? '2024';
+		const seasonId = competition.activeSeasonId?.trim() || currentSeasonFallback();
 		return {
 			items: [
 				{
@@ -1763,7 +1765,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 
 	return {
 		async getUser(params: Parameters<RankupApiClient['getUser']>[0]) {
-			return executeMockHandler(registry, 'getUserPublicProfile', { params }).response;
+			return (await executeMockHandler(registry, 'getUserPublicProfile', { params })).response;
 		},
 		async listSports() {
 			return buildSportList();
@@ -1837,7 +1839,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 			return pickRuleset(params.rulesetId);
 		},
 		async listCompetitions(query: Parameters<RankupApiClient['listCompetitions']>[0]) {
-			return executeMockHandler(registry, 'listCompetitions', { query }).response;
+			return (await executeMockHandler(registry, 'listCompetitions', { query })).response;
 		},
 		async getCompetition(params: Parameters<RankupApiClient['getCompetition']>[0]) {
 			return pickCompetition(params.competitionId);
@@ -1899,13 +1901,13 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 			return { items: [], nextCursor: undefined };
 		},
 		async listMyTournaments(query: Parameters<RankupApiClient['listMyTournaments']>[0]) {
-			return executeMockHandler(registry, 'listMyTournaments', { query }).response;
+			return (await executeMockHandler(registry, 'listMyTournaments', { query })).response;
 		},
 		async listMyDuels(_query: Parameters<RankupApiClient['listMyDuels']>[0]) {
 			return buildDuelPage();
 		},
 		async createTournament(body: Parameters<RankupApiClient['createTournament']>[0]) {
-			return executeMockHandler(registry, 'createTournament', { body }).response;
+			return (await executeMockHandler(registry, 'createTournament', { body })).response;
 		},
 		async createDuel(body: Parameters<RankupApiClient['createDuel']>[0]) {
 			const tournamentId = `duel_${Date.now()}`;
@@ -1932,7 +1934,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 				},
 				myMembership: pickMembership(),
 			};
-			registry.db.tourneys.create({
+			registry.db.tournaments.create({
 				tournamentId,
 				tournament,
 				membership: pickMembership(),
@@ -1959,7 +1961,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 				},
 				myMembership: pickMembership(),
 			};
-			registry.db.tourneys.create({
+			registry.db.tournaments.create({
 				tournamentId,
 				tournament,
 				membership: pickMembership(),
@@ -2340,7 +2342,7 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 			params: Parameters<RankupApiClient['getMatchdayMatches']>[0],
 			query: Parameters<RankupApiClient['getMatchdayMatches']>[1],
 		) {
-			return executeMockHandler(registry, 'listTournamentMatchdayMatches', { params, query }).response;
+			return (await executeMockHandler(registry, 'listTournamentMatchdayMatches', { params, query })).response;
 		},
 		async listMatchdaySubmissions(
 			params: Parameters<RankupApiClient['listMatchdaySubmissions']>[0],
@@ -2796,12 +2798,14 @@ export function createMockRankupApiClient(options: MockApiOptions = {}): RankupA
 			return { ...userMatchdayStatsSnapshot, tournamentId: params.tournamentId, matchday: params.matchday };
 		},
 		async authorize(params: Parameters<RankupApiClient['authorize']>[0]) {
-			return executeMockHandler(registry, 'oauthAuthorize', { params }).response;
+			return (await executeMockHandler(registry, 'oauthAuthorize', { params })).response;
 		},
 		async token(body: Parameters<RankupApiClient['token']>[0]) {
-			return executeMockHandler(registry, 'oauthTokenExchange', { body }).response;
+			return (await executeMockHandler(registry, 'oauthTokenExchange', { body })).response;
 		},
 	};
 }
 
 export type { MockDb } from './mock-db.js';
+export { createMockApiServer } from './create-server.js';
+export type { MockApiServer, MockApiServerOptions } from './create-server.js';

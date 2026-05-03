@@ -72,7 +72,7 @@ Owner: Rankup maintainers (architecture).
 
 Fecha objetivo: 2026-02-03.
 
-Ejemplo: `ITourneyContextService` y `IGameRuntimeService` propuestos en el doc de partición.
+Ejemplo: `ITournamentContextService` y `IGameRuntimeService` propuestos en el doc de partición.
 
 Criterio de aceptación: runtime con casos de uso claros; domain services sin lógica cross‑domain.
 
@@ -188,7 +188,7 @@ Owner: Rankup maintainers (architecture).
 
 Fecha objetivo: 2026-02-03.
 
-Ejemplo: UI importa `@rankup/rankup/domains/tournaments/core/contracts/tourneyCore.js`.
+Ejemplo: UI importa `@rankup/rankup/domains/tournaments/core/contracts/tournamentCore.js`.
 
 Criterio de aceptación: UI no importa runtime implementations; contracts versionados si cambian.
 
@@ -2174,7 +2174,7 @@ Criterio de aceptación: algoritmo ScorePrediction documentado y testeado.
 
 ### ENG-28.2 (P0) runtime/* use‑cases core
 
-Decisión: **TBD**; el doc de partición propone `ITourneyContextService` y `IGameRuntimeService` como base.
+Decisión: **TBD**; el doc de partición propone `ITournamentContextService` y `IGameRuntimeService` como base.
 
 Racional: `docs/architecture/rankup-engine-domain-partitioning.md` sección runtime.
 

@@ -27,7 +27,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |       |   `-- SKILL.md
 |       |-- rankup-di-primitives
 |       |   `-- SKILL.md
-|       |-- rankup-domain-tourney-service
+|       |-- rankup-domain-tournament-service
 |       |   `-- SKILL.md
 |       |-- rankup-epic-002
 |       |   `-- SKILL.md
@@ -127,15 +127,15 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |   |   `-- rk-drawer.ts
 |   |   |   |-- rk-match-row
 |   |   |   |   `-- rk-match-row.ts
-|   |   |   |-- rk-tourney-footer
-|   |   |   |   `-- rk-tourney-footer.ts
-|   |   |   |-- rk-tourney-header
-|   |   |   |   `-- rk-tourney-header.ts
-|   |   |   |-- rk-tourney-list
-|   |   |   |   `-- rk-tourney-list.ts
-|   |   |   |-- rk-tourney-matchday
-|   |   |   |   |-- rk-tourney-matchday-live.ts
-|   |   |   |   `-- rk-tourney-matchday-not-started.ts
+|   |   |   |-- rk-tournament-footer
+|   |   |   |   `-- rk-tournament-footer.ts
+|   |   |   |-- rk-tournament-header
+|   |   |   |   `-- rk-tournament-header.ts
+|   |   |   |-- rk-tournament-list
+|   |   |   |   `-- rk-tournament-list.ts
+|   |   |   |-- rk-tournament-matchday
+|   |   |   |   |-- rk-tournament-matchday-live.ts
+|   |   |   |   `-- rk-tournament-matchday-not-started.ts
 |   |   |   `-- score-bets
 |   |   |       |-- rk-sb-bet-match
 |   |   |       |   `-- rk-sb-bet-match.ts
@@ -161,7 +161,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |       |-- css-color-scheme.ts
 |   |   |       |-- has-matchday-started.ts
 |   |   |       |-- paths.ts
-|   |   |       `-- tourney-path.ts
+|   |   |       `-- tournament-path.ts
 |   |   |-- lit-localize.json
 |   |   |-- main.ts
 |   |   |-- package.json
@@ -174,21 +174,21 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |   |   |-- rk-reset-password-page.ts
 |   |   |   |   |-- rk-signin-page.ts
 |   |   |   |   `-- rk-signup-page.ts
-|   |   |   |-- create-tourney
-|   |   |   |   `-- rk-create-tourney-page.ts
+|   |   |   |-- create-tournament
+|   |   |   |   `-- rk-create-tournament-page.ts
 |   |   |   |-- home
 |   |   |   |   `-- rk-home-page.ts
-|   |   |   |-- join-tourney
-|   |   |   |   `-- rk-join-tourney-page.ts
-|   |   |   |-- tourney
+|   |   |   |-- join-tournament
+|   |   |   |   `-- rk-join-tournament-page.ts
+|   |   |   |-- tournament
 |   |   |   |   |-- pages
 |   |   |   |   |   |-- rk-sb-rules.ts
-|   |   |   |   |   |-- rk-share-tourney.ts
-|   |   |   |   |   |-- rk-tourney-chat.ts
-|   |   |   |   |   |-- rk-tourney-matchday.ts
-|   |   |   |   |   |-- rk-tourney-ranking.ts
-|   |   |   |   |   `-- rk-tourney-settings.ts
-|   |   |   |   `-- rk-tourney-page.ts
+|   |   |   |   |   |-- rk-share-tournament.ts
+|   |   |   |   |   |-- rk-tournament-chat.ts
+|   |   |   |   |   |-- rk-tournament-matchday.ts
+|   |   |   |   |   |-- rk-tournament-ranking.ts
+|   |   |   |   |   `-- rk-tournament-settings.ts
+|   |   |   |   `-- rk-tournament-page.ts
 |   |   |   `-- welcome
 |   |   |       `-- rk-welcome-page.ts
 |   |   |-- rk-app.ts
@@ -199,14 +199,14 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |       |-- create-rankup-api-client.ts
 |   |   |       |-- gateway-mapping.ts
 |   |   |       |-- http-client.ts
-|   |   |       `-- tourney
-|   |   |           |-- tourney-core-gateway.ts
-|   |   |           |-- tourney-invitation-codes-gateway.ts
-|   |   |           |-- tourney-invites-gateway.ts
-|   |   |           |-- tourney-mappers.ts
-|   |   |           |-- tourney-matchdays-gateway.ts
-|   |   |           |-- tourney-members-gateway.ts
-|   |   |           `-- tourney-ranking-gateway.ts
+|   |   |       `-- tournament
+|   |   |           |-- tournament-core-gateway.ts
+|   |   |           |-- tournament-invitation-codes-gateway.ts
+|   |   |           |-- tournament-invites-gateway.ts
+|   |   |           |-- tournament-mappers.ts
+|   |   |           |-- tournament-matchdays-gateway.ts
+|   |   |           |-- tournament-members-gateway.ts
+|   |   |           `-- tournament-ranking-gateway.ts
 |   |   |-- src
 |   |   |-- test
 |   |   |-- tsconfig.json
@@ -298,7 +298,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |-- 0040-dev-server-normalize-node-modules-paths.md
 |   |   |-- 0041-vscode-workspace-file.md
 |   |   |-- 0042-apps-layer-and-spa-split.md
-|   |   |-- 0043-domain-tourney-umbrella-and-app-composition-root.md
+|   |   |-- 0043-domain-tournament-umbrella-and-app-composition-root.md
 |   |   |-- 0044-internal-game-mode-registry-and-ruleset-versioning.md
 |   |   |-- 0045-openapi-3-1-2-toolchain-compat.md
 |   |   |-- 0046-platform-no-product-sdks.md
@@ -306,7 +306,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |-- 0048-domain-dtos-and-gateways.md
 |   |   |-- 0049-apibase-style-domain-layout.md
 |   |   |-- 0050-openapi-change-protocol-and-gateway-mapping.md
-|   |   |-- 0051-tourney-capability-split.md
+|   |   |-- 0051-tournament-capability-split.md
 |   |   |-- PENDING.md
 |   |   `-- README.md
 |   |-- architecture
@@ -366,7 +366,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |       |   |-- 005-ts-only-and-toolchain-unification.md
 |       |   |-- 006-mock-http-server.md
 |       |   |-- 007-workspace-archetype-alignment.md
-|       |   `-- 008-domain-tourney-boundaries.md
+|       |   `-- 008-domain-tournament-boundaries.md
 |       |-- log
 |       |   |-- 2026-01-29.md
 |       |   |-- 2026-01-30.md
@@ -535,7 +535,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |-- package.json
 |   |   |-- src
 |   |   |   `-- domains
-|   |   |       `-- tourney
+|   |   |       `-- tournament
 |   |   |           |-- LLM_PROMPT.md
 |   |   |           |-- README.md
 |   |   |           |-- analysis
@@ -544,28 +544,28 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |           |   `-- README.md
 |   |   |           |-- codes
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyInvitationCodes.ts
-|   |   |           |   |   |-- tourneyInvitationCodesGateway.ts
+|   |   |           |   |   |-- tournamentInvitationCodes.ts
+|   |   |           |   |   |-- tournamentInvitationCodesGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   `-- invitationCodes.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyInvitationCodesService.ts
+|   |   |           |   |   `-- tournamentInvitationCodesService.ts
 |   |   |           |   `-- validation
 |   |   |           |-- common
 |   |   |           |-- contracts
 |   |   |           |-- core
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyCore.ts
-|   |   |           |   |   |-- tourneyCoreGateway.ts
+|   |   |           |   |   |-- tournamentCore.ts
+|   |   |           |   |   |-- tournamentCoreGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   |-- preview.ts
 |   |   |           |   |   `-- tournament.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyCoreService.ts
+|   |   |           |   |   `-- tournamentCoreService.ts
 |   |   |           |   `-- validation
 |   |   |           |       `-- validateCreateTournamentRequest.ts
 |   |   |           |-- fixtures
@@ -573,53 +573,53 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |   |   |           |-- index.ts
 |   |   |           |-- invites
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyInvites.ts
-|   |   |           |   |   |-- tourneyInvitesGateway.ts
+|   |   |           |   |   |-- tournamentInvites.ts
+|   |   |           |   |   |-- tournamentInvitesGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   `-- invites.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyInvitesService.ts
+|   |   |           |   |   `-- tournamentInvitesService.ts
 |   |   |           |   `-- validation
 |   |   |           |-- matchdays
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyMatchdays.ts
-|   |   |           |   |   |-- tourneyMatchdaysGateway.ts
+|   |   |           |   |   |-- tournamentMatchdays.ts
+|   |   |           |   |   |-- tournamentMatchdaysGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   `-- matchday.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyMatchdaysService.ts
+|   |   |           |   |   `-- tournamentMatchdaysService.ts
 |   |   |           |   `-- validation
 |   |   |           |-- members
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyMembers.ts
-|   |   |           |   |   |-- tourneyMembersGateway.ts
+|   |   |           |   |   |-- tournamentMembers.ts
+|   |   |           |   |   |-- tournamentMembersGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   `-- members.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyMembersService.ts
+|   |   |           |   |   `-- tournamentMembersService.ts
 |   |   |           |   `-- validation
 |   |   |           |-- mock
 |   |   |           |-- models
 |   |   |           |-- ranking
 |   |   |           |   |-- contracts
-|   |   |           |   |   |-- tourneyRanking.ts
-|   |   |           |   |   |-- tourneyRankingGateway.ts
+|   |   |           |   |   |-- tournamentRanking.ts
+|   |   |           |   |   |-- tournamentRankingGateway.ts
 |   |   |           |   |   `-- types.ts
 |   |   |           |   |-- models
 |   |   |           |   |   |-- index.ts
 |   |   |           |   |   `-- ranking.ts
 |   |   |           |   |-- services
-|   |   |           |   |   `-- tourneyRankingService.ts
+|   |   |           |   |   `-- tournamentRankingService.ts
 |   |   |           |   `-- validation
 |   |   |           |-- recaps
 |   |   |           |   `-- README.md
-|   |   |           |-- registerTourneyDomainServices.ts
+|   |   |           |-- registerTournamentDomainServices.ts
 |   |   |           |-- results
 |   |   |           |   `-- README.md
 |   |   |           |-- services
@@ -682,7 +682,7 @@ tree -a --charset=ascii -I '.git|node_modules|dist|.yarn|.DS_Store'
 |       |   |-- sb-bet-match-card.css
 |       |   |-- scrollbar.css
 |       |   |-- theme.css
-|       |   |-- tourney-card.css
+|       |   |-- tournament-card.css
 |       |   `-- typography.css
 |       |-- toggle-input
 |       |   `-- toggle-input.ts

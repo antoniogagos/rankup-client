@@ -1,11 +1,11 @@
+import { createHttpRankupApiClient } from '../apps/rankup-spa/services/api/http-client.js';
+import { startOpenApiMockServer } from '../packages/api-mock/src/server/openapi-contract.js';
+import SwaggerParser from '@apidevtools/swagger-parser';
+import Ajv, { type ValidateFunction } from 'ajv';
 import { execSync } from 'child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import Ajv, { type ValidateFunction } from 'ajv';
-import SwaggerParser from '@apidevtools/swagger-parser';
 import type { OpenAPIV3 } from 'openapi-types';
-import { startOpenApiMockServer } from '../packages/api-mock/src/server/openapi-contract.js';
-import { createHttpRankupApiClient } from '../apps/rankup-spa/services/api/http-client.js';
 
 type OperationEntry = {
 	operationId: string;
@@ -38,6 +38,12 @@ type Fixture = {
 const SPEC_PATH = resolve(process.cwd(), 'packages/api/openapi.yaml');
 const OPERATIONS_PATH = resolve(process.cwd(), 'packages/api/src/generated/operations.json');
 const WAIVERS_PATH = resolve(process.cwd(), 'diagnostics/operation-waivers.json');
+const BASELINE_PATH = resolve(process.cwd(), 'diagnostics/parity-baseline-operations.json');
+const COVERAGE_SCOPE = process.env.OPERATION_COVERAGE_SCOPE === 'global' ? 'global' : 'baseline';
+
+type ParityBaseline = {
+	operationIds: string[];
+};
 
 const ajv = new Ajv({
 	allErrors: true,
@@ -86,6 +92,24 @@ function loadWaivers(): Map<string, Set<string>> {
 	return map;
 }
 
+function loadBaselineOperationIds(): Set<string> {
+	const raw = readJson<ParityBaseline>(BASELINE_PATH);
+	if (!raw || !Array.isArray(raw.operationIds)) {
+		throw new Error('parity-baseline-operations.json must include operationIds[].');
+	}
+	return new Set(raw.operationIds);
+}
+
+function isInScope(entry: OperationEntry, baselineOperationIds: Set<string> | null): boolean {
+	if (isAdminOperation(entry)) {
+		return false;
+	}
+	if (!baselineOperationIds) {
+		return true;
+	}
+	return baselineOperationIds.has(entry.operationId);
+}
+
 function buildOperationMap(spec: OpenAPIV3.Document): Map<string, { operation: OpenAPIV3.OperationObject }> {
 	const map = new Map<string, { operation: OpenAPIV3.OperationObject }>();
 	const paths = spec.paths ?? {};
@@ -99,6 +123,29 @@ function buildOperationMap(spec: OpenAPIV3.Document): Map<string, { operation: O
 		}
 	}
 	return map;
+}
+
+function toResponseObject(response: OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.ResponseObject | undefined {
+	if (!response || '$ref' in response) {
+		return undefined;
+	}
+	return response;
+}
+
+function collectExpectedResponseHeaders(operation: OpenAPIV3.OperationObject, status: number): string[] {
+	const responses = operation.responses ?? {};
+	const statusKey = String(status);
+	const direct = toResponseObject(responses[statusKey] as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+	if (direct?.headers) {
+		return Object.keys(direct.headers);
+	}
+	const rangeKey = `${Math.floor(status / 100)}XX`;
+	const ranged = toResponseObject(responses[rangeKey] as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+	if (ranged?.headers) {
+		return Object.keys(ranged.headers);
+	}
+	const fallback = toResponseObject(responses.default as OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject | undefined);
+	return fallback?.headers ? Object.keys(fallback.headers) : [];
 }
 
 function selectResponseSchema(operation: OpenAPIV3.OperationObject, status: number, contentType: string): OpenAPIV3.SchemaObject | undefined {
@@ -184,11 +231,14 @@ async function run() {
 	}
 
 	const waivers = loadWaivers();
+	const baselineOperationIds = COVERAGE_SCOPE === 'baseline' ? loadBaselineOperationIds() : null;
 	const { fixtures, byOperation, errors: fixtureErrors } = loadFixtures();
 	const missingFixtures: OperationEntry[] = [];
+	const operationIds = new Set(manifest.operations.map(operation => operation.operationId));
+	const unknownBaselineIds = baselineOperationIds ? [...baselineOperationIds].filter(operationId => !operationIds.has(operationId)) : [];
 
 	for (const entry of manifest.operations) {
-		if (isAdminOperation(entry)) {
+		if (!isInScope(entry, baselineOperationIds)) {
 			continue;
 		}
 		if (byOperation.has(entry.operationId)) {
@@ -200,10 +250,13 @@ async function run() {
 		}
 	}
 
-	if (fixtureErrors.length > 0 || missingFixtures.length > 0) {
+	if (fixtureErrors.length > 0 || unknownBaselineIds.length > 0 || missingFixtures.length > 0) {
 		console.error('api-http:schema-validate failed');
 		for (const error of fixtureErrors) {
 			console.error(`- ${error}`);
+		}
+		for (const operationId of unknownBaselineIds) {
+			console.error(`- Baseline operationId "${operationId}" not found in operations manifest`);
 		}
 		for (const entry of missingFixtures) {
 			console.error(`- Missing fixture (http fidelity) for ${entry.operationId} (${entry.method.toUpperCase()} ${entry.path})`);
@@ -219,10 +272,17 @@ async function run() {
 		status: 0,
 		contentType: '',
 		body: null as unknown,
+		headers: {} as Record<string, string>,
 	};
 
 	const fetchFn: typeof fetch = async (input, init) => {
-		const response = await fetch(input, init);
+		const nextHeaders = new Headers(init?.headers);
+		nextHeaders.set('x-rankup-mock-reset', 'true');
+		const response = await fetch(input, {
+			...init,
+			redirect: 'manual',
+			headers: nextHeaders,
+		});
 		const clone = response.clone();
 		const contentType = normalizeContentType(clone.headers.get('content-type'));
 		let payload: unknown = null;
@@ -236,6 +296,11 @@ async function run() {
 		responseState.status = response.status;
 		responseState.contentType = contentType;
 		responseState.body = payload;
+			const responseHeaders: Record<string, string> = {};
+			response.headers.forEach((value, name) => {
+				responseHeaders[name.toLowerCase()] = value;
+			});
+			responseState.headers = responseHeaders;
 		return response;
 	};
 
@@ -253,7 +318,7 @@ async function run() {
 			errors.push(`Unknown operationId in fixture: ${fixture.operationId}`);
 			continue;
 		}
-		if (isAdminOperation(entry)) {
+		if (!isInScope(entry, baselineOperationIds)) {
 			continue;
 		}
 		const waiverTypes = waivers.get(fixture.operationId);
@@ -294,6 +359,13 @@ async function run() {
 		if (fixture.expect?.status === undefined && status >= 400) {
 			errors.push(`${fixture.operationId}: unexpected status ${status}`);
 			continue;
+		}
+
+		const expectedHeaders = collectExpectedResponseHeaders(specEntry.operation, status);
+		for (const headerName of expectedHeaders) {
+			if (!(headerName.toLowerCase() in responseState.headers)) {
+				errors.push(`${fixture.operationId}: missing required response header "${headerName}" for status ${status}`);
+			}
 		}
 
 		const schema = selectResponseSchema(specEntry.operation, status, contentType);

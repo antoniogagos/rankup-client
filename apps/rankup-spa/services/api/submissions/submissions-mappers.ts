@@ -1,5 +1,7 @@
 import { defineSharedKeys, pickFields } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Domain from '@rankup/rankup/domains/submissions/scorePrediction/contracts/types.js';
 
 const userSummaryKeys = defineSharedKeys<Domain.UserSummary, Api.MeSummary>()(['userId', 'username', 'pictureUrl']);
@@ -103,3 +105,5 @@ export const mapUpsertMatchdaySubmissionResult = (
 	applied: result.applied,
 	rejected: result.rejected.map(mapSubmissionItemRejection),
 });
+
+export const mapSubmissionsProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

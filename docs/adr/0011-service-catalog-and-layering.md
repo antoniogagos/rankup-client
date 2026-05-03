@@ -18,7 +18,7 @@ Rankup needs stable boundaries that survive API evolution, new game modes, and n
 ## Constraints
 
 -   No UI tests.
--   Services use injection and scopes (app now; tourney later).
+-   Services use injection and scopes (app now; tournament later).
 
 ## Consequences
 

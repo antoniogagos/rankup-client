@@ -18,7 +18,7 @@ API clients live in the host/app layer.
 - Move Rankup API client creation (`createRankupApiClient`, `createHttpRankupApiClient`)
   into app services (`apps/rankup-spa/services/api/**`).
 - Move the `IRankupApiClient` service identifier into the domain umbrella
-  (`packages/domain-tourney/contracts/rankupApiClient.ts`).
+  (`packages/domain-tournament/contracts/rankupApiClient.ts`).
 - `registerPlatformServices` no longer accepts/registers the API client.
 - Composition root registers `IRankupApiClient` directly in the app.
 - Add guardrails to forbid product SDK imports inside `packages/platform`.

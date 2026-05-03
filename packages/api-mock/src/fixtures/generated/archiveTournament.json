@@ -1,0 +1,6 @@
+{
+	"operationId": "archiveTournament",
+	"params": {
+		"tournamentId": "tournament-1"
+	}
+}

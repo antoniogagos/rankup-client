@@ -7,7 +7,7 @@ It is intended to be sufficient for an agent to implement new services without e
 
 -   Explicit dependencies (constructor injection) instead of implicit globals.
 -   A single composition root selects implementations (mock vs real, browser vs node).
--   Scopes are explicit (app-scope now; tourney-scope later).
+-   Scopes are explicit (app-scope now; tournament-scope later).
 -   UI packages remain implementation-agnostic.
 
 ## Definitions
@@ -121,11 +121,11 @@ UI should not use it as a service locator.
 A child instantiation service is used to model scoped state.
 Planned scope:
 
--   tourney-scope: per tournament context and per game-mode runtime.
+-   tournament-scope: per tournament context and per game-mode runtime.
 
 Pattern:
 
--   create child with overridden/additional bindings (e.g. ITourneyContextService)
+-   create child with overridden/additional bindings (e.g. ITournamentContextService)
 
 ## Lit UI integration (controllers)
 
@@ -138,12 +138,12 @@ Instead:
 Allowed:
 
 -   `rk-home-page` depends on a `HomeController` passed from the composition root.
--   `rk-tourney-list` calls `this.appServices.tourney.core.listMyTournaments()`.
+-   `rk-tournament-list` calls `this.appServices.tournament.core.listMyTournaments()`.
 
 Not allowed:
 
 	-   `rk-home-page` imports `IEnvironmentService` and pulls services directly.
-	-   `rk-tourney-list` imports SDK clients/gateways or `InstantiationService`.
+	-   `rk-tournament-list` imports SDK clients/gateways or `InstantiationService`.
 
 ## Lit UI integration (@service)
 
@@ -157,10 +157,10 @@ Example:
 
 ```ts
 import { service } from '@rankup/platform/instantiation/browser/provider.js';
-import { ITourneyCoreService } from '@rankup/rankup/domains/tournaments/core/contracts/tourneyCore.js';
+import { ITournamentCoreService } from '@rankup/rankup/domains/tournaments/core/contracts/tournamentCore.js';
 
 class RkExample extends LitElement {
-	@service(ITourneyCoreService) tourneyCore?: ITourneyCoreService;
+	@service(ITournamentCoreService) tournamentCore?: ITournamentCoreService;
 }
 ```
 
@@ -183,10 +183,10 @@ Use `scopedServicesController` to provide page-local services:
 
 ```ts
 readonly #scope = scopedServicesController(this)
-  .provideClass(ITourneyMatchdaysService, TourneyMatchdaysService);
+  .provideClass(ITournamentMatchdaysService, TournamentMatchdaysService);
 
 get #matchdays() {
-  return this.#scope.get(ITourneyMatchdaysService);
+  return this.#scope.get(ITournamentMatchdaysService);
 }
 ```
 

@@ -58,7 +58,7 @@ async function runSmoke(baseUrl: string, registry?: MockRegistry) {
 	// Delay via query param
 	{
 		const start = Date.now();
-		await fetchJson(baseUrl, '/tourneys?x-rankup-mock-delay-ms=200');
+		await fetchJson(baseUrl, '/tournaments?x-rankup-mock-delay-ms=200');
 		const elapsed = Date.now() - start;
 		const pass = elapsed >= 150;
 		results.push({
@@ -73,25 +73,25 @@ async function runSmoke(baseUrl: string, registry?: MockRegistry) {
 		if (!registry) {
 			results.push({ name: 'reset (registry)', pass: false, details: 'registry missing' });
 		} else {
-			const before = await fetchJson(baseUrl, '/tourneys');
-			assert(Array.isArray(before.body), 'expected tourneys array');
+			const before = await fetchJson(baseUrl, '/tournaments');
+			assert(Array.isArray(before.body), 'expected tournaments array');
 			const beforeCount = (before.body as unknown[]).length;
 			const base = (before.body as Array<Record<string, unknown>>)[0];
-			assert(base, 'expected at least one tourney fixture');
-			const { tourneyId: _ignore, ...rest } = base;
-			registry.db.tourneys.create({
+			assert(base, 'expected at least one tournament fixture');
+			const { tournamentId: _ignore, ...rest } = base;
+			registry.db.tournaments.create({
 				...(rest as Record<string, unknown>),
 				name: 'Scenario smoke created',
 			});
-			const afterCreate = await fetchJson(baseUrl, '/tourneys');
-			assert(Array.isArray(afterCreate.body), 'expected tourneys array after create');
+			const afterCreate = await fetchJson(baseUrl, '/tournaments');
+			assert(Array.isArray(afterCreate.body), 'expected tournaments array after create');
 			const afterCreateCount = (afterCreate.body as unknown[]).length;
 
-			await fetchJson(baseUrl, '/tourneys', {
+			await fetchJson(baseUrl, '/tournaments', {
 				headers: { 'x-rankup-mock-reset': '1' },
 			});
-			const afterReset = await fetchJson(baseUrl, '/tourneys');
-			assert(Array.isArray(afterReset.body), 'expected tourneys array after reset');
+			const afterReset = await fetchJson(baseUrl, '/tournaments');
+			assert(Array.isArray(afterReset.body), 'expected tournaments array after reset');
 			const afterResetCount = (afterReset.body as unknown[]).length;
 
 			const pass = afterCreateCount === beforeCount + 1 && afterResetCount === beforeCount;

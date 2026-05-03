@@ -81,3 +81,10 @@ This catalog defines stable `type` URIs for RFC 9457 Problem Details responses.
   - Title varies by status
   - Status: any
   - Use for generic 4xx/5xx when a specific `type` is not warranted.
+
+## Baseline per-operation mapping (Epic 010)
+
+- `docs/quality/operation-problem-catalog-baseline.md`
+- `diagnostics/parity-baseline-problem-codes.json`
+
+These files define the operational mapping for baseline `operationId`s to stable `status + Problem.code` envelopes.

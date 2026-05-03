@@ -46,6 +46,7 @@
 	},
 	"devDependencies": {
 		"@open-wc/testing": "^3.0.0",
+		"@rankup/testkit": "workspace:*",
 		"@types/page": "^1.11.4",
 		"@web/dev-server": "^0.4.6",
 		"@web/dev-server-core": "^0.7.5",

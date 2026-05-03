@@ -1,5 +1,7 @@
 import { mapOptional } from '../gateway-mapping.js';
+import { mapProblemToDomainError } from '../problem/mapProblemToDomainError.js';
 import type * as Api from '@rankup/api';
+import type { DomainError } from '@rankup/rankup/domains/shared/errors/domainError.js';
 import type * as Appeals from '@rankup/rankup/domains/trustSafety/appeals/contracts/types.js';
 import type * as Enforcement from '@rankup/rankup/domains/trustSafety/enforcement/contracts/types.js';
 import type * as Reports from '@rankup/rankup/domains/trustSafety/reports/contracts/types.js';
@@ -145,3 +147,5 @@ export function mapCreateAppealRequest(body: Appeals.CreateAppealRequest): Api.C
 		attachments: body.attachments,
 	};
 }
+
+export const mapTrustSafetyProblemToDomainError = (problem: unknown): DomainError => mapProblemToDomainError(problem);

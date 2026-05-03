@@ -2,7 +2,7 @@ import type { MyTournamentItem, MyTournamentPage } from '@rankup/api';
 import { startOpenApiMockServer } from './openapi-contract.js';
 import type { MockRegistry } from '../core/registry.js';
 
-async function fetchTourneys(baseUrl: string): Promise<MyTournamentItem[]> {
+async function fetchTournaments(baseUrl: string): Promise<MyTournamentItem[]> {
 	const response = await fetch(`${baseUrl}/me/tournaments`);
 	const page = (await response.json()) as MyTournamentPage;
 	return page.items ?? [];
@@ -25,39 +25,39 @@ async function runSelfTest(baseUrl: string, registry?: MockRegistry) {
 
 	results.push({ name: 'token (validation fail)', status: tokenResponse.status });
 
-	if (registry?.db?.tourneys) {
-		const before = await fetchTourneys(baseUrl);
+	if (registry?.db?.tournaments) {
+		const before = await fetchTournaments(baseUrl);
 		const base = before[0];
 		if (base) {
-			const created = registry.db.tourneys.create({
-				tournamentId: 'tourney-crud',
+			const created = registry.db.tournaments.create({
+				tournamentId: 'tournament-crud',
 				tournament: {
 					...base.tournament,
-					tournamentId: 'tourney-crud',
+					tournamentId: 'tournament-crud',
 					name: 'CRUD: created',
 				},
 				membership: base.membership,
 			});
-			const afterCreate = await fetchTourneys(baseUrl);
+			const afterCreate = await fetchTournaments(baseUrl);
 			results.push({
-				name: 'tourney create reflected',
+				name: 'tournament create reflected',
 				status: afterCreate.length === before.length + 1 ? 200 : 500,
 			});
 
-			registry.db.tourneys.update(created.tournamentId, {
+			registry.db.tournaments.update(created.tournamentId, {
 				tournament: { ...created.tournament, name: 'CRUD: updated' },
 			});
-			const afterUpdate = await fetchTourneys(baseUrl);
+			const afterUpdate = await fetchTournaments(baseUrl);
 			const updated = afterUpdate.find(item => item.tournament.tournamentId === created.tournamentId);
 			results.push({
-				name: 'tourney update reflected',
+				name: 'tournament update reflected',
 				status: updated?.tournament.name === 'CRUD: updated' ? 200 : 500,
 			});
 
-			registry.db.tourneys.remove(created.tournamentId);
-			const afterDelete = await fetchTourneys(baseUrl);
+			registry.db.tournaments.remove(created.tournamentId);
+			const afterDelete = await fetchTournaments(baseUrl);
 			results.push({
-				name: 'tourney delete reflected',
+				name: 'tournament delete reflected',
 				status: afterDelete.length === before.length ? 200 : 500,
 			});
 		}

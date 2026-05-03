@@ -51,7 +51,7 @@
 | 0040 | Dev-server normalizes duplicate node_modules paths                | Superseded (ADR 0047) | 2026-01-31 | repo         |
 | 0041 | VS Code multi-root workspace file                                 | Accepted | 2026-02-01 | repo         |
 | 0042 | Introduce apps/ layer and split landing vs SPA                    | Accepted | 2026-02-02 | repo         |
-| 0043 | Domain tourney umbrella + app-owned composition root              | Superseded (ADR 0049) | 2026-02-02 | repo         |
+| 0043 | Domain tournament umbrella + app-owned composition root              | Superseded (ADR 0049) | 2026-02-02 | repo         |
 | 0044 | Internal game-mode registry + ruleset versioning                  | Accepted | 2026-02-02 | repo         |
 | 0045 | Pin OpenAPI to 3.1.2 for toolchain compatibility                  | Accepted | 2026-02-02 | repo         |
 | 0046 | Platform is infra-only (no product SDK imports)                   | Accepted | 2026-02-02 | repo         |
@@ -59,14 +59,26 @@
 | 0048 | Domain DTOs + gateways (no @rankup/api in UI/domain)               | Accepted | 2026-02-02 | repo         |
 | 0049 | Apibase-style domain layout inside @rankup/rankup                 | Accepted | 2026-02-03 | repo         |
 | 0050 | OpenAPI change protocol + gateway mapping helpers                | Accepted | 2026-02-03 | repo         |
-| 0051 | Tourney capability split (Hadron-style)                          | Accepted | 2026-02-03 | tourney domain |
-| 0052 | Rename tourney domain folder to tournaments                      | Accepted | 2026-02-03 | packages/rankup |
+| 0051 | Tournament capability split (Hadron-style)                          | Accepted | 2026-02-03 | tournament domain |
+| 0052 | Rename tournament domain folder to tournaments                      | Accepted | 2026-02-03 | packages/rankup |
 | 0053 | Move rankings into the scoring domain                             | Accepted | 2026-02-03 | packages/rankup |
 | 0054 | Scaffold Rankup Engine layers and domain placeholders             | Accepted | 2026-02-03 | packages/rankup |
 | 0055 | Heads-Up is a tournament format (not a game mode)                 | Accepted | 2026-02-04 | OpenAPI + domains |
 | 0056 | Operation Coverage Gate (OpenAPI ↔ Mock ↔ Gateways)               | Accepted | 2026-02-05 | repo         |
 | 0057 | Rankup-web landing runtime and animation stack                    | Accepted | 2026-02-06 | apps/rankup-web |
 | 0058 | Lit Localize msg() explicit-id policy and global guardrail        | Accepted | 2026-02-06 | repo         |
+| 0059 | ScorePrediction v1 operational specification                      | Accepted | 2026-02-06 | packages/rankup + api |
+| 0060 | Tournament lifecycle state machine v1                             | Accepted | 2026-02-06 | packages/rankup + api |
+| 0061 | Idempotency and ETag semantics v1                                 | Accepted | 2026-02-06 | packages/rankup + api |
+| 0062 | Engine storage baseline v1 (CRUD + versioned snapshots)           | Accepted | 2026-02-06 | packages/rankup |
+| 0063 | Sports canonical model and provider mapping v1                    | Accepted | 2026-02-06 | packages/rankup |
+| 0064 | Engine error taxonomy v1 (Problem Details)                        | Accepted | 2026-02-06 | packages/rankup + api |
+| 0065 | Engine observability minimum v1                                   | Accepted | 2026-02-06 | packages/rankup |
+| 0066 | Engine replay baseline v1                                         | Accepted | 2026-02-06 | packages/rankup |
+| 0067 | Engine roles and permissions matrix v1                            | Accepted | 2026-02-06 | packages/rankup + api |
+| 0068 | Engine test platform Vitest v1                                    | Accepted | 2026-02-06 | packages/rankup + repo |
+| 0069 | Client ProblemDetails -> DomainError canonicalization             | Accepted | 2026-02-08 | apps/rankup-spa + packages/rankup |
+| 0070 | Operational SSE client standard (resume/dedupe/ordering/disposal) | Accepted | 2026-02-09 | @rankup/base + @rankup/testkit + packages/rankup/test |
 
 Note: ADR 0005 updated on 2026-01-29 to clarify composite TypeScript declaration requirements.
 Note: ADR 0011 updated on 2026-01-29 to reference the DI normative document.

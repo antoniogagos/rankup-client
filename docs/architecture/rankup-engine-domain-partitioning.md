@@ -144,9 +144,9 @@ Reglas:
 
 #### 5.3 runtime/ (sí, dentro del engine)
 
-Qué es: orquestación product‑side por scope (tourney), sin mezclar en UI:
+Qué es: orquestación product‑side por scope (tournament), sin mezclar en UI:
 
--	ITourneyContextService: resuelve tournamentId + role + gameModeId + rulesetVersionId + verificationStatus.
+-	ITournamentContextService: resuelve tournamentId + role + gameModeId + rulesetVersionId + verificationStatus.
 -	IGameRuntimeService: dispatch por modo usando IGameModeRegistry.
 
 Clave: runtime es el lugar correcto para coordinación cross‑domain (application layer), no dentro de dominios.
@@ -169,7 +169,7 @@ Impacto:
 -	OpenAPI: mejor trazabilidad tag→dominio/capability.
 -	Mock‑first: más mocks, pero más simples y aislados.
 
-#### 6.2 Pocos dominios grandes (status quo tourney como contenedor)
+#### 6.2 Pocos dominios grandes (status quo tournament como contenedor)
 
 Riesgos:
 -	Acoplamiento silencioso: ranking/submissions/chat terminan compartiendo tipos/decisiones.
@@ -210,7 +210,7 @@ packages/rankup/src/
 		gameModes/
 		sports/
 	runtime/
-		tourney/
+		tournament/
 		game/
 	domains/
 		accounts/

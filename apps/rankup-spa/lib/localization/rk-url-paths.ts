@@ -11,22 +11,22 @@ export const PublicPaths = {
 };
 
 export const AppPaths = {
-	TOURNEYS: msg('torneos', { id: 'paths.tourneys', desc: 'This is part of the URL.' }),
-	TOURNEY: msg('torneo', { id: 'paths.tourneys', desc: 'This is part of the URL.' }),
-	CHAT: msg('chat', { id: 'paths.tourneys', desc: 'This is part of the URL.' }),
-	MATCHDAY: msg('jornada', { id: 'paths.tourneys', desc: 'This is part of the URL.' }),
-	RANKING: msg('clasificacion', { id: 'paths.tourneys', desc: 'This is part of the URL.' }),
-	SHARE_TOURNEY: msg('compartir-torneo', {
-		id: 'paths.tourneys',
+	TOURNAMENTS: msg('torneos', { id: 'paths.tournaments', desc: 'This is part of the URL.' }),
+	TOURNAMENT: msg('torneo', { id: 'paths.tournaments', desc: 'This is part of the URL.' }),
+	CHAT: msg('chat', { id: 'paths.tournaments', desc: 'This is part of the URL.' }),
+	MATCHDAY: msg('jornada', { id: 'paths.tournaments', desc: 'This is part of the URL.' }),
+	RANKING: msg('clasificacion', { id: 'paths.tournaments', desc: 'This is part of the URL.' }),
+	SHARE_TOURNAMENT: msg('compartir-torneo', {
+		id: 'paths.tournaments',
 		desc: 'This is part of the URL.',
 	}),
-	RULES_TOURNEY: msg('sistema-de-puntuacion', {
-		id: 'paths.tourneys',
+	RULES_TOURNAMENT: msg('sistema-de-puntuacion', {
+		id: 'paths.tournaments',
 		desc: 'This is part of the URL.',
 	}),
-	JOIN_TOURNEY: msg('unirse-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l27c16' }),
-	CREATE_TOURNEY: msg('crear-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l28c18' }),
-	SETTINGS_TOURNEY: msg('ajustes-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l29c20' }),
+	JOIN_TOURNAMENT: msg('unirse-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l27c16' }),
+	CREATE_TOURNAMENT: msg('crear-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l28c18' }),
+	SETTINGS_TOURNAMENT: msg('ajustes-torneo', { id: 'apps.rankup.spa.lib.localization.rk.url.paths.msg.l29c20' }),
 };
 
 type PublicPathsKeys = keyof typeof PublicPaths;

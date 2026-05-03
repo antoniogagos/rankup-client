@@ -6,7 +6,7 @@ import { UsersGateway } from '../services/api/accounts/users-gateway.js';
 import { LiveGateway } from '../services/api/engagement/live-gateway.js';
 import { RecapsGateway } from '../services/api/engagement/recaps-gateway.js';
 import { StatsGateway } from '../services/api/engagement/stats-gateway.js';
-import { TourneyChatGateway } from '../services/api/engagement/tourney-chat-gateway.js';
+import { TournamentChatGateway } from '../services/api/engagement/tournament-chat-gateway.js';
 import { UpdatesGateway } from '../services/api/engagement/updates-gateway.js';
 import { AchievementsCatalogGateway } from '../services/api/achievements/achievements-catalog-gateway.js';
 import { AchievementsGrantsGateway } from '../services/api/achievements/achievements-grants-gateway.js';
@@ -24,13 +24,14 @@ import { RankedLeaderboardsGateway } from '../services/api/ranked/ranked-leaderb
 import { RankedSeasonsGateway } from '../services/api/ranked/ranked-seasons-gateway.js';
 import { VerifiedEventsGateway } from '../services/api/verified/verified-events-gateway.js';
 import { VerifiedHubGateway } from '../services/api/verified/verified-hub-gateway.js';
-import { TourneySubmissionsGateway } from '../services/api/submissions/tourney-submissions-gateway.js';
-import { TourneyCoreGateway } from '../services/api/tourney/tourney-core-gateway.js';
-import { TourneyInvitationCodesGateway } from '../services/api/tourney/tourney-invitation-codes-gateway.js';
-import { TourneyInvitesGateway } from '../services/api/tourney/tourney-invites-gateway.js';
-import { TourneyMatchdaysGateway } from '../services/api/tourney/tourney-matchdays-gateway.js';
-import { TourneyMembersGateway } from '../services/api/tourney/tourney-members-gateway.js';
-import { TourneyRankingGateway } from '../services/api/tourney/tourney-ranking-gateway.js';
+import { TournamentSubmissionsGateway } from '../services/api/submissions/tournament-submissions-gateway.js';
+import { TournamentCoreGateway } from '../services/api/tournaments/tournament-core-gateway.js';
+import { TournamentInvitationCodesGateway } from '../services/api/tournaments/tournament-invitation-codes-gateway.js';
+import { TournamentInvitesGateway } from '../services/api/tournaments/tournament-invites-gateway.js';
+import { TournamentMatchdaysGateway } from '../services/api/tournaments/tournament-matchdays-gateway.js';
+import { TournamentMembersGateway } from '../services/api/tournaments/tournament-members-gateway.js';
+import { TournamentRankingGateway } from '../services/api/tournaments/tournament-ranking-gateway.js';
+import { TournamentResultsGateway } from '../services/api/scoring/tournament-results-gateway.js';
 import { GameModesGateway } from '../services/api/rules/game-modes-gateway.js';
 import { RulesetsGateway } from '../services/api/rules/rulesets-gateway.js';
 import { SportsCatalogGateway } from '../services/api/sports/sports-catalog-gateway.js';
@@ -46,7 +47,7 @@ import { IMeGateway } from '@rankup/rankup/domains/accounts/me/contracts/meGatew
 import { ISocialGateway } from '@rankup/rankup/domains/accounts/social/contracts/socialGateway.js';
 import { IUsersGateway } from '@rankup/rankup/domains/accounts/users/contracts/usersGateway.js';
 import { registerAccountsDomainServices } from '@rankup/rankup/domains/accounts/registerAccountsDomainServices.js';
-import { ITourneyChatGateway } from '@rankup/rankup/domains/engagement/chat/contracts/tourneyChatGateway.js';
+import { ITournamentChatGateway } from '@rankup/rankup/domains/engagement/chat/contracts/tournamentChatGateway.js';
 import { ILiveGateway } from '@rankup/rankup/domains/engagement/live/contracts/liveGateway.js';
 import { IRecapsGateway } from '@rankup/rankup/domains/engagement/recaps/contracts/recapsGateway.js';
 import { IStatsGateway } from '@rankup/rankup/domains/engagement/stats/contracts/statsGateway.js';
@@ -75,14 +76,15 @@ import { registerRankedDomainServices } from '@rankup/rankup/domains/ranked/regi
 import { IVerifiedEventsGateway } from '@rankup/rankup/domains/verified/events/contracts/eventsGateway.js';
 import { IVerifiedHubGateway } from '@rankup/rankup/domains/verified/hub/contracts/hubGateway.js';
 import { registerVerifiedDomainServices } from '@rankup/rankup/domains/verified/registerVerifiedDomainServices.js';
-import { ITourneySubmissionsGateway } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tourneySubmissionsGateway.js';
+import { ITournamentSubmissionsGateway } from '@rankup/rankup/domains/submissions/scorePrediction/contracts/tournamentSubmissionsGateway.js';
 import { registerSubmissionsDomainServices } from '@rankup/rankup/domains/submissions/registerSubmissionsDomainServices.js';
-import { ITourneyCoreGateway } from '@rankup/rankup/domains/tournaments/core/contracts/tourneyCoreGateway.js';
-import { ITourneyInvitationCodesGateway } from '@rankup/rankup/domains/tournaments/codes/contracts/tourneyInvitationCodesGateway.js';
-import { ITourneyInvitesGateway } from '@rankup/rankup/domains/tournaments/invites/contracts/tourneyInvitesGateway.js';
-import { ITourneyMatchdaysGateway } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tourneyMatchdaysGateway.js';
-import { ITourneyMembersGateway } from '@rankup/rankup/domains/tournaments/members/contracts/tourneyMembersGateway.js';
-import { ITourneyRankingGateway } from '@rankup/rankup/domains/scoring/ranking/contracts/tourneyRankingGateway.js';
+import { ITournamentCoreGateway } from '@rankup/rankup/domains/tournaments/core/contracts/tournamentCoreGateway.js';
+import { ITournamentInvitationCodesGateway } from '@rankup/rankup/domains/tournaments/codes/contracts/tournamentInvitationCodesGateway.js';
+import { ITournamentInvitesGateway } from '@rankup/rankup/domains/tournaments/invites/contracts/tournamentInvitesGateway.js';
+import { ITournamentMatchdaysGateway } from '@rankup/rankup/domains/tournaments/matchdays/contracts/tournamentMatchdaysGateway.js';
+import { ITournamentMembersGateway } from '@rankup/rankup/domains/tournaments/members/contracts/tournamentMembersGateway.js';
+import { ITournamentRankingGateway } from '@rankup/rankup/domains/scoring/ranking/contracts/tournamentRankingGateway.js';
+import { ITournamentResultsGateway } from '@rankup/rankup/domains/scoring/results/contracts/tournamentResultsGateway.js';
 import { registerScoringDomainServices } from '@rankup/rankup/domains/scoring/registerScoringDomainServices.js';
 import { IGameModesGateway } from '@rankup/rankup/domains/rules/gameModes/contracts/gameModesGateway.js';
 import { IRulesetsGateway } from '@rankup/rankup/domains/rules/rulesets/contracts/rulesetsGateway.js';
@@ -90,7 +92,7 @@ import { registerRulesDomainServices } from '@rankup/rankup/domains/rules/regist
 import { ISportsCatalogGateway } from '@rankup/rankup/domains/sports/catalog/contracts/sportsCatalogGateway.js';
 import { ISportsScheduleGateway } from '@rankup/rankup/domains/sports/schedule/contracts/sportsScheduleGateway.js';
 import { registerSportsDomainServices } from '@rankup/rankup/domains/sports/registerSportsDomainServices.js';
-import { registerTourneyDomainServices } from '@rankup/rankup/domains/tournaments/registerTourneyDomainServices.js';
+import { registerTournamentDomainServices } from '@rankup/rankup/domains/tournaments/registerTournamentDomainServices.js';
 
 export type CompositionRootOptions = {
 	getAccessToken?: () => string | null | undefined;
@@ -117,18 +119,19 @@ export function createCompositionRoot(options: CompositionRootOptions = {}): Ins
 		environmentService,
 		sessionManager: options.sessionManager,
 	});
-	services.set(ITourneyCoreGateway, new TourneyCoreGateway(apiClient));
-	services.set(ITourneyMatchdaysGateway, new TourneyMatchdaysGateway(apiClient));
-	services.set(ITourneyRankingGateway, new TourneyRankingGateway(apiClient));
-	services.set(ITourneyMembersGateway, new TourneyMembersGateway(apiClient));
-	services.set(ITourneyInvitationCodesGateway, new TourneyInvitationCodesGateway(apiClient));
-	services.set(ITourneyInvitesGateway, new TourneyInvitesGateway(apiClient));
-	services.set(ITourneySubmissionsGateway, new TourneySubmissionsGateway(apiClient));
+	services.set(ITournamentCoreGateway, new TournamentCoreGateway(apiClient));
+	services.set(ITournamentMatchdaysGateway, new TournamentMatchdaysGateway(apiClient));
+	services.set(ITournamentRankingGateway, new TournamentRankingGateway(apiClient));
+	services.set(ITournamentResultsGateway, new TournamentResultsGateway(apiClient));
+	services.set(ITournamentMembersGateway, new TournamentMembersGateway(apiClient));
+	services.set(ITournamentInvitationCodesGateway, new TournamentInvitationCodesGateway(apiClient));
+	services.set(ITournamentInvitesGateway, new TournamentInvitesGateway(apiClient));
+	services.set(ITournamentSubmissionsGateway, new TournamentSubmissionsGateway(apiClient));
 	services.set(IAuthGateway, new AuthGateway(apiClient));
 	services.set(IMeGateway, new MeGateway(apiClient));
 	services.set(IUsersGateway, new UsersGateway(apiClient));
 	services.set(ISocialGateway, new SocialGateway(apiClient));
-	services.set(ITourneyChatGateway, new TourneyChatGateway(apiClient));
+	services.set(ITournamentChatGateway, new TournamentChatGateway(apiClient));
 	services.set(ILiveGateway, new LiveGateway(apiClient));
 	services.set(IRecapsGateway, new RecapsGateway(apiClient));
 	services.set(IStatsGateway, new StatsGateway(apiClient));
@@ -163,7 +166,7 @@ export function createCompositionRoot(options: CompositionRootOptions = {}): Ins
 	registerVerifiedDomainServices(services);
 	registerRankedDomainServices(services);
 	registerSubmissionsDomainServices(services);
-	registerTourneyDomainServices(services);
+	registerTournamentDomainServices(services);
 	registerScoringDomainServices(services);
 	registerRulesDomainServices(services);
 	registerSportsDomainServices(services);
