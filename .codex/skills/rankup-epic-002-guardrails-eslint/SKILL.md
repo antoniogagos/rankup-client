@@ -1,10 +1,9 @@
 ---
-name: rankup-epic-002-guardrails-eslint
-description: Epic 002 guardrails skill: enforce UI import boundaries via ESLint (no instantiation, no platform browser, no env, api-mock allowlist).
-metadata:
-  owner: rankup
-  epic: "002"
-  wp: "002-06"
+name: "rankup-epic-002-guardrails-eslint"
+description: "Epic 002 guardrails skill: enforce UI import boundaries via ESLint (no instantiation, no platform browser, no env, api-mock allowlist)."
+owner: "rankup"
+epic: "002"
+wp: "002-06"
 ---
 
 # Skill: Epic 002 guardrails (ESLint import restrictions)
