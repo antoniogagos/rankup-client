@@ -1,10 +1,9 @@
 ---
-name: rankup-epic-002-ui-bridge
-description: Epic 002 UI bridge skill: expose typed AppServices to UI without DI primitives or service locator access.
-metadata:
-  owner: rankup
-  epic: "002"
-  wp: "002-03"
+name: "rankup-epic-002-ui-bridge"
+description: "Epic 002 UI bridge skill: expose typed AppServices to UI without DI primitives or service locator access."
+owner: "rankup"
+epic: "002"
+wp: "002-03"
 ---
 
 # Skill: Epic 002 UI bridge (typed AppServices, no service locator)
