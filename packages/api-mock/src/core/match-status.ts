@@ -3,6 +3,7 @@ import { matchStatusCatalog, type CanonicalMatchStatus } from '@rankup/api/gener
 
 export type CanonicalMockMatchStatus = CanonicalMatchStatus;
 
+// OpenAPI MatchStatus.x-rankup-canonical-statuses is the only provider-status catalog.
 const CANONICAL_STATUSES: CanonicalMockMatchStatus[] = ['pending', 'provisional', 'final', 'void'];
 const canonicalByProviderStatus: Record<string, CanonicalMockMatchStatus> = {};
 

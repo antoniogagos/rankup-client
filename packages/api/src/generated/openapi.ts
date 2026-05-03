@@ -5571,6 +5571,7 @@ export interface components {
     /**
      * @description Provider-driven match status. Not an enum for forward compatibility.
      * Examples for football providers: NS, LIVE, HT, FT, POSTP, CANCL, AET, PEN.
+     * Canonical mappings are declared in `x-rankup-canonical-statuses` and consumed by generated catalog artifacts.
      */
     MatchStatus: string;
     /** @enum {string} */

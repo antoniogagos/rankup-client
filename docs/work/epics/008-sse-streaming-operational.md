@@ -133,3 +133,5 @@ Acceptance (VSCode-grade):
 -   Completed PRs: `PR-001`
 -   Remaining PRs: `PR-002`, `PR-003`, `PR-004`
 -   Blockers: none (as of 2026-02-09)
+
+Maintenance note (2026-05-03): Restored `packages/api/openapi.yaml` after commit `3affae1` accidentally deleted the OpenAPI SOT. This does not advance `PR-002`; it restores the contract baseline required by existing OpenAPI and generated-catalog gates.

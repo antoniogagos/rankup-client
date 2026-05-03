@@ -269,6 +269,7 @@ Maintenance note (2026-02-09): Completed `WP-008-34` `PR-004` by replacing runti
 Maintenance note (2026-02-09): Completed `WP-008-34` `PR-005` by adding a versioned release-critical operations catalog (`diagnostics/release-critical-operations.json`), enforcing blocking `releaseCriticalNotImplemented=0` in global coverage gates/report, and adding non-critical fallback canonicalization coverage (`getMyPreferences` fixture `expect.status=501` + `notImplementedFallback.contract.test.ts`).
 Maintenance note (2026-02-09): Completed `WP-008-34` `PR-006` by moving provider match-status canonicalization to OpenAPI SOT (`components.schemas.MatchStatus.x-rankup-canonical-statuses`) with generated catalog artifacts, removing manual `OperationId` literal unions from `api-mock` core types, and adding blocking guardrail `scripts/repo-openapi-sot-drift.ts` to prevent status/type drift.
 Maintenance note (2026-02-09): Opened `WP-008-35` (`docs/work/epics/008-sse-streaming-operational.md`) for product-grade SSE hardening and completed `PR-001` with shared `OperationalSseClient` in `@rankup/base`, testkit migration to the standard client, and deterministic engine/P0 coverage for dedupe/reconnect/ordering/disposal + leak checks.
+Maintenance note (2026-05-03): Restored `packages/api/openapi.yaml` after commit `3affae1` accidentally deleted the OpenAPI SOT; restored content includes the `MatchStatus.x-rankup-canonical-statuses` extension required by generated match-status catalog gates.
 
 ## Truth hierarchy
 
