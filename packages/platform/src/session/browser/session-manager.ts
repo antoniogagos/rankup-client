@@ -1,4 +1,3 @@
-// } from 'amazon-cognito-identity-js'; // can't be used because is only for node, we use the minified version
 import { authConfig, isMockMode } from '../../environment/browser/env.js';
 import type { ISessionManager } from '../common/sessionManager.js';
 import type { EventsMap, Providers, Session } from '../common/types.js';
@@ -154,7 +153,7 @@ export class SessionManager implements ReactiveController, ISessionManager {
 			Pool: new CognitoUserPool({ UserPoolId, ClientId }),
 		});
 		return new Promise((resolve, reject) => {
-			cognitoUser.changePassword(oldPassword, newPassword, (err: Error, result: any) => {
+			cognitoUser.changePassword(oldPassword, newPassword, (err: Error | undefined, result: any) => {
 				if (err) {
 					console.error(err.message || JSON.stringify(err));
 					reject(err);
@@ -195,7 +194,7 @@ export class SessionManager implements ReactiveController, ISessionManager {
 			Pool: new CognitoUserPool({ UserPoolId, ClientId }),
 		});
 		return new Promise((resolve, reject) => {
-			cognitoUser.resendConfirmationCode((err: Error, result: any) => {
+			cognitoUser.resendConfirmationCode((err: Error | undefined, result: any) => {
 				if (err) {
 					console.error(err.message || JSON.stringify(err));
 					reject(err);
@@ -217,12 +216,17 @@ export class SessionManager implements ReactiveController, ISessionManager {
 			throw new Error('No session');
 		}
 		const cognitoUser = this._getCurrentCognitoUser();
+		if (!cognitoUser) {
+			throw new Error('No current Cognito user');
+		}
 		const sessionToken = new CognitoRefreshToken({ RefreshToken: _session.refreshToken });
 		return new Promise<Session>((resolve, reject) => {
-			cognitoUser.refreshSession(sessionToken, (err: Error, session: any) => {
+			cognitoUser.refreshSession(sessionToken, (err: Error | undefined, session?: CognitoUserSession) => {
 				if (err) {
 					console.error(err.message || JSON.stringify(err));
 					reject(err);
+				} else if (!session) {
+					reject(new Error('Cognito refresh did not return a session'));
 				} else {
 					this.session = this._cognitoUserSessionToSession(session);
 					resolve(this.session);
@@ -331,10 +335,12 @@ export class SessionManager implements ReactiveController, ISessionManager {
 				Name: 'custom:rk_username',
 				Value: username,
 			});
-			userPool.signUp(email, password, [attrUsername], null, (err: Error, result: ISignUpResult) => {
+			userPool.signUp(email, password, [attrUsername], [], (err: Error | undefined, result?: ISignUpResult) => {
 				if (err) {
 					console.error(err.message || JSON.stringify(err));
 					reject(err);
+				} else if (!result) {
+					reject(new Error('Cognito sign up did not return a result'));
 				} else {
 					const { userConfirmed, userSub: userId } = result;
 					resolve({
@@ -355,7 +361,7 @@ export class SessionManager implements ReactiveController, ISessionManager {
 		});
 		return new Promise((resolve, reject) => {
 			cognitoUser.authenticateUser(authDetails, {
-				onSuccess: (result: CognitoUserSession, userConfirmationNecessary: boolean) => {
+				onSuccess: (result: CognitoUserSession, userConfirmationNecessary?: boolean) => {
 					resolve(this._cognitoUserSessionToSession(result, userConfirmationNecessary));
 				},
 				onFailure: (err: any) => {

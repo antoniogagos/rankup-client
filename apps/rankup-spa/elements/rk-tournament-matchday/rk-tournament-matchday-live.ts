@@ -6,6 +6,9 @@ import type { Match } from '@rankup/rankup/domains/tournaments/matchdays/contrac
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+/**
+ * @element rk-tournament-matchday-live
+ */
 @customElement('rk-tournament-matchday-live')
 export class RkTournamentMatchdayLive extends LitElement {
 	@property({ attribute: false }) fixture?: Match[];
@@ -30,20 +33,29 @@ export class RkTournamentMatchdayLive extends LitElement {
 	}
 
 	override render() {
-		return html` ${this.fixture?.map(match => html` <rk-match-row id="match" @click=${() => this._onMatchClick(match)} .match=${match}></rk-match-row> `)} `;
+		return html`
+			${this.fixture?.map((match, index) => html`
+				<rk-match-row
+					id="match"
+					@click=${() => this._onMatchClick(match)}
+					.match=${match}
+					.rowIndex=${index}
+				></rk-match-row>
+			`)}
+		`;
 	}
 
 	static override styles = [
 		css`
 		:host {
-			background-color: var(--color-canvas-default);
+			background-color: #f8f8fc;
 			color: var(--color-fg-default);
 			display: block;
 			box-sizing: border-box;
-			margin-top: 2rem;
+			margin-top: 0.7rem;
 		}
 		#match {
-			margin: 1rem 0;
+			margin: 0.9rem 0;
 		}
 		`];
 }

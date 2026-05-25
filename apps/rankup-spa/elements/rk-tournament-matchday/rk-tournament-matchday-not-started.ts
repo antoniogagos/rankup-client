@@ -6,6 +6,9 @@ import type { Match } from '@rankup/rankup/domains/tournaments/matchdays/contrac
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+/**
+ * @element rk-tournament-matchday-not-started
+ */
 @customElement('rk-tournament-matchday-not-started')
 export class RkTournamentMatchdayNotStarted extends LitElement {
 	@property({ attribute: false }) fixture?: Match[];
@@ -51,11 +54,11 @@ export class RkTournamentMatchdayNotStarted extends LitElement {
 			box-sizing: border-box;
 		}
 		#match {
-			margin: 3rem 0px;
+			margin: 1rem 0;
 		}
 
 		:host > #match:first-child {
-			margin-top: 1.5rem;
+			margin-top: 1.2rem;
 		}
 		`];
 }

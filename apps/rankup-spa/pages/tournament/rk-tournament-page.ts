@@ -16,6 +16,9 @@ import LinkStyles from '@rankup/samba/styles/link.css';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+/**
+ * @element rk-tournament-page
+ */
 @customElement('rk-tournament-page')
 export class RkTournamentPage extends LitElement {
 	@property({ type: Boolean }) override hidden = true;
@@ -54,7 +57,7 @@ export class RkTournamentPage extends LitElement {
 		AppRouterStyles,
 		css`
 		:host {
-			background: var(--color-canvas-default);
+			background: #f8f8fc;
 			box-sizing: border-box;
 			color: var(--color-fg-default);
 			display: flex;

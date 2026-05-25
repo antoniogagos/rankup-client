@@ -12,6 +12,39 @@ import typographyStyles from '@rankup/samba/styles/typography.css';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+type TournamentCardMeta = {
+	styleId: string;
+	imageUrl: string;
+	label: string;
+};
+
+const defaultTournamentCardMeta: TournamentCardMeta = {
+	styleId: 'default',
+	imageUrl: '/assets/images/rk-logo-with-bg.svg',
+	label: 'Rankup logo',
+};
+
+const tournamentCardMetaByCompetitionId: Record<string, TournamentCardMeta> = {
+	FOOTBALL_SPAIN_LEAGUE_1: {
+		styleId: 'laliga',
+		imageUrl: '/assets/images/laliga.svg',
+		label: 'La Liga logo',
+	},
+	FOOTBALL_UK_LEAGUE_1: {
+		styleId: 'premier',
+		imageUrl: '/assets/images/premier-league.svg',
+		label: 'Premier League logo',
+	},
+	FOOTBALL_CHAMPIONS_LEAGUE: {
+		styleId: 'champions',
+		imageUrl: '/assets/images/champions-league.svg',
+		label: 'Champions League logo',
+	},
+};
+
+/**
+ * @element rk-tournament-list
+ */
 @customElement('rk-tournament-list')
 export class RkTournamentList extends LitElement {
 	@service(ITournamentCoreService) private readonly _tournamentService!: ITournamentCoreService;
@@ -37,13 +70,20 @@ export class RkTournamentList extends LitElement {
 		window.removeEventListener('rk-tournament-list-refresh', this._onRefreshRequested);
 	}
 
-	private _getCompetitionMeta(sportId: string) {
-		switch (sportId) {
-			case 'football':
-				return { styleId: 'football', icon: 'rk-logo-with-bg', label: 'Football logo' };
-			default:
-				return { styleId: 'default', icon: 'rk-logo-with-bg', label: 'Rankup logo' };
+	private _getTournamentCardMeta(tournament: MyTournamentItem['tournament']): TournamentCardMeta {
+		const competitionId = tournament.timing?.competitionId;
+		const competitionMeta = competitionId ? tournamentCardMetaByCompetitionId[competitionId] : undefined;
+		const heroImageUrl = tournament.heroImageUrl?.trim();
+
+		if (heroImageUrl) {
+			return {
+				styleId: competitionMeta?.styleId ?? defaultTournamentCardMeta.styleId,
+				imageUrl: heroImageUrl,
+				label: `${tournament.name} logo`,
+			};
 		}
+
+		return competitionMeta ?? defaultTournamentCardMeta;
 	}
 
 	private _getMedalAsset(position: number) {
@@ -54,12 +94,12 @@ export class RkTournamentList extends LitElement {
 	}
 
 	private _renderTournamentCard(tournament: MyTournamentItem) {
-		const { styleId, icon, label } = this._getCompetitionMeta(tournament.tournament.sportId);
+		const { styleId, imageUrl, label } = this._getTournamentCardMeta(tournament.tournament);
 		const medal = this._getMedalAsset(0);
 		const href = path('TOURNAMENT', `${tournament.tournament.tournamentId}/${AppPaths.MATCHDAY}`);
 		return html`
 			<a href=${href} class="tournament-card" competitionId=${styleId}>
-				<div><img src="/assets/images/${icon}.svg" alt="${label}" /></div>
+				<div><img src=${imageUrl} alt=${label} /></div>
 				<div class="tournament-description">
 					<div class="tournament-name">${tournament.tournament.name}</div>
 					<span>${Icons('person', 10)} ${tournament.tournament.memberCount}</span>

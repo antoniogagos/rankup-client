@@ -10,6 +10,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+/**
+ * @element rk-tournament-header
+ */
 @customElement('rk-tournament-header')
 export class RkTournamentHeader extends LitElement {
 	@property({ type: String, attribute: 'tournament-base' }) tournamentBase = '';
@@ -67,7 +70,7 @@ export class RkTournamentHeader extends LitElement {
 			display: flex;
 		}
 		.color-header-text {
-			background: var(--color-header-bg);
+			background: #f8f8fc;
 			color: var(--color-header-text);
 		}
 		.color-header-text-inverted {
