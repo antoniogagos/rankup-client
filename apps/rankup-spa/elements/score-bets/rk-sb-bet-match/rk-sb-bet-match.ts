@@ -1,96 +1,90 @@
 import { Icons } from '../../../authenticated-icons.js';
-import { calculateOddsHandicap } from '../../../lib/utils/calculate-odds-handicap.js';
 import { msg } from '@lit/localize';
 import type { Match } from '@rankup/rankup/domains/tournaments/matchdays/contracts/types.js';
 import ResetStyles from '@rankup/samba/styles/reset.css';
 import MatchCardStyles from '@rankup/samba/styles/sb-bet-match-card.css';
 import TypographyStyles from '@rankup/samba/styles/typography.css';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+/**
+ * @element rk-sb-bet-match
+ */
 @customElement('rk-sb-bet-match')
 export class RkSbBetMatch extends LitElement {
 	@property({ attribute: false }) match?: Match;
 
-	private _onInputHandlerClick(operation: string, side: string) {
-		const inputId = `#${side}Input`;
-		const input = this.shadowRoot!.querySelector(inputId) as HTMLInputElement;
-		if (operation === 'add') {
-			input.stepUp();
+	@state() private _homePrediction = 1;
+
+	@state() private _awayPrediction = 1;
+
+	private _onInputHandlerClick(operation: 'add' | 'subtract', side: 'home' | 'away', evt: Event) {
+		evt.stopPropagation();
+		const delta = operation === 'add' ? 1 : -1;
+		if (side === 'home') {
+			this._homePrediction = Math.max(0, this._homePrediction + delta);
 		} else {
-			input.stepDown();
+			this._awayPrediction = Math.max(0, this._awayPrediction + delta);
 		}
-		this.requestUpdate();
 	}
 
 	private _betInputVal(side: string): number {
-		const inputId = `#${side}Input`;
-		const input = this.shadowRoot?.querySelector(inputId) as HTMLInputElement;
-		return Number(input?.value);
+		return side === 'home' ? this._homePrediction : this._awayPrediction;
 	}
 
 	override render() {
 		if (!this.match) return;
 		const scheduledAt = this.match.scheduledAt ? new Date(this.match.scheduledAt) : null;
 		const hasDerby = Boolean(this.match.isDerby);
-		const hasUpsetOdds = calculateOddsHandicap(this.match.odds);
+		const homeName = this.match.homeTeam?.name ?? 'Home';
+		const awayName = this.match.awayTeam?.name ?? 'Away';
 		return html`
 			<div class="match-card f6">
 				<div class="match-card-header">
-					<div>${scheduledAt ? new Intl.DateTimeFormat(['ban', 'id']).format(scheduledAt) : ''}</div>
+					<div>${this._formatScheduleLabel(scheduledAt)}</div>
 					<div class="card-header--right-content">
 						${hasDerby
 							? html`
-								<div>${msg('Derbi', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l45c16' })}</div>
-								<img id="derbiLightningImg" src="/assets/images/lightning.svg" alt="Lightning" />
+								<div class="match-badge match-badge--derby">
+									<span class="warning-mark" aria-hidden="true"></span>
+									${msg('Derby', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.derby.badge' })}
+								</div>
 							`
 							: ''}
-						${hasUpsetOdds ? html` <div>${msg('Sorpresa', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l49c37' })} ${Icons('speedometer', 20)}</div> ` : ''}
 					</div>
 				</div>
 				<div class="teams">
 					<div class="team home-team">
-						<span class="team-name">Sevilla</span>
-						<img width="42" height="42" src="/assets/teams/sevilla.png" alt="home logo" />
+						<span class="team-name">${homeName}</span>
+						<img width="42" height="42" src=${this._getTeamCrestUrl(homeName)} alt=${this._getTeamAlt(homeName)} />
 						<div class="bet-handler">
-							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'home')}>${Icons('chevron-up', 10)}</button>
-							<input
-								tabindex="-1"
-								readonly
-								min="0"
-								step="1"
-								value="0"
-								type="number"
+							<button class="chevron-btn" aria-label=${msg('Increase home prediction', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.home.increase' })} @click=${(evt: Event) => this._onInputHandlerClick('add', 'home', evt)}>${Icons('chevron-up', 10)}</button>
+							<div
 								class="bet-input ${classMap({
 									win: this._betInputVal('home') > this._betInputVal('away'),
 									draw: this._betInputVal('home') === this._betInputVal('away'),
 									lose: this._betInputVal('home') < this._betInputVal('away'),
 								})}"
-								id="homeInput" />
-							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('subtract', 'home')}>${Icons('chevron-down', 10)}</button>
+								id="homeInput">${this._homePrediction}</div>
+							<button class="chevron-btn" aria-label=${msg('Decrease home prediction', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.home.decrease' })} @click=${(evt: Event) => this._onInputHandlerClick('subtract', 'home', evt)}>${Icons('chevron-down', 10)}</button>
 						</div>
 					</div>
+					${hasDerby ? html`<div class="derby-bolt" aria-hidden="true"></div>` : ''}
 					<div class="team away-team">
 						<div class="bet-handler">
-							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('add', 'away')}>${Icons('chevron-up', 10)}</button>
-							<input
-								tabindex="-1"
-								readonly
-								min="0"
-								step="1"
-								value="0"
-								type="number"
+							<button class="chevron-btn" aria-label=${msg('Increase away prediction', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.away.increase' })} @click=${(evt: Event) => this._onInputHandlerClick('add', 'away', evt)}>${Icons('chevron-up', 10)}</button>
+							<div
 								class="bet-input ${classMap({
 									win: this._betInputVal('away') > this._betInputVal('home'),
 									draw: this._betInputVal('away') === this._betInputVal('home'),
 									lose: this._betInputVal('away') < this._betInputVal('home'),
 								})}"
-								id="awayInput" />
-							<button class="chevron-btn" @click=${() => this._onInputHandlerClick('subtract', 'away')}>${Icons('chevron-down', 10)}</button>
+								id="awayInput">${this._awayPrediction}</div>
+							<button class="chevron-btn" aria-label=${msg('Decrease away prediction', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.away.decrease' })} @click=${(evt: Event) => this._onInputHandlerClick('subtract', 'away', evt)}>${Icons('chevron-down', 10)}</button>
 						</div>
-						<img width="42" height="42" src="/assets/teams/betis.png" alt="away logo" />
-						<span class="team-name">betis</span>
+						<img width="42" height="42" src=${this._getTeamCrestUrl(awayName)} alt=${this._getTeamAlt(awayName)} />
+						<span class="team-name">${awayName}</span>
 					</div>
 				</div>
 				<div class="offset-shadows">
@@ -98,22 +92,50 @@ export class RkSbBetMatch extends LitElement {
 					<div></div>
 				</div>
 			</div>
-			${hasDerby || hasUpsetOdds
+			${hasDerby
 				? html`
 					<div class="foot-note">
-						${hasDerby
-							? html`
-								<div>
-									<img id="derbiLightningImg" class="xs" src="/assets/images/lightning.svg" alt="Lightning" />
-									${msg('¡Derbi! Bonus de +5 puntos al acertar resultado exacto', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l108c12' })}
-								</div>
-							`
-							: ''}
-						${hasUpsetOdds ? html` <div>${Icons('speedometer', 10)} ${msg('¡Sorpresa! Bonus de puntos si empata o gana el Sevilla', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.rk.sb.bet.match.msg.l112c65' })}</div> ` : ''}
+						<div>
+							<span class="warning-mark xs" aria-hidden="true"></span>
+							${msg('Derby! Exact result has a bonus of +5 points', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.derby.footnote' })}
+						</div>
 					</div>
 				`
 				: ''}
 		`;
+	}
+
+	private _formatScheduleLabel(date: Date | null): string {
+		if (!date) {
+			return '';
+		}
+		const now = new Date();
+		const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+		const startOfMatchDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+		const dayOffset = Math.round((startOfMatchDay - startOfToday) / 86400000);
+		const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+		if (dayOffset === 0) {
+			return `${msg('Today', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.today' })} ${time}`;
+		}
+		if (dayOffset === 1) {
+			return `${msg('Tomorrow', { id: 'apps.rankup.spa.elements.score.bets.rk.sb.bet.match.tomorrow' })} ${time}`;
+		}
+		return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${time}`;
+	}
+
+	private _getTeamCrestUrl(name: string): string {
+		const normalized = name.toLowerCase();
+		if (normalized.includes('betis')) {
+			return '/assets/teams/betis.png';
+		}
+		if (normalized.includes('sevilla')) {
+			return '/assets/teams/sevilla.png';
+		}
+		return '/assets/images/rk-logo-with-bg.svg';
+	}
+
+	private _getTeamAlt(name: string): string {
+		return `${name} logo`;
 	}
 
 	static override styles = [
