@@ -12,114 +12,164 @@ import { ProviderService, setRootProviderService } from '@rankup/platform/instan
 import { createSessionManager } from '@rankup/platform/session/browser/sessionManagerService.js';
 import type { ISessionManager } from '@rankup/platform/session/common/sessionManager.js';
 
-if (!('URLPattern' in globalThis)) await import('urlpattern-polyfill');
+void bootstrap().catch(error => {
+	console.error('Failed to bootstrap Rankup SPA', error);
+});
 
-const authWall = document.body.querySelector('rk-auth-wall') as AuthWall | null;
-if (!authWall) {
-	throw new Error('rk-auth-wall not found');
-}
+async function bootstrap(): Promise<void> {
+	await ensureUrlPattern();
 
-const overlayContainer = document.body.querySelector('overlay-container') as { closeAll?: () => void } | null;
-
-const disposables = new DisposableStore();
-
-let authAppImported = false;
-let unAuthAppImported = false;
-let hasPendingSession = false;
-let pendingSession: unknown = null;
-let bootReady = false;
-
-let sessionManager: ISessionManager;
-let appServices: AppServices;
-
-const assignAuthAppProps = () => {
-	const app = document.body.querySelector('rk-app') as { appServices?: AppServices; sessionManager?: ISessionManager } | null;
-	if (!app) {
-		return;
+	const authWall = document.body.querySelector('rk-auth-wall') as AuthWall | null;
+	if (!authWall) {
+		throw new Error('rk-auth-wall not found');
 	}
-	app.appServices = appServices;
-	app.sessionManager = sessionManager;
-};
 
-const assignPublicAppProps = () => {
-	const app = document.body.querySelector('rk-unauthenticated-app') as { sessionManager?: ISessionManager } | null;
-	if (!app) {
-		return;
-	}
-	app.sessionManager = sessionManager;
-};
+	const overlayContainer = document.body.querySelector('overlay-container') as { closeAll?: () => void } | null;
+	const disposables = new DisposableStore();
 
-const updateAppForSession = (session: unknown) => {
-	overlayContainer?.closeAll?.();
-	if (session) {
-		setColorScheme();
-		if (!authAppImported) {
-			import('./rk-app.js').then(assignAuthAppProps);
-			authAppImported = true;
-		} else {
-			assignAuthAppProps();
+	let authAppImported = false;
+	let unAuthAppImported = false;
+	let hasPendingSession = false;
+	let pendingSession: unknown = null;
+	let bootReady = false;
+
+	let sessionManager: ISessionManager;
+	let appServices: AppServices;
+
+	const assignAuthAppProps = () => {
+		const app = document.body.querySelector('rk-app') as { appServices?: AppServices; sessionManager?: ISessionManager } | null;
+		if (!app) {
+			return;
 		}
-		return;
+		app.appServices = appServices;
+		app.sessionManager = sessionManager;
+	};
+
+	const assignPublicAppProps = () => {
+		const app = document.body.querySelector('rk-unauthenticated-app') as { sessionManager?: ISessionManager } | null;
+		if (!app) {
+			return;
+		}
+		app.sessionManager = sessionManager;
+	};
+
+	const updateAppForSession = (session: unknown) => {
+		overlayContainer?.closeAll?.();
+		if (session) {
+			setColorScheme();
+			if (!authAppImported) {
+				void import('./rk-app.js')
+					.then(assignAuthAppProps)
+					.catch(error => {
+						console.error('Failed to load authenticated Rankup app', error);
+					});
+				authAppImported = true;
+			} else {
+				assignAuthAppProps();
+			}
+			return;
+		}
+		removeColorScheme();
+		if (!unAuthAppImported) {
+			void import('./rk-unauthenticated-app.js')
+				.then(assignPublicAppProps)
+				.catch(error => {
+					console.error('Failed to load unauthenticated Rankup app', error);
+				});
+			unAuthAppImported = true;
+		} else {
+			assignPublicAppProps();
+		}
+	};
+
+	disposables.add(listen(authWall, 'session-updated', (evt: Event) => {
+		const { session } = (evt as CustomEvent).detail;
+		if (!bootReady) {
+			pendingSession = session;
+			hasPendingSession = true;
+			return;
+		}
+		updateAppForSession(session);
+	}));
+
+	await import('./elements/rk-auth-wall/rk-auth-wall.js');
+	await customElements.whenDefined('rk-auth-wall');
+
+	sessionManager = createSessionManager(authWall);
+
+	const instantiationService = createCompositionRoot({
+		getAccessToken: () => sessionManager.session?.accessToken ?? null,
+		sessionManager,
+	});
+
+	const providerService = new ProviderService(instantiationService);
+	setRootProviderService(providerService);
+	providerService.provide(authWall, instantiationService, {
+		claimAll: true,
+		handleMissingServices: true,
+	});
+
+	appServices = createAppServices(instantiationService);
+
+	ensureMockBanner();
+
+	if (isMockMode && !sessionManager.session) {
+		sessionManager
+			.signInWithPassword({
+				email: 'mock@rankup.local',
+				password: 'mock-password',
+			})
+			.catch(() => {});
 	}
-	removeColorScheme();
-	if (!unAuthAppImported) {
-		import('./rk-unauthenticated-app.js').then(assignPublicAppProps);
-		unAuthAppImported = true;
+
+	bootReady = true;
+	if (hasPendingSession) {
+		updateAppForSession(pendingSession);
 	} else {
-		assignPublicAppProps();
+		updateAppForSession(sessionManager.session);
 	}
+
+	disposables.add(listen(window, 'pagehide', () => {
+		disposables.dispose();
+	}));
+}
+
+type BrowserGlobal = {
+	URLPattern?: unknown;
+	globalThis?: unknown;
 };
 
-disposables.add(listen(authWall, 'session-updated', (evt: Event) => {
-	const { session } = (evt as CustomEvent).detail;
-	if (!bootReady) {
-		pendingSession = session;
-		hasPendingSession = true;
-		return;
+function getBrowserGlobal(): BrowserGlobal {
+	if (typeof globalThis !== 'undefined') {
+		return globalThis as BrowserGlobal;
 	}
-	updateAppForSession(session);
-}));
-
-await import('./elements/rk-auth-wall/rk-auth-wall.js');
-await customElements.whenDefined('rk-auth-wall');
-
-sessionManager = createSessionManager(authWall);
-
-const instantiationService = createCompositionRoot({
-	getAccessToken: () => sessionManager.session?.accessToken ?? null,
-	sessionManager,
-});
-
-const providerService = new ProviderService(instantiationService);
-setRootProviderService(providerService);
-providerService.provide(authWall, instantiationService, {
-	claimAll: true,
-	handleMissingServices: true,
-});
-
-appServices = createAppServices(instantiationService);
-
-ensureMockBanner();
-
-if (isMockMode && !sessionManager.session) {
-	sessionManager
-		.signInWithPassword({
-			email: 'mock@rankup.local',
-			password: 'mock-password',
-		})
-		.catch(() => {});
+	if (typeof self !== 'undefined') {
+		return self as BrowserGlobal;
+	}
+	if (typeof window !== 'undefined') {
+		return window as BrowserGlobal;
+	}
+	return {};
 }
 
-bootReady = true;
-if (hasPendingSession) {
-	updateAppForSession(pendingSession);
-} else {
-	updateAppForSession(sessionManager.session);
+function ensureGlobalThis(): BrowserGlobal {
+	const browserGlobal = getBrowserGlobal();
+	if (browserGlobal.globalThis !== browserGlobal) {
+		Object.defineProperty(browserGlobal, 'globalThis', {
+			configurable: true,
+			value: browserGlobal,
+			writable: true,
+		});
+	}
+	return browserGlobal;
 }
 
-disposables.add(listen(window, 'pagehide', () => {
-	disposables.dispose();
-}));
+async function ensureUrlPattern(): Promise<void> {
+	const browserGlobal = ensureGlobalThis();
+	if (!('URLPattern' in browserGlobal)) {
+		await import('urlpattern-polyfill');
+	}
+}
 
 function setColorScheme() {
 	let theme = 'light';

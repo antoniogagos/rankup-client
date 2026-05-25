@@ -30,7 +30,20 @@ const defaultEnv: EnvConfig = {
 	Auth: defaultAuth,
 };
 
-const globalEnv = (globalThis as { __APP_ENV__?: Partial<EnvConfig> }).__APP_ENV__ ?? {};
+function getEnvGlobal(): { __APP_ENV__?: Partial<EnvConfig> } {
+	if (typeof globalThis !== 'undefined') {
+		return globalThis as { __APP_ENV__?: Partial<EnvConfig> };
+	}
+	if (typeof self !== 'undefined') {
+		return self as { __APP_ENV__?: Partial<EnvConfig> };
+	}
+	if (typeof window !== 'undefined') {
+		return window as { __APP_ENV__?: Partial<EnvConfig> };
+	}
+	return {};
+}
+
+const globalEnv = getEnvGlobal().__APP_ENV__ ?? {};
 const authFromGlobal = (globalEnv as { Auth?: AuthConfig; auth?: AuthConfig }).Auth ?? (globalEnv as { auth?: AuthConfig }).auth ?? {};
 
 export const env: EnvConfig = {

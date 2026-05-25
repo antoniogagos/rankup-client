@@ -107,7 +107,7 @@ function createCompetitions(activeSeasonId: string): Competition[] {
 	];
 }
 
-function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
+function createTournaments(nowEpochMs: number, activeSeasonId: string): MyTournamentRecord[] {
 	const joinedAtDaysAgo = (days: number) => new Date(nowEpochMs - 1000 * 60 * 60 * 24 * days).toISOString();
 	return [
 		{
@@ -129,6 +129,10 @@ function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
 					locked: false,
 				},
 				memberCount: 18,
+				timing: {
+					competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+					seasonId: activeSeasonId,
+				},
 			},
 			membership: {
 				role: 'admin',
@@ -154,6 +158,10 @@ function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
 					locked: false,
 				},
 				memberCount: 12,
+				timing: {
+					competitionId: 'FOOTBALL_UK_LEAGUE_1',
+					seasonId: activeSeasonId,
+				},
 			},
 			membership: {
 				role: 'player',
@@ -179,6 +187,10 @@ function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
 					locked: false,
 				},
 				memberCount: 10,
+				timing: {
+					competitionId: 'FOOTBALL_CHAMPIONS_LEAGUE',
+					seasonId: activeSeasonId,
+				},
 			},
 			membership: {
 				role: 'player',
@@ -205,6 +217,10 @@ function createTournaments(nowEpochMs: number): MyTournamentRecord[] {
 					maxPlayers: 2,
 				},
 				memberCount: 2,
+				timing: {
+					competitionId: 'FOOTBALL_SPAIN_LEAGUE_1',
+					seasonId: activeSeasonId,
+				},
 			},
 			membership: {
 				role: 'player',
@@ -389,7 +405,7 @@ export function createMockDb(options: MockDbOptions = {}): MockDb {
 	const nowEpochMs = resolveNowEpochMs(options);
 	const seasonId = resolveSeasonId(options, nowEpochMs);
 	const competitions = createCompetitions(seasonId);
-	const tournaments = createTournaments(nowEpochMs);
+	const tournaments = createTournaments(nowEpochMs, seasonId);
 	const matches = createMatches(nowEpochMs, seasonId);
 
 	return {
